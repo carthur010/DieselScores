@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014134019">
+<meta name="build" content="20261014134134">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -786,6 +786,7 @@ button.brand, button.brand span { color: var(--accent); }
     { id: "ucl",    name: "Champions League", short: "UCL", sport: "Soccer", path: "soccer/uefa.champions", soccer: true },
     { id: "uel",    name: "Europa League", short: "UEL", sport: "Soccer", path: "soccer/uefa.europa", soccer: true },
     { id: "uecl",   name: "Conference League", short: "UECL", sport: "Soccer", path: "soccer/uefa.europa.conf", soccer: true },
+    { id: "uwcl",   name: "Women's Champions League", short: "UWCL", sport: "Soccer", path: "soccer/uefa.wchampions", soccer: true },
     { id: "mls",    name: "MLS", sport: "Soccer", path: "soccer/usa.1", soccer: true },
     { id: "nwsl",   name: "NWSL", sport: "Soccer", path: "soccer/usa.nwsl", soccer: true },
     // Leaderboards and events
@@ -799,7 +800,7 @@ button.brand, button.brand span { color: var(--accent); }
   const SOCCER_HOME = ["epl", "wsl", "laliga", "seriea", "bund", "ligue1", "mls", "nwsl"];
   const P4_GROUPS = [1, 4, 5, 8];
   // Leagues that get their own tab. Everything else lives under All.
-  const MAIN_TABS = ["nfl", "ncaaf", "mlb", "nba", "nhl", "epl", "wsl", "pga"]; // ESPN conference ids: ACC, Big 12, Big Ten, SEC
+  const MAIN_TABS = ["nfl", "ncaaf", "mlb", "nba", "nhl", "epl", "wsl", "uwcl", "pga"]; // ESPN conference ids: ACC, Big 12, Big Ten, SEC
 
   // "Close game" rules by sport. lastPeriod comes from the league's regulation length.
   const CLOSE = {

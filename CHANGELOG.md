@@ -16,6 +16,7 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+- **UEFA Women's Champions League** (Oct 14): added as a league (UWCL). It gets its own tab on match days and can be added to My Leagues.
 - **WSL tab** (Oct 14): the Women's Super League gets its own tab whenever it has games (it was working, but had no tab and no games this week during the break). Any league in My Leagues with games now gets a tab too. The Women's League Cup is renamed WSL Players Cup to match ESPN.
 - **Your setup sticks** (Oct 14): your 14 teams (Patriots, Sharks, USC, Newcastle, Arsenal, Knicks, Rangers, UCLA football, Kings, Giants, Diamondbacks, Mets, UCLA hoops, AC Milan) and 14 leagues (MLB, NHL, NFL, College Football, Premier League, Champions League, NBA, PGA Tour, FA Cup, LaLiga, Serie A, Bundesliga, Europa League, Men's College Hoops) are now built in as the starting setup. Beta and live share one saved setup on each device, and Settings has **Reset To My Setup** to put it back in one tap.
 - **Game card, Apple Sports style additions** (Oct 14):
