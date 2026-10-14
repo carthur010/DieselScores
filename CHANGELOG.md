@@ -16,6 +16,7 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+- **Settings reorganized** (Oct 14): My Teams and My Leagues up top. **Layout & Display** and **Alerts** are collapsible sections (closed by default, and the app remembers what you leave open). The Alerts header shows how many alerts are on.
 - **Tap Scores to go home** (Oct 14): the logo (and the house icon) jumps to today on your home tab, closes anything open and re-expands collapsed sections.
 - **Golf on All and Live** (Oct 14): PGA and LPGA leaderboards only show there while a round is being played, and sit below the games. Before and between rounds they stay on the PGA, LPGA and My Leagues tabs.
 - **Fix** (Oct 14): next-game time and arena are now double-checked against ESPN's daily scoreboard (the team schedule feed can lag). Game cards show the arena and city under the watch info. Before a game, the odds card says "Not posted yet" instead of disappearing.

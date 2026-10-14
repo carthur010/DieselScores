@@ -112,6 +112,14 @@ section.block { background: var(--surface); border: 1px solid var(--line); borde
 .bhead { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
 .sheet-card > .bhead { flex: 0 0 auto; }
 .sheet-card .bhead .tog { width: 40px; height: 40px; }
+.set-sec { border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+.set-sec-h { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; text-align: left; font-weight: 700; font-size: 16px; }
+.set-sec-h span { display: grid; gap: 2px; }
+.set-sec-h small { font-weight: 500; font-size: 12px; color: var(--muted); }
+.set-sec-h svg { width: 18px; height: 18px; color: var(--muted); transform: rotate(180deg); transition: transform .15s; flex: 0 0 auto; }
+.set-sec.open .set-sec-h svg { transform: none; }
+.set-sec-b { padding: 0 14px 10px; display: grid; gap: 12px; }
+.set-sec-b .set-row:last-child { border-bottom: 0; }
 .set-done { width: 100%; height: 46px; border-radius: 12px; background: var(--accent); color: var(--bg); font-weight: 700; font-size: 16px; margin-top: 6px; }
 .bhead h2 { margin: 0; font-family: var(--display); font-size: 24px; font-weight: 700; letter-spacing: .01em; }
 .bhead .meta { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
@@ -2161,21 +2169,28 @@ button.brand, button.brand span { color: var(--accent); }
     return `<div class="set-row set-col"><div class="set-lbl">${esc(label)}<small>${esc(hint)}</small></div>
       <div class="toggles">${ALERT_EVENTS[group].map(([ev, name]) => `<button class="chip ${prefs[ev] ? "on" : ""}" data-alert-group="${group}" data-alert-ev="${ev}" aria-pressed="${!!prefs[ev]}">${esc(name)}</button>`).join("")}</div></div>`;
   }
+  let setOpen = store.get("setOpen", { display: false, alerts: false });
+  function setSection(id, title, sub, body) {
+    const open = !!setOpen[id];
+    return `<div class="set-sec ${open ? "open" : ""}"><button class="set-sec-h" data-set-sec="${id}" aria-expanded="${open}"><span>${esc(title)}<small>${esc(sub)}</small></span>${CHEV}</button>${open ? `<div class="set-sec-b">${body}</div>` : ""}</div>`;
+  }
   function renderSettings() {
     const teams = state.favs.size, leagues = state.favLeagues.length;
+    const on = Object.values(state.alertPrefs).reduce((n, g) => n + Object.values(g).filter(Boolean).length, 0);
     document.getElementById("settings-body").innerHTML =
-      segRow("Open to", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens") +
-      segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
-      segRow("Color", "palette", store.get("palette", "red"), [["red", "Red"], ["navy", "Navy"], ["green", "Green"]]) +
-      segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
-      segRow("Betting odds", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "Lines on game cards and in Gamecast") +
-      `<h3 class="set-h">Alerts</h3>` +
-      alertGroup("team", "My teams", "Games with teams you follow") +
-      alertGroup("watched", "Games you're watching", "Tap the bell on any game to add it") +
-      alertGroup("all", "All games", "Anything that turns interesting, any team") +
-      `<div class="set-row"><div class="set-lbl">Test alerts<small>${esc(notifyStatus())}. Alerts work while Scores is open.</small></div><button class="chip" data-test-alert>Send test</button></div>` +
       `<div class="set-row"><div class="set-lbl">My Teams<small>Following ${teams} team${teams === 1 ? "" : "s"}</small></div><button class="chip" data-set-open="teams">Edit</button></div>` +
       `<div class="set-row"><div class="set-lbl">My Leagues<small>${leagues} league${leagues === 1 ? "" : "s"} in your order</small></div><button class="chip" data-set-open="leagues">Edit order</button></div>` +
+      setSection("display", "Layout & Display", "Open to, layout, color, appearance, odds",
+        segRow("Open to", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens") +
+        segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
+        segRow("Color", "palette", store.get("palette", "red"), [["red", "Red"], ["navy", "Navy"], ["green", "Green"]]) +
+        segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
+        segRow("Betting odds", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "Lines on game cards and in Gamecast")) +
+      setSection("alerts", "Alerts", `${on} alert${on === 1 ? "" : "s"} on`,
+        alertGroup("team", "My teams", "Games with teams you follow") +
+        alertGroup("watched", "Games you're watching", "Tap the bell on any game to add it") +
+        alertGroup("all", "All games", "Anything that turns interesting, any team") +
+        `<div class="set-row"><div class="set-lbl">Test alerts<small>${esc(notifyStatus())}. Alerts work while Scores is open.</small></div><button class="chip" data-test-alert>Send test</button></div>`) +
       `<button class="set-done" data-set-done>Done</button>` +
       `<p class="hint set-foot">${location.pathname.includes("/beta") ? `You're on the beta. <a href="../">Open the live app</a>` : `Want to try new features early? <a href="beta/">Open the beta</a>`}</p>`;
   }
@@ -2212,6 +2227,8 @@ button.brand, button.brand span { color: var(--accent); }
       renderSettings();
       return;
     }
+    const sec = e.target.closest("[data-set-sec]");
+    if (sec) { const k = sec.dataset.setSec; setOpen[k] = !setOpen[k]; store.set("setOpen", setOpen); renderSettings(); return; }
     if (e.target.closest("[data-set-done]")) { document.getElementById("ssheet").hidden = true; return; }
     const o = e.target.closest("[data-set-open]");
     if (o) {
