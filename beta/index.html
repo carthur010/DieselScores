@@ -1295,7 +1295,17 @@ button.brand span { color: var(--accent); }
     const quiet = [];
     TEAM_LEAGUES.forEach(lg => { if (!pool.some(g => g.lg.id === lg.id) && !state.data[lg.id]?.error && !state.data[lg.id]?.events?.length) quiet.push(lg.short || lg.name); });
     const feed = pool.filter(g => !shown.has(g.id));
-    if (feed.length && state.view === "league") {
+    if (feed.length && state.view === "league" && tab === "live") {
+      // Live tab, By League: one "You Are Looking Live" section with a card grid per league inside
+      const parts = TEAM_LEAGUES.map(lg => {
+        const list = feed.filter(g => g.lg.id === lg.id).sort((x, y) => new Date(x.date) - new Date(y.date));
+        if (!list.length) return "";
+        return `<div class="tl-group"><div class="tl-head"><span class="tl-badge">${esc(lg.short || lg.name)}</span>
+          <span class="crumb">${esc(lg.sport)} <span>› ${esc(lg.name)}</span></span></div>
+          <div class="grid">${list.map(card).join("")}</div></div>`;
+      }).join("");
+      html += block("feed", "You Are Looking Live", `${feed.length} game${feed.length > 1 ? "s" : ""}`, parts);
+    } else if (feed.length && state.view === "league") {
       TEAM_LEAGUES.forEach(lg => {
         const list = feed.filter(g => g.lg.id === lg.id).sort((x, y) => ({ in: 0, pre: 1, post: 2 }[x.state] - { in: 0, pre: 1, post: 2 }[y.state]) || new Date(x.date) - new Date(y.date));
         if (!list.length) return;
