@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014093007">
+<meta name="build" content="20261014093144">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2276,7 +2276,7 @@ button.brand, button.brand span { color: var(--accent); }
     const [fa, fh] = teamPair(j, a, h)(j.lastFiveGames || []);
     if (!fa && !fh) return "";
     const side = lfSide === 1 ? (fh || fa) : (fa || fh);
-    const evs = (side?.events || []).slice(0, 5);
+    const evs = (side?.events || []).slice().sort((x, y) => new Date(y.gameDate) - new Date(x.gameDate)).slice(0, 5);
     const tabs = `<div class="seg gc-seg"><button class="${side === fa ? "on" : ""}" data-lf="0">${esc(a.abbr)}</button><button class="${side === fh ? "on" : ""}" data-lf="1">${esc(h.abbr)}</button></div>`;
     const rows = evs.map(e => {
       const d = e.gameDate ? new Date(e.gameDate) : null;
