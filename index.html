@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores</title>
-<meta name="build" content="20261014145439">
+<meta name="build" content="20261014152245">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores">
@@ -1576,7 +1576,11 @@ button.brand, button.brand span { color: var(--accent); }
     if (openGameKey === key) repaintGame();
   }
   // iOS app: real iPhone notifications through the native plugin
-  var LN = window.Capacitor?.isNativePlatform?.() ? window.Capacitor.Plugins?.LocalNotifications : null;
+  // The app's bridge only fills Capacitor.Plugins when @capacitor/core is bundled, and this page isn't bundled,
+  // so call the native plugin straight through the bridge
+  var CAP = window.Capacitor;
+  var LN = CAP?.isNativePlatform?.() && CAP.nativePromise ? (CAP.Plugins?.LocalNotifications || Object.fromEntries(
+    ["checkPermissions", "requestPermissions", "schedule", "getPending", "cancel"].map(m => [m, (o) => CAP.nativePromise("LocalNotifications", m, o || {})]))) : null;
   var nativePerm = "prompt";
   if (LN) {
     LN.checkPermissions().then(p => { nativePerm = p.display; syncScheduled(); }).catch(() => {});
