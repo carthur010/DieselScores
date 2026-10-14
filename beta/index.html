@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014134134">
+<meta name="build" content="20261014134405">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -398,6 +398,11 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .toasts { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 10px); right: 12px; left: 12px; z-index: 60; display: grid; justify-items: end; gap: 8px; pointer-events: none; }
 .toast { pointer-events: auto; width: min(380px, 100%); background: var(--fg); color: var(--bg); border-left: 5px solid var(--accent); border-radius: 10px; padding: 10px 14px; display: grid; gap: 3px; box-shadow: 0 10px 30px rgba(0,0,0,.25); animation: slide .25s ease-out; }
 .toast.hot { border-left-color: var(--live); }
+.toast { position: relative; padding-right: 40px; cursor: pointer; transition: opacity .2s, transform .2s; }
+.toast.out { opacity: 0; transform: translateY(-8px); }
+.toast-x { position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: var(--bg); opacity: .7; }
+.toast-x:hover { opacity: 1; background: rgba(255,255,255,.12); }
+.toast-x svg { width: 14px; height: 14px; }
 .toast b { font-family: var(--display); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; font-size: 16px; }
 .toast span { font-size: 14px; }
 .toast small { font-size: 12px; opacity: .75; }
@@ -1557,14 +1562,24 @@ button.brand, button.brand span { color: var(--accent); }
     if (Notification.permission === "denied") return "Notifications are blocked in your phone's settings";
     return "Notifications not allowed yet";
   }
+  // In-app alerts: tap X (or swipe it away) to dismiss; they also leave on their own after a few seconds
   function toast(title, line, sub, link, hot) {
     const box = document.getElementById("toasts");
-    const el = document.createElement(link ? "a" : "div");
-    el.className = "toast" + (hot ? " hot" : "");
-    if (link) { el.href = link; el.target = "_blank"; el.rel = "noopener"; }
-    el.innerHTML = `<b>${esc(title)}</b><span>${esc(line)}</span>${sub ? `<small>${esc(sub)}</small>` : ""}`;
+    const el = document.createElement("div");
+    el.className = "toast" + (hot ? " hot" : "") + (link ? " linked" : "");
+    el.setAttribute("role", "status");
+    el.innerHTML = `<button class="toast-x" aria-label="Dismiss"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button><b>${esc(title)}</b>${line ? `<span>${esc(line)}</span>` : ""}${sub ? `<small>${esc(sub)}</small>` : ""}`;
+    let gone = false;
+    const close = () => { if (gone) return; gone = true; el.classList.add("out"); setTimeout(() => el.remove(), 200); };
+    el.querySelector(".toast-x").onclick = e => { e.stopPropagation(); close(); };
+    el.onclick = () => { if (link) window.open(link, "_blank", "noopener"); close(); };
+    // swipe up or sideways to dismiss
+    let x0 = 0, y0 = 0;
+    el.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+    el.addEventListener("touchend", e => { const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; if (Math.abs(dx) > 50 || dy < -30) { e.preventDefault(); close(); } });
     box.prepend(el);
-    setTimeout(() => el.remove(), 9000);
+    [...box.children].slice(3).forEach(x => x.remove());   // never more than 3 at once
+    setTimeout(close, hot ? 7000 : 4500);
   }
 
   // =====================================================================
