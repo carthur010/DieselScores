@@ -110,6 +110,9 @@ main { padding-block: 16px 48px; display: grid; gap: 18px; }
 /* Sections */
 section.block { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
 .bhead { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.sheet-card > .bhead { flex: 0 0 auto; }
+.sheet-card .bhead .tog { width: 40px; height: 40px; }
+.set-done { width: 100%; height: 46px; border-radius: 12px; background: var(--accent); color: var(--bg); font-weight: 700; font-size: 16px; margin-top: 6px; }
 .bhead h2 { margin: 0; font-family: var(--display); font-size: 24px; font-weight: 700; letter-spacing: .01em; }
 .bhead .meta { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .bhead h2 { white-space: nowrap; }
@@ -468,7 +471,8 @@ button.brand span { color: var(--accent); }
   .lb td, .lb th { padding-inline: 7px; }
   .lb .pos { width: 32px; }
   .sheet { place-items: end center; padding: 0; }
-  .sheet-card { border-radius: 14px 14px 0 0; max-height: 88vh; }
+  .sheet-card { border-radius: 14px 14px 0 0; max-height: calc(88vh - env(safe-area-inset-top)); max-height: calc(100dvh - env(safe-area-inset-top) - 44px); }
+  .sheet-body { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
 }
 
 /* ---------- Color: Red (default) with cream, black and white ---------- */
@@ -2137,6 +2141,7 @@ button.brand, button.brand span { color: var(--accent); }
       `<div class="set-row"><div class="set-lbl">Test alerts<small>${esc(notifyStatus())}. Alerts work while Scores is open.</small></div><button class="chip" data-test-alert>Send test</button></div>` +
       `<div class="set-row"><div class="set-lbl">My Teams<small>Following ${teams} team${teams === 1 ? "" : "s"}</small></div><button class="chip" data-set-open="teams">Edit</button></div>` +
       `<div class="set-row"><div class="set-lbl">My Leagues<small>${leagues} league${leagues === 1 ? "" : "s"} in your order</small></div><button class="chip" data-set-open="leagues">Edit order</button></div>` +
+      `<button class="set-done" data-set-done>Done</button>` +
       `<p class="hint set-foot">${location.pathname.includes("/beta") ? `You're on the beta. <a href="../">Open the live app</a>` : `Want to try new features early? <a href="beta/">Open the beta</a>`}</p>`;
   }
   function openSettings() { renderSettings(); document.getElementById("ssheet").hidden = false; }
@@ -2172,6 +2177,7 @@ button.brand, button.brand span { color: var(--accent); }
       renderSettings();
       return;
     }
+    if (e.target.closest("[data-set-done]")) { document.getElementById("ssheet").hidden = true; return; }
     const o = e.target.closest("[data-set-open]");
     if (o) {
       document.getElementById("ssheet").hidden = true;
