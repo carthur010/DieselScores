@@ -1226,7 +1226,7 @@ button.brand span { color: var(--accent); }
       });
     } else if (feed.length) {
       const live = feed.filter(g => g.state === "in").length;
-      const title = tab === "live" ? (shown.size ? "Also Live" : "Live Now") : tab === "close" ? "Close Games" : dayLabel(state.date);
+      const title = tab === "live" ? "You Are Looking Live" : tab === "close" ? "Close Games" : dayLabel(state.date);
       html += block("feed", title, live && tab !== "live" ? `${live} live · ${feed.length} total` : `${feed.length} game${feed.length > 1 ? "s" : ""}`, timeline(feed));
     } else if (tab === "live" && !shown.size) {
       const upcoming = games.filter(g => g.state === "pre").sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
