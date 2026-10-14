@@ -3,7 +3,7 @@
   "appName": "Scores",
   "webDir": "www",
   "server": {
-    "url": "https://carthur010.github.io/DieselScores/",
+    "url": "https://carthur010.github.io/DieselScores/beta/",
     "errorPath": "index.html"
   },
   "ios": {
