@@ -9,6 +9,11 @@ Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 ## Waiting to ship (in beta now)
 Nothing. Everything shipped to live on Oct 14. Still worth a real-phone check: each watch app opening (YouTube TV, Peacock, Paramount+, HBO Max) and game-day betting odds on the card.
 
+## Next up: TV Settings
+- [ ] Each user picks the services they have (YouTube TV, Hulu + Live TV, Sling, Fubo, DirecTV Stream, cable login, Peacock, Paramount+, Max, ESPN+, Prime Video, Apple TV, League Pass, MLB.TV, NHL app); watch buttons only show those
+- [ ] Home market or ZIP code so regional networks (MSG, YES, SNY, NBC Sports) and blackouts show correctly
+- [ ] "Not on your services" note when nothing matches
+
 ## Alert ideas (not built yet)
 - Postponed / delayed / weather delay for your teams
 - Starting lineups or goalie confirmed (needs a lineup feed)
