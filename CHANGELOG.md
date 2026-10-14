@@ -16,6 +16,13 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+- **New game card** (Oct 14): tap Gamecast for a full-screen card in the Apple Sports layout, kept in Scores colors. Team-color header with big scores, logos, records, follow stars, goal scorers (hockey and soccer) and the line score. Big watch button, alert bell and a share button. Three tabs:
+  - **Stats**: Betting Odds (spread or puck/run line, total, moneyline), Win Probability chart, Team Stats bars in each team's colors, Leaders.
+  - **Play-By-Play**: the last 40 plays, scoring plays highlighted.
+  - **Box Score**: player stats for both teams.
+- **Betting odds toggle** (Oct 14): tap **Hide** on the odds card, or use Settings → Betting odds. Hides lines on game cards, Worth A Watch and Gamecast. One tap brings them back.
+- **Upcoming tab** (Oct 14): the next three days, one collapsible section per day. Your teams first, then your leagues in your order. Also an Open to option.
+- **Drag to reorder leagues** (Oct 14): grab the handle in My Leagues instead of tapping arrows.
 - **My Teams tab**: today's games for teams you follow (with a count on the tab), then an **Up Next** list with every other team's next game. Edit teams button at the top. Also available under Settings → Open to.
 - **Gamecast pill** styled to match the watch button.
 - **Red color scheme**: brick red (#A93439) with black, white and a cream background, plus gold (#AC9841) for favorite stars, the selected date, Playoffs tags, the golf leader row and "Next" labels. Red app icon. Settings has a **Color** option: Red, Navy (#07357A with gold and a red live color) or the classic Green. Live scores use #E31837.

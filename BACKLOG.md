@@ -4,7 +4,7 @@ Live: https://carthur010.github.io/DieselScores/
 Beta: https://carthur010.github.io/DieselScores/beta/
 Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 
-> Beta 2.0 (Apple Sports look, /beta2) is parked. Ideas from it that could come to the classic beta later: Upcoming tab, game card Stats/Odds tabs, drag-to-reorder leagues.
+> Beta 2.0 (Apple Sports look, /beta2) is parked. Its best ideas (game card, Upcoming tab, Stats/Odds, drag-to-reorder) now live in the classic beta.
 
 ## Waiting to ship (in beta now)
 - [ ] SF Pro fonts on Apple devices
@@ -13,6 +13,10 @@ Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 - [ ] Settings panel (gear icon): Open to, Layout, Appearance, Close-game alerts, My Teams, My Leagues
 - [ ] In-app game details screen (replaces Gamecast links)
 - [ ] Alert options (my teams / watched games / all games), game bell, test alert button
+- [ ] Apple-style game card in Scores colors, with Stats / Play-By-Play / Box Score tabs
+- [ ] Betting odds toggle (Settings, or Hide right on the odds card)
+- [ ] Upcoming tab (next 3 days)
+- [ ] Drag-to-reorder in My Leagues
 
 ## Idea backlog (from SportsDudes)
 1. **"This guy is going off" tracker** (Ben): flag big individual games live, like a no-hitter in progress, hat trick, triple-double, big NFL stat lines.
@@ -28,7 +32,6 @@ Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 - **Pinch to switch layout** on the scores screen.
 - **Always expand favorite games** toggle: your teams' games stay full-size even in Compact.
 - **Favorites section** at the top as a grid of your teams' games across leagues (today's strip, but full cards).
-- **Game odds toggle**: show or hide betting lines everywhere.
 - **Betting results on finals**: "Raptors covered (-11.5), Over 220.5" under final scores (pairs with Faiz's Upset Alert idea).
 - **Playoff seeds** next to team names, e.g. (1) TB, (2) CLE.
 - **Highlights link** on final games.
