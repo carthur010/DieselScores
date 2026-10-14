@@ -1,3 +1,5 @@
-# Scoreline
+# Scores
 
-Live scores, close games and where to watch. Open: https://carthur010.github.io/scoreline/
+Live scores, what to flip to, and where to watch.
+
+Open it: https://carthur010.github.io/scoreline/
