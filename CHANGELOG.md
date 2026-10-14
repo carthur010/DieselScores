@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## In beta (not on live yet)
+- Fix: iPhone app notifications never fired. The page was looking for the notifications plugin in a spot the app only fills in bundled builds; it now calls the plugin directly.
+
 ## Oct 14, 2026: Live (2:55 PM)
 - Welcome screen now lets new people pick their leagues as well as their teams. It's titled "Welcome To Scores".
 
