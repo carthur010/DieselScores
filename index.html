@@ -420,16 +420,15 @@ section.closed .bbody { display: none; }
     // Leaderboards and events
     { id: "pga",    name: "PGA Tour", short: "PGA", sport: "Golf", path: "golf/pga", kind: "golf" },
     { id: "lpga",   name: "LPGA", sport: "Golf", path: "golf/lpga", kind: "golf" },
-    { id: "f1",     name: "Formula 1", short: "F1", sport: "Racing", path: "racing/f1", kind: "race" },
-    { id: "atp",    name: "ATP Tour", short: "ATP", sport: "Tennis", path: "tennis/atp", kind: "tennis" },
-    { id: "wta",    name: "WTA Tour", short: "WTA", sport: "Tennis", path: "tennis/wta", kind: "tennis" },
   ];
   const LG = Object.fromEntries(LEAGUES.map(l => [l.id, l]));
   const TEAM_LEAGUES = LEAGUES.filter(l => !l.kind);
   const EVENT_LEAGUES = LEAGUES.filter(l => l.kind);
   const SEARCHABLE = ["nfl", "mlb", "nba", "wnba", "nhl", "epl", "wsl", "laliga", "seriea", "bund", "ligue1", "mls", "nwsl", "ncaaf", "ncaam", "ncaaw"];
   const SOCCER_HOME = ["epl", "wsl", "laliga", "seriea", "bund", "ligue1", "mls", "nwsl"];
-  const P4_GROUPS = [1, 4, 5, 8]; // ESPN conference ids: ACC, Big 12, Big Ten, SEC
+  const P4_GROUPS = [1, 4, 5, 8];
+  // Leagues that get their own tab. Everything else lives under All.
+  const MAIN_TABS = ["nfl", "ncaaf", "mlb", "nba", "nhl", "epl", "pga"]; // ESPN conference ids: ACC, Big 12, Big Ten, SEC
 
   // "Close game" rules by sport. lastPeriod comes from the league's regulation length.
   const CLOSE = {
@@ -985,9 +984,9 @@ section.closed .bbody { display: none; }
       </div>`;
     const scores = g.state === "pre" ? "<span></span>" :
       `<div class="t-sc ${g.state === "in" ? "live" : ""}"><span class="${lose(a, h) || trailing(a, h) ? "lose" : ""}">${esc(a.score)}</span><span class="${lose(h, a) || trailing(h, a) ? "lose" : ""}">${esc(h.score)}</span></div>`;
-    const extras = [situation(g), g.state !== "post" ? watchPill(g) : "", tagsFor(g, { includeClose: false })].filter(Boolean).join("");
+    const extras = [situation(g), g.state !== "post" ? watchPill(g) : ""].filter(Boolean).join("");
     return `<div class="t ${g.fav ? "fav" : ""}">
-      <div class="t-time"><span>${esc(timeLabel(g.date))}</span><span class="st ${statusClass(g)}">${esc(st || "–")}</span>${g.close ? '<span class="tag">Close</span>' : ""}</div>
+      <div class="t-time"><span>${esc(timeLabel(g.date))}</span><span class="st ${statusClass(g)}">${esc(st || "–")}</span></div>
       <div class="t-teams">${team(a, h, false)}${team(h, a, true)}${extras ? `<div class="t-extra">${extras}</div>` : ""}</div>
       ${scores}
       ${g.link ? `<a class="t-go" href="${esc(g.link)}" target="_blank" rel="noopener" aria-label="Open Gamecast">${ARROW}</a>` : "<span></span>"}
@@ -995,7 +994,7 @@ section.closed .bbody { display: none; }
   }
 
   // Expanded row (Apple Sports)
-  function expandedRow(g) {
+  function expandedRow(g, showTags = false) {
     const [a, h] = g.teams;
     if (!a || !h) return "";
     const side = t => `<div class="f-team ${t.homeAway === "home" ? "home" : ""} ${isFavTeam(g.lg, t.abbr) ? "fav" : ""}">${starBtn(g.lg, t)}
@@ -1008,7 +1007,7 @@ section.closed .bbody { display: none; }
     let sub = situation(g);
     if (!sub && g.state === "pre" && g.odds?.details) sub = esc(g.odds.details);
     const lgLabel = (g.lg.short || g.lg.name) + (g.note ? " · " + g.note : "");
-    const tags = tagsFor(g);
+    const tags = showTags === true ? tagsFor(g) : "";
     const sClass = g.state === "in" ? "live" : g.state === "pre" ? "pre" : "";
     return `<div class="f">
       <div class="f-lg">${esc(lgLabel)}</div>${tags ? `<div class="f-why">${tags}</div>` : ""}
@@ -1033,7 +1032,7 @@ section.closed .bbody { display: none; }
       return `<div class="tl-group">
         <div class="tl-head"><span class="tl-badge">${esc(gr.lg.short || gr.lg.name)}</span>
           <span class="crumb">${esc(gr.lg.sport)} <span>› ${esc(gr.lg.name)}${esc(note)}</span></span></div>
-        ${rowFn === expandedRow ? `<div class="feat">${gr.games.map(rowFn).join("")}</div>` : gr.games.map(rowFn).join("")}
+        ${rowFn === expandedRow ? `<div class="feat">${gr.games.map(g => expandedRow(g)).join("")}</div>` : gr.games.map(g => rowFn(g)).join("")}
       </div>`;
     }).join("");
   }
@@ -1166,7 +1165,7 @@ section.closed .bbody { display: none; }
       { id: "close", label: "Close games", n: closeN, hot: closeN > 0 },
     ];
     const cfb = games.filter(g => g.lg.id === "ncaaf");
-    LEAGUES.filter(lg => counts[lg.id] > 0 || state.tab === lg.id).forEach(lg => {
+    LEAGUES.filter(lg => (MAIN_TABS.includes(lg.id) && counts[lg.id] > 0) || state.tab === lg.id).forEach(lg => {
       chips.push({ id: lg.id, label: lg.short || lg.name, n: counts[lg.id] || 0 });
       if (lg.id === "ncaaf") {
         chips.push({ id: "cfb25", label: "CFB Top 25", n: cfb.filter(g => g.teams.some(t => t.rank)).length });
@@ -1223,7 +1222,7 @@ section.closed .bbody { display: none; }
       if (picks.length >= 1 && (tab === "all" || picks.some(g => g.state === "in"))) {
         if (tab === "live") shown = new Set(picks.map(g => g.id));
         html += block("worth", "Worth Watching", strong.length ? `${strong.length} worth a look` : "best of what's on",
-          `<div class="feat">${picks.map(expandedRow).join("")}</div>`, BOLT);
+          `<div class="feat">${picks.map(g => expandedRow(g, true)).join("")}</div>`, BOLT);
       }
     }
 
