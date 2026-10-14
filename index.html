@@ -108,7 +108,7 @@ main { padding-block: 16px 48px; display: grid; gap: 18px; }
 /* Sections */
 section.block { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
 .bhead { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
-.bhead h2 { margin: 0; font-family: var(--display); font-size: 22px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; }
+.bhead h2 { margin: 0; font-family: var(--display); font-size: 24px; font-weight: 700; letter-spacing: .01em; }
 .bhead .meta { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .bhead h2 { white-space: nowrap; }
 .bhead .tog { margin-left: auto; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; background: var(--bg); color: var(--muted); }
@@ -337,8 +337,8 @@ header.top { top: 0; padding-top: env(safe-area-inset-top, 0px); }
       <span class="livecount" id="livebug" hidden><span class="dot"></span><span id="liven">0</span> live</span>
       <div class="spacer"></div>
       <div class="seg" role="group" aria-label="Layout">
-        <button data-view="time">By time</button>
-        <button data-view="league">By league</button>
+        <button data-view="time">By Time</button>
+        <button data-view="league">By League</button>
       </div>
       <button class="iconbtn" id="teamsbtn" title="Your teams" aria-label="Search and follow teams">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -1220,12 +1220,12 @@ header.top { top: 0; padding-top: env(safe-area-inset-top, 0px); }
       });
     } else if (feed.length) {
       const live = feed.filter(g => g.state === "in").length;
-      const title = tab === "live" ? (shown.size ? "Also live" : "Live now") : tab === "close" ? "Close games" : dayLabel(state.date);
+      const title = tab === "live" ? (shown.size ? "Also Live" : "Live Now") : tab === "close" ? "Close Games" : dayLabel(state.date);
       html += block("feed", title, live && tab !== "live" ? `${live} live · ${feed.length} total` : `${feed.length} game${feed.length > 1 ? "s" : ""}`, timeline(feed));
     } else if (tab === "live" && !shown.size) {
       const upcoming = games.filter(g => g.state === "pre").sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
       html += `<div class="block empty">Nothing live right now.${upcoming.length ? " Here's what's up next." : ""}</div>`;
-      if (upcoming.length) html += block("upnext", "Up next", `${upcoming.length} games`, state.view === "league" ? `<div class="grid">${upcoming.map(card).join("")}</div>` : timeline(upcoming));
+      if (upcoming.length) html += block("upnext", "Up Next", `${upcoming.length} games`, state.view === "league" ? `<div class="grid">${upcoming.map(card).join("")}</div>` : timeline(upcoming));
     } else if (tab === "close") {
       html += `<div class="block empty">No close games right now. Games show up here late with a tight score: under 5:00 in the 4th or 3rd, the 7th inning or later in baseball, or the 85th minute in soccer.</div>`;
     } else if (!specialsFor(tab).length) {
