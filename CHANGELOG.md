@@ -7,6 +7,7 @@ Newest first. Beta changes move to Live when shipped.
 - New solo Tennis app on Live Tennis API: Live and Upcoming, ATP/WTA filter, live game points and who's serving, match detail sheet, call counter for the free 100/day.
 
 ## In beta (not on live yet)
+- Search results are tappable, not just followable: tap a team's name for its own page (logo, record, Follow button, Up Next and Previous Games, each opening the game card), or tap a league to jump to its tab.
 - Tennis matches are tappable: a match view with player photos and flags, seeds, status, round and court, a set-by-set score with tiebreaks, a Full Draw button and Match Stats bars (aces, double faults, serve %, break points) when ESPN has them.
 - Tennis tournaments with no singles matches that day are hidden (the WTA feed lists every small event that week, so empty ones were piling up).
 - Search finds leagues too: typing NFL, Tennis, Premier, CFB and so on shows a Leagues section with Follow buttons above the team results. Following a league adds it to My Leagues.

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014191612">
+<meta name="build" content="20261014194422">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -411,6 +411,14 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .h3-note { text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 12px; margin-left: 6px; }
 #suggest h3 { margin-bottom: 4px; }
 .res-row img { width: 28px; height: 28px; object-fit: contain; }
+.nm.tap { cursor: pointer; }
+.nm.tap:hover { text-decoration: underline; }
+.tm-hero { display: grid; justify-items: center; gap: 6px; text-align: center; padding: 4px 0 10px; }
+.tm-hero img { width: 84px; height: 84px; object-fit: contain; filter: drop-shadow(0 3px 10px rgba(0,0,0,.35)); }
+.tm-hero b { font-family: var(--display); font-size: 30px; font-weight: 700; }
+.tm-hero small { color: rgba(255,255,255,.8); font-size: 13px; }
+.watchbig.ghostbig { background: var(--surface); color: var(--fg); border: 1px solid var(--line); }
+.l5-row.tap { cursor: pointer; }
 .lg-badge { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-size: 8.5px; font-weight: 800; letter-spacing: .02em; }
 .res-row .nm { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .res-row .nm small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
@@ -2030,6 +2038,60 @@ button.brand, button.brand span { color: var(--accent); }
     return block("ev-" + e.lg.id + e.id, `${e.lg.short || e.lg.name} · ${e.name}`, meta, body + more);
   }
   const BLOCK = { golf: golfBlock, tennis: tennisBlock };
+  // ---- From search: open a league (jumps to its tab) or a team (its own page)
+  function openTeamRepaint() { const tm = teamView; if (!tm) return; const s = tm.sched; openTeam(tm).catch(() => {}); }
+  function openLeague(id) {
+    if (!LG[id]) return;
+    fromSettings = false; closeSheet(); closeGame();
+    state.tab = id; render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  let teamView = null;
+  async function openTeam(tm) {
+    const lg = LG[tm.lg]; if (!lg || !tm.id) return;
+    fromSettings = false; closeSheet(); closeGame(); teamView = tm;
+    const el = document.getElementById("gsheet");
+    const paintTeam = (sched) => {
+      if (teamView !== tm) return;
+      const k = keyFor(tm), on = state.favs.has(k);
+      const games = sched?.games || [];
+      const now = Date.now();
+      const next = games.filter(g => g.state !== "post" && new Date(g.date).getTime() > now - 4 * 3600e3).slice(0, 4);
+      const past = games.filter(g => g.state === "post").slice(-6).reverse();
+      const row = g => `<div class="l5-row tap" role="button" tabindex="0" data-game="${lg.id}:${esc(g.id)}"><span class="l5-d">${esc(new Date(g.date).toLocaleDateString(undefined, { weekday: "short" }))}<br>${esc(new Date(g.date).toLocaleDateString(undefined, { month: "numeric", day: "numeric" }))}</span>
+        <span class="l5-at">${g.home ? "vs" : "@"}</span>${g.oppLogo ? `<img src="${esc(g.oppLogo)}" alt="">` : "<i></i>"}<span class="l5-o">${esc(g.opp)}</span>
+        <span class="l5-r">${g.state === "post" ? `<small>Final</small><span><b class="${g.res === "W" ? "w" : g.res === "L" ? "l" : ""}">${esc(g.res || "")}</b> ${esc(g.score)}</span>` : `<small>${esc(g.state === "in" ? "Live" : g.tv || "")}</small><span>${esc(g.state === "in" ? g.score : timeLabel(g.date))}</span>`}</span></div>`;
+      el.innerHTML = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:${readable(tm.color)};--ch:${readable(tm.color)}"></div>
+        <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span></div>
+        <div class="tm-hero">${tm.logo ? `<img src="${esc(tm.logo)}" alt="">` : ""}<b>${esc(tm.name)}</b><small>${esc([lg.name, sched?.record, sched?.standing].filter(Boolean).join(" · "))}</small></div></div>
+        <div class="gc-actions"><button class="watchbig ${on ? "ghostbig" : ""}" data-team-follow>${on ? "Following" : "Follow"}</button></div>
+        ${!sched ? `<div class="skel"></div><div class="skel"></div>` : ""}
+        ${next.length ? `<div class="gc-c"><h3>Up Next</h3>${next.map(row).join("")}</div>` : ""}
+        ${past.length ? `<div class="gc-c"><h3>Previous ${gameWord(lg, true)}</h3>${past.map(row).join("")}</div>` : ""}
+        ${sched && !next.length && !past.length ? `<p class="hint" style="text-align:center">No schedule found for this team.</p>` : ""}</div>`;
+    };
+    el.hidden = false; el.scrollTop = 0; paintTeam(null);
+    const parse = (j) => (j.events || []).map(ev => {
+      const c = ev.competitions?.[0] || {}, cs = c.competitors || [];
+      const me = cs.find(x => String(x.team?.id || x.id) === String(tm.id)), op = cs.find(x => x !== me);
+      const sv = x => x?.score?.displayValue ?? x?.score ?? "";
+      const st = c.status?.type?.state || "pre";
+      return { id: String(ev.id), date: ev.date, state: st, home: me?.homeAway === "home",
+        opp: op?.team?.shortDisplayName || op?.team?.displayName || op?.team?.abbreviation || "TBD", oppLogo: op?.team?.logos?.[0]?.href || op?.team?.logo || "",
+        res: st === "post" ? (me?.winner ? "W" : op?.winner ? "L" : "D") : "", score: me && op ? `${sv(me)}-${sv(op)}` : "",
+        tv: (c.broadcasts || [])[0]?.media?.shortName || "" };
+    });
+    let sched = { games: [] };
+    try {
+      const urls = [API + lg.path + "/teams/" + tm.id + "/schedule"]; if (!lg.soccer && !lg.kind) urls.push(API + lg.path + "/teams/" + tm.id + "/schedule?seasontype=3");
+      const js = await Promise.all(urls.map(u => fetch(u).then(r => r.ok ? r.json() : {}).catch(() => ({}))));
+      const seen = new Set();
+      sched.games = js.flatMap(parse).filter(g => !seen.has(g.id) && seen.add(g.id)).sort((a, b) => new Date(a.date) - new Date(b.date));
+      sched.record = js[0]?.team?.recordSummary || ""; sched.standing = js[0]?.team?.standingSummary || "";
+    } catch {}
+    paintTeam(sched);
+    teamView.sched = sched;
+  }
   // ---- Tennis match view: players, set-by-set score, the draw, match stats
   let tennisKey = null;
   function findMatch(key) {
@@ -2410,7 +2472,7 @@ button.brand, button.brand span { color: var(--accent); }
   function resRow(t, i, list) {
     const k = keyFor(t), on = state.favs.has(k), drag = list === "f";
     return `<div class="res-row ${drag ? "drag" : ""}" ${drag ? `data-k="${esc(k)}"` : ""}>${t.logo ? `<img src="${esc(t.logo)}" alt="">` : "<span></span>"}
-      <span class="nm">${esc(t.name)}<small>${esc(LG[t.lg].short || LG[t.lg].name)}</small></span>
+      <span class="nm tap" role="button" tabindex="0" data-open-team="${list}|${i}">${esc(t.name)}<small>${esc(LG[t.lg].short || LG[t.lg].name)} · View</small></span>
       <button class="follow ${on ? "on" : ""}" data-list="${list}" data-i="${i}">${on ? "Following" : "Follow"}</button>${drag ? `<span class="handle" role="button" aria-label="Drag to reorder ${esc(t.name)}" title="Drag to reorder">${HANDLE}</span>` : ""}</div>`;
   }
   // Suggestions: teams near the ones you follow, then popular picks
@@ -2477,7 +2539,7 @@ button.brand, button.brand span { color: var(--accent); }
   function lgRow(l) {
     const on = state.favLeagues.includes(l.id);
     return `<div class="res-row"><span class="lg-badge">${esc((l.short || (l.name.split(" ").length > 1 ? l.name.split(" ").map(w => w[0]).join("") : l.name)).replace(/[^A-Za-z0-9]/g, "").slice(0, 5).toUpperCase())}</span>
-      <span class="nm">${esc(l.name)}<small>${esc(l.sport)} · League</small></span>
+      <span class="nm tap" role="button" tabindex="0" data-open-lg="${l.id}">${esc(l.name)}<small>${esc(l.sport)} · League · View</small></span>
       <button class="follow ${on ? "on" : ""}" data-follow-lg="${l.id}">${on ? "Following" : "Follow"}</button></div>`;
   }
   function drawResults(searching) {
@@ -2557,6 +2619,10 @@ button.brand, button.brand span { color: var(--accent); }
   });
   document.getElementById("sheet").addEventListener("click", e => {
     if (e.target.id === "sheet") return closeSheet();
+    const ol = e.target.closest("[data-open-lg]");
+    if (ol) { openLeague(ol.dataset.openLg); return; }
+    const ot = e.target.closest("[data-open-team]");
+    if (ot) { const [ls, i] = ot.dataset.openTeam.split("|"); const tm = (ls === "r" ? results : ls === "s" ? sugg : following)[+i]; if (tm) openTeam(tm); return; }
     const fl = e.target.closest("[data-follow-lg]");
     if (fl) { const id = fl.dataset.followLg; state.favLeagues = state.favLeagues.includes(id) ? state.favLeagues.filter(x => x !== id) : [...state.favLeagues, id]; saveLeagues(); drawResults(); return; }
     const b = e.target.closest(".follow");
@@ -2696,7 +2762,7 @@ button.brand, button.brand span { color: var(--accent); }
   function ord(n) { const s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
   function closeGame() {
     document.getElementById("gsheet").hidden = true;
-    clearTimeout(gameTimer); openGameKey = null; lastSummary = null; tennisKey = null;
+    clearTimeout(gameTimer); openGameKey = null; lastSummary = null; tennisKey = null; teamView = null;
   }
   function repaintGame() {
     if (!openGameKey) return;
@@ -3136,6 +3202,9 @@ button.brand, button.brand span { color: var(--accent); }
   });
   document.getElementById("gsheet").addEventListener("click", async e => {
     if (e.target.closest("[data-gclose]")) { closeGame(); return; }
+    if (e.target.closest("[data-team-follow]") && teamView) { const tm = teamView; toggleFav(keyFor(tm), { lg: tm.lg, id: tm.id, name: tm.name, logo: tm.logo, color: tm.color, abbr: tm.abbr }); openTeamRepaint(); return; }
+    const tg = e.target.closest("[data-game]");
+    if (tg && teamView) { teamView = null; openGame(tg.dataset.game); return; }
     const lu = e.target.closest("[data-lu]");
     if (lu) { lineupSide = +lu.dataset.lu; repaintGame(); return; }
     const lf = e.target.closest("[data-lf]");
