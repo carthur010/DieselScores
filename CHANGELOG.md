@@ -16,7 +16,8 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
-_Nothing new. Beta matches live as of Oct 14._
+- **By Time matches By League** (Oct 14): By Time now uses the same game cards (abbreviations, records, odds line, bell, Gamecast), in start-time order with a small league tag on each card.
+- **Title case counts** (Oct 14): "2 Games", "3 Live · 8 Total".
 
 ## Oct 14, 2026: Live (big update, 8:55 AM)
 Everything from the beta shipped to live: the new red look (Navy and Green in Settings), Apple-style game card, Upcoming tab, alerts, drag to reorder teams and leagues, suggested teams, and the rest below. Also fixed during the pre-ship check: the odds card no longer says "Not posted yet" on a live game when ESPN's game details are missing.
