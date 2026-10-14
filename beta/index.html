@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014185826">
+<meta name="build" content="20261014190541">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -362,6 +362,19 @@ section.closed .bhead { border-bottom: 0; }
 .ms.add { display: flex; align-items: center; padding: 0 14px; color: var(--muted); font-weight: 600; font-size: 13px; border-style: dashed; }
 .ms.add:hover { color: var(--fg); }
 .lb-wrap { overflow-x: auto; }
+.tn { display: grid; }
+.tn-m { padding: 10px 16px; border-top: 1px solid var(--line); }
+.tn-m:first-child { border-top: 0; }
+.tn-h { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.tn-live { color: var(--live, #d33); font-weight: 700; }
+.tn-p { display: grid; grid-template-columns: 20px 1fr auto; align-items: center; gap: 8px; padding: 3px 0; color: var(--muted); }
+.tn-p.w { color: var(--fg); font-weight: 700; }
+.tn-p img { width: 20px; height: 14px; object-fit: cover; border-radius: 2px; }
+.tn-p .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tn-s { display: flex; gap: 12px; font-variant-numeric: tabular-nums; }
+.tn-s span { min-width: 12px; text-align: center; }
+.tn-s span.won { color: var(--fg); font-weight: 700; }
+.tn-s sup { font-size: 9px; margin-left: 1px; }
 .lb { width: 100%; border-collapse: collapse; font-size: 14px; }
 .lb th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .lb td { padding: 7px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
@@ -810,6 +823,8 @@ button.brand, button.brand span { color: var(--accent); }
     // Leaderboards and events
     { id: "pga",    name: "PGA Tour", short: "PGA", sport: "Golf", path: "golf/pga", kind: "golf" },
     { id: "lpga",   name: "LPGA", sport: "Golf", path: "golf/lpga", kind: "golf" },
+    { id: "atp",    name: "ATP Tour", short: "ATP", sport: "Tennis", path: "tennis/atp", kind: "tennis" },
+    { id: "wta",    name: "WTA Tour", short: "WTA", sport: "Tennis", path: "tennis/wta", kind: "tennis" },
   ];
   const LG = Object.fromEntries(LEAGUES.map(l => [l.id, l]));
   const TEAM_LEAGUES = LEAGUES.filter(l => !l.kind);
@@ -818,7 +833,7 @@ button.brand, button.brand span { color: var(--accent); }
   const SOCCER_HOME = ["epl", "wsl", "laliga", "seriea", "bund", "ligue1", "mls", "nwsl"];
   const P4_GROUPS = [1, 4, 5, 8];
   // Leagues that get their own tab. Everything else lives under All.
-  const MAIN_TABS = ["nfl", "ncaaf", "mlb", "nba", "nhl", "epl", "wsl", "uwcl", "pga"]; // ESPN conference ids: ACC, Big 12, Big Ten, SEC
+  const MAIN_TABS = ["nfl", "ncaaf", "mlb", "nba", "nhl", "epl", "wsl", "uwcl", "pga", "atp", "wta"]; // ESPN conference ids: ACC, Big 12, Big Ten, SEC
 
   // "Close game" rules by sport. lastPeriod comes from the league's regulation length.
   const CLOSE = {
@@ -1243,7 +1258,8 @@ button.brand, button.brand span { color: var(--accent); }
   function athleteRow(x) {
     return { name: x?.athlete?.displayName || x?.athlete?.shortName || x?.roster?.shortDisplayName || x?.team?.displayName || "",
       flag: x?.athlete?.flag?.href || "", winner: !!x?.winner,
-      sets: (x?.linescores || []).map(l => l?.value).filter(v => v != null) };
+      sets: (x?.linescores || []).map(l => l?.value).filter(v => v != null),
+      tb: (x?.linescores || []).filter(l => l?.value != null).map(l => l?.tiebreak ?? null) };
   }
 
   function parseMma(ev, lg) {
@@ -1264,7 +1280,7 @@ button.brand, button.brand span { color: var(--accent); }
     const matches = comps.map(({ c, group }) => ({
       a: athleteRow(c.competitors?.[0]), b: athleteRow(c.competitors?.[1]),
       state: c.status?.type?.state || "pre", detail: c.status?.type?.shortDetail || "",
-      round: c.round?.displayName || c.type?.text || group, date: c.date,
+      round: (typeof c.round === "string" ? c.round : c.round?.displayName) || c.type?.text || "", group, date: c.date, id: c.id,
     })).filter(m => m.a.name && m.b.name);
     const ord = { in: 0, post: 1, pre: 2 };
     matches.sort((x, y) => (ord[x.state] - ord[y.state]) || (x.state === "post" ? new Date(y.date) - new Date(x.date) : new Date(x.date) - new Date(y.date)));
@@ -1302,7 +1318,7 @@ button.brand, button.brand span { color: var(--accent); }
 
   async function loadLeague(lg) {
     if (lg.kind) {
-      const url = API + lg.path + "/scoreboard" + (isToday() ? "" : "?dates=" + ymd(state.date));
+      const url = API + lg.path + "/scoreboard" + (isToday() && lg.kind !== "tennis" ? "" : "?dates=" + ymd(state.date));
       const r = await fetch(url, { cache: "no-store" });
       if (!r.ok) throw new Error("HTTP " + r.status);
       const j = await r.json();
@@ -1983,7 +1999,24 @@ button.brand, button.brand span { color: var(--accent); }
     const more = e.link ? `<div class="f-act" style="padding-bottom:12px"><a class="f-link" href="${esc(e.link)}" target="_blank" rel="noopener">Full Leaderboard</a></div>` : "";
     return block("ev-" + e.lg.id + e.id, `${e.lg.short || e.lg.name} · ${e.name}`, eventMeta(e), body + more);
   }
-  const BLOCK = { golf: golfBlock };
+  // Tennis: the day's singles matches, live first, then results, then what's next
+  function tennisBlock(e) {
+    const day = ymd(state.date);
+    const list = e.matches.filter(m => !/doubles/i.test(m.group) && (m.state === "in" || (m.date && ymd(new Date(m.date)) === day)));
+    const rows = list.slice(0, 12).map(m => {
+      const status = m.state === "in" ? `<span class="tn-live">${esc(m.detail || "Live")}</span>` : m.state === "pre" ? esc(timeLabel(m.date)) : esc(m.detail || "Final");
+      const pl = (x, o) => {
+        const sets = x.sets.map((v, i) => { const won = v > (o.sets[i] ?? -1); const tb = x.tb?.[i] != null && !won ? `<sup>${x.tb[i]}</sup>` : ""; return `<span class="${won ? "won" : ""}">${v}${tb}</span>`; }).join("");
+        return `<div class="tn-p ${x.winner ? "w" : ""}">${x.flag ? `<img src="${esc(x.flag)}" alt="">` : "<i></i>"}<span class="nm">${esc(x.name)}</span><span class="tn-s">${sets}</span></div>`;
+      };
+      return `<div class="tn-m"><div class="tn-h"><span>${esc(m.round || m.group || "")}</span><span>${status}</span></div>${pl(m.a, m.b)}${pl(m.b, m.a)}</div>`;
+    }).join("");
+    const body = rows ? `<div class="tn">${rows}</div>` : `<div class="empty">No singles matches ${isToday() ? "today" : "this day"}.</div>`;
+    const more = e.link ? `<div class="f-act" style="padding-bottom:12px"><a class="f-link" href="${esc(e.link)}" target="_blank" rel="noopener">Full Draw</a></div>` : "";
+    const meta = list.some(m => m.state === "in") ? `${list.filter(m => m.state === "in").length} Live · ${list.length} Total` : `${list.length} Match${list.length === 1 ? "" : "es"}`;
+    return block("ev-" + e.lg.id + e.id, `${e.lg.short || e.lg.name} · ${e.name}`, meta, body + more);
+  }
+  const BLOCK = { golf: golfBlock, tennis: tennisBlock };
 
   // "8 Games", or "8 Matches" when every game in the list is soccer
   function countLabel(n, games) { const m = games?.length && games.every(g => g.lg?.soccer); return `${n} ${m ? (n === 1 ? "Match" : "Matches") : (n === 1 ? "Game" : "Games")}`; }

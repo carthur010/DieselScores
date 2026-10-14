@@ -51,7 +51,7 @@ Nothing. Everything shipped to live on Oct 14. Still worth a real-phone check: e
 - **Highlights link** on final games.
 
 ### Low priority
-- **More leagues (future adds)**: Charles's list of 105 leagues and events; Scores covers 28. Full table in the doc (Future Adds: More Leagues). Best first adds: Formula 1, UFC, tennis majors, Liga MX, international soccer. Most have ESPN feeds.
+- **More leagues (future adds)**: Charles's list of 105 leagues and events; Scores covers 28. Full table in the doc (Future Adds: More Leagues). Tennis (ATP, WTA) added to beta Oct 14. Best next adds: Formula 1, UFC, Liga MX, international soccer. Most have ESPN feeds.
 - **Soccer depth via API-Football** (part of API-Sports): player ratings, detailed match stats, closer to SofaScore. Free tier to start. (SofaScore's own feed is off-limits: blocked and against their terms.)
 - **YouTube TV deep links to the channel**: test whether a channel's share link (ESPN, TNT, etc.) stays the same day to day. If yes, map every channel so the button lands on the live feed.
 - **MLB's own stats feed** (statsapi.mlb.com) for richer at-bat detail in the game screen.
