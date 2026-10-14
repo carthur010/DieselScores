@@ -16,6 +16,7 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+- **Fix** (Oct 14): next-game time and arena are now double-checked against ESPN's daily scoreboard (the team schedule feed can lag). Game cards show the arena and city under the watch info. Before a game, the odds card says "Not posted yet" instead of disappearing.
 - **Clickable next-game chips** (Oct 14): tap a team's Next chip (or its row in Up Next on My Teams) to open that game's card with odds, records and the arena.
 - **Next-game chips** (Oct 14): dropped the @ / vs and added where the game is played (e.g. Newark, NJ). Same location shows in the Up Next list on My Teams.
 - **Fix** (Oct 14): header icons (home, search, settings, refresh) sit together in one row at the top right again. The new game card's stat bars had accidentally restyled the header. On small phones the live counter shortens to just the dot and number.

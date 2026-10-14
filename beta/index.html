@@ -399,6 +399,8 @@ button.t-go { background: var(--surface); cursor: pointer; }
 .belbig svg { width: 20px; height: 20px; }
 .belbig.on { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
 .gc-net { text-align: center; color: var(--muted); font-size: 13px; }
+.gc-venue { margin-top: 4px; }
+.gc-hero + .gc-venue { margin-top: 14px; }
 .gtabs { display: flex; justify-content: space-around; margin: 20px 0 12px; border-bottom: 1px solid var(--line); }
 .gtabs button { font-size: 15px; font-weight: 700; color: var(--muted); padding: 10px 4px; border-bottom: 3px solid transparent; margin-bottom: -1px; }
 .gtabs button.on { color: var(--fg); border-color: var(--accent); }
@@ -1121,6 +1123,14 @@ button.brand, button.brand span { color: var(--accent); }
       found = parse(await (await fetch(API + lg.path + "/teams/" + m.id + "/schedule")).json());
       if (!found && !lg.soccer) found = parse(await (await fetch(API + lg.path + "/teams/" + m.id + "/schedule?seasontype=3")).json());
     } catch {}
+    // The team schedule feed can lag. Confirm time and arena against that day's scoreboard.
+    if (found?.id) {
+      try {
+        const r = await fetch(API + lg.path + "/scoreboard?dates=" + ymd(new Date(found.date)) + (lg.extra || ""), { cache: "no-store" });
+        const ev = r.ok ? ((await r.json()).events || []).find(e => String(e.id) === found.id) : null;
+        if (ev) { found.date = ev.date || found.date; const pl = placeName(ev.competitions?.[0]?.venue); if (pl) found.place = pl; found.v = 2; }
+      } catch {}
+    }
     state.next[k] = found ? { t: Date.now(), ...found } : { t: Date.now(), none: true };
   }
 
@@ -1128,7 +1138,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (!isToday()) return;
     const playing = new Set(allGames().flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
     const todo = [...state.favs].filter(k => !playing.has(k))
-      .filter(k => { const c = state.next[k]; return !c || (c.date && (c.place === undefined || c.id === undefined)) || Date.now() - c.t > 3 * 3600e3 || (c.date && new Date(c.date) < Date.now() - 4 * 3600e3); });
+      .filter(k => { const c = state.next[k]; return !c || (c.date && c.v !== 2) || Date.now() - c.t > 3 * 3600e3 || (c.date && new Date(c.date) < Date.now() - 4 * 3600e3); });
     if (!todo.length) return;
     await ensureMeta(todo);
     await Promise.allSettled(todo.map(fetchNext));
@@ -1958,7 +1968,8 @@ button.brand, button.brand span { color: var(--accent); }
     const fmtTeam = (x, o, t) => `<div class="gc-team">${gs === "pre" ? "" : `<div class="big ${lose(x, o) ? "lose" : ""}">${esc(x.score)}</div>`}
       ${x.logo ? `<img src="${esc(x.logo)}" alt="">` : ""}<b>${x.rank ? `<i>${x.rank}</i> ` : ""}${esc(x.name || x.abbr)}</b><small>${esc(x.record)}</small>${g && t?.abbr ? starBtn(g.lg, t) : ""}</div>`;
     const sub = [g?.series || comp.series?.summary].filter(Boolean)[0] || "";
-    const venue = !g && comp.venue ? [comp.venue.fullName, placeName(comp.venue)].filter(Boolean).join(" · ") : "";
+    const vn = j?.gameInfo?.venue || comp.venue;
+    const venue = vn ? [vn.fullName, placeName(vn)].filter(Boolean).join(" · ") : "";
     const label = [lg.short || lg.name, g?.note].filter(Boolean).join(" · ");
     let html = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:${readable(a.color)};--ch:${readable(h.color)}"></div>
       <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span>${g ? `<button class="circ" data-share="${g.lg.id}:${g.id}" aria-label="Share">${SHAREIC}</button>` : ""}</div>
@@ -1984,7 +1995,7 @@ button.brand, button.brand span { color: var(--accent); }
         ${gs !== "post" ? `<button class="belbig ${state.watched[g.lg.id + ":" + g.id] ? "on" : ""}" data-watchgame="${g.lg.id}:${g.id}" aria-label="${state.watched[g.lg.id + ":" + g.id] ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL_BIG}</button>` : ""}</div>
         ${g.broadcast ? `<div class="gc-net">${gs === "in" ? "Live on" : gs === "pre" ? "On" : "Aired on"} ${esc(g.broadcast.replace(" / ", ", "))}</div>` : ""}`;
     }
-    if (!g && venue) html += `<div class="gc-net" style="margin-top:14px">${esc(venue)}</div>`;
+    if (venue) html += `<div class="gc-net gc-venue">${esc(venue)}</div>`;
     if (!j) return html + `<div class="skel"></div><div class="skel"></div></div>`;
     const tabs = [["stats", "Stats"], ["plays", "Play-By-Play"], ["box", "Box Score"]];
     html += `<div class="gtabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${gameTab === k}" class="${gameTab === k ? "on" : ""}" data-gtab="${k}">${l}</button>`).join("")}</div>`;
@@ -2026,6 +2037,8 @@ button.brand, button.brand span { color: var(--accent); }
     let html = "";
     const odds = oddsCard(j, a, h, lg);
     if (odds && state.showOdds) html += odds;
+    else if (!odds && state.showOdds && (j.header?.competitions?.[0]?.status?.type?.state || "pre") === "pre")
+      html += `<div class="gc-c"><h3>Betting Odds<button class="linkbtn" data-odds="off">Hide</button></h3><div class="foot" style="margin:0">Not posted yet. Lines usually show up the day of the game.</div></div>`;
     const wp = (j.winprobability || []).map(x => x.homeWinPercentage).filter(x => typeof x === "number");
     if (wp.length > 2) {
       const last = wp[wp.length - 1], W = 300, Hh = 84;
@@ -2059,7 +2072,7 @@ button.brand, button.brand span { color: var(--accent); }
       html += `<div class="gc-c"><h3>Leaders</h3><div class="ldr">${leaders.slice(0, 2).map(t => `<div><b>${esc(t.team?.abbreviation || "")}</b>${
         t.leaders.slice(0, 3).map(c => { const l = c.leaders?.[0]; return l ? `<p>${esc(l.athlete?.displayName || "")}<small>${esc(c.displayName || "")}: ${esc(l.displayValue || "")}</small></p>` : ""; }).join("")}</div>`).join("")}</div></div>`;
     }
-    if (odds && !state.showOdds) html += `<div class="odds-off"><button class="linkbtn" data-odds="on">Show betting odds</button></div>`;
+    if (!state.showOdds) html += `<div class="odds-off"><button class="linkbtn" data-odds="on">Show betting odds</button></div>`;
     return html || `<div class="empty">No stats yet.</div>`;
   }
   function playsTab(j, lg) {
