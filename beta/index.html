@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014194422">
+<meta name="build" content="20261014194649">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2020,9 +2020,9 @@ button.brand, button.brand span { color: var(--accent); }
     return block("ev-" + e.lg.id + e.id, `${e.lg.short || e.lg.name} · ${e.name}`, eventMeta(e), body + more);
   }
   // Tennis: the day's singles matches, live first, then results, then what's next
+  function tennisDay(e) { const day = ymd(state.date); return e.matches.filter(m => !/doubles/i.test(m.group) && (m.state === "in" || (m.date && ymd(new Date(m.date)) === day))); }
   function tennisBlock(e) {
-    const day = ymd(state.date);
-    const list = e.matches.filter(m => !/doubles/i.test(m.group) && (m.state === "in" || (m.date && ymd(new Date(m.date)) === day)));
+    const list = tennisDay(e);
     if (!list.length) return "";
     const rows = list.slice(0, 12).map(m => {
       const status = m.state === "in" ? `<span class="tn-live">${esc(m.detail || "Live")}</span>` : m.state === "pre" ? esc(timeLabel(m.date)) : esc(m.detail || "Final");
@@ -2178,6 +2178,19 @@ button.brand, button.brand span { color: var(--accent); }
   const inConf = (g, c) => g.teams.some(t => t.conf === c);
   function renderConfs(games) {
     const el = document.getElementById("confs");
+    // Tennis tabs: a row of tournaments playing that day, busiest first
+    if (LG[state.tab]?.kind === "tennis") {
+      const lgId = state.tab, evs = allSpecial().filter(e => e.lg.id === lgId).map(e => ({ e, list: tennisDay(e) })).filter(x => x.list.length)
+        .sort((x, y) => y.list.filter(m => m.state === "in").length - x.list.filter(m => m.state === "in").length || y.list.length - x.list.length);
+      el.hidden = evs.length < 2;
+      if (el.hidden) return;
+      const cur = state.conf[lgId] || "";
+      const short = n => n.replace(/^(Rolex|Dongfeng Voyah|Vanda Pharmaceuticals|BNP Paribas|Mutua|Internazionali BNL d'Italia)\s+/i, "").replace(/\s+(Women's|Men's)?\s*Championships?$/i, "").replace(/ Open$/i, " Open");
+      el.innerHTML = `<button class="chip ${!cur ? "on" : ""}" data-conf="">All Tournaments</button>` + evs.map(({ e, list }) => { const live = list.filter(m => m.state === "in").length;
+        return `<button class="chip ${cur === String(e.id) ? "on" : ""} ${live ? "hot" : ""}" data-conf="${esc(e.id)}">${esc(short(e.name))}<span class="n">${live ? live + " Live" : list.length}</span></button>`; }).join("");
+      el.querySelectorAll("button").forEach(b => b.onclick = () => { state.conf[lgId] = b.dataset.conf; store.set("conf", state.conf); render(); });
+      return;
+    }
     const lg = confLg(state.tab), C = CONFS[lg];
     const pool = lg ? games.filter(g => g.lg.id === lg) : [];
     el.hidden = !pool.length;
@@ -2212,7 +2225,7 @@ button.brand, button.brand span { color: var(--accent); }
   function specialsFor(tab) {
     const all = allSpecial();
     if (tab === "all" || tab === "live") return all.filter(e => e.state === "in");
-    if (LG[tab]?.kind) return all.filter(e => e.lg.id === tab);
+    if (LG[tab]?.kind) { const pick = LG[tab].kind === "tennis" && state.conf?.[tab]; return all.filter(e => e.lg.id === tab && (!pick || String(e.id) === pick)); }
     return [];
   }
 

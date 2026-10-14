@@ -31,6 +31,8 @@ Nothing. Everything shipped to live on Oct 14. Still worth a real-phone check: e
 - Real push alerts with the app closed (needs a small server or the iOS app)
 
 ## Idea backlog (from SportsDudes)
+- [ ] **Tennis tiers filter** (Jack): ATP / Challenger / ITF and WTA / WTA 125 / ITF. ESPN's feed has no tier field, so this needs Live Tennis API's tour field (Tennis app) or licensed data.
+- [ ] **Easier league switching** (Jack): the long chip row plus a second conference/tournament row is clunky. Idea: a league picker sheet (grid of your leagues) and a single "Conference ▾" / "Tournament ▾" dropdown like ESPN's.
 - [x] **Tighten Upset Alert** (Ben; group settled on +200 moneyline, in beta Oct 14): today any betting favorite trailing in the second half counts, so PSG vs. City (near pick'em) fired. Require a real underdog: 7+ pt spread NFL/NBA, 10+ CFB, +150 or longer moneyline in soccer/NHL/MLB.
 - [x] **College football by conference** (Faiz, in beta Oct 14): SEC, Big Ten, Big 12, ACC etc. as filters or sections, like Bleacher Report. Faiz also said the expanded view beats Bleacher Report's UI.
 1. **"This guy is going off" tracker** (Ben): flag big individual games live, like a no-hitter in progress, hat trick, triple-double, big NFL stat lines.
