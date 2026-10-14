@@ -1486,7 +1486,7 @@ button.brand, button.brand span { color: var(--accent); }
       if (mine.length) {
         const liveN = mine.filter(g => g.state === "in").length;
         html += block("myteams", isToday() ? "Today" : dayLabel(state.date), liveN ? `${liveN} live · ${mine.length} total` : `${mine.length} game${mine.length > 1 ? "s" : ""}`,
-          state.view === "league" ? `<div class="grid">${mine.map(card).join("")}</div>` : timeline(mine));
+          state.view === "league" ? `<div class="grid">${mine.map(card).join("")}</div>` : `<div class="tl-group">${mine.map(tlRow).join("")}</div>`);
       } else {
         html += `<div class="block empty">None of your teams play ${isToday() ? "today" : "on " + esc(dayLabel(state.date))}.</div>`;
       }
