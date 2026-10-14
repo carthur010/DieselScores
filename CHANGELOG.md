@@ -10,6 +10,8 @@ Newest first. Beta changes move to Live when shipped.
 - **Full-screen game card** tinted with both teams' colors: big scores, goal scorers (hockey/soccer), line score, Watch button, alert bell, share, and Stats / Play-By-Play / Box Score tabs with betting odds, win probability, team stat bars and leaders.
 - **Edit screen**: My Leagues with drag handles to reorder, My Teams, More to Follow, and a search bar for teams and leagues.
 - **Settings**: Open to, Color (Field Green / Brick Red / Navy), alert options, test alerts.
+- **All classic features ported in**: Live Now view (Worth A Watch + **You Are Looking Live** by league), Close Games view, CFB Top 25 and Power 4 views, live counts in the menu, a "live now" shortcut on Home, **Compact layout** option (Sofascore-style rows) in Settings, **calendar date picker** in the menu, collapsible sections, **Follow** buttons on the game card, where-to-watch under live games, tap the title for Home, and the after-midnight live games fix.
+- **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
 - **My Teams tab**: today's games for teams you follow (with a count on the tab), then an **Up Next** list with every other team's next game. Edit teams button at the top. Also available under Settings → Open to.

@@ -44,9 +44,9 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 
 /* Header */
 .hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 6px 4px 18px; }
-.hd h1 { margin: 0; font-family: var(--disp); font-weight: 700; font-size: 40px; letter-spacing: -.02em; line-height: 1; display: flex; align-items: baseline; gap: 8px; }
-.hd h1 small { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--g3); background: var(--accent); padding: 3px 7px; border-radius: 6px; transform: translateY(-6px); }
-.pill { display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 999px; background: var(--pill); border: 1px solid var(--pill-line); font-weight: 600; font-size: 17px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.hd h1 { min-width: 0; margin: 0; font-family: var(--disp); font-weight: 700; font-size: 40px; letter-spacing: -.02em; line-height: 1; display: flex; align-items: baseline; gap: 8px; }
+.hd h1 small { white-space: nowrap; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--g3); background: var(--accent); padding: 3px 7px; border-radius: 6px; transform: translateY(-6px); }
+.pill { white-space: nowrap; flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 999px; background: var(--pill); border: 1px solid var(--pill-line); font-weight: 600; font-size: 17px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 .pill svg { width: 20px; height: 20px; }
 
 /* Panel */
@@ -95,6 +95,44 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 .updated { text-align: center; color: var(--dim); font-size: 12px; padding: 14px 0 4px; }
 .skel { height: 120px; margin: 14px 0; border-radius: 18px; background: linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.09), rgba(255,255,255,.04)); background-size: 200% 100%; animation: sh 1.2s infinite; }
 @keyframes sh { to { background-position: -200% 0; } }
+
+/* Compact rows */
+.crow { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; text-align: left; padding: 11px 2px; border-bottom: 1px solid var(--line); }
+.crow:last-child { border-bottom: 0; }
+.ctime { display: grid; gap: 3px; font-size: 13px; color: var(--muted); }
+.ctime b { font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ctime b.live { color: var(--live); }
+.cteams { display: grid; gap: 6px; min-width: 0; }
+.ct { display: flex; align-items: center; gap: 9px; font-size: 16px; min-width: 0; }
+.ct img, .ct .cl { width: 22px; height: 22px; object-fit: contain; flex: 0 0 auto; }
+.ct .cl { font-style: normal; font-size: 8px; font-weight: 800; display: grid; place-items: center; background: rgba(255,255,255,.12); border-radius: 50%; }
+.ct span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ct .rk { font-style: normal; color: var(--muted); font-size: 13px; }
+.ct.lose { color: var(--muted); }
+.ct .cf { width: 12px; height: 12px; flex: 0 0 auto; }
+.cwhy { font-size: 12px; color: var(--accent); padding-left: 31px; }
+.cwhy .hot { color: var(--live); }
+.cscore { display: grid; gap: 6px; text-align: right; font-family: var(--disp); font-stretch: condensed; font-weight: 600; font-size: 21px; line-height: 22px; }
+.cscore.live { color: var(--fg); }
+.cscore .lose { color: var(--dim); }
+
+/* Extras */
+.sec-h .fold { margin-left: auto; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.08); }
+.sec-h .fold svg { width: 13px; height: 13px; transition: transform .2s; }
+.sec-h .fold.closed svg { transform: rotate(180deg); }
+.big-h { font-family: var(--disp); font-size: 24px; font-weight: 700; padding: 22px 2px 0; }
+.livebar { display: flex; align-items: center; gap: 4px; margin: 14px auto 2px; padding: 8px 14px; border-radius: 999px; background: rgba(255,75,85,.14); color: #fff; font-weight: 600; font-size: 14px; }
+.livebar .chev { width: 12px; height: 12px; }
+.datelabel { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 12px 0 0; font-weight: 600; }
+.datelabel button { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.12); }
+.datelabel svg { width: 12px; height: 12px; }
+.mi .cnt { margin-left: auto; font-style: normal; font-size: 14px; color: var(--muted); font-weight: 600; }
+.circ.cal { position: relative; overflow: hidden; }
+.circ.cal input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.hd h1 button { font: inherit; letter-spacing: inherit; }
+.followbtn { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; padding: 5px 11px; border-radius: 999px; background: rgba(255,255,255,.14); }
+.followbtn svg { width: 13px; height: 13px; }
+.followbtn.on { background: #fff; color: #000; }
 
 /* Golf */
 .golf { display: grid; padding: 6px 0 12px; }
@@ -247,7 +285,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 <body>
 <div class="wrap">
   <header class="hd">
-    <h1 id="brand">Scores<small>2.0 Beta</small></h1>
+    <h1 id="brand"><button data-view="home" aria-label="Home">Scores</button><small>2.0 Beta</small></h1>
     <button class="pill" id="menubtn" aria-haspopup="true" aria-expanded="false"><span id="menuicon"></span><span id="menulabel">Home</span></button>
   </header>
   <section class="panel">
@@ -256,6 +294,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
       <button data-day="today" class="on">Today</button>
       <button data-day="upcoming">Upcoming</button>
     </nav>
+    <div class="datelabel" id="datelabel" hidden></div>
     <div id="main"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
   </section>
 </div>
@@ -764,7 +803,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
     const lg = LG[m.lg];
     const parse = j => {
       const now = Date.now();
-      const ev = (j.events || []).filter(e => new Date(e.date).getTime() > now - 4 * 3600e3)
+      const ev = (j.events || []).filter(e => new Date(e.date).getTime() > now - 15 * 60e3)
         .filter(e => (e.competitions?.[0]?.status?.type?.state || "pre") !== "post")
         .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
       if (!ev) return null;
@@ -786,7 +825,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
     if (!isToday()) return;
     const playing = new Set(allGames().flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
     const todo = [...state.favs].filter(k => !playing.has(k))
-      .filter(k => { const c = state.next[k]; return !c || Date.now() - c.t > 3 * 3600e3 || (c.date && new Date(c.date) < Date.now() - 4 * 3600e3); });
+      .filter(k => { const c = state.next[k]; return !c || Date.now() - c.t > 3 * 3600e3 || (c.date && new Date(c.date) < Date.now()); });
     if (!todo.length) return;
     await ensureMeta(todo);
     await Promise.allSettled(todo.map(fetchNext));
@@ -952,7 +991,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
   // ---------- extra state for 2.0 ----------
   state.day = "today";
   state.view = store.get("home2", "home");          // "home" | "teams" | league id
-  if (state.view !== "home" && state.view !== "teams" && !LG[state.view]) state.view = "home";
+  if (!["home", "teams", "live", "close", "cfb25", "p4"].includes(state.view) && !LG[state.view]) state.view = "home";
   state.upcoming = { key: "", at: 0, days: [] };
   state.closedDates = new Set();
   state.gameTab = "stats";
@@ -970,7 +1009,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
     if (g.state === "in") {
       if (g.sit?.downDistanceText) return g.sit.downDistanceText;
       if (g.lg.sport === "Baseball" && g.sit?.outs != null) return `${g.sit.outs} out${g.sit.outs === 1 ? "" : "s"}${g.sit.balls != null ? ` · ${g.sit.balls}-${g.sit.strikes}` : ""}`;
-      return g.series || "";
+      return g.series || (g.watch?.[0] ? g.watch[0].app + (g.watch[0].nets[0] && g.watch[0].nets[0] !== g.watch[0].app ? " · " + g.watch[0].nets[0] : "") : g.broadcast || "");
     }
     if (g.state === "pre") return g.odds?.details || (g.watch?.[0] ? `${g.watch[0].app}${g.watch[0].nets[0] && g.watch[0].nets[0] !== g.watch[0].app ? " · " + g.watch[0].nets[0] : ""}` : g.broadcast || "");
     return g.series || "";
@@ -1002,9 +1041,23 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
         ${score(h, a)}${teamCell(h, "h", g)}</div>
     </button>`;
   }
+  function rowCompact(g, opts = {}) {
+    const [a, h] = g.teams;
+    if (!a || !h) return "";
+    const lose = (t, o) => g.state === "post" && o.winner && !t.winner;
+    const why = opts.why ? (g.reasons || []).map(r => `<span class="why ${/Upset/.test(r) ? "hot" : ""}">${esc(r)}</span>`).join(" · ") : "";
+    const tline = (t, o, at) => `<div class="ct ${lose(t, o) ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : `<i class="cl">${esc(t.abbr)}</i>`}<span>${at ? "@ " : ""}${t.rank ? `<i class="rk">${t.rank}</i> ` : ""}${esc(t.name || t.abbr)}</span>${isFavTeam(g.lg, t.abbr) ? `<i class="cf">${IC.star}</i>` : ""}</div>`;
+    const sc = (t, o) => `<span class="${lose(t, o) ? "lose" : ""}">${esc(t.score)}</span>`;
+    return `<button class="crow" data-game="${g.lg.id}:${g.id}">
+      <div class="ctime"><span>${esc(timeLabel(g.date))}</span><b class="${g.state === "in" ? "live" : ""}">${g.state === "pre" ? "" : esc(statusText(g))}</b></div>
+      <div class="cteams">${tline(a, h, false)}${tline(h, a, true)}${why ? `<div class="cwhy">${why}</div>` : ""}</div>
+      <div class="cscore ${g.state === "in" ? "live" : ""}">${g.state === "pre" ? "" : sc(a, h) + sc(h, a)}</div>
+    </button>`;
+  }
+  function R(g, opts) { return store.get("layout2", "expanded") === "compact" ? rowCompact(g, opts) : row(g, opts); }
   function nextRow(k) {
     const m = state.favMeta[k], n = state.next[k];
-    if (!m) return "";
+    if (!m || (n?.date && new Date(n.date) < Date.now())) return "";
     const me = { abbr: m.abbr, name: (m.name || "").split(" ").slice(-1)[0] || m.abbr, logo: m.logo };
     const opp = { abbr: n?.opp || "", name: n?.opp || "", logo: n?.oppLogo || "" };
     const [a, h] = n?.at === "@" ? [me, opp] : [opp, me];
@@ -1012,8 +1065,13 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
     return `<div class="row"><div class="rl">${esc(LG[m.lg]?.short || LG[m.lg]?.name || "")}</div>
       <div class="rg">${cell(a, "a")}<div></div><div class="mid"><b>${n?.date ? esc(timeLabel(n.date)) : n?.none ? "Off" : "…"}</b><small>${n?.date ? esc(new Date(n.date).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })) : n?.none ? "No games scheduled" : ""}</small></div><div></div>${cell(h, "h")}</div></div>`;
   }
-  function secHead(html, view) {
-    return `<div class="sec-h">${view ? `<button data-view="${view}">${html}${IC.chev}</button>` : html}</div>`;
+  function secHead(html, view, id) {
+    const closed = id && state.closed.has(id);
+    return `<div class="sec-h">${view ? `<button data-view="${view}">${html}${IC.chev}</button>` : html}${id ? `<button class="fold ${closed ? "closed" : ""}" data-fold="${id}" aria-expanded="${!closed}" aria-label="${closed ? "Expand" : "Collapse"} section">${IC.up}</button>` : ""}</div>`;
+  }
+  function section(id, head, view, rowsHtml) {
+    if (!rowsHtml) return "";
+    return secHead(head, view, id) + (state.closed.has(id) ? "" : rowsHtml);
   }
   function golfSection(e) {
     const rows = e.rows.slice(0, 8);
@@ -1029,51 +1087,87 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
   function dayContent(games, specials, opts = {}) {
     let html = "";
     const view = state.view;
+    const byLeague = (list, prefix, opts2 = {}) => {
+      let out = "";
+      leagueOrder().forEach(id => {
+        const lg = LG[id];
+        if (lg.kind) return;
+        const l = list.filter(g => g.lg.id === id).sort(byStatus);
+        if (!l.length) return;
+        out += section(prefix + id, `${lgIcon(lg)}<span>${esc(lg.name)}</span>`, id, l.map(g => R(g, { league: false, ...opts2 })).join(""));
+      });
+      return out;
+    };
+    const worthPicks = (exclude) => {
+      const must = games.filter(g => !exclude.has(g.id) && earned(g) && (g.close || g.playoff)).sort((x, y) => y.hype - x.hype);
+      const other = games.filter(g => !exclude.has(g.id) && earned(g) && !g.close && !g.playoff).sort((x, y) => y.hype - x.hype);
+      return must.concat(other.slice(0, Math.max(0, 6 - must.length)));
+    };
     if (view === "teams") {
       const mine = games.filter(g => g.fav).sort(byStatus);
-      html += mine.map(g => row(g)).join("");
+      html += mine.map(g => R(g)).join("");
       if (opts.withNext) {
         const playing = new Set(mine.flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
         const ups = [...state.favs].filter(k => !playing.has(k) && state.favMeta[k])
           .sort((a, b) => (state.next[a]?.date ? new Date(state.next[a].date) : Infinity) - (state.next[b]?.date ? new Date(state.next[b].date) : Infinity));
-        if (ups.length) html += secHead(`<span>Up Next</span>`) + ups.map(nextRow).join("");
+        const rows = ups.map(nextRow).join("");
+        if (rows) html += section("upnext", `<span>Up Next</span>`, null, rows);
       }
       return html;
+    }
+    if (view === "live") {
+      const live = games.filter(g => g.state === "in");
+      const shown = new Set();
+      if (opts.worth) {
+        const picks = worthPicks(new Set()).filter(g => g.state === "in");
+        if (picks.length) { html += section("worth", `<span>Worth A Watch</span>`, null, picks.map(g => R(g, { why: true })).join("")); picks.forEach(g => shown.add(g.id)); }
+      }
+      const rest = live.filter(g => !shown.has(g.id));
+      if (rest.length) html += `<div class="big-h">You Are Looking Live</div>` + byLeague(rest, "live-");
+      specials.filter(e => e.state === "in").forEach(e => { html += golfSection(e); });
+      if (!html) {
+        const next = games.filter(g => g.state === "pre").sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
+        html = `<div class="empty">Nothing live right now.${next.length ? " Here's what's up next." : ""}</div>` + next.map(g => R(g)).join("");
+      }
+      return html;
+    }
+    if (view === "close") {
+      const l = games.filter(g => g.close).sort((x, y) => y.hype - x.hype);
+      return l.length ? l.map(g => R(g, { why: true })).join("") : `<div class="empty">No close games right now. Games show up here late with a tight score: under 5:00 in the 4th or 3rd, the 7th inning or later in baseball, or the 85th minute in soccer.</div>`;
+    }
+    if (view === "cfb25" || view === "p4") {
+      const l = games.filter(g => g.lg.id === "ncaaf" && (view === "p4" ? g.p4 : g.teams.some(t => t.rank))).sort((a, b) => (b.rankedClash - a.rankedClash) || byStatus(a, b));
+      return l.map(g => R(g, { league: false })).join("");
     }
     if (LG[view]) {
       const lg = LG[view];
       if (lg.kind) return specials.filter(e => e.lg.id === view).map(golfSection).join("");
-      return games.filter(g => g.lg.id === view).sort(byStatus).map(g => row(g, { league: false })).join("");
+      return games.filter(g => g.lg.id === view).sort(byStatus).map(g => R(g, { league: false })).join("");
     }
-    // Home
+    // Home: My Teams, Worth A Watch, then your leagues in order
     const shown = new Set();
     const mine = games.filter(g => g.fav).sort(byStatus);
     if (mine.length) {
-      html += secHead(`<i>${IC.star.replace("<svg", '<svg class="st"')}</i><span>My Teams</span>`, "teams") + mine.map(g => row(g)).join("");
+      html += section("mine", `<i>${IC.star.replace("<svg", '<svg class="st"')}</i><span>My Teams</span>`, "teams", mine.map(g => R(g)).join(""));
       mine.forEach(g => shown.add(g.id));
     }
     if (opts.worth) {
-      const must = games.filter(g => !shown.has(g.id) && earned(g) && (g.close || g.playoff)).sort((x, y) => y.hype - x.hype);
-      const other = games.filter(g => !shown.has(g.id) && earned(g) && !g.close && !g.playoff).sort((x, y) => y.hype - x.hype);
-      const picks = must.concat(other.slice(0, Math.max(0, 6 - must.length)));
-      if (picks.length) {
-        html += secHead(`<span>Worth A Watch</span>`) + picks.map(g => row(g, { why: true })).join("");
-        picks.forEach(g => shown.add(g.id));
-      }
+      const picks = worthPicks(shown);
+      if (picks.length) { html += section("worth", `<span>Worth A Watch</span>`, null, picks.map(g => R(g, { why: true })).join("")); picks.forEach(g => shown.add(g.id)); }
     }
     leagueOrder().forEach(id => {
       const lg = LG[id];
       if (lg.kind) { specials.filter(e => e.lg.id === id).forEach(e => { html += golfSection(e); }); return; }
       const list = games.filter(g => g.lg.id === id && !shown.has(g.id)).sort(byStatus);
       if (!list.length) return;
-      html += secHead(`${lgIcon(lg)}<span>${esc(lg.name)}</span>`, id) + list.map(g => row(g, { league: false })).join("");
+      html += section("lg-" + id, `${lgIcon(lg)}<span>${esc(lg.name)}</span>`, id, list.map(g => R(g, { league: false })).join(""));
     });
     return html;
   }
 
   // ---------- Upcoming ----------
   async function loadUpcoming() {
-    const view = state.view;
+    const view = ["live", "close"].includes(state.view) ? "home" : ["cfb25", "p4"].includes(state.view) ? "ncaaf" : state.view;
     let ids;
     if (LG[view]) ids = [view];
     else {
@@ -1101,6 +1195,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
   function renderUpcoming() {
     const main = document.getElementById("main");
     let html = "";
+    const realView = state.view;
+    if (realView === "live" || realView === "close") state.view = "home";
     state.upcoming.days.forEach(({ date, games }) => {
       const k = ymd(date), closed = state.closedDates.has(k);
       const body = dayContent(games, [], {});
@@ -1113,11 +1209,19 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
       if (later.length) html += `<div class="date-h"><button>Later</button></div>` + later.map(nextRow).join("");
     }
     main.innerHTML = html || `<div class="empty">Nothing scheduled in the next few days${state.view === "teams" ? " for your teams" : ""}.</div>`;
+    state.view = realView;
   }
 
   // ---------- page ----------
+  const LIVEIC = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="#ff4b55"/></svg>';
+  const CLOSEIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>';
+  const CALIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
   function viewLabel() {
     if (state.view === "teams") return [IC.star, "My Teams"];
+    if (state.view === "live") return [LIVEIC, "Live Now"];
+    if (state.view === "close") return [CLOSEIC, "Close Games"];
+    if (state.view === "cfb25") return [lgIcon(LG.ncaaf), "CFB Top 25"];
+    if (state.view === "p4") return [lgIcon(LG.ncaaf), "Power 4"];
     if (LG[state.view]) return [lgIcon(LG[state.view]), LG[state.view].short || LG[state.view].name];
     return [IC.home, "Home"];
   }
@@ -1126,17 +1230,32 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
     document.getElementById("menuicon").innerHTML = ic;
     document.getElementById("menulabel").textContent = lbl;
     document.querySelectorAll("[data-day]").forEach(b => b.classList.toggle("on", b.dataset.day === state.day));
+    const dl = document.getElementById("datelabel");
+    dl.hidden = state.day !== "date";
+    if (state.day === "date") dl.innerHTML = `<span>${esc(state.date.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" }))}</span><button data-day="today" aria-label="Back to today">${IC.x}</button>`;
     if (state.day === "upcoming") return renderUpcoming();
     const main = document.getElementById("main");
     if (!state.updatedAt && !Object.keys(state.data).length) return;
     if (LEAGUES.every(lg => state.data[lg.id]?.error)) { main.innerHTML = `<div class="empty">Couldn't reach the scores feed. Check your connection and pull down to refresh.</div>`; return; }
     const games = allGames(), specials = allSpecial();
     let html = dayContent(games, specials, { worth: state.day === "today", withNext: state.day === "today" });
+    if (state.view === "home" && state.day === "today") {
+      const liveN = games.filter(g => g.state === "in").length;
+      if (liveN) html = `<button class="livebar" data-view="live"><i class="livedot"></i>${liveN} live now${IC.chev}</button>` + html;
+    }
     if (!html) {
       html = `<div class="empty">${state.view === "teams" ? `None of your teams play ${state.day === "yesterday" ? "yesterday" : "today"}.` : LG[state.view] ? `No ${esc(LG[state.view].short || LG[state.view].name)} games ${state.day}.` : "No games."}</div>`;
     }
     if (state.updatedAt && state.day === "today") html += `<div class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}</div>`;
     main.innerHTML = html;
+  }
+  function setDate(dt) {
+    state.day = sameDay(dt, new Date()) ? "today" : sameDay(dt, addDays(new Date(), -1)) ? "yesterday" : "date";
+    state.date = startOfDay(dt);
+    state.data = {}; state.updatedAt = null; primed = false;
+    closeMenu(); window.scrollTo({ top: 0 });
+    document.getElementById("main").innerHTML = '<div class="skel"></div><div class="skel"></div>';
+    render(); loadAll();
   }
   function setDay(d) {
     if (d === state.day) return;
@@ -1158,11 +1277,18 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 
   // ---------- menu ----------
   function openMenu() {
+    const games = state.day === "upcoming" ? [] : allGames();
+    const liveN = games.filter(g => g.state === "in").length, closeN = games.filter(g => g.close).length;
+    const cnt = n => n ? `<em class="cnt">${n}</em>` : "";
+    const mi = (v, ic, label, n) => `<button class="mi ${state.view === v ? "on" : ""}" data-view="${v}">${ic}<span>${esc(label)}</span>${cnt(n)}</button>`;
     const items = [`<button class="mi" data-menu="search">${IC.search}<span>Search</span></button>`,
-      `<button class="mi ${state.view === "home" ? "on" : ""}" data-view="home">${IC.home}<span>Home</span></button>`,
-      `<button class="mi ${state.view === "teams" ? "on" : ""}" data-view="teams">${IC.star}<span>My Teams</span></button>`]
-      .concat(state.favLeagues.filter(id => LG[id]).map(id => `<button class="mi ${state.view === id ? "on" : ""}" data-view="${id}">${lgIcon(LG[id])}<span>${esc(LG[id].name)}</span></button>`));
-    document.getElementById("menu").innerHTML = `<div class="menu-top"><button class="circ" data-menu="settings" aria-label="Settings">${IC.gear}</button><span class="sp"></span><button class="chipbtn" data-menu="edit">Edit</button></div>${items.join("")}`;
+      mi("home", IC.home, "Home"), mi("live", LIVEIC, "Live Now", liveN), mi("close", CLOSEIC, "Close Games", closeN), mi("teams", IC.star, "My Teams", games.filter(g => g.fav).length)]
+      .concat(state.favLeagues.filter(id => LG[id]).flatMap(id => {
+        const out = [mi(id, lgIcon(LG[id]), LG[id].name, games.filter(g => g.lg.id === id).length)];
+        if (id === "ncaaf") out.push(mi("cfb25", lgIcon(LG.ncaaf), "CFB Top 25", games.filter(g => g.lg.id === "ncaaf" && g.teams.some(t => t.rank)).length), mi("p4", lgIcon(LG.ncaaf), "Power 4", games.filter(g => g.lg.id === "ncaaf" && g.p4).length));
+        return out;
+      }));
+    document.getElementById("menu").innerHTML = `<div class="menu-top"><button class="circ" data-menu="settings" aria-label="Settings">${IC.gear}</button><label class="circ cal" aria-label="Pick a date">${CALIC}<input type="date" id="datepick" value="${isoDate(state.date)}"></label><span class="sp"></span><button class="chipbtn" data-menu="edit">Edit</button></div>${items.join("")}`;
     document.getElementById("menu").hidden = false;
     document.getElementById("scrim").hidden = false;
     document.getElementById("menubtn").setAttribute("aria-expanded", "true");
@@ -1217,7 +1343,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
     const team = (c, t) => ({
       abbr: c?.team?.abbreviation || t.abbr || "", name: c?.team?.shortDisplayName || c?.team?.name || t.name || "",
       logo: c?.team?.logos?.[0]?.href || c?.team?.logo || t.logo || "", color: hexColor(c?.team?.color) || t.color || "",
-      score: c?.score ?? t.score ?? "", record: c?.record?.[0]?.summary || t.record || "", rank: t.rank, winner: c?.winner ?? t.winner,
+      full: c?.team?.displayName || t.full || "", score: c?.score ?? t.score ?? "", record: c?.record?.[0]?.summary || t.record || "", rank: t.rank, winner: c?.winner ?? t.winner,
       id: c?.team?.id || c?.id || t.id, lines: c?.linescores || [], hits: c?.hits, errors: c?.errors,
     });
     const a = team(A, ta), h = team(H, th);
@@ -1226,7 +1352,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
     const status = g ? statusText(g) : (st.shortDetail || "");
     const lose = (x, o) => gs === "post" && (+x.score) < (+o.score);
     const fmtTeam = (x, o) => `<div class="gc-team">${gs === "pre" ? "" : `<div class="big ${lose(x, o) ? "lose" : ""}">${esc(x.score)}</div>`}
-      ${x.logo ? `<img src="${esc(x.logo)}" alt="">` : ""}<b>${x.rank ? `<span style="opacity:.6">${x.rank}</span> ` : ""}${esc(x.name || x.abbr)}${g && isFavTeam(g.lg, x.abbr) ? ` <span style="font-size:13px">★</span>` : ""}</b><small>${esc(x.record)}</small></div>`;
+      ${x.logo ? `<img src="${esc(x.logo)}" alt="">` : ""}<b>${x.rank ? `<span style="opacity:.6">${x.rank}</span> ` : ""}${esc(x.name || x.abbr)}</b>${g ? `<button class="followbtn ${isFavTeam(g.lg, x.abbr) ? "on" : ""}" data-cardfav='${esc(JSON.stringify({ lg: g.lg.id, id: x.id, name: x.full || x.name, logo: x.logo, color: x.color, abbr: x.abbr }))}'>${isFavTeam(g.lg, x.abbr) ? IC.star + " Following" : IC.starO + " Follow"}</button>` : ""}<small>${esc(x.record)}</small></div>`;
     const label = [lg.short || lg.name, g?.note].filter(Boolean).join(" · ");
     let html = `<div class="gc-bg" style="--ca:${readable(a.color)};--ch:${readable(h.color)}"></div><div class="layer-in">
       <div class="layer-top"><button class="circ" data-close="game" aria-label="Close">${IC.x}</button><span class="sp"></span>${g ? `<button class="circ" data-share="${g.lg.id}:${g.id}" aria-label="Share">${IC.share}</button>` : ""}</div>
@@ -1448,7 +1574,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
     const groups = [["team", "My teams", "Games with teams you follow"], ["watched", "Games you're watching", "Tap the bell on a game card to add it"], ["all", "All games", "Anything that turns interesting, any team"]];
     el.innerHTML = `<div class="layer-in"><div class="layer-top"><span class="sp"></span><button class="circ" data-close="settings" aria-label="Done">${IC.check}</button></div>
       <h2>Settings</h2>
-      <div class="set"><b>Open to</b><small>What you see when the app opens</small><div class="opts">${opt("home2", "home", "Home", state.view === "home")}${opt("home2", "teams", "My Teams", state.view === "teams")}</div></div>
+      <div class="set"><b>Open to</b><small>What you see when the app opens</small><div class="opts">${opt("home2", "home", "Home", state.view === "home")}${opt("home2", "live", "Live Now", state.view === "live")}${opt("home2", "teams", "My Teams", state.view === "teams")}</div></div>
+      <div class="set"><b>Layout</b><small>Expanded is the big scoreboard look. Compact fits more games on screen.</small><div class="opts">${opt("layout2", "expanded", "Expanded", store.get("layout2", "expanded") === "expanded")}${opt("layout2", "compact", "Compact", store.get("layout2", "expanded") === "compact")}</div></div>
       <div class="set"><b>Color</b><small>Background tint</small><div class="opts">${opt("palette2", "green", "Field Green", p === "green")}${opt("palette2", "red", "Brick Red", p === "red")}${opt("palette2", "navy", "Navy", p === "navy")}</div></div>
       <h2>Alerts</h2>
       ${groups.map(([g, l, s]) => `<div class="set"><b>${esc(l)}</b><small>${esc(s)}</small><div class="opts">${ALERT_EVENTS[g].map(([ev, name]) => `<button class="opt ${state.alertPrefs[g][ev] ? "on" : ""}" data-alert-group="${g}" data-alert-ev="${ev}">${esc(name)}</button>`).join("")}</div></div>`).join("")}
@@ -1489,6 +1616,14 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
       return;
     }
     const gm = t.closest("[data-game]"); if (gm) { openGame(gm.dataset.game); return; }
+    const fd = t.closest("[data-fold]");
+    if (fd) { const id = fd.dataset.fold; state.closed.has(id) ? state.closed.delete(id) : state.closed.add(id); render(); return; }
+    const cf = t.closest("[data-cardfav]");
+    if (cf) {
+      let meta = null; try { meta = JSON.parse(cf.dataset.cardfav); } catch {}
+      if (meta) { const k = favKey(LG[meta.lg], meta.abbr); toggleFav(k, meta); toast(state.favs.has(k) ? "Following" : "Unfollowed", meta.name, "", "", false); const y = document.getElementById("game").scrollTop; document.getElementById("game").innerHTML = gameShell(findGame(openGameKey), lastSummary, LG[openGameKey.split(":")[0]]); document.getElementById("game").scrollTop = y; }
+      return;
+    }
     const dt = t.closest("[data-date-tog]"); if (dt) { const k = dt.dataset.dateTog; state.closedDates.has(k) ? state.closedDates.delete(k) : state.closedDates.add(k); renderUpcoming(); return; }
     const lf = t.closest("[data-lfav]");
     if (lf) { const id = lf.dataset.lfav; state.favLeagues = state.favLeagues.includes(id) ? state.favLeagues.filter(x => x !== id) : [...state.favLeagues, id]; store.set("favLeagues", state.favLeagues); renderEdit(); render(); return; }
@@ -1500,11 +1635,15 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
       const key = s.dataset.set, val = s.dataset.val;
       if (key === "home2") { state.view = val; store.set("home2", val); render(); }
       if (key === "palette2") { store.set("palette2", val); applyPalette(); }
+      if (key === "layout2") { store.set("layout2", val); render(); }
       renderSettings(); return;
     }
     const ag = t.closest("[data-alert-group]");
     if (ag) { const g = ag.dataset.alertGroup, ev = ag.dataset.alertEv; state.alertPrefs[g][ev] = !state.alertPrefs[g][ev]; store.set("alertPrefs", state.alertPrefs); if (state.alertPrefs[g][ev]) askPermission(); renderSettings(); return; }
     if (t.closest("[data-test-alert]")) { toast("Test alert", "In-app alerts are working.", "", "", false); await askPermission(); if ("Notification" in window && Notification.permission === "granted") notify("Test alert", "Phone notifications are working too.", "", "", false, "test"); renderSettings(); return; }
+  });
+  document.addEventListener("change", e => {
+    if (e.target.id === "datepick" && e.target.value) { const [y, m, d] = e.target.value.split("-").map(Number); setDate(new Date(y, m - 1, d)); }
   });
   document.addEventListener("keydown", e => { if (e.key === "Escape") { closeMenu(); ["game", "edit", "settings"].forEach(closeLayer); } });
   document.addEventListener("visibilitychange", () => {
