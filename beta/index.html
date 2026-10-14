@@ -537,7 +537,7 @@ button.brand, button.brand span { color: var(--accent); }
 <header class="top">
   <div class="wrap">
     <div class="bar">
-      <button class="brand" id="brandbtn" aria-label="Home">Score<span>s</span><em class="betatag">Beta</em></button>
+      <button class="brand" id="brandbtn" aria-label="Home" title="Home">Score<span>s</span><em class="betatag">Beta</em></button>
       <span class="livecount" id="livebug" hidden><span class="dot"></span><span id="liven">0</span><span class="lv-w"> live</span></span>
       <div class="spacer"></div>
       <div class="seg" role="group" aria-label="Layout">
@@ -1886,7 +1886,9 @@ button.brand, button.brand span { color: var(--accent); }
   document.getElementById("q").addEventListener("input", search);
   document.getElementById("teamsbtn").onclick = openSheet;
   function goHome() {
-    closeSheet();
+    closeSheet(); closeGame();
+    ["lsheet", "ssheet"].forEach(id => document.getElementById(id).hidden = true);
+    state.closed.clear();
     state.tab = store.get("home", "live");
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (!isToday()) setDate(new Date()); else render();
