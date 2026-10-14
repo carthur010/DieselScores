@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014092925">
+<meta name="build" content="20261014093007">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2295,7 +2295,9 @@ button.brand, button.brand span { color: var(--accent); }
     if (c && (c.entries || c.pending) && Date.now() - c.at < 30 * 60e3) return c.pending || c.entries;
     const pending = (async () => {
       try {
-        const r = await fetch("https://site.api.espn.com/apis/v2/sports/" + lg.path + "/standings" + (season ? "?season=" + season : ""));
+        // site.web.api with type=0&level=1 returns the live, league-wide table for the season
+        let r = await fetch("https://site.web.api.espn.com/apis/v2/sports/" + lg.path + "/standings?type=0&level=1&seasontype=2" + (season ? "&season=" + season : "")).catch(() => null);
+        if (!r || !r.ok) r = await fetch("https://site.api.espn.com/apis/v2/sports/" + lg.path + "/standings" + (season ? "?season=" + season : ""));
         const jj = r.ok ? await r.json() : null;
         const out = [];
         const walk = n => { (n?.standings?.entries || []).forEach(e => out.push(e)); (n?.children || []).forEach(walk); };
