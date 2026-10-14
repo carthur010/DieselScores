@@ -81,5 +81,6 @@ Nothing. Everything shipped to live on Oct 14. Still worth a real-phone check: e
 
 ### Before going public
 - [ ] Licensed score data (Sportradar, SportsDataIO, API-Sports) instead of ESPN's unofficial feed
+- [ ] Licensed tennis data: Live Tennis API (free 100/day, Basic $9.99/mo, Pro $29.99/mo, Ultra $99.99/mo for live match stats) behind a small middle layer (e.g. Cloudflare Worker) that holds the key and caches once a minute. Not SofaScore's private API: unofficial, against their terms, can be blocked, and a TestFlight/App Store risk.
 - [ ] Team logo usage handled properly, or abbreviations only
 - [ ] Simple privacy policy
