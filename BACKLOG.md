@@ -20,6 +20,11 @@ Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 6. **Team records** (Charles): on By League cards already; not in By Time. Keep it simple.
 7. ~~Close games at the top of Worth A Watch~~ (Faiz). Done, plus every playoff game.
 
+### Low priority
+- **Soccer depth via API-Football** (part of API-Sports): player ratings, detailed match stats, closer to SofaScore. Free tier to start. (SofaScore's own feed is off-limits: blocked and against their terms.)
+- **YouTube TV deep links to the channel**: test whether a channel's share link (ESPN, TNT, etc.) stays the same day to day. If yes, map every channel so the button lands on the live feed.
+- **MLB's own stats feed** (statsapi.mlb.com) for richer at-bat detail in the game screen.
+
 ## Roadmap: real iOS app
 
 ### Approach
