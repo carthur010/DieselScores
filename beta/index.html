@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014094823">
+<meta name="build" content="20261014095630">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -703,7 +703,7 @@ button.brand, button.brand span { color: var(--accent); }
     <div class="sheet-body">
       <p class="hint">Drag the handle to set the order. Your leagues show first on My Leagues and Upcoming.</p>
       <div class="res" id="lfav"></div>
-      <h3>Add more</h3>
+      <h3>Add More</h3>
       <div class="res" id="lrest"></div>
     </div>
   </div>
@@ -954,22 +954,22 @@ button.brand, button.brand span { color: var(--accent); }
     const favAbbr = (g.odds?.details || "").match(/^([A-Z0-9&]{2,6})\s+-/)?.[1];
     if (g.state === "in") {
       score += 10;
-      if (g.close) { score += 50; reasons.push("Close game"); }
-      if (reg && g.period > reg) { score += 30; reasons.push(g.lg.sport === "Baseball" ? "Extra innings" : "Overtime"); }
+      if (g.close) { score += 50; reasons.push("Close Game"); }
+      if (reg && g.period > reg) { score += 30; reasons.push(g.lg.sport === "Baseball" ? "Extra Innings" : "Overtime"); }
       const leader = as > hs ? a : hs > as ? h : null;
       const favTeam = favAbbr ? g.teams.find(t => t.abbr === favAbbr) : null;
       const rankedFav = a.rank && !h.rank ? a : h.rank && !a.rank ? h : (a.rank && h.rank ? (a.rank < h.rank ? a : h) : null);
       const victim = favTeam || rankedFav;
       if (secondHalf && leader && victim && leader !== victim && margin > 0) {
-        score += 40; reasons.push(victim.rank ? `Upset alert: No. ${victim.rank} trails` : "Upset alert");
+        score += 40; reasons.push(victim.rank ? `Upset Alert: No. ${victim.rank} Trails` : "Upset Alert");
       }
-      if (g.rankedClash) { score += 20; reasons.push("Top 25 clash"); }
+      if (g.rankedClash) { score += 20; reasons.push("Top 25 Clash"); }
       if (g.playoff) { score += 25; reasons.push("Playoffs"); }
       if (!g.close && !reasons.length) score += Math.max(0, 15 - margin);
     } else if (g.state === "pre") {
       const mins = (new Date(g.date) - Date.now()) / 60000;
-      if (mins <= 45 && mins > -15) { score += 8; reasons.push("Starting soon"); }
-      if (g.rankedClash) { score += 6; reasons.push("Top 25 clash"); }
+      if (mins <= 45 && mins > -15) { score += 8; reasons.push("Starting Soon"); }
+      if (g.rankedClash) { score += 6; reasons.push("Top 25 Clash"); }
     }
     return { hype: score, reasons };
   }
@@ -1278,9 +1278,9 @@ button.brand, button.brand span { color: var(--accent); }
   // =====================================================================
   // Alert events: start, half (halftime/intermission), close, ot, lead (lead change), upset, playoff (playoff game starts), final
   const ALERT_EVENTS = {
-    team:    [["start", "Game start"], ["score", "Every score"], ["redzone", "Red zone"], ["period", "End of period"], ["half", "Halftime"], ["close", "Close game"], ["ot", "Overtime"], ["lead", "Lead changes"], ["comeback", "Comebacks"], ["final", "Final score"]],
-    watched: [["start", "Game start"], ["score", "Every score"], ["redzone", "Red zone"], ["period", "End of period"], ["half", "Halftime"], ["close", "Close game"], ["ot", "Overtime"], ["lead", "Lead changes"], ["comeback", "Comebacks"], ["final", "Final score"]],
-    all:     [["close", "Close games"], ["ot", "Overtime"], ["upset", "Upset alerts"], ["comeback", "Big comebacks"], ["nohit", "No-hitter watch"], ["playoff", "Playoff games starting"]],
+    team:    [["start", "Game Start"], ["score", "Every Score"], ["redzone", "Red Zone"], ["period", "End Of Period"], ["half", "Halftime"], ["close", "Close Game"], ["ot", "Overtime"], ["lead", "Lead Changes"], ["comeback", "Comebacks"], ["final", "Final Score"]],
+    watched: [["start", "Game Start"], ["score", "Every Score"], ["redzone", "Red Zone"], ["period", "End Of Period"], ["half", "Halftime"], ["close", "Close Game"], ["ot", "Overtime"], ["lead", "Lead Changes"], ["comeback", "Comebacks"], ["final", "Final Score"]],
+    all:     [["close", "Close Games"], ["ot", "Overtime"], ["upset", "Upset Alerts"], ["comeback", "Big Comebacks"], ["nohit", "No-Hitter Watch"], ["playoff", "Playoff Games Starting"]],
   };
   const REMIND_MINS = [30, 15, 10, 5, 1];
   // How big a deficit counts as a comeback when it's erased
@@ -1386,22 +1386,22 @@ button.brand, button.brand span { color: var(--accent); }
       case "start": return notify(g.fav ? `${who} game is on` : `${who} is on`, `${a.name || a.abbr} at ${h.name || h.abbr}`, watch, g.link, false, k);
       case "playoff": return notify(`Playoffs: ${a.abbr} at ${h.abbr} is on`, g.note || g.series || `${a.name} at ${h.name}`, watch, g.link, false, k);
       case "half": return notify(`${who}: ${/end of/i.test(g.status) ? g.status : "Halftime"}`, line, watch, g.link, false, k);
-      case "lead": return notify(`${who}: Lead change`, `${leaderOf(g)} leads · ${line}`, watch, g.link, false, k);
-      case "close": return notify(`${g.fav || isWatched(g) ? who + ": " : ""}Close game`, line, watch, g.link, false, k);
-      case "ot": return notify(`${g.fav || isWatched(g) ? who + ": " : ""}${g.lg.sport === "Baseball" ? "Extra innings" : "Overtime"}`, line, watch, g.link, false, k);
+      case "lead": return notify(`${who}: Lead Change`, `${leaderOf(g)} leads · ${line}`, watch, g.link, false, k);
+      case "close": return notify(`${g.fav || isWatched(g) ? who + ": " : ""}Close Game`, line, watch, g.link, false, k);
+      case "ot": return notify(`${g.fav || isWatched(g) ? who + ": " : ""}${g.lg.sport === "Baseball" ? "Extra Innings" : "Overtime"}`, line, watch, g.link, false, k);
       case "score": {
         const scorer = (+a.score) - (+(snapPrev[g.id]?.sa ?? a.score)) > 0 ? a : h;
-        return notify(`${who}: ${scorer.abbr} scores`, line, watch, g.link, false, k + ":" + a.score + "-" + h.score);
+        return notify(`${who}: ${scorer.abbr} Scores`, line, watch, g.link, false, k + ":" + a.score + "-" + h.score);
       }
-      case "redzone": return notify(`${who}: Red zone`, `${g.sit?.downDistanceText || ""}${g.sit?.downDistanceText ? " · " : ""}${line}`, watch, g.link, false, k + ":" + Date.now());
+      case "redzone": return notify(`${who}: Red Zone`, `${g.sit?.downDistanceText || ""}${g.sit?.downDistanceText ? " · " : ""}${line}`, watch, g.link, false, k + ":" + Date.now());
       case "period": return notify(`${who}: ${g.status}`, line, watch, g.link, false, k + ":" + g.period);
       case "comeback": return notify(`${who}: Comeback`, `${leaderOf(g) ? leaderOf(g) + " leads" : "All square"} after trailing big · ${line}`, watch, g.link, true, k);
-      case "nohit": { const t = g.teams.find(t => +t.hits === 0); return notify(`No-hitter watch: ${t?.abbr || ""}`, `${t?.name || t?.abbr} has no hits · ${g.status} · ${line}`, watch, g.link, true, k); }
-      case "upset": return notify(g.reasons.find(r => /Upset/.test(r)) || "Upset alert", line, watch, g.link, true, k);
+      case "nohit": { const t = g.teams.find(t => +t.hits === 0); return notify(`No-Hitter Watch: ${t?.abbr || ""}`, `${t?.name || t?.abbr} has no hits · ${g.status} · ${line}`, watch, g.link, true, k); }
+      case "upset": return notify(g.reasons.find(r => /Upset/.test(r)) || "Upset Alert", line, watch, g.link, true, k);
       case "final": {
         const me = g.teams.find(t => isFavTeam(g.lg, t.abbr)), opp = g.teams.find(t => t !== me);
         const res = g.fav && me && opp ? ((+me.score) > (+opp.score) ? "W" : (+me.score) < (+opp.score) ? "L" : "T") : "";
-        return notify(`${who} final${res ? ": " + res : ""}`, `${a.abbr} ${a.score}, ${h.abbr} ${h.score}`, g.lg.short || g.lg.name, g.link, res === "L", k);
+        return notify(`${who} Final${res ? ": " + res : ""}`, `${a.abbr} ${a.score}, ${h.abbr} ${h.score}`, g.lg.short || g.lg.name, g.link, res === "L", k);
       }
     }
   }
@@ -1411,7 +1411,7 @@ button.brand, button.brand span { color: var(--accent); }
     const g = findGame(key);
     if (state.watched[key]) {
       askPermission();
-      toast("Alerts on for this game", g ? `${g.teams[0]?.abbr} at ${g.teams[1]?.abbr}` : "", "Change what you get in Settings", "", false);
+      toast("Alerts On For This Game", g ? `${g.teams[0]?.abbr} at ${g.teams[1]?.abbr}` : "", "Change what you get in Settings", "", false);
     }
     render();
     if (openGameKey === key) repaintGame();
@@ -1455,7 +1455,7 @@ button.brand, button.brand span { color: var(--accent); }
   function bellBtn(g) {
     if (g.state === "post") return "";
     const k = g.lg.id + ":" + g.id, on = !!state.watched[k];
-    return `<button class="bellbtn ${on ? "on" : ""}" data-watchgame="${k}" aria-pressed="${on}" title="${on ? "Alerts on for this game" : "Get alerts for this game"}" aria-label="${on ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL}</button>`;
+    return `<button class="bellbtn ${on ? "on" : ""}" data-watchgame="${k}" aria-pressed="${on}" title="${on ? "Alerts On For This Game" : "Get alerts for this game"}" aria-label="${on ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL}</button>`;
   }
   function statusClass(g) { return g.state === "in" ? "live" : g.state === "post" ? "final" : ""; }
 
@@ -1471,7 +1471,7 @@ button.brand, button.brand span { color: var(--accent); }
       return `${bases}${outs}<span class="txt">${s.balls != null ? `${s.balls}-${s.strikes}` : ""}${s.lastPlay?.text ? " · " + esc(s.lastPlay.text) : ""}</span>`;
     }
     if (g.lg.sport === "Football" && s.downDistanceText) {
-      return `<span class="txt">${s.isRedZone ? '<b style="color:var(--live)">Red zone</b> · ' : ""}${esc(s.downDistanceText)}</span>`;
+      return `<span class="txt">${s.isRedZone ? '<b style="color:var(--live)">Red Zone</b> · ' : ""}${esc(s.downDistanceText)}</span>`;
     }
     // Basketball, hockey, soccer: the latest play when ESPN sends one
     if (s.lastPlay?.text) return `<span class="txt" title="${esc(s.lastPlay.text)}">${esc(s.lastPlay.text)}</span>`;
@@ -1619,7 +1619,7 @@ button.brand, button.brand span { color: var(--accent); }
           <td class="num ${toPar(r.today)}">${esc(r.today || "–")}</td>
           <td class="num">${esc(r.thru || "–")}</td></tr>`;
       }).join("")}</tbody></table></div>` : `<div class="empty">Tee times aren't posted yet.</div>`;
-    const more = e.link ? `<div class="f-act" style="padding-bottom:12px"><a class="f-link" href="${esc(e.link)}" target="_blank" rel="noopener">Full leaderboard</a></div>` : "";
+    const more = e.link ? `<div class="f-act" style="padding-bottom:12px"><a class="f-link" href="${esc(e.link)}" target="_blank" rel="noopener">Full Leaderboard</a></div>` : "";
     return block("ev-" + e.lg.id + e.id, `${e.lg.short || e.lg.name} · ${e.name}`, eventMeta(e), body + more);
   }
   const BLOCK = { golf: golfBlock };
@@ -1682,7 +1682,7 @@ button.brand, button.brand span { color: var(--accent); }
       { id: "teams", label: "My Teams", n: games.filter(g => g.fav).length || null },
       { id: "mine", label: "My Leagues" },
       { id: "upcoming", label: "Upcoming" },
-      { id: "close", label: "Close games", n: closeN, hot: closeN > 0 },
+      { id: "close", label: "Close Games", n: closeN, hot: closeN > 0 },
     ];
     const cfb = games.filter(g => g.lg.id === "ncaaf");
     LEAGUES.filter(lg => (MAIN_TABS.includes(lg.id) && counts[lg.id] > 0) || state.tab === lg.id).forEach(lg => {
@@ -1727,7 +1727,7 @@ button.brand, button.brand span { color: var(--accent); }
     const up = state.upcoming;
     if (!up.days?.length) return '<div class="skel"></div><div class="skel"></div>';
     const order = upcomingIds();
-    let html = `<div class="mine-bar"><span>Next 3 days · your teams, then your leagues</span><button class="chip" data-edit-leagues>Edit leagues</button></div>`;
+    let html = `<div class="mine-bar"><span>Next 3 days · your teams, then your leagues</span><button class="chip" data-edit-leagues>Edit Leagues</button></div>`;
     up.days.forEach(({ date, games }) => {
       games = games.map(g => ({ ...g, fav: g.teams.some(t => isFavTeam(g.lg, t.abbr)) }));
       if (!games.length) return;
@@ -1772,7 +1772,7 @@ button.brand, button.brand span { color: var(--accent); }
       const playing = new Set(mine.flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
       const nexts = isToday() ? [...state.favs].filter(k => !playing.has(k) && state.next[k]?.date)
         .sort((a, b) => favRank(a) - favRank(b)) : [];
-      html += `<div class="mystrip" aria-label="Your teams">${mine.map(stripChip).join("")}${nexts.map(nextChip).join("")}<button class="ms add" data-open-sheet>${state.favs.size ? "+ Teams" : "+ Follow teams"}</button></div>`;
+      html += `<div class="mystrip" aria-label="Your teams">${mine.map(stripChip).join("")}${nexts.map(nextChip).join("")}<button class="ms add" data-open-sheet>${state.favs.size ? "+ Teams" : "+ Follow Teams"}</button></div>`;
     }
 
     // Worth A Watch: always at the top of Live and All. Only games that earned it:
@@ -1802,7 +1802,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (tab === "teams") {
       const ORD = { in: 0, pre: 1, post: 2 };
       const mine = games.filter(g => g.fav).sort((a, b) => (ORD[a.state] - ORD[b.state]) || gameRank(a) - gameRank(b));
-      html += `<div class="mine-bar"><span>Following ${state.favs.size} team${state.favs.size === 1 ? "" : "s"}</span><button class="chip" data-open-sheet>Edit teams</button></div>`;
+      html += `<div class="mine-bar"><span>Following ${state.favs.size} team${state.favs.size === 1 ? "" : "s"}</span><button class="chip" data-open-sheet>Edit Teams</button></div>`;
       if (mine.length) {
         const liveN = mine.filter(g => g.state === "in").length;
         html += block("myteams", isToday() ? "Today" : dayLabel(state.date), liveN ? `${liveN} Live · ${mine.length} Total` : countLabel(mine.length),
@@ -1829,7 +1829,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (tab === "mine") {
       const order = state.favLeagues.filter(id => LG[id]).concat(LEAGUES.map(l => l.id).filter(id => !state.favLeagues.includes(id)));
       const off = [];
-      html += `<div class="mine-bar"><span>Your leagues first, in your order</span><button class="chip" data-edit-leagues>Edit order</button></div>`;
+      html += `<div class="mine-bar"><span>Your leagues first, in your order</span><button class="chip" data-edit-leagues>Edit Order</button></div>`;
       let dividerDone = false;
       order.forEach(id => {
         const lg = LG[id], isFav = state.favLeagues.includes(id);
@@ -1845,7 +1845,7 @@ button.brand, button.brand span { color: var(--accent); }
           }
         }
         if (!section) { if (isFav) off.push(lg.short || lg.name); return; }
-        if (!isFav && !dividerDone) { html += `<h3 class="mine-div">Other leagues</h3>`; dividerDone = true; }
+        if (!isFav && !dividerDone) { html += `<h3 class="mine-div">Other Leagues</h3>`; dividerDone = true; }
         html += section;
       });
       if (off.length) html += `<p class="quiet">No games ${isToday() ? "today" : "this day"}: ${esc(off.join(", "))}</p>`;
@@ -2250,7 +2250,7 @@ button.brand, button.brand span { color: var(--accent); }
     html += `</div>`;
     if (g) {
       const w = gs !== "post" && g.watch?.[0];
-      html += `<div class="gc-actions">${w ? `<a class="watchbig" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">${PLAY_BIG} Watch on ${esc(w.app)}</a>` : g.link ? `<a class="watchbig" href="${esc(g.link)}" target="_blank" rel="noopener">Open on ESPN</a>` : ""}
+      html += `<div class="gc-actions">${w ? `<a class="watchbig" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">${PLAY_BIG} Watch On ${esc(w.app)}</a>` : g.link ? `<a class="watchbig" href="${esc(g.link)}" target="_blank" rel="noopener">Open On ESPN</a>` : ""}
         ${gs !== "post" ? `<button class="belbig ${state.watched[g.lg.id + ":" + g.id] ? "on" : ""}" data-watchgame="${g.lg.id}:${g.id}" aria-label="${state.watched[g.lg.id + ":" + g.id] ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL_BIG}</button>` : ""}</div>
         ${g.broadcast ? `<div class="gc-net">${gs === "in" ? "Live on" : gs === "pre" ? "On" : "Aired on"} ${esc(g.broadcast.replace(" / ", ", "))}</div>` : ""}`;
     }
@@ -2259,7 +2259,7 @@ button.brand, button.brand span { color: var(--accent); }
     const tabs = [["stats", "Stats"], ["plays", "Play-By-Play"], ["box", "Box Score"]];
     html += `<div class="gtabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${gameTab === k}" class="${gameTab === k ? "on" : ""}" data-gtab="${k}">${l}</button>`).join("")}</div>`;
     html += gameTab === "stats" ? statsTab(j, a, h, lg) : gameTab === "plays" ? playsTab(j, lg) : boxTab(j);
-    if (g?.link) html += `<a class="ext" href="${esc(g.link)}" target="_blank" rel="noopener">Open full Gamecast on ESPN</a>`;
+    if (g?.link) html += `<a class="ext" href="${esc(g.link)}" target="_blank" rel="noopener">Open Full Gamecast On ESPN</a>`;
     return html + `</div>`;
   }
   function scorers(j, a, h) {
@@ -2283,7 +2283,7 @@ button.brand, button.brand span { color: var(--accent); }
     const sp = typeof pc.spread === "number" ? pc.spread : null;
     const fmt = n => n == null || n === "" ? "–" : (n > 0 ? "+" + n : String(n));
     const so = x => x?.spreadOdds != null ? `<br><small>${fmt(x.spreadOdds)}</small>` : "";
-    const foot = pc.provider?.name ? `<div class="foot">Odds by ${esc(pc.provider.name)}</div>` : "";
+    const foot = pc.provider?.name ? `<div class="foot">Odds By ${esc(pc.provider.name)}</div>` : "";
     if (sp != null || pc.overUnder != null || pc.homeTeamOdds?.moneyLine != null) {
       return `<div class="gc-c">${head}<table class="tbl"><thead><tr><th>Team</th><th>${lineName}</th><th>Total</th><th>Moneyline</th></tr></thead><tbody>
         <tr><td>${esc(a.abbr)}</td><td>${sp != null ? fmt(-sp) : "–"}${so(pc.awayTeamOdds)}</td><td>${pc.overUnder != null ? "O " + pc.overUnder : "–"}${pc.overOdds != null ? `<br><small>${fmt(pc.overOdds)}</small>` : ""}</td><td>${fmt(pc.awayTeamOdds?.moneyLine)}</td></tr>
@@ -2334,7 +2334,7 @@ button.brand, button.brand span { color: var(--accent); }
     html += leadersCard(j, a, h);
     html += lastFiveCard(j, a, h);
     html += standingsCard(j, a, h, lg);
-    if (!state.showOdds) html += `<div class="odds-off"><button class="linkbtn" data-odds="on">Show betting odds</button></div>`;
+    if (!state.showOdds) html += `<div class="odds-off"><button class="linkbtn" data-odds="on">Show Betting Odds</button></div>`;
     return html || `<div class="empty">No stats yet.</div>`;
   }
   // ---- Pregame and season context (CBS-style)
@@ -2593,8 +2593,8 @@ button.brand, button.brand span { color: var(--accent); }
       e.preventDefault();
       if (done) return;
       const r = (e.scale || 1) / s0;
-      if (r < 0.8 && state.density !== "compact") { done = true; setDensity("compact"); render(); toast("Compact scoreboard", "", "", "", false); }
-      else if (r > 1.25 && state.density !== "expanded") { done = true; setDensity("expanded"); render(); toast("Expanded scoreboard", "", "", "", false); }
+      if (r < 0.8 && state.density !== "compact") { done = true; setDensity("compact"); render(); toast("Compact Scoreboard", "", "", "", false); }
+      else if (r > 1.25 && state.density !== "expanded") { done = true; setDensity("expanded"); render(); toast("Expanded Scoreboard", "", "", "", false); }
     }, { passive: false });
     // Two-finger touch pinch for other browsers
     let d0 = 0;
@@ -2622,7 +2622,7 @@ button.brand, button.brand span { color: var(--accent); }
     store.set("alerts", on);
     if (on) {
       try { if ("Notification" in window && Notification.permission === "default") await Notification.requestPermission(); } catch {}
-      toast("Alerts on", "You'll get a heads-up when a game turns close, goes to overtime, or an upset starts brewing.", "Works while Scores is open");
+      toast("Alerts On", "You'll get a heads-up when a game turns close, goes to overtime, or an upset starts brewing.", "Works while Scores is open");
     }
   }
   function segRow(label, key, value, options, hint) {
@@ -2631,7 +2631,7 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function alertGroup(group, label, hint) {
     const prefs = state.alertPrefs[group];
-    const rem = group === "all" ? "" : `<div class="rem-lbl">Heads-up before start</div><div class="toggles">${REMIND_MINS.map(m => { const on = (prefs.remind || []).includes(m); return `<button class="chip ${on ? "on" : ""}" data-remind-group="${group}" data-remind="${m}" aria-pressed="${on}">${m} min</button>`; }).join("")}</div>`;
+    const rem = group === "all" ? "" : `<div class="rem-lbl">Heads-Up Before Start</div><div class="toggles">${REMIND_MINS.map(m => { const on = (prefs.remind || []).includes(m); return `<button class="chip ${on ? "on" : ""}" data-remind-group="${group}" data-remind="${m}" aria-pressed="${on}">${m} min</button>`; }).join("")}</div>`;
     return `<div class="set-row set-col"><div class="set-lbl">${esc(label)}<small>${esc(hint)}</small></div>
       <div class="toggles">${ALERT_EVENTS[group].map(([ev, name]) => `<button class="chip ${prefs[ev] ? "on" : ""}" data-alert-group="${group}" data-alert-ev="${ev}" aria-pressed="${!!prefs[ev]}">${esc(name)}</button>`).join("")}</div>${rem}</div>`;
   }
@@ -2645,22 +2645,22 @@ button.brand, button.brand span { color: var(--accent); }
     const on = Object.values(state.alertPrefs).reduce((n, g) => n + Object.values(g).reduce((c, v) => c + (Array.isArray(v) ? v.length : v ? 1 : 0), 0), 0);
     document.getElementById("settings-body").innerHTML =
       `<div class="set-row"><div class="set-lbl">My Teams<small>Following ${teams} team${teams === 1 ? "" : "s"}</small></div><button class="chip" data-set-open="teams">Edit</button></div>` +
-      `<div class="set-row"><div class="set-lbl">My Leagues<small>${leagues} league${leagues === 1 ? "" : "s"} in your order</small></div><button class="chip" data-set-open="leagues">Edit order</button></div>` +
+      `<div class="set-row"><div class="set-lbl">My Leagues<small>${leagues} league${leagues === 1 ? "" : "s"} in your order</small></div><button class="chip" data-set-open="leagues">Edit Order</button></div>` +
       setSection("display", "Layout & Display", "Open to, layout, color, appearance, odds",
-        segRow("Open to", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens") +
+        segRow("Open To", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens") +
         segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
         segRow("Scoreboard", "density", state.density, [["compact", "Compact"], ["expanded", "Expanded"]], "Or pinch the scores: in for Compact, out for Expanded") +
-        segRow("Always expand my teams", "expandFavs", state.expandFavs ? "on" : "off", [["on", "On"], ["off", "Off"]], "In Compact, your teams' games stay full size") +
+        segRow("Always Expand My Teams", "expandFavs", state.expandFavs ? "on" : "off", [["on", "On"], ["off", "Off"]], "In Compact, your teams' games stay full size") +
         segRow("Color", "palette", store.get("palette", "red"), [["red", "Red"], ["navy", "Navy"], ["green", "Green"], ["purple", "Purple"], ["orange", "Orange"]]) +
         segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
-        segRow("Betting odds", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "Lines on game cards and in Gamecast")) +
+        segRow("Betting Odds", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "Lines on game cards and in Gamecast")) +
       setSection("alerts", "Alerts", `${on} alert${on === 1 ? "" : "s"} on`,
-        alertGroup("team", "My teams", "Games with teams you follow") +
-        alertGroup("watched", "Games you're watching", "Tap the bell on any game to add it") +
-        alertGroup("all", "All games", "Anything that turns interesting, any team") +
-        `<div class="set-row"><div class="set-lbl">Test alerts<small>${esc(notifyStatus())}. Alerts work while Scores is open.</small></div><button class="chip" data-test-alert>Send test</button></div>`) +
+        alertGroup("team", "My Teams", "Games with teams you follow") +
+        alertGroup("watched", "Games You're Watching", "Tap the bell on any game to add it") +
+        alertGroup("all", "All Games", "Anything that turns interesting, any team") +
+        `<div class="set-row"><div class="set-lbl">Test Alerts<small>${esc(notifyStatus())}. Alerts work while Scores is open.</small></div><button class="chip" data-test-alert>Send Test</button></div>`) +
       `<button class="set-done" data-set-done>Done</button>` +
-      `<p class="hint set-foot">${location.pathname.includes("/beta") ? `You're on the beta. <a href="../">Open the live app</a>` : `Want to try new features early? <a href="beta/">Open the beta</a>`}</p>`;
+      `<p class="hint set-foot">${location.pathname.includes("/beta") ? `You're on the beta. <a href="../">Open The Live App</a>` : `Want to try new features early? <a href="beta/">Open The Beta</a>`}</p>`;
   }
   function openSettings() { renderSettings(); document.getElementById("ssheet").hidden = false; }
   document.getElementById("settingsbtn").onclick = openSettings;
@@ -2700,9 +2700,9 @@ button.brand, button.brand span { color: var(--accent); }
       return;
     }
     if (e.target.closest("[data-test-alert]")) {
-      toast("Test alert", "In-app alerts are working.", "", "", false);
+      toast("Test Alert", "In-app alerts are working.", "", "", false);
       await askPermission();
-      if ("Notification" in window && Notification.permission === "granted") notify("Test alert", "Phone notifications are working too.", "", "", false, "test");
+      if ("Notification" in window && Notification.permission === "granted") notify("Test Alert", "Phone notifications are working too.", "", "", false, "test");
       renderSettings();
       return;
     }
