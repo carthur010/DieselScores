@@ -435,6 +435,19 @@ button.brand span { color: var(--accent); }
   --bg: #0b110f; --surface: #121a17; --surface-2: #17211d; --line: #22302b; --fg: #eef3f1;
   --muted: #8d9b96; --dim: #4c5a55; --accent: #3fcf8e; --accent-soft: #15302a; --live: #ff5468; --star: #ffc933; --gold: #3fcf8e; --gold-soft: #15302a;
 }
+/* ---------- Color: Navy ---------- */
+:root[data-palette="navy"] {
+  --bg: #f4f6fa; --surface: #ffffff; --surface-2: #f7f9fc; --line: #dbe2ee; --fg: #0b1222;
+  --muted: #5a6478; --dim: #a7b0c2; --accent: #07357a; --accent-soft: #e1e8f5; --live: #e31837; --star: #ac9841; --gold: #ac9841; --gold-soft: #f1ecdc;
+}
+@media (prefers-color-scheme: dark) { :root[data-palette="navy"]:not([data-theme="light"]) {
+  --bg: #070b14; --surface: #0f1626; --surface-2: #141d30; --line: #1f2a42; --fg: #eef2fa;
+  --muted: #8a95ae; --dim: #3c4862; --accent: #7fa2e6; --accent-soft: #14223f; --live: #ff4d63; --star: #c9b65e; --gold: #c9b65e; --gold-soft: #2a2716;
+} }
+:root[data-palette="navy"][data-theme="dark"] {
+  --bg: #070b14; --surface: #0f1626; --surface-2: #141d30; --line: #1f2a42; --fg: #eef2fa;
+  --muted: #8a95ae; --dim: #3c4862; --accent: #7fa2e6; --accent-soft: #14223f; --live: #ff4d63; --star: #c9b65e; --gold: #c9b65e; --gold-soft: #2a2716;
+}
 .betatag { background: var(--fg) !important; color: var(--bg) !important; }
 button.brand, button.brand span { color: var(--accent); }
 .dates button.d.on { border-color: var(--gold); }
@@ -1807,7 +1820,7 @@ button.brand, button.brand span { color: var(--accent); }
   // ---- Settings
   function applyTheme() {
     const pal = store.get("palette", "red");
-    if (pal === "green") document.documentElement.dataset.palette = "green"; else delete document.documentElement.dataset.palette;
+    if (pal === "green" || pal === "navy") document.documentElement.dataset.palette = pal; else delete document.documentElement.dataset.palette;
     const t = store.get("theme", "system");
     if (t === "system") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
   }
@@ -1837,7 +1850,7 @@ button.brand, button.brand span { color: var(--accent); }
     document.getElementById("settings-body").innerHTML =
       segRow("Open to", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["mine", "My Leagues"]], "The tab you see when the app opens") +
       segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
-      segRow("Color", "palette", store.get("palette", "red"), [["red", "Red"], ["green", "Green"]]) +
+      segRow("Color", "palette", store.get("palette", "red"), [["red", "Red"], ["navy", "Navy"], ["green", "Green"]]) +
       segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
       `<h3 class="set-h">Alerts</h3>` +
       alertGroup("team", "My teams", "Games with teams you follow") +
