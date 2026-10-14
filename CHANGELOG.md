@@ -3,6 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Game header: league, time, series, network, arena and city all sit in the middle column between the two teams. Long team names (Timberwolves, Diamondbacks) shrink to fit.
 - Game header info is stacked on three lines with no "On": network (FS1), arena (Dodger Stadium), city (Los Angeles, California). Same on every game.
 - Series lines read "MIL Leads 2-0" / "Tied 1-1" instead of ESPN's "MIL leads series 2-0".
 - Networks trimmed to leagues Scores covers: Tennis Channel and CNBC removed. New Free To Watch pick, Free Sports Channels: Mountain West Network, WCC Network, BYUtv, Stadium (college), beIN SPORTS XTRA (soccer) and Fubo Sports Network. Skipped: horse racing, cricket, motorsports, combat, outdoor and news-only channels.
