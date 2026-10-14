@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014184840">
+<meta name="build" content="20261014184943">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2624,14 +2624,14 @@ button.brand, button.brand span { color: var(--accent); }
       ${x.logo ? `<img src="${esc(x.logo)}" alt="">` : ""}<b>${x.rank ? `<i>${x.rank}</i> ` : ""}${esc(x.name || x.abbr)}</b><small>${esc(x.record)}</small>${g && t?.abbr ? starBtn(g.lg, t) : ""}</div>`;
     const sub = g?.series || seriesText(comp.series?.summary);
     const vn = j?.gameInfo?.venue || comp.venue;
-    const venue = vn ? [vn.fullName, placeName(vn)].filter(Boolean).join(" · ") : "";
     const label = [lg.short || lg.name, g?.note].filter(Boolean).join(" · ");
     let html = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:${readable(a.color)};--ch:${readable(h.color)}"></div>
       <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span>${g ? `<button class="circ" data-share="${g.lg.id}:${g.id}" aria-label="Share">${SHAREIC}</button>` : ""}</div>
       <div class="gc-lbl">${esc(label)}</div>
       <div class="gc-grid">${fmtTeam(a, h, ta)}<div class="gc-mid"><b>${gs === "in" ? '<i class="livedot"></i>' : ""}${esc(gs === "pre" && (g || comp.date) ? whenLabel(g?.date || comp.date) : status)}</b>${sub ? `<small>${esc(sub)}</small>` : ""}</div>${fmtTeam(h, a, th)}</div>`;
-    const net = g?.broadcast ? `${gs === "in" ? "Live on" : gs === "pre" ? "On" : "Aired on"} ${g.broadcast.replace(" / ", ", ")}` : "";
-    if (net || venue) html += `<div class="gc-info">${net ? `<span>${esc(net)}</span>` : ""}${venue ? `<span>${esc(venue)}</span>` : ""}</div>`;
+    // Stacked: network, arena, city. "FS1 / Dodger Stadium / Los Angeles, California"
+    const lines = [g?.broadcast?.replace(" / ", ", "), vn?.fullName, placeName(vn)].filter(Boolean);
+    if (lines.length) html += `<div class="gc-info">${lines.map(l => `<span>${esc(l)}</span>`).join("")}</div>`;
     html += scorers(j, a, h);
     if (a.lines.length && h.lines.length) {
       const n = Math.max(a.lines.length, h.lines.length, lg.sport === "Baseball" ? 9 : 0);

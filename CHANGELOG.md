@@ -3,6 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Game header info is stacked on three lines with no "On": network (FS1), arena (Dodger Stadium), city (Los Angeles, California). Same on every game.
 - Series lines read "MIL Leads 2-0" / "Tied 1-1" instead of ESPN's "MIL leads series 2-0".
 - Networks trimmed to leagues Scores covers: Tennis Channel and CNBC removed. New Free To Watch pick, Free Sports Channels: Mountain West Network, WCC Network, BYUtv, Stadium (college), beIN SPORTS XTRA (soccer) and Fubo Sports Network. Skipped: horse racing, cricket, motorsports, combat, outdoor and news-only channels.
 - National network codes from Charles's national list: NHLN, CNBC, TC (Tennis Channel), GOLF, NFL RedZone and beIN SPORTS en Español count as national channels. Digital-only college feeds (SECN+, ACCNX, ESPN3, Big 12 Now) now point to the ESPN app instead of live TV bundles.
