@@ -2,7 +2,8 @@
 
 Newest first. Beta changes move to Live when shipped.
 
-## Oct 14, 2026: Tennis app (separate, at /tennis)
+## Oct 14, 2026: Tennis app (separate, at /tennis, beta at /tennis/beta)
+- Rebuilt in the Scores look (cream, black and red, same fonts, cards and game-card hero) with its own beta channel. Results tab uses ESPN's free feed.
 - New solo Tennis app on Live Tennis API: Live and Upcoming, ATP/WTA filter, live game points and who's serving, match detail sheet, call counter for the free 100/day.
 
 ## In beta (not on live yet)

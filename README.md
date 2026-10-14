@@ -22,8 +22,10 @@ A Capacitor shell that loads the live site, so every "ship it" updates the app t
 
 Native config lives in `app/capacitor.config.json`. After changing it, run `npx cap sync ios` inside `app/`.
 
-## Tennis (tennis/)
+## Tennis (tennis/ and tennis/beta/)
 
-A separate solo app on Live Tennis API (free plan, 100 calls a day). Live: https://carthur010.github.io/DieselScores/tennis/
-The API key is typed into the app once and kept only in that browser's storage. It is never in the code.
-Live and Upcoming tabs, ATP/WTA filter, live points and server, tap a match for set-by-set detail. A call counter keeps it inside the free limit (live refresh every 90 seconds while open).
+A separate solo app in the Scores look, on Live Tennis API (free plan, 100 calls a day) plus ESPN for finished results.
+- Live: https://carthur010.github.io/DieselScores/tennis/
+- Beta: https://carthur010.github.io/DieselScores/tennis/beta/
+Same workflow as Scores: changes go to tennis/beta first, then ship to tennis/ on "ship it" (copy beta, change title "Tennis Beta" to "Tennis", drop the Beta tag, PREFIX "tennis-beta:" to "tennis:", icon and manifest paths).
+The API key is typed into the app once and kept only in that browser (shared between beta and live). It is never in the code.

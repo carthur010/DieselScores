@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tennis Beta</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tennis Beta">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#fdf8e9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e0c0b" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="../icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+/* Same look as Scores: cream, black and red, SF Pro / Barlow, collapsible cards */
+:root {
+  --bg: #fdf8e9; --surface: #ffffff; --surface-2: #fbf6e8; --line: #e8dfc8; --fg: #000000;
+  --muted: #6b6356; --dim: #b4ab98; --accent: #a93439; --accent-soft: #f5e3df; --live: #e31837; --ball: #c8e63c;
+  --display: -apple-system, BlinkMacSystemFont, "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: -apple-system, BlinkMacSystemFont, "Barlow", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --bg: #0e0c0b; --surface: #181513; --surface-2: #1f1b18; --line: #2e2824; --fg: #ffffff;
+  --muted: #a69d90; --dim: #554d45; --accent: #e0676b; --accent-soft: #3a1d1e; --live: #ff5a5f; color-scheme: dark;
+} }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; padding-bottom: calc(env(safe-area-inset-bottom) + 20px); }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+a { color: inherit; text-decoration: none; }
+.wrap { max-width: 980px; margin: 0 auto; padding-inline: 16px; }
+header.top { position: sticky; top: 0; z-index: 10; padding-top: env(safe-area-inset-top); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+.bar { display: flex; align-items: center; gap: 12px; padding: 14px 0 8px; }
+.brand { font-family: var(--display); font-weight: 700; font-size: 32px; line-height: 1; color: var(--accent); display: flex; align-items: center; gap: 8px; flex: 1; }
+.brand em { font-style: normal; font-family: var(--body); font-size: 12px; font-weight: 800; letter-spacing: .08em; background: var(--fg); color: var(--bg); padding: 3px 7px; border-radius: 5px; }
+.ic { width: 36px; height: 36px; display: grid; place-items: center; color: var(--fg); }
+.ic svg { width: 22px; height: 22px; }
+.ic.spin svg { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.tabs { display: flex; gap: 6px; padding: 4px 0 12px; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.chip { padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-weight: 600; font-size: 14px; color: var(--muted); white-space: nowrap; }
+.chip.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.chip .n { margin-left: 6px; opacity: .65; }
+.chip.hot:not(.on) { color: var(--live); border-color: color-mix(in srgb, var(--live) 40%, var(--line)); }
+.tabs .sep { width: 1px; background: var(--line); margin: 4px 2px; flex: none; }
+main { padding-top: 14px; }
+.block { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; margin-bottom: 14px; overflow: hidden; }
+.bhead { display: flex; align-items: center; gap: 10px; padding: 14px 16px; }
+.bhead h2 { margin: 0; font-family: var(--display); font-size: 24px; font-weight: 700; line-height: 1.1; flex: 1; min-width: 0; }
+.bhead .meta { color: var(--muted); font-size: 13px; white-space: nowrap; }
+.tour { font-family: var(--body); font-size: 11px; font-weight: 800; letter-spacing: .05em; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 2px 6px; vertical-align: middle; margin-right: 6px; }
+.m { padding: 10px 16px 12px; border-top: 1px solid var(--line); cursor: pointer; }
+.m:hover { background: var(--surface-2); }
+.mh { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.mh .live { color: var(--live); font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+.mh .live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--live); animation: pulse 1.6s infinite; }
+@keyframes pulse { 50% { opacity: .3; } }
+.p { display: grid; grid-template-columns: 8px 22px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 3px 0; color: var(--muted); font-size: 16px; }
+.p.w { color: var(--fg); font-weight: 700; }
+.p .srv { width: 8px; height: 8px; border-radius: 50%; }
+.p .srv.on { background: var(--ball); box-shadow: 0 0 0 1px rgba(0,0,0,.15); }
+.p .fl { font-size: 17px; line-height: 1; text-align: center; }
+.p .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fg); }
+.p:not(.w) .nm { color: inherit; }
+.p .nm small { color: var(--muted); font-weight: 500; margin-right: 4px; }
+.sc { display: flex; gap: 12px; align-items: center; }
+.sc span { min-width: 12px; text-align: center; }
+.sc span.won { color: var(--fg); font-weight: 800; }
+.sc .pt { min-width: 30px; padding: 2px 6px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-weight: 800; font-size: 14px; }
+.sc sup { font-size: 9px; }
+.empty { text-align: center; color: var(--muted); padding: 40px 20px; }
+.foot { text-align: center; color: var(--muted); font-size: 12px; margin: 14px 0; }
+.foot b { color: var(--fg); }
+.setup { background: var(--surface); border-radius: 18px; padding: 22px 18px; border: 1px solid var(--line); }
+.setup h2 { margin: 0 0 6px; font-family: var(--display); font-size: 26px; }
+.setup p { color: var(--muted); margin: 0 0 14px; font-size: 14px; }
+.setup input { width: 100%; padding: 13px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); font: inherit; font-size: 16px; }
+.btn { display: flex; justify-content: center; align-items: center; height: 46px; padding: 0 22px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 700; font-size: 16px; margin-top: 12px; width: 100%; }
+.btn.ghost { background: var(--surface-2); color: var(--fg); border: 1px solid var(--line); }
+.err { background: var(--accent-soft); color: var(--accent); border-radius: 12px; padding: 12px 14px; font-size: 13px; margin-bottom: 14px; word-break: break-word; }
+.note { color: var(--muted); font-size: 12px; padding: 0 16px 12px; }
+/* match sheet: Scores game-card hero in tennis blue */
+.sheet { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; z-index: 20; }
+.sheet[hidden] { display: none; }
+.sh { width: 100%; max-width: 640px; margin: 0 auto; max-height: calc(100dvh - env(safe-area-inset-top) - 20px); overflow-y: auto; background: var(--bg); border-radius: 22px 22px 0 0; padding-bottom: calc(env(safe-area-inset-bottom) + 24px); }
+.hero { position: relative; color: #fff; padding: 14px 16px 18px; border-radius: 0 0 28px 28px; background: linear-gradient(120deg, #1f4e79, #163a5c); }
+.hero .top { display: flex; justify-content: space-between; }
+.circ { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: rgba(0,0,0,.25); color: #fff; }
+.circ svg { width: 18px; height: 18px; }
+.duo { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 8px; margin: 8px 0 14px; }
+.who { display: grid; justify-items: center; gap: 6px; text-align: center; min-width: 0; }
+.who .av { width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,.14); display: grid; place-items: center; font-size: 32px; }
+.who b { font-size: 17px; font-weight: 700; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.who b i { font-style: normal; opacity: .65; margin-right: 3px; }
+.who small { color: rgba(255,255,255,.72); font-size: 12px; }
+.mid { display: grid; gap: 4px; justify-items: center; text-align: center; width: 128px; }
+.mid .lbl { color: rgba(255,255,255,.75); font-size: 12px; font-weight: 600; }
+.mid .st { font-size: 18px; font-weight: 700; }
+.mid small { color: rgba(255,255,255,.75); font-size: 12px; }
+table.box { width: 100%; border-collapse: collapse; background: rgba(0,0,0,.22); border-radius: 12px; overflow: hidden; }
+.box th, .box td { padding: 8px 6px; text-align: center; white-space: nowrap; }
+.box th { color: rgba(255,255,255,.6); font-size: 11px; font-weight: 700; }
+.box td:first-child, .box th:first-child { text-align: left; font-weight: 700; padding-left: 10px; }
+.box tr + tr td { border-top: 1px solid rgba(255,255,255,.15); }
+.box .won { font-weight: 800; }
+.box .ptc { color: var(--ball); font-weight: 800; }
+.box sup { font-size: 9px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; margin: 14px 16px 0; }
+.card h3 { margin: 0 0 6px; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.kv div { display: flex; justify-content: space-between; padding: 7px 0; font-size: 14px; }
+.kv div + div { border-top: 1px solid var(--line); }
+.kv span { color: var(--muted); }
+details { margin: 14px 16px 0; color: var(--muted); font-size: 12px; }
+details pre { white-space: pre-wrap; word-break: break-all; background: var(--surface-2); padding: 10px; border-radius: 10px; max-height: 300px; overflow: auto; }
+.set-x { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: var(--bg); border-bottom: 1px solid var(--line); }
+.set-x b { font-family: var(--display); font-size: 26px; }
+.xbtn { width: 36px; height: 36px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; }
+.xbtn svg { width: 16px; height: 16px; }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="bar">
+    <div class="brand">Tennis <em>Beta</em></div>
+    <button class="ic" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
+    <button class="ic" id="gear" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+</div></header>
+<div class="wrap">
+  <main id="main"></main>
+  <div class="foot" id="foot"></div>
+</div>
+<div class="sheet" id="sheet" hidden><div class="sh" id="sh"></div></div>
+<script>
+(() => {
+  // ---------------------------------------------------------------
+  // Tennis: a small solo app on Live Tennis API (free tier: 100 calls a day).
+  // The API key is typed in once and kept only in this browser's storage.
+  // ---------------------------------------------------------------
+  const API = "https://api.livetennisapi.com/api/public/v1";
+  const DAILY = 100;
+  const PREFIX = "tennis-beta:";   // beta copy uses "tennis-beta:"
+  const SHARED = new Set(["key", "used"]);   // one key and one call budget across beta and live
+  const pk = k => (SHARED.has(k) ? "tennis-shared:" : PREFIX) + k;
+  const ls = { get(k, d) { try { const v = localStorage.getItem(pk(k)); return v == null ? d : JSON.parse(v); } catch { return d; } },
+               set(k, v) { try { localStorage.setItem(pk(k), JSON.stringify(v)); } catch {} } };
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const today = () => new Date().toISOString().slice(0, 10);
+  const st = { key: ls.get("key", ""), tab: ls.get("tab", "live"), tour: ls.get("tour", "all"), data: { live: null, upcoming: null, results: null, ...ls.get("cache", {}) }, err: "", loading: false };
+
+  // ---- Call budget: count every request so the free 100/day lasts
+  function used() { const u = ls.get("used", {}); return u.day === today() ? u.n : 0; }
+  function bump() { ls.set("used", { day: today(), n: used() + 1 }); }
+
+  async function call(path) {
+    if (used() >= DAILY) throw new Error("Daily limit reached (100 calls on the free plan). Resets tomorrow.");
+    bump();
+    const r = await fetch(API + path, { headers: { Authorization: "Bearer " + st.key, Accept: "application/json" } });
+    const txt = await r.text();
+    let j = null; try { j = JSON.parse(txt); } catch {}
+    if (!r.ok) throw new Error((j && (j.message || j.error || j.detail)) || `${r.status} ${r.statusText}`);
+    return j;
+  }
+  const list = j => Array.isArray(j) ? j : (j?.data || j?.matches || j?.results || j?.items || []);
+
+  // ---- Normalize a match, whatever shape the API sends
+  const pick = (...v) => v.find(x => x != null && x !== "");
+  function player(p) {
+    if (!p) return { name: "TBD" };
+    if (typeof p === "string") return { name: p };
+    const c = pick(p.country, p.country_code, p.countryCode, p.nationality, p.flag) || "";
+    return { id: pick(p.id, p.player_id), name: pick(p.name, p.full_name, p.fullName, [p.first_name, p.last_name].filter(Boolean).join(" ")) || "TBD",
+      short: pick(p.short_name, p.shortName, shortName(pick(p.name, p.full_name, p.fullName))), country: typeof c === "string" ? c : (c.code || c.alpha3 || c.name || ""),
+      seed: pick(p.seed, p.seeding), rank: pick(p.rank, p.ranking) };
+  }
+  // "Felix Auger-Aliassime" → "F. Auger-Aliassime"
+  function shortName(n) { const w = String(n || "").trim().split(/\s+/); return w.length > 1 ? `${w[0][0]}. ${w.slice(1).join(" ")}` : n; }
+  function norm(m) {
+    const pl = m.players || {};
+    const a = player(pick(pl.p1, pl.player1, pl[0], m.player1, m.home, m.p1));
+    const b = player(pick(pl.p2, pl.player2, pl[1], m.player2, m.away, m.p2));
+    const sc = m.score || {};
+    // games: player-major [[6,4,3],[4,6,2]] or set-major [{p1:6,p2:4}, ...]
+    let ga = [], gb = [];
+    const g = pick(sc.games, sc.sets, m.sets);
+    if (Array.isArray(g) && Array.isArray(g[0])) { ga = g[0] || []; gb = g[1] || []; }
+    else if (Array.isArray(g)) g.forEach(s => { ga.push(pick(s.p1, s.player1, s[0], s.home)); gb.push(pick(s.p2, s.player2, s[1], s.away)); });
+    const tbs = sc.tiebreaks || sc.tie_breaks || [];
+    const pts = pick(sc.points, sc.game_score, sc.current_game) || [];
+    const note = pick(sc.note, m.note, "");
+    const srv = pick(sc.server, sc.serving, m.server);
+    const t = m.tournament || {};
+    const status = String(pick(m.status, m.state, "") || "").toLowerCase();
+    const win = pick(m.winner, m.winner_id);
+    return { id: pick(m.id, m.match_id), raw: m, a, b, ga, gb, tbs,
+      pa: Array.isArray(pts) ? pts[0] : pts?.p1, pb: Array.isArray(pts) ? pts[1] : pts?.p2,
+      srv: srv === 1 || srv === "p1" || srv === "1" || srv === a.id ? 1 : srv === 2 || srv === "p2" || srv === "2" || srv === b.id ? 2 : 0,
+      tourney: typeof t === "string" ? t : pick(t.name, t.title, m.tournament_name) || "Tournament",
+      tour: String(pick(m.tour, t.tour, m.category, "") || "").toUpperCase(), surface: pick(m.surface, t.surface, ""),
+      round: pick(m.round, m.round_name, m.stage, ""), court: pick(m.court, m.court_name, ""),
+      time: pick(m.start_time, m.scheduled_at, m.start, m.date, m.time),
+      live: /live|progress|playing|in_play/.test(status), done: /complete|finish|ended|retired|walkover/.test(status), status, note, source: m.source || "Live Tennis API",
+      winner: win == null ? 0 : (win === 1 || win === "p1" || win === a.id || win === a.name) ? 1 : (win === 2 || win === "p2" || win === b.id || win === b.name) ? 2 : 0 };
+  }
+  // Country code → flag emoji (2- or 3-letter codes)
+  const A3 = { USA:"US",GBR:"GB",ESP:"ES",ITA:"IT",FRA:"FR",GER:"DE",DEU:"DE",SUI:"CH",CHE:"CH",SRB:"RS",RUS:"RU",NOR:"NO",CAN:"CA",AUS:"AU",ARG:"AR",CHI:"CL",CHN:"CN",JPN:"JP",POL:"PL",CZE:"CZ",GRE:"GR",NED:"NL",NLD:"NL",BEL:"BE",DEN:"DK",DNK:"DK",BRA:"BR",KAZ:"KZ",CRO:"HR",HRV:"HR",BUL:"BG",AUT:"AT",POR:"PT",PRT:"PT",SWE:"SE",FIN:"FI",UKR:"UA",BLR:"BY",ROU:"RO",HUN:"HU",SVK:"SK",SLO:"SI",SVN:"SI",TUN:"TN",EGY:"EG",RSA:"ZA",KOR:"KR",TPE:"TW",IND:"IN",COL:"CO",PER:"PE",MEX:"MX",LAT:"LV",EST:"EE",LTU:"LT",GEO:"GE",ARM:"AM",ISR:"IL",TUR:"TR",MON:"MC",URU:"UY",ECU:"EC",BOL:"BO",PAR:"PY",NZL:"NZ",IRL:"IE",HKG:"HK",THA:"TH",INA:"ID",PHI:"PH",MAR:"MA",QAT:"QA",KSA:"SA",BIH:"BA",MDA:"MD",CYP:"CY",LUX:"LU" };
+  function flag(c) { c = String(c || "").toUpperCase(); if (c.length === 3) c = A3[c] || ""; return /^[A-Z]{2}$/.test(c) ? String.fromCodePoint(...[...c].map(x => 127397 + x.charCodeAt(0))) : "🎾"; }
+
+  // ---- Results: today's finished singles from ESPN's free feed (Live Tennis API's free plan doesn't include them)
+  async function loadResults(force) {
+    const c = st.data.results;
+    if (!force && c && Date.now() - c.at < 5 * 60e3) return;
+    st.loading = true; paint();
+    const d = new Date(), ymd = d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+    const items = [];
+    await Promise.allSettled(["atp", "wta"].map(async tour => {
+      const j = await (await fetch(`https://site.api.espn.com/apis/site/v2/sports/tennis/${tour}/scoreboard?dates=${ymd}`)).json();
+      (j.events || []).forEach(ev => (ev.groupings || []).forEach(gr => {
+        if (/doubles/i.test(gr.grouping?.displayName || "")) return;
+        (gr.competitions || []).forEach(cp => {
+          if (cp.status?.type?.state !== "post" || new Date(cp.date).toDateString() !== d.toDateString()) return;
+          const [x, y] = cp.competitors || [];
+          const pl = c => ({ name: c?.athlete?.displayName, country: (c?.athlete?.flag?.href || "").match(/countries\/500\/([a-z]{3})/i)?.[1] || "" });
+          const ls_ = c => (c?.linescores || []).map(l => l.value);
+          const tb = (c?.linescores || []).map((l, i) => [l.tiebreak ?? null, (y?.linescores || [])[i]?.tiebreak ?? null]);
+          items.push({ id: "espn-" + cp.id, status: "completed", tour, tournament: { name: ev.name }, round: typeof cp.round === "string" ? cp.round : cp.round?.displayName,
+            court: cp.venue?.court || "", players: { p1: pl(x), p2: pl(y) }, score: { games: [ls_(x), ls_(y)], tiebreaks: tb, note: cp.status?.type?.detail },
+            winner: x?.winner ? 1 : y?.winner ? 2 : null, start_time: cp.date, source: "ESPN" });
+        });
+      }));
+    }));
+    st.data.results = { at: Date.now(), items }; ls.set("cache", st.data);
+    st.loading = false; paint();
+  }
+  const loadTab = (tab, force) => tab === "results" ? loadResults(force) : load(tab, force);
+
+  // ---- Data
+  async function load(which, force) {
+    const c = st.data[which];
+    if (!force && c && Date.now() - c.at < (which === "live" ? 90e3 : 15 * 60e3)) return;   // stay inside the daily budget
+    st.loading = true; st.err = ""; paint();
+    try {
+      const j = await call(`/matches?status=${which}&limit=200`);
+      st.data[which] = { at: Date.now(), items: list(j) };
+      ls.set("cache", st.data);
+    } catch (e) { st.err = e.message === "Failed to fetch" ? "Couldn't reach Live Tennis API. If this keeps happening, the API may not allow calls straight from a browser, so tell Claude and it'll add a small relay." : e.message; }
+    st.loading = false; paint();
+  }
+
+  // ---- Render
+  function scores(m, who) {
+    const g = who === 1 ? m.ga : m.gb, o = who === 1 ? m.gb : m.ga;
+    const sets = g.map((v, i) => { if (v == null) return ""; const won = v > (o[i] ?? -1) && (m.done || i < g.length - 1); const tb = Array.isArray(m.tbs[i]) ? m.tbs[i][who - 1] : null; return `<span class="${won ? "won" : ""}">${esc(v)}${tb != null && !won ? `<sup>${esc(tb)}</sup>` : ""}</span>`; }).join("");
+    const pt = m.live && (who === 1 ? m.pa : m.pb) != null ? `<span class="pt">${esc(who === 1 ? m.pa : m.pb)}</span>` : "";
+    return `<span class="sc">${sets}${pt}</span>`;
+  }
+  function row(m, who) {
+    const p = who === 1 ? m.a : m.b;
+    const lead = m.winner === who || (m.live && (who === 1 ? m.ga : m.gb).length && false);
+    return `<div class="p ${m.winner === who ? "w" : ""} ${lead ? "lead" : ""}"><i class="srv ${m.live && m.srv === who ? "on" : ""}"></i><span class="fl">${flag(p.country)}</span>
+      <span class="nm">${p.seed ? `<small>${esc(p.seed)}</small>` : ""}${esc(p.short || p.name)}</span>${scores(m, who)}</div>`;
+  }
+  function when(m) {
+    if (m.live) return `<span class="live">Live</span>`;
+    if (m.done) return esc(/retir/i.test(m.note) ? "Retired" : /walkover/i.test(m.note) ? "Walkover" : "Final");
+    if (!m.time) return "Upcoming";
+    const d = new Date(m.time); if (isNaN(d)) return esc(m.time);
+    const same = d.toDateString() === new Date().toDateString();
+    return (same ? "" : d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) + " · ") + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  }
+  function paint() {
+    const items = (st.data[st.tab]?.items || []).map(norm);
+    const tours = [...new Set(items.map(m => m.tour).filter(Boolean))].sort();
+    const shown = items.filter(m => st.tour === "all" || m.tour === st.tour);
+    const ln = (st.data.live?.items || []).length;
+    const rn = (st.data.results?.items || []).length;
+    document.getElementById("tabs").innerHTML = [["live", "Live", ln], ["upcoming", "Upcoming", null], ["results", "Results", rn || null]].map(([k, l, n]) => `<button class="chip ${st.tab === k ? "on" : ""} ${k === "live" && n ? "hot" : ""}" data-tab="${k}">${l}${n != null ? `<span class="n">${n}</span>` : ""}</button>`).join("")
+      + (tours.length > 1 ? `<span class="sep"></span>` + ["all", ...tours].map(t => `<button class="chip ${st.tour === t ? "on" : ""}" data-tour="${esc(t)}">${t === "all" ? "All Tours" : esc(t)}</button>`).join("") : "");
+    document.getElementById("refresh").classList.toggle("spin", st.loading);
+    const main = document.getElementById("main");
+    if (!st.key && st.tab !== "results") { main.innerHTML = setupHtml(); document.getElementById("foot").innerHTML = ""; return; }
+    let html = st.err ? `<div class="err">${esc(st.err)}</div>` : "";
+    if (!shown.length) html += `<div class="empty">${st.loading ? "Loading…" : st.tab === "live" ? "No matches live right now." : st.tab === "results" ? "No finished singles matches yet today." : "Nothing scheduled yet."}</div>`;
+    const groups = {};
+    shown.forEach(m => { (groups[m.tourney] = groups[m.tourney] || []).push(m); });
+    Object.entries(groups).forEach(([name, ms]) => {
+      const liveN = ms.filter(m => m.live).length;
+      html += `<section class="block"><div class="bhead"><h2>${ms[0].tour ? `<span class="tour">${esc(ms[0].tour)}</span>` : ""}${esc(name)}</h2><span class="meta">${liveN ? `${liveN} Live · ` : ""}${ms.length} Match${ms.length === 1 ? "" : "es"}${ms[0].surface ? ` · ${esc(ms[0].surface)}` : ""}</span></div>`
+        + ms.map(m => `<div class="m" data-m="${esc(m.id)}"><div class="mh"><span>${esc([m.round, m.court].filter(Boolean).join(" · "))}</span><span>${when(m)}</span></div>${row(m, 1)}${row(m, 2)}</div>`).join("") + `</section>`;
+    });
+    main.innerHTML = html;
+    const at = st.data[st.tab]?.at;
+    document.getElementById("foot").innerHTML = `${at ? `Updated ${new Date(at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} · ` : ""}${st.tab === "results" ? "Results from ESPN" : `<b>${used()}</b> of ${DAILY} free calls used today`}`;
+  }
+  function setupHtml() {
+    return `<div class="setup"><h2>Connect Live Tennis API</h2>
+      <p>Paste your API key. It stays on this phone only and is never sent anywhere except Live Tennis API.</p>
+      <input id="keyin" type="password" autocomplete="off" placeholder="Your API key" value="">
+      <button class="btn" id="savekey">Save And Load Matches</button></div>`;
+  }
+  async function openMatch(id) {
+    const base = [...(st.data.live?.items || []), ...(st.data.upcoming?.items || []), ...(st.data.results?.items || [])].map(norm).find(m => String(m.id) === String(id));
+    if (!base) return;
+    showMatch(base);
+    if ((base.live || base.done) && base.source !== "ESPN" && st.key) {   // one extra call for the full detail, only when it can add something
+      try { const j = await call(`/matches/${encodeURIComponent(id)}`); const d = j?.data || j?.match || j; if (d && typeof d === "object") showMatch(norm({ ...base.raw, ...d }), true); } catch {}
+    }
+  }
+  function showMatch(m, detailed) {
+    const n = Math.max(m.ga.length, m.gb.length);
+    const X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    const who = (p, i) => `<div class="who"><div class="av">${flag(p.country)}</div><b>${p.seed ? `<i>${esc(p.seed)}</i>` : ""}${esc(p.short || p.name)}</b>${m.winner === i ? "<small>Winner</small>" : p.rank ? `<small>World No. ${esc(p.rank)}</small>` : ""}</div>`;
+    const cell = (x, o, i, k) => { const v = x[i]; if (v == null) return "<td>–</td>"; const won = v > (o[i] ?? -1) && (m.done || i < n - 1); const tb = Array.isArray(m.tbs[i]) ? m.tbs[i][k] : null; return `<td class="${won ? "won" : ""}">${esc(v)}${tb != null && !won ? `<sup>${esc(tb)}</sup>` : ""}</td>`; };
+    const status = m.live ? "Live" : when(m).replace(/<[^>]+>/g, "");
+    const facts = [["Tour", m.tour], ["Round", m.round], ["Court", m.court], ["Surface", m.surface], ["Data", m.source]].filter(([, v]) => v);
+    document.getElementById("sh").innerHTML = `<div class="hero"><div class="top"><button class="circ" data-close aria-label="Close">${X}</button></div>
+        <div class="duo">${who(m.a, 1)}<div class="mid"><div class="lbl">${esc(m.tourney)}</div><div class="st">${m.live ? '<span style="color:#ff8a8a">● </span>' : ""}${esc(status)}</div>${m.round ? `<small>${esc(m.round)}</small>` : ""}${m.court ? `<small>${esc(m.court)}</small>` : ""}</div>${who(m.b, 2)}</div>
+        ${n ? `<table class="box"><thead><tr><th></th>${Array.from({ length: n }, (_, i) => `<th>${i + 1}</th>`).join("")}${m.live ? "<th>Pts</th>" : ""}</tr></thead><tbody>
+          ${[[m.a, m.ga, m.gb, 0, m.pa, 1], [m.b, m.gb, m.ga, 1, m.pb, 2]].map(([p, x, o, k, pt, w]) => `<tr><td>${m.live && m.srv === w ? "🎾 " : ""}${esc(p.short || p.name)}</td>${Array.from({ length: n }, (_, i) => cell(x, o, i, k)).join("")}${m.live ? `<td class="ptc">${esc(pt ?? "")}</td>` : ""}</tr>`).join("")}</tbody></table>` : ""}</div>
+      <div class="card kv"><h3>Match Info</h3>${facts.map(([k, v]) => `<div><span>${k}</span><b>${esc(v)}</b></div>`).join("")}</div>
+      <details><summary>Raw data${detailed ? "" : " (list view)"}</summary><pre>${esc(JSON.stringify(m.raw, null, 2))}</pre></details>`;
+    document.getElementById("sheet").hidden = false;
+    document.getElementById("sh").scrollTop = 0;
+  }
+  function settings() {
+    const X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    document.getElementById("sh").innerHTML = `<div class="set-x"><b>Settings</b><button class="xbtn" data-close aria-label="Close">${X}</button></div>
+      <div class="card kv"><h3>Live Tennis API</h3><div><span>API Key</span><b>${st.key ? "Saved On This Phone" : "Not Set"}</b></div><div><span>Calls Today</span><b>${used()} of ${DAILY}</b></div><div><span>Live Refresh</span><b>Every 90 Seconds</b></div><div><span>Results</span><b>ESPN (Free)</b></div></div>
+      <div style="padding:0 16px">${st.key ? `<button class="btn ghost" data-clearkey>Remove API Key</button>` : `<button class="btn" data-close data-tab="live">Add API Key</button>`}
+      <p class="foot">${location.pathname.includes("/beta") ? `You're on the beta. <a href="../" style="color:var(--accent)">Open The Live App</a>` : `Want to try new features early? <a href="beta/" style="color:var(--accent)">Open The Beta</a>`}</p></div>`;
+    document.getElementById("sheet").hidden = false;
+  }
+
+  // ---- Events
+  document.addEventListener("click", e => {
+    const t = e.target.closest("[data-tab]"); if (t) { document.getElementById("sheet").hidden = true; st.tab = t.dataset.tab; ls.set("tab", st.tab); paint(); if (st.key || st.tab === "results") loadTab(st.tab); return; }
+    const tr = e.target.closest("[data-tour]"); if (tr) { st.tour = tr.dataset.tour; ls.set("tour", st.tour); paint(); return; }
+    const m = e.target.closest("[data-m]"); if (m) { openMatch(m.dataset.m); return; }
+    if (e.target.closest("[data-close]") || e.target.id === "sheet") { document.getElementById("sheet").hidden = true; return; }
+    if (e.target.closest("[data-clearkey]")) { st.key = ""; ls.set("key", ""); document.getElementById("sheet").hidden = true; paint(); return; }
+    if (e.target.id === "savekey") { const v = document.getElementById("keyin").value.trim(); if (!v) return; st.key = v; ls.set("key", v); paint(); loadTab(st.tab, true); return; }
+  });
+  document.getElementById("refresh").onclick = () => (st.key || st.tab === "results") && loadTab(st.tab, true);
+  document.getElementById("gear").onclick = settings;
+  // Live refresh while the app is open and on screen
+  setInterval(() => { if (st.key && !document.hidden && st.tab === "live") load("live"); }, 30e3);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && (st.key || st.tab === "results")) loadTab(st.tab); });
+  paint();
+  if (st.key || st.tab === "results") loadTab(st.tab);
+})();
+</script>
+</body>
+</html>
