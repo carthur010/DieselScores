@@ -9,6 +9,14 @@ Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 ## Waiting to ship (in beta now)
 Nothing. Everything shipped to live on Oct 14. Still worth a real-phone check: each watch app opening (YouTube TV, Peacock, Paramount+, HBO Max) and game-day betting odds on the card.
 
+## Alert ideas (not built yet)
+- Postponed / delayed / weather delay for your teams
+- Starting lineups or goalie confirmed (needs a lineup feed)
+- Big line movement on your teams' games
+- Clinched / eliminated (playoff races)
+- "Worth A Watch" ping when any game becomes must-watch
+- Real push alerts with the app closed (needs a small server or the iOS app)
+
 ## Idea backlog (from SportsDudes)
 1. **"This guy is going off" tracker** (Ben): flag big individual games live, like a no-hitter in progress, hat trick, triple-double, big NFL stat lines.
 2. **Upset Alert section** (Faiz): its own section for any underdog currently leading. Built for live bets.
