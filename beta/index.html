@@ -937,13 +937,13 @@ button.brand, button.brand span { color: var(--accent); }
     if (!r.ok) throw new Error("HTTP " + r.status);
     const j = await r.json();
     let games = (j.events || []).map(ev => normalize(ev, lg));
-    // After midnight, last night's games are still on the previous day's scoreboard. Pull in anything live or finished.
-    if (isToday() && new Date().getHours() < 6) {
+    // After midnight, last night's games are still on the previous day's scoreboard. Pull in the ones still being played.
+    if (isToday() && new Date().getHours() < 8) {
       try {
         const ry = await fetch(API + lg.path + "/scoreboard?dates=" + ymd(addDays(state.date, -1)) + (lg.extra || ""), { cache: "no-store" });
         if (ry.ok) {
           const have = new Set(games.map(g => g.id));
-          ((await ry.json()).events || []).map(ev => normalize(ev, lg)).filter(g => !have.has(g.id) && g.state !== "pre").forEach(g => games.push(g));
+          ((await ry.json()).events || []).map(ev => normalize(ev, lg)).filter(g => !have.has(g.id) && g.state === "in").forEach(g => games.push(g));
         }
       } catch {}
     }
