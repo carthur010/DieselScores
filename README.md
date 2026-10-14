@@ -4,6 +4,7 @@ Live scores, what to flip to, and where to watch.
 
 - Live: https://carthur010.github.io/DieselScores/
 - Beta: https://carthur010.github.io/DieselScores/beta/
+- Beta 2.0: https://carthur010.github.io/DieselScores/beta2/
 
 ## How releases work
 1. New changes go to `beta/` only.

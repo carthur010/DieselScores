@@ -2,6 +2,15 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Beta 2.0 (at /beta2, separate app)
+- **Apple Sports-style redesign**: dark gradient, big title, menu pill (Home / My Teams / any league), one glass panel with **Yesterday / Today / Upcoming**.
+- Centered scoreboard rows with big condensed scores, records before games, odds or network under the time, stars on your teams.
+- **Home** = My Teams, Worth A Watch, then your leagues in order. **My Teams** view adds Up Next. Each league has its own view.
+- **Upcoming**: next 3 days by date (collapsible), your teams first.
+- **Full-screen game card** tinted with both teams' colors: big scores, goal scorers (hockey/soccer), line score, Watch button, alert bell, share, and Stats / Play-By-Play / Box Score tabs with betting odds, win probability, team stat bars and leaders.
+- **Edit screen**: My Leagues with drag handles to reorder, My Teams, More to Follow, and a search bar for teams and leagues.
+- **Settings**: Open to, Color (Field Green / Brick Red / Navy), alert options, test alerts.
+
 ## In beta (not on live yet)
 - **My Teams tab**: today's games for teams you follow (with a count on the tab), then an **Up Next** list with every other team's next game. Edit teams button at the top. Also available under Settings → Open to.
 - **Gamecast pill** styled to match the watch button.
