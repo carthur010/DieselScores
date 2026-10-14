@@ -1486,8 +1486,7 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function specialsFor(tab) {
     const all = allSpecial();
-    if (tab === "all") return all;
-    if (tab === "live") return all.filter(e => e.state === "in");
+    if (tab === "all" || tab === "live") return all.filter(e => e.state === "in");
     if (LG[tab]?.kind) return all.filter(e => e.lg.id === tab);
     return [];
   }
@@ -1677,8 +1676,9 @@ button.brand, button.brand span { color: var(--accent); }
       return;
     }
 
-    // Golf
-    specialsFor(tab).forEach(e => { html += BLOCK[e.kind](e); });
+    // Golf: on its own tab it leads; on All and Live it only shows while a round is in progress, below the games
+    const golfBelow = ["all", "live"].includes(tab);
+    if (!golfBelow) specialsFor(tab).forEach(e => { html += BLOCK[e.kind](e); });
 
     // The feed
     const quiet = [];
@@ -1714,6 +1714,7 @@ button.brand, button.brand span { color: var(--accent); }
     } else if (!specialsFor(tab).length) {
       html += `<div class="block empty">No games on ${esc(dayLabel(state.date))}.</div>`;
     }
+    if (golfBelow) specialsFor(tab).forEach(e => { html += BLOCK[e.kind](e); });
     if (tab === "all" && quiet.length) html += `<p class="quiet">Off ${isToday() ? "today" : "this day"}: ${esc(quiet.join(", "))}</p>`;
     if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}${isToday() ? " · refreshes automatically" : ""}</p>`;
     main.innerHTML = html;
