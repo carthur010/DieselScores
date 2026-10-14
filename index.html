@@ -594,7 +594,11 @@ button.brand span { color: var(--accent); }
       note: comp.notes?.[0]?.headline || "",
       odds: odds ? { details: odds.details || "", ou: odds.overUnder } : null,
       sit: comp.situation || {}, period: st.period || 0, clock: st.displayClock || "",
+      series: comp.series?.summary || "",
     };
+    // Playoff game: postseason per ESPN, a series attached, or a playoff round in the game note
+    g.playoff = ev.season?.type === 3 || !!comp.series ||
+      /playoff|postseason|wild card|division series|championship series|world series|\bALCS\b|\bNLCS\b|\bALDS\b|\bNLDS\b|conference (semi)?finals?|stanley cup|nba finals|super bowl|cfp|bowl\b/i.test(g.note);
     g.close = isClose(g);
     Object.assign(g, interest(g));
     return g;
@@ -635,6 +639,7 @@ button.brand span { color: var(--accent); }
         score += 40; reasons.push(victim.rank ? `Upset alert: No. ${victim.rank} trails` : "Upset alert");
       }
       if (g.rankedClash) { score += 20; reasons.push("Top 25 clash"); }
+      if (g.playoff) { score += 25; reasons.push("Playoffs"); }
       if (!g.close && !reasons.length) score += Math.max(0, 15 - margin);
     } else if (g.state === "pre") {
       const mins = (new Date(g.date) - Date.now()) / 60000;
@@ -1068,6 +1073,7 @@ button.brand span { color: var(--accent); }
     let sub = "";
     if (g.state === "pre" && g.odds?.details) sub = esc(g.odds.details);
     else if (g.state === "in" && g.sit?.downDistanceText) sub = esc(g.sit.downDistanceText);
+    if (g.series) sub = sub ? sub + "<br>" + esc(g.series) : esc(g.series);
     const pill = g.state !== "post" && g.watch?.length ? `<span>${watchPill(g)}</span>` : "";
     const lgLabel = (g.lg.short || g.lg.name) + (g.note ? " · " + g.note : "");
     const why = g.reasons || [];
@@ -1232,14 +1238,14 @@ button.brand span { color: var(--accent); }
     }
 
     // Worth A Watch: always at the top of Live and All. Only games that earned it:
-    // close and late, overtime/extra innings, an upset brewing, or a Top 25 clash in progress.
-    // Every close game makes it, your teams included. No filler.
+    // playoffs, close and late, overtime/extra innings, an upset brewing, or a Top 25 clash in progress.
+    // Every close game and every playoff game makes it, your teams included. No filler.
     let shown = new Set();
     if (["live", "all"].includes(tab)) {
-      const earned = g => g.state === "in" && (g.close || g.reasons.some(r => /Overtime|Extra|Upset|Top 25/.test(r)));
-      const close = games.filter(g => earned(g) && g.close).sort((x, y) => y.hype - x.hype);
-      const other = games.filter(g => earned(g) && !g.close).sort((x, y) => y.hype - x.hype);
-      const picks = close.concat(other.slice(0, Math.max(0, 6 - close.length)));
+      const earned = g => g.state === "in" && (g.close || g.playoff || g.reasons.some(r => /Overtime|Extra|Upset|Top 25/.test(r)));
+      const must = games.filter(g => earned(g) && (g.close || g.playoff)).sort((x, y) => y.hype - x.hype);
+      const other = games.filter(g => earned(g) && !g.close && !g.playoff).sort((x, y) => y.hype - x.hype);
+      const picks = must.concat(other.slice(0, Math.max(0, 6 - must.length)));
       if (picks.length) {
         if (tab === "live") shown = new Set(picks.map(g => g.id));
         html += block("worth", "Worth A Watch", `${picks.length} game${picks.length > 1 ? "s" : ""}`,
