@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 14, 2026: Tennis app (separate, at /tennis)
+- New solo Tennis app on Live Tennis API: Live and Upcoming, ATP/WTA filter, live game points and who's serving, match detail sheet, call counter for the free 100/day.
+
 ## In beta (not on live yet)
 - Tennis matches are tappable: a match view with player photos and flags, seeds, status, round and court, a set-by-set score with tiebreaks, a Full Draw button and Match Stats bars (aces, double faults, serve %, break points) when ESPN has them.
 - Tennis tournaments with no singles matches that day are hidden (the WTA feed lists every small event that week, so empty ones were piling up).

@@ -1,0 +1,1 @@
+{ "name": "Tennis", "short_name": "Tennis", "start_url": "./", "display": "standalone", "background_color": "#0b2136", "theme_color": "#0f2a44", "icons": [{ "src": "icon.png", "sizes": "512x512", "type": "image/png" }] }

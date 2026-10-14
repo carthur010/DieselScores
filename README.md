@@ -21,3 +21,9 @@ A Capacitor shell that loads the live site, so every "ship it" updates the app t
 3. Pick your iPhone or a simulator up top and hit Run.
 
 Native config lives in `app/capacitor.config.json`. After changing it, run `npx cap sync ios` inside `app/`.
+
+## Tennis (tennis/)
+
+A separate solo app on Live Tennis API (free plan, 100 calls a day). Live: https://carthur010.github.io/DieselScores/tennis/
+The API key is typed into the app once and kept only in that browser's storage. It is never in the code.
+Live and Upcoming tabs, ATP/WTA filter, live points and server, tap a match for set-by-set detail. A call counter keeps it inside the free limit (live refresh every 90 seconds while open).
