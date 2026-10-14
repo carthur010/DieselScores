@@ -43,8 +43,8 @@ Nothing. Everything shipped to live on Oct 14. Still worth a real-phone check: e
 - **Pinch to switch layout** on the scores screen.
 - **Always expand favorite games** toggle: your teams' games stay full-size even in Compact.
 - **Favorites section** at the top as a grid of your teams' games across leagues (today's strip, but full cards).
-- **Betting results on finals**: "Raptors covered (-11.5), Over 220.5" under final scores (pairs with Faiz's Upset Alert idea).
-- **Playoff seeds** next to team names, e.g. (1) TB, (2) CLE.
+- ~~**Betting results on finals**~~ (in beta Oct 14): "Raptors covered (-11.5), Over 220.5" under final scores (pairs with Faiz's Upset Alert idea).
+- ~~**Playoff seeds**~~ (in beta Oct 14) next to team names, e.g. (1) TB, (2) CLE.
 - **Highlights link** on final games.
 
 ### Low priority

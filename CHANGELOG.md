@@ -16,6 +16,8 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+- **Betting results on finals** (Oct 14): final games show how the closing line played out, like "BOS covered (+3.5) · Under 228.5". The app remembers each game's line before and during the game, and looks it up from ESPN for finals it didn't see. Soccer shows the total only. Hidden when betting odds are off.
+- **Playoff seeds** (Oct 14): playoff games show each team's seed next to its name, like (1) TB and (2) CLE, on cards, Compact, Simple, the top strip and the game card. Seeds come from the league standings.
 - **Dismiss alerts** (Oct 14): in-app alerts now have an X, can be swiped away, and close when tapped. They leave on their own sooner (about 4 seconds, 7 for upsets and comebacks) and never stack more than three.
 - **UEFA Women's Champions League** (Oct 14): added as a league (UWCL). It gets its own tab on match days and can be added to My Leagues.
 - **WSL tab** (Oct 14): the Women's Super League gets its own tab whenever it has games (it was working, but had no tab and no games this week during the break). Any league in My Leagues with games now gets a tab too. The Women's League Cup is renamed WSL Players Cup to match ESPN.

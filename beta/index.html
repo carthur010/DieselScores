@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014135040">
+<meta name="build" content="20261014135557">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -550,6 +550,7 @@ button.t-go { background: var(--surface); cursor: pointer; }
 .lu-b.in { color: var(--accent); font-weight: 600; }
 .lu-b i { font-style: normal; color: var(--live); }
 .tbl-wrap { overflow-x: auto; }
+.txt.bet { color: var(--fg); font-weight: 600; }
 .st-tbl td.tm { text-align: left; font-weight: 600; white-space: nowrap; }
 .st-tbl td.rk { color: var(--muted); width: 22px; }
 .st-tbl th:nth-child(2) { text-align: left; }
@@ -1036,7 +1037,8 @@ button.brand, button.brand span { color: var(--accent); }
       nets, watch: watchOptions(nets, lg),
       rankedClash: teams.length === 2 && teams.every(t => t.rank),
       note: comp.notes?.[0]?.headline || "",
-      odds: odds ? { details: odds.details || "", ou: odds.overUnder } : null,
+      odds: odds ? { details: odds.details || "", ou: odds.overUnder, spread: typeof odds.spread === "number" ? odds.spread : null } : null,
+      seasonYear: ev.season?.year || null,
       sit: comp.situation || {}, period: st.period || 0, clock: st.displayClock || "",
       series: comp.series?.summary || "",
     };
@@ -1647,10 +1649,80 @@ button.brand, button.brand span { color: var(--accent); }
     if (s.lastPlay?.text) return `<span class="txt" title="${esc(s.lastPlay.text)}">${esc(s.lastPlay.text)}</span>`;
     return "";
   }
+  // ---- Betting results on finals: the closing line, remembered while the game was upcoming or live,
+  // or looked up from the game summary afterwards. "LAR covered (-3.5) · Over 55.5"
+  const oddsCache = store.get("oddsCache", {});
+  function rememberOdds(games) {
+    let changed = false;
+    games.forEach(g => {
+      const k = g.lg.id + ":" + g.id;
+      if (g.state !== "post" && g.odds && (g.odds.spread != null || g.odds.ou != null)) {
+        const o = { spread: g.odds.spread, ou: g.odds.ou ?? null, t: Date.now() };
+        if (JSON.stringify(oddsCache[k]?.spread) !== JSON.stringify(o.spread) || oddsCache[k]?.ou !== o.ou) { oddsCache[k] = o; changed = true; }
+      }
+    });
+    if (changed) saveOdds();
+  }
+  function saveOdds() {
+    const keys = Object.keys(oddsCache);
+    if (keys.length > 500) keys.sort((a, b) => oddsCache[a].t - oddsCache[b].t).slice(0, keys.length - 500).forEach(k => delete oddsCache[k]);
+    store.set("oddsCache", oddsCache);
+  }
+  const oddsLookups = new Set();
+  async function fillClosingLines(games) {
+    if (!state.showOdds) return;
+    const need = games.filter(g => g.state === "post" && !oddsCache[g.lg.id + ":" + g.id] && !oddsLookups.has(g.lg.id + ":" + g.id) && !g.lg.kind).slice(0, 40);
+    if (!need.length) return;
+    need.forEach(g => oddsLookups.add(g.lg.id + ":" + g.id));
+    await Promise.allSettled(need.map(async g => {
+      const r = await fetch(API + g.lg.path + "/summary?event=" + g.id);
+      if (!r.ok) return;
+      const pc = ((await r.json()).pickcenter || [])[0];
+      oddsCache[g.lg.id + ":" + g.id] = pc ? { spread: typeof pc.spread === "number" ? pc.spread : null, ou: pc.overUnder ?? null, t: Date.now() } : { none: true, t: Date.now() };
+    }));
+    saveOdds();
+    render();
+  }
+  function betResult(g) {
+    const o = oddsCache[g.lg.id + ":" + g.id];
+    if (!o || o.none) return "";
+    const [away, home] = g.teams;
+    const as = +away?.score, hs = +home?.score;
+    if (isNaN(as) || isNaN(hs)) return "";
+    const fmt = n => (n > 0 ? "+" : "") + n;
+    const out = [];
+    if (o.spread != null && !g.lg.soccer) {
+      const diff = hs + o.spread - as;
+      out.push(diff > 0 ? `${home.abbr} covered (${fmt(o.spread)})` : diff < 0 ? `${away.abbr} covered (${fmt(-o.spread)})` : `Push (${home.abbr} ${fmt(o.spread)})`);
+    }
+    if (o.ou != null) { const tot = as + hs; out.push(tot > o.ou ? `Over ${o.ou}` : tot < o.ou ? `Under ${o.ou}` : `Push ${o.ou}`); }
+    return out.join(" · ");
+  }
+  // ---- Playoff seeds from the standings: "(1) TB"
+  const seeds = {};          // lg.id -> { teamId: seed }
+  const seedLoading = new Set();
+  function applySeeds(games) {
+    games.forEach(g => { if (g.playoff && seeds[g.lg.id]) g.teams.forEach(t => { const s = seeds[g.lg.id][String(t.id)]; if (s) t.seed = s; }); });
+  }
+  function loadSeeds(games) {
+    const lgs = [...new Set(games.filter(g => g.playoff && !g.lg.soccer && !g.lg.college && !g.lg.kind).map(g => g.lg.id + "|" + (g.seasonYear || "")))];
+    lgs.forEach(async key => {
+      if (seedLoading.has(key)) return;
+      seedLoading.add(key);
+      const [id, yr] = key.split("|");
+      const entries = await loadStandings(LG[id], yr);
+      const map = {};
+      (entries || []).forEach(e => { const s = (e.stats || []).find(x => x.type === "playoffseed"); if (s && +s.value > 0 && +s.value <= 16) map[String(e.team?.id)] = +s.value; });
+      seeds[id] = map;
+      render();
+    });
+  }
+  const seedTag = t => t.seed ? `(${t.seed}) ` : "";
   function footText(g) {
     const sit = situation(g);
     if (sit) return sit;
     if (g.state === "pre" && state.showOdds && g.odds?.details) return `<span class="txt">${esc(g.odds.details)}${g.odds.ou ? " · O/U " + esc(g.odds.ou) : ""}${g.note ? " · " + esc(g.note) : ""}</span>`;
+    if (g.state === "post" && state.showOdds) { const r = betResult(g); if (r) return `<span class="txt bet">${esc(r)}${g.note ? " · " + esc(g.note) : ""}</span>`; }
     return `<span class="txt">${esc(g.note)}</span>`;
   }
 
@@ -1662,7 +1734,7 @@ button.brand, button.brand span { color: var(--accent); }
     return `<div class="row ${lose ? "lose" : ""}">
       ${starBtn(g.lg, t)}
       ${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<span></span>"}
-      <span class="who">${t.rank ? `<span class="rk">${t.rank}</span>` : ""}<span class="ab" title="${esc(t.full)}">${esc(t.abbr)}</span><span class="rc" ${t.seriesRec ? `title="Series record (regular season ${esc(t.seasonRecord || "")})"` : ""}>${esc(recText(t))}</span>${poss ? '<span class="poss" title="Possession"></span>' : ""}</span>
+      <span class="who">${t.seed ? `<span class="rk">(${t.seed})</span>` : t.rank ? `<span class="rk">${t.rank}</span>` : ""}<span class="ab" title="${esc(t.full)}">${esc(t.abbr)}</span><span class="rc" ${t.seriesRec ? `title="Series record (regular season ${esc(t.seasonRecord || "")})"` : ""}>${esc(recText(t))}</span>${poss ? '<span class="poss" title="Possession"></span>' : ""}</span>
       ${g.state === "pre" ? "" : `<span class="sc">${esc(t.score)}</span>`}
     </div>`;
   }
@@ -1684,7 +1756,7 @@ button.brand, button.brand span { color: var(--accent); }
     const st = g.state === "pre" ? (g.status === timeLabel(g.date) ? "" : g.status) : g.status;
     const team = (t, o, at) => `<div class="tt ${lose(t, o) ? "lose" : ""}">
         ${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : ""}
-        <span class="nm" title="${esc(t.full)}">${at ? "@ " : ""}${t.rank ? t.rank + " " : ""}${esc(t.name)}</span>
+        <span class="nm" title="${esc(t.full)}">${at ? "@ " : ""}${seedTag(t)}${t.rank ? t.rank + " " : ""}${esc(t.name)}</span>
         ${starBtn(g.lg, t, "mini")}
       </div>`;
     const scores = g.state === "pre" ? "<span></span>" :
@@ -1739,7 +1811,7 @@ button.brand, button.brand span { color: var(--accent); }
     const [a, h] = g.teams;
     if (!a || !h) return "";
     const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
-    const team = (t, o) => `<span class="sr-t ${lose(t, o) ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<i></i>"}<span class="nm">${t.rank ? `<small>${t.rank}</small> ` : ""}${esc(t.name || t.abbr)}</span>${isFavTeam(g.lg, t.abbr) ? '<span class="mc-fav">★</span>' : ""}${g.state === "pre" ? "" : `<b>${esc(t.score)}</b>`}</span>`;
+    const team = (t, o) => `<span class="sr-t ${lose(t, o) ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<i></i>"}<span class="nm">${t.seed ? `<small>(${t.seed})</small> ` : t.rank ? `<small>${t.rank}</small> ` : ""}${esc(t.name || t.abbr)}</span>${isFavTeam(g.lg, t.abbr) ? '<span class="mc-fav">★</span>' : ""}${g.state === "pre" ? "" : `<b>${esc(t.score)}</b>`}</span>`;
     const top = g.state === "pre" ? timeLabel(g.date) : g.status;
     // Under the time: before a game, where to watch; live, "Live"; playoffs, the series game
     const tv = g.watch?.[0]?.app || g.broadcast || "";
@@ -1754,7 +1826,7 @@ button.brand, button.brand span { color: var(--accent); }
     const [a, h] = g.teams;
     if (!a || !h) return "";
     const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
-    const row = (t, o) => `<span class="mcg-row ${lose(t, o) ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<i></i>"}<b>${t.rank ? `<small>${t.rank}</small> ` : ""}${esc(t.abbr)}</b>${isFavTeam(g.lg, t.abbr) ? '<span class="mc-fav">★</span>' : ""}<em class="${g.state === "pre" ? "rec" : ""}">${esc(g.state === "pre" ? recText(t) : t.score)}</em></span>`;
+    const row = (t, o) => `<span class="mcg-row ${lose(t, o) ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<i></i>"}<b>${t.seed ? `<small>(${t.seed})</small> ` : t.rank ? `<small>${t.rank}</small> ` : ""}${esc(t.abbr)}</b>${isFavTeam(g.lg, t.abbr) ? '<span class="mc-fav">★</span>' : ""}<em class="${g.state === "pre" ? "rec" : ""}">${esc(g.state === "pre" ? recText(t) : t.score)}</em></span>`;
     return `<article class="g mini tap ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name)}: game details">
       <span class="mcg-top">${showLg ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span>${g.pin ? '<span class="pin-mark" aria-label="Favorite game">♥</span>' : ""}</span>${row(a, h)}${row(h, a)}</article>`;
   }
@@ -1766,7 +1838,7 @@ button.brand, button.brand span { color: var(--accent); }
     const [a, h] = g.teams;
     if (!a || !h) return "";
     const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
-    const row = (t, o) => miniRow(t.logo, t.abbr, g.state === "pre" ? recText(t) : "", g.state === "pre" ? null : t.score, lose(t, o), isFavTeam(g.lg, t.abbr));
+    const row = (t, o) => miniRow(t.logo, seedTag(t) + t.abbr, g.state === "pre" ? recText(t) : "", g.state === "pre" ? null : t.score, lose(t, o), isFavTeam(g.lg, t.abbr));
     const sit = g.state === "in" ? (g.sit?.downDistanceText || (g.lg.sport === "Baseball" && g.sit?.outs != null ? `${g.sit.outs} out${g.sit.outs === 1 ? "" : "s"}` : "")) : "";
     const foot = sit || (g.state !== "post" ? (g.watch?.[0]?.app || g.broadcast || "") : (g.series || g.lg.short || g.lg.name));
     return `<button class="ms mc ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" title="${esc(a.full + " at " + h.full)}">
@@ -1934,6 +2006,7 @@ button.brand, button.brand span { color: var(--accent); }
   }
 
   function render() {
+    { const gs = allGames(); rememberOdds(gs); applySeeds(Object.values(state.data).flatMap(d => d.events || [])); loadSeeds(gs); setTimeout(() => fillClosingLines(allGames()), 0); }
     document.querySelectorAll("[data-view]").forEach(b => { const on = b.dataset.view === state.view; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
     renderDates();
     const games = allGames();
@@ -2395,7 +2468,7 @@ button.brand, button.brand span { color: var(--accent); }
       abbr: c?.team?.abbreviation || t.abbr || "", name: c?.team?.shortDisplayName || c?.team?.name || t.name || "",
       logo: c?.team?.logos?.[0]?.href || c?.team?.logo || t.logo || "", color: hexColor(c?.team?.color) || t.color || "",
       full: c?.team?.displayName || t.full || "", score: c?.score ?? t.score ?? "", record: t.seriesRec ? recText(t) : (c?.record?.[0]?.summary || t.record || ""),
-      rank: t.rank, winner: c?.winner ?? t.winner, id: c?.team?.id || t.id, lines: c?.linescores || [], hits: c?.hits, errors: c?.errors,
+      rank: t.seed ? `(${t.seed})` : t.rank, winner: c?.winner ?? t.winner, id: c?.team?.id || t.id, lines: c?.linescores || [], hits: c?.hits, errors: c?.errors,
     });
     const a = team(cs[0], ta), h = team(cs[1], th);
     const st = comp.status?.type || {};
