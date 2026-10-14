@@ -192,6 +192,18 @@ section.closed .bbody { display: none; }
 
 /* ---------- Compact (Sofascore-style) ---------- */
 .plain { display: grid; gap: 8px; }
+.ph-btn { display: flex; gap: 8px; align-items: baseline; width: 100%; text-align: left; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; padding: 2px 0; }
+.chev { margin-left: auto; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: var(--surface); border: 1px solid var(--line); color: var(--muted); flex: 0 0 auto; align-self: center; }
+.chev svg { width: 13px; height: 13px; transition: transform .2s; }
+.closed > .ph .chev svg, .tl-group.closed .tl-head .chev svg { transform: rotate(180deg); }
+.plain.closed > .card { display: none; }
+.tl-group.closed .tl-body { display: none; }
+.tl-group.closed .tl-head { padding-bottom: 14px; }
+.tl-head { width: 100%; text-align: left; cursor: pointer; }
+.tl-head .chev { background: transparent; border: 0; }
+.tl-head .cnt { margin-left: auto; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.tl-head .cnt b { color: var(--live); font-weight: 600; }
+.tl-head .cnt + .chev { margin-left: 0; }
 .ph { margin: 4px 2px 0; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: flex; gap: 8px; align-items: baseline; }
 .ph span { font-weight: 500; letter-spacing: 0; text-transform: none; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
@@ -1033,11 +1045,15 @@ section.closed .bbody { display: none; }
     });
     return groups.map(gr => {
       const note = gr.games[0].note && gr.games.every(x => x.note === gr.games[0].note) ? " · " + gr.games[0].note : "";
-      return `<div class="tl-group">
-        <div class="tl-head"><span class="tl-badge">${esc(gr.lg.short || gr.lg.name)}</span>
-          <span class="crumb">${esc(gr.lg.sport)} <span>› ${esc(gr.lg.name)}${esc(note)}</span></span></div>
+      const gid = "grp-" + gr.lg.id, closed = state.closed.has(gid);
+      const liveN = gr.games.filter(x => x.state === "in").length;
+      return `<div class="tl-group ${closed ? "closed" : ""}">
+        <button class="tl-head" data-tog="${gid}" aria-expanded="${!closed}"><span class="tl-badge">${esc(gr.lg.short || gr.lg.name)}</span>
+          <span class="crumb">${esc(gr.lg.sport)} <span>› ${esc(gr.lg.name)}${esc(note)}</span></span>
+          <span class="cnt">${closed ? (liveN ? `<b>${liveN} live</b>` : `${gr.games.length} game${gr.games.length > 1 ? "s" : ""}`) : ""}</span><i class="chev">${CHEV}</i></button>
+        <div class="tl-body">
         ${rowFn === expandedRow ? `<div class="feat">${gr.games.map(g => expandedRow(g)).join("")}</div>` : gr.games.map(g => rowFn(g)).join("")}
-      </div>`;
+      </div></div>`;
     }).join("");
   }
 
@@ -1113,10 +1129,10 @@ section.closed .bbody { display: none; }
   const BLOCK = { golf: golfBlock, race: raceBlock, mma: mmaBlock, tennis: tennisBlock };
 
   function block(id, title, meta, body, icon) {
-    if (state.view === "compact") {
-      return `<section class="plain"><h2 class="ph">${esc(title)}${meta ? `<span>${esc(meta)}</span>` : ""}</h2><div class="card">${body}</div></section>`;
-    }
     const closed = state.closed.has(id);
+    if (state.view === "compact") {
+      return `<section class="plain ${closed ? "closed" : ""}"><h2 class="ph" data-tog="${esc(id)}"><button class="ph-btn" aria-expanded="${!closed}">${esc(title)}${meta ? `<span>${esc(meta)}</span>` : ""}<i class="chev">${CHEV}</i></button></h2><div class="card">${body}</div></section>`;
+    }
     return `<section class="block ${closed ? "closed" : ""}" data-block="${esc(id)}">
       <div class="bhead">${icon || ""}<h2>${esc(title)}</h2>${meta ? `<span class="meta">${esc(meta)}</span>` : ""}
         <button class="tog" data-tog="${esc(id)}" aria-expanded="${!closed}" aria-label="${closed ? "Expand" : "Collapse"} ${esc(title)}">${CHEV}</button></div>
