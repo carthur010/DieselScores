@@ -578,6 +578,7 @@ button.brand span { color: var(--accent); }
     next: store.get("next", {}),         // key -> { t, date, opp, oppLogo, at, none }
     closed: new Set(),
     alerts: store.get("alerts", false),
+    teamAlerts: store.get("teamAlerts", true),
     favLeagues: store.get("favLeagues", DEFAULT_FAV_LEAGUES),
     data: {},
     loading: false,
@@ -1002,6 +1003,7 @@ button.brand span { color: var(--accent); }
   // Alerts
   // =====================================================================
   const seen = new Set();
+  const lastState = {};
   let primed = false;
   function triggers(g) {
     const out = [];
@@ -1009,31 +1011,66 @@ button.brand span { color: var(--accent); }
     g.reasons.forEach(r => { if (/Overtime|Extra/.test(r)) out.push("ot"); if (/Upset/.test(r)) out.push("upset"); });
     return out;
   }
+  function favName(g) {
+    const t = g.teams.find(t => isFavTeam(g.lg, t.abbr));
+    return t ? (t.name || t.abbr) : "";
+  }
   function checkAlerts() {
-    allGames().filter(g => g.state === "in").forEach(g => {
+    allGames().forEach(g => {
+      // Your teams: game starting, close late, final
+      const prev = lastState[g.id];
+      lastState[g.id] = g.state;
+      if (g.fav && state.teamAlerts && primed && prev && prev !== g.state) {
+        if (prev === "pre" && g.state === "in") fireTeam(g, "start");
+        if (g.state === "post") fireTeam(g, "final");
+      }
+      if (g.state !== "in") return;
       triggers(g).forEach(tr => {
         const k = g.id + ":" + tr;
         if (seen.has(k)) return;
         seen.add(k);
-        if (primed && state.alerts) fireAlert(g, tr, k);
+        if (!primed) return;
+        if (state.alerts || (g.fav && state.teamAlerts && tr === "close")) fireAlert(g, tr, k);
       });
     });
     primed = true;
   }
+  function fireTeam(g, kind) {
+    const [a, h] = g.teams, name = favName(g);
+    const line = `${a.abbr} ${a.score}, ${h.abbr} ${h.score}`;
+    if (kind === "start") {
+      const where = g.watch?.[0] ? `Watch on ${g.watch[0].app}${g.watch[0].nets[0] ? " (" + g.watch[0].nets[0] + ")" : ""}` : "";
+      notify(`${name} game is on`, `${a.name || a.abbr} at ${h.name || h.abbr}`, where, g.link, false, g.id + ":start");
+    } else {
+      const me = g.teams.find(t => isFavTeam(g.lg, t.abbr)), opp = g.teams.find(t => t !== me);
+      const res = me && opp ? ((+me.score) > (+opp.score) ? "W" : (+me.score) < (+opp.score) ? "L" : "T") : "";
+      notify(`${name} final${res ? ": " + res : ""}`, line, g.lg.short || g.lg.name, g.link, res === "L", g.id + ":final");
+    }
+  }
   function fireAlert(g, tr, tagKey) {
     const [a, h] = g.teams;
-    const title = tr === "close" ? "Close game" : tr === "ot" ? (g.lg.sport === "Baseball" ? "Extra innings" : "Overtime") : (g.reasons.find(r => /Upset/.test(r)) || "Upset alert");
+    const name = g.fav ? favName(g) + ": " : "";
+    const title = name + (tr === "close" ? "Close game" : tr === "ot" ? (g.lg.sport === "Baseball" ? "Extra innings" : "Overtime") : (g.reasons.find(r => /Upset/.test(r)) || "Upset alert"));
     const line = `${a.abbr} ${a.score}, ${h.abbr} ${h.score} · ${g.status}`;
     const where = g.watch?.[0] ? `Watch on ${g.watch[0].app}` : (g.lg.short || g.lg.name);
-    toast(title, line, where, g.link, tr === "upset");
+    notify(title, line, where, g.link, tr === "upset", tagKey);
+  }
+  function notify(title, line, where, link, hot, tagKey) {
+    toast(title, line, where, link, hot);
     try {
       if ("Notification" in window && Notification.permission === "granted") {
-        const opts = { body: `${line}\n${where}`, tag: tagKey, data: { url: g.link || location.href } };
+        const opts = { body: [line, where].filter(Boolean).join("\n"), tag: tagKey, data: { url: link || location.href } };
         (navigator.serviceWorker?.getRegistration?.() || Promise.resolve(null))
           .then(reg => reg ? reg.showNotification(title, opts) : new Notification(title, opts))
           .catch(() => {});
       }
     } catch {}
+  }
+  function notifyStatus() {
+    if (!("Notification" in window)) return /iPhone|iPad/.test(navigator.userAgent) ? "Add Scores to your home screen to allow notifications" : "This browser doesn't support notifications";
+    if (Notification.permission === "granted") return "Notifications allowed";
+    if (Notification.permission === "denied") return "Notifications are blocked in your phone's settings";
+    return "Notifications not allowed yet";
   }
   function toast(title, line, sub, link, hot) {
     const box = document.getElementById("toasts");
@@ -1680,6 +1717,9 @@ button.brand span { color: var(--accent); }
     if (t === "system") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
   }
   applyTheme();
+  async function askPermission() {
+    try { if ("Notification" in window && Notification.permission === "default") await Notification.requestPermission(); } catch {}
+  }
   async function setAlerts(on) {
     state.alerts = on;
     store.set("alerts", on);
@@ -1698,7 +1738,9 @@ button.brand span { color: var(--accent); }
       segRow("Open to", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["mine", "My Leagues"]], "The tab you see when the app opens") +
       segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
       segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
-      segRow("Close-game alerts", "alerts", state.alerts ? "on" : "off", [["on", "On"], ["off", "Off"]], "Close games, overtime, upsets. Works while the app is open") +
+      segRow("My team alerts", "teamAlerts", state.teamAlerts ? "on" : "off", [["on", "On"], ["off", "Off"]], "Game starting, close late, final score") +
+      segRow("Close-game alerts", "alerts", state.alerts ? "on" : "off", [["on", "On"], ["off", "Off"]], "Any close game, overtime or upset") +
+      `<div class="set-row"><div class="set-lbl">Test alerts<small>${esc(notifyStatus())}. Alerts work while Scores is open.</small></div><button class="chip" data-test-alert>Send test</button></div>` +
       `<div class="set-row"><div class="set-lbl">My Teams<small>Following ${teams} team${teams === 1 ? "" : "s"}</small></div><button class="chip" data-set-open="teams">Edit</button></div>` +
       `<div class="set-row"><div class="set-lbl">My Leagues<small>${leagues} league${leagues === 1 ? "" : "s"} in your order</small></div><button class="chip" data-set-open="leagues">Edit order</button></div>` +
       `<p class="hint set-foot">${location.pathname.includes("/beta") ? `You're on the beta. <a href="../">Open the live app</a>` : `Want to try new features early? <a href="beta/">Open the beta</a>`}</p>`;
@@ -1715,7 +1757,15 @@ button.brand span { color: var(--accent); }
       if (key === "view") { state.view = val; store.set("view3", val); }
       if (key === "theme") { store.set("theme", val); applyTheme(); }
       if (key === "alerts") await setAlerts(val === "on");
+      if (key === "teamAlerts") { state.teamAlerts = val === "on"; store.set("teamAlerts", state.teamAlerts); if (state.teamAlerts) await askPermission(); }
       renderSettings(); render();
+      return;
+    }
+    if (e.target.closest("[data-test-alert]")) {
+      toast("Test alert", "In-app alerts are working.", "", "", false);
+      await askPermission();
+      if ("Notification" in window && Notification.permission === "granted") notify("Test alert", "Phone notifications are working too.", "", "", false, "test");
+      renderSettings();
       return;
     }
     const o = e.target.closest("[data-set-open]");
