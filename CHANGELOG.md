@@ -16,6 +16,8 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+- **Reorder your teams** (Oct 14): drag the ☰ handle in Your Teams. Your order sets how teams line up in the top strip, My Teams and Up Next (live games still go first).
+- **Suggested teams** (Oct 14): Your Teams suggests teams near the ones you follow (New York, Bay Area, Sacramento and more), then popular picks. One tap to follow.
 - **Settings back button** (Oct 14): closing My Teams or My Leagues after opening it from Settings drops you back in Settings, not on the scoreboard.
 - **Scroll fix** (Oct 14): popups (Teams, Leagues, Settings, game card) lock the page behind them, so swiping scrolls the list you're in instead of the scores underneath.
 - **Settings reorganized** (Oct 14): My Teams and My Leagues up top. **Layout & Display** and **Alerts** are collapsible sections (closed by default, and the app remembers what you leave open). The Alerts header shows how many alerts are on.

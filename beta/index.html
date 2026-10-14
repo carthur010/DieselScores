@@ -320,6 +320,11 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .res-row { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 9px 2px; border-bottom: 1px solid var(--line); }
 .res-row .stripe { display: none; }
 .res-row:last-child { border-bottom: 0; }
+.res-row.drag { grid-template-columns: 28px minmax(0, 1fr) auto 36px; }
+.res-row.dragging { background: var(--accent-soft); border-radius: 10px; position: relative; z-index: 3; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+.res-row .handle { width: 36px; }
+.h3-note { text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 12px; margin-left: 6px; }
+#suggest h3 { margin-bottom: 4px; }
 .res-row img { width: 28px; height: 28px; object-fit: contain; }
 .res-row .nm { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .res-row .nm small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
@@ -586,7 +591,8 @@ button.brand, button.brand span { color: var(--accent); }
     <div class="sheet-body">
       <input type="search" id="q" placeholder="Search any team: Mets, Arsenal, Duke…" autocomplete="off" aria-label="Search teams">
       <div class="res" id="results"></div>
-      <h3>Following</h3>
+      <div id="suggest"></div>
+      <h3>Following <span class="h3-note">drag ☰ to set your order</span></h3>
       <div class="res" id="following"></div>
     </div>
   </div>
@@ -755,6 +761,9 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function favKey(lg, abbr) { return (lg.soccer ? "soccer" : lg.id) + ":" + abbr; }
   function isFavTeam(lg, abbr) { return state.favs.has(favKey(lg, abbr)); }
+  // Your team order (set by dragging in Your Teams). Lower = higher up.
+  function favRank(k) { const i = [...state.favs].indexOf(k); return i < 0 ? 999 : i; }
+  function gameRank(g) { return Math.min(...g.teams.map(t => favRank(favKey(g.lg, t.abbr)))); }
   function hexColor(c) { return c && /^[0-9a-f]{6}$/i.test(c) ? "#" + c : ""; }
   function clockSecs(c) { const [m, s] = String(c || "").split(":").map(Number); return isNaN(m) ? Infinity : m * 60 + (s || 0); }
 
@@ -1565,7 +1574,7 @@ button.brand, button.brand span { color: var(--accent); }
       games = games.map(g => ({ ...g, fav: g.teams.some(t => isFavTeam(g.lg, t.abbr)) }));
       if (!games.length) return;
       const byTime = (x, y) => new Date(x.date) - new Date(y.date);
-      const mine = games.filter(g => g.fav).sort(byTime);
+      const mine = games.filter(g => g.fav).sort((x, y) => gameRank(x) - gameRank(y) || byTime(x, y));
       let body = "";
       if (mine.length) body += state.view === "league" ? `<h3 class="up-lg">My Teams</h3><div class="grid">${mine.map(card).join("")}</div>`
         : `<div class="tl-group"><div class="tl-head"><span class="tl-badge">My Teams</span><span class="crumb">${mine.length} game${mine.length > 1 ? "s" : ""}</span></div>${mine.map(tlRow).join("")}</div>`;
@@ -1601,10 +1610,10 @@ button.brand, button.brand span { color: var(--accent); }
 
     // Your teams strip: today's games plus the next game for everyone else
     if (["live", "all", "mine"].includes(tab)) {
-      const mine = games.filter(g => g.fav).sort((a, b) => ({ in: 0, pre: 1, post: 2 }[a.state] - { in: 0, pre: 1, post: 2 }[b.state]) || new Date(a.date) - new Date(b.date));
+      const mine = games.filter(g => g.fav).sort((a, b) => ({ in: 0, pre: 1, post: 2 }[a.state] - { in: 0, pre: 1, post: 2 }[b.state]) || gameRank(a) - gameRank(b));
       const playing = new Set(mine.flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
       const nexts = isToday() ? [...state.favs].filter(k => !playing.has(k) && state.next[k]?.date)
-        .sort((a, b) => new Date(state.next[a].date) - new Date(state.next[b].date)) : [];
+        .sort((a, b) => favRank(a) - favRank(b)) : [];
       html += `<div class="mystrip" aria-label="Your teams">${mine.map(stripChip).join("")}${nexts.map(nextChip).join("")}<button class="ms add" data-open-sheet>${state.favs.size ? "+ Teams" : "+ Follow teams"}</button></div>`;
     }
 
@@ -1634,7 +1643,7 @@ button.brand, button.brand span { color: var(--accent); }
     // My Teams: today's games for teams you follow, then everyone's next game
     if (tab === "teams") {
       const ORD = { in: 0, pre: 1, post: 2 };
-      const mine = games.filter(g => g.fav).sort((a, b) => (ORD[a.state] - ORD[b.state]) || new Date(a.date) - new Date(b.date));
+      const mine = games.filter(g => g.fav).sort((a, b) => (ORD[a.state] - ORD[b.state]) || gameRank(a) - gameRank(b));
       html += `<div class="mine-bar"><span>Following ${state.favs.size} team${state.favs.size === 1 ? "" : "s"}</span><button class="chip" data-open-sheet>Edit teams</button></div>`;
       if (mine.length) {
         const liveN = mine.filter(g => g.state === "in").length;
@@ -1645,7 +1654,7 @@ button.brand, button.brand span { color: var(--accent); }
       }
       const playing = new Set(mine.flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
       const ups = [...state.favs].filter(k => !playing.has(k)).map(k => ({ k, m: state.favMeta[k], n: state.next[k] }))
-        .filter(x => x.m).sort((a, b) => (a.n?.date ? new Date(a.n.date) : Infinity) - (b.n?.date ? new Date(b.n.date) : Infinity));
+        .filter(x => x.m).sort((a, b) => favRank(a.k) - favRank(b.k));
       if (ups.length) {
         html += block("upnextteams", "Up Next", "", `<div class="nxt">${ups.map(({ k, m, n }) => `<div class="nxt-row" ${n?.id ? `data-game="${esc(m.lg)}:${esc(n.id)}" role="button" tabindex="0"` : ""}>
             ${m.logo ? `<img src="${esc(m.logo)}" alt="">` : "<span></span>"}
@@ -1740,7 +1749,7 @@ button.brand, button.brand span { color: var(--accent); }
     document.getElementById("sheet").hidden = false;
     setTimeout(() => document.getElementById("q").focus(), 50);
     renderSheet();
-    ensureMeta([...state.favs]).then(renderSheet);
+    ensureMeta([...state.favs]).then(() => { renderSheet(); loadSuggestions(); });
   }
   // Sheets opened from Settings return to Settings when closed
   let fromSettings = false;
@@ -1748,10 +1757,56 @@ button.brand, button.brand span { color: var(--accent); }
   function closeSheet() { const el = document.getElementById("sheet"); if (el.hidden) return; el.hidden = true; backToSettings(); }
   function closeLeagues() { const el = document.getElementById("lsheet"); if (el.hidden) return; el.hidden = true; backToSettings(); }
   function resRow(t, i, list) {
-    const k = keyFor(t), on = state.favs.has(k);
-    return `<div class="res-row">${t.logo ? `<img src="${esc(t.logo)}" alt="">` : "<span></span>"}
+    const k = keyFor(t), on = state.favs.has(k), drag = list === "f";
+    return `<div class="res-row ${drag ? "drag" : ""}" ${drag ? `data-k="${esc(k)}"` : ""}>${t.logo ? `<img src="${esc(t.logo)}" alt="">` : "<span></span>"}
       <span class="nm">${esc(t.name)}<small>${esc(LG[t.lg].short || LG[t.lg].name)}</small></span>
-      <button class="follow ${on ? "on" : ""}" data-list="${list}" data-i="${i}">${on ? "Following" : "Follow"}</button></div>`;
+      <button class="follow ${on ? "on" : ""}" data-list="${list}" data-i="${i}">${on ? "Following" : "Follow"}</button>${drag ? `<span class="handle" role="button" aria-label="Drag to reorder ${esc(t.name)}" title="Drag to reorder">${HANDLE}</span>` : ""}</div>`;
+  }
+  // Suggestions: teams near the ones you follow, then popular picks
+  const NEARBY = [
+    [/New York|Brooklyn|New Jersey|\bNY\b/i, ["New York Yankees", "New York Giants", "New York Jets", "Brooklyn Nets", "New York Liberty", "New York Islanders", "New Jersey Devils", "New York City FC", "New York Red Bulls", "St. John's Red Storm"]],
+    [/San Francisco|San Jose|Oakland|Golden State|Bay Area|Stanford|California/i, ["Golden State Warriors", "San Francisco 49ers", "San Francisco Giants", "San Jose Sharks", "Golden State Valkyries", "San Jose Earthquakes", "Stanford Cardinal", "California Golden Bears"]],
+    [/Sacramento/i, ["Sacramento Kings", "Golden State Warriors", "San Francisco 49ers", "San Francisco Giants", "Sacramento State Hornets"]],
+    [/Los Angeles|LA |Anaheim|UCLA|USC/i, ["Los Angeles Lakers", "Los Angeles Dodgers", "Los Angeles Rams", "LA Clippers", "Los Angeles Kings", "LAFC", "LA Galaxy"]],
+    [/Boston|New England/i, ["Boston Celtics", "Boston Red Sox", "New England Patriots", "Boston Bruins"]],
+    [/Chicago/i, ["Chicago Bulls", "Chicago Cubs", "Chicago Bears", "Chicago Blackhawks", "Chicago White Sox"]],
+    [/Philadelphia/i, ["Philadelphia Eagles", "Philadelphia 76ers", "Philadelphia Phillies", "Philadelphia Flyers"]],
+    [/Arsenal|Chelsea|Tottenham|West Ham|Fulham|Crystal Palace|Brentford/i, ["Chelsea", "Tottenham Hotspur", "Arsenal Women", "Crystal Palace"]],
+  ];
+  const POPULAR = ["Los Angeles Lakers", "New York Yankees", "Kansas City Chiefs", "Los Angeles Dodgers", "Golden State Warriors", "Dallas Cowboys", "Real Madrid", "Manchester City", "Liverpool", "Barcelona", "Duke Blue Devils", "Boston Celtics"];
+  let sugg = [], suggKey = "";
+  const suggCache = store.get("suggCache", {});
+  function suggestNames() {
+    const names = [...state.favs].map(k => state.favMeta[k]?.name || "").filter(Boolean);
+    const followed = new Set(names.map(n => n.toLowerCase()));
+    const out = [];
+    NEARBY.forEach(([re, list]) => { if (names.some(n => re.test(n))) list.forEach(n => out.push(n)); });
+    POPULAR.forEach(n => out.push(n));
+    return [...new Set(out)].filter(n => !followed.has(n.toLowerCase())).slice(0, 8);
+  }
+  async function loadSuggestions() {
+    const names = suggestNames(), key = names.join("|");
+    if (key === suggKey) return drawSuggest();
+    suggKey = key;
+    const found = await Promise.all(names.map(async n => {
+      if (suggCache[n]) return suggCache[n];
+      try {
+        const j = await (await fetch("https://site.api.espn.com/apis/common/v3/search?type=team&limit=8&query=" + encodeURIComponent(n))).json();
+        const items = (j.items || []).map(i => ({ i, lgId: LG_BY_SLUG[(i.sport || "") + "/" + (i.league || i.defaultLeagueSlug || "")] })).filter(x => x.lgId && x.i.abbreviation);
+        const hit = items.find(x => (x.i.displayName || "").toLowerCase() === n.toLowerCase()) || items[0];
+        if (!hit) return null;
+        const t = { lg: hit.lgId, id: hit.i.id, abbr: hit.i.abbreviation, name: hit.i.displayName || n, short: hit.i.name || "", logo: hit.i.logos?.[0]?.href || "", color: hexColor(hit.i.color) };
+        suggCache[n] = t; store.set("suggCache", suggCache);
+        return t;
+      } catch { return null; }
+    }));
+    sugg = found.filter(t => t && !state.favs.has(keyFor(t))).slice(0, 5);
+    drawSuggest();
+  }
+  function drawSuggest() {
+    const el = document.getElementById("suggest");
+    const show = !document.getElementById("q").value.trim() && sugg.length;
+    el.innerHTML = show ? `<h3>Suggested</h3><div class="res">${sugg.map((t, i) => resRow(t, i, "s")).join("")}</div>` : "";
   }
   function drawResults() {
     const el = document.getElementById("results");
@@ -1762,6 +1817,7 @@ button.brand, button.brand span { color: var(--accent); }
   function search() {
     clearTimeout(searchTimer);
     const q = document.getElementById("q").value.trim();
+    drawSuggest();
     if (!q) { results = []; drawResults(); return; }
     searchTimer = setTimeout(async () => {
       const seq = ++searchSeq;
@@ -1789,6 +1845,7 @@ button.brand, button.brand span { color: var(--accent); }
     }).filter(t => LG[t.lg]);
     document.getElementById("following").innerHTML = following.length ? following.map((t, i) => resRow(t, i, "f")).join("") : '<p class="hint">Not following anyone yet.</p>';
     drawResults();
+    drawSuggest();
   }
 
   // =====================================================================
@@ -1825,11 +1882,37 @@ button.brand, button.brand span { color: var(--accent); }
     if (e.target.id === "sheet") return closeSheet();
     const b = e.target.closest(".follow");
     if (!b) return;
-    const t = (b.dataset.list === "r" ? results : following)[+b.dataset.i];
+    const t = (b.dataset.list === "r" ? results : b.dataset.list === "s" ? sugg : following)[+b.dataset.i];
     if (!t) return;
     toggleFav(keyFor(t), { lg: t.lg, id: t.id, name: t.name, logo: t.logo, color: t.color, abbr: t.abbr });
   });
   document.getElementById("sheet-x").onclick = closeSheet;
+  let tdrag = null;
+  const folEl = document.getElementById("following");
+  folEl.addEventListener("pointerdown", e => {
+    const hd = e.target.closest(".handle"); if (!hd) return;
+    tdrag = { row: hd.closest(".res-row") };
+    tdrag.row.classList.add("dragging");
+    try { hd.setPointerCapture(e.pointerId); } catch {}
+    e.preventDefault();
+  });
+  folEl.addEventListener("pointermove", e => {
+    if (!tdrag) return;
+    const rows = [...folEl.querySelectorAll(".res-row")], i = rows.indexOf(tdrag.row), y = e.clientY;
+    const prev = rows[i - 1], next = rows[i + 1];
+    if (prev) { const b = prev.getBoundingClientRect(); if (y < b.top + b.height / 2) { folEl.insertBefore(tdrag.row, prev); return; } }
+    if (next) { const b = next.getBoundingClientRect(); if (y > b.top + b.height / 2) folEl.insertBefore(next, tdrag.row); }
+  });
+  const endTDrag = () => {
+    if (!tdrag) return;
+    tdrag.row.classList.remove("dragging"); tdrag = null;
+    const order = [...folEl.querySelectorAll(".res-row")].map(r => r.dataset.k).filter(Boolean);
+    const rest = [...state.favs].filter(k => !order.includes(k));
+    const next = order.concat(rest);
+    if (next.join() !== [...state.favs].join()) { state.favs = new Set(next); store.set("favs", next); renderSheet(); render(); }
+  };
+  folEl.addEventListener("pointerup", endTDrag);
+  folEl.addEventListener("pointercancel", endTDrag);
   // ---- Watch buttons: on phones try the app first, fall back to the website
   const IS_MOBILE = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   document.addEventListener("click", e => {
