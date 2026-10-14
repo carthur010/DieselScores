@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014165658">
+<meta name="build" content="20261014170324">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -485,6 +485,7 @@ button.t-go { background: var(--surface); cursor: pointer; }
 .belbig { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--line); color: var(--muted); }
 .belbig svg { width: 20px; height: 20px; }
 .belbig.on { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+.gc-info { display: grid; gap: 2px; justify-items: center; text-align: center; margin-top: 12px; font-size: 13px; color: rgba(255,255,255,.8); }
 .gc-net { text-align: center; color: var(--muted); font-size: 13px; }
 .gc-venue { margin-top: 4px; }
 .gc-hero + .gc-venue { margin-top: 14px; }
@@ -848,7 +849,7 @@ button.brand, button.brand span { color: var(--accent); }
     { id: "directv", name: "DirecTV Stream", kind: "bundle", url: "https://stream.directv.com/", scheme: "dtvnow://", rsn: /./ },
     { id: "cable", name: "Cable / Satellite", kind: "bundle", url: "", scheme: "", rsn: /./ },
     { id: "gotham", name: "Gotham Sports", kind: "regional", url: "https://gothamsports.com/", re: /^(MSG|MSG ?2|MSGSN|MSG Sportsnet|MSG\+|YES|YES Network)$/i },
-    { id: "espnplus", name: "ESPN app", label: "ESPN+ / ESPN app", kind: "stream", url: "https://www.espn.com/watch/", scheme: "sportscenter://", re: /ESPN\+|ESPN Unlimited|ESPN App|ESPN Deportes\+/i },
+    { id: "espnplus", name: "ESPN", label: "ESPN+ / ESPN", kind: "stream", url: "https://www.espn.com/watch/", scheme: "sportscenter://", re: /ESPN\+|ESPN Unlimited|ESPN App|ESPN Deportes\+/i },
     { id: "peacock", name: "Peacock", kind: "stream", url: "https://www.peacocktv.com/sports", scheme: "peacock://", re: /Peacock/i },
     { id: "paramount", name: "Paramount+", kind: "stream", url: "https://www.paramountplus.com/live-tv/", scheme: "paramountplus://", re: /Paramount\+|Paramount Plus|CBS Sports Golazo/i },
     { id: "max", name: "HBO Max", kind: "stream", url: "https://play.hbomax.com/", scheme: "hbomax://", re: /^(Max|HBO Max|truTV Max)$/i },
@@ -861,7 +862,7 @@ button.brand, button.brand span { color: var(--accent); }
     { id: "youtube", name: "YouTube", kind: "stream", url: "https://www.youtube.com/", scheme: "youtube://", re: /^YouTube$/i },
     { id: "leaguepass", name: "NBA League Pass", kind: "package", league: "nba", url: "https://www.nba.com/watch/league-pass-stream", re: /NBA League Pass/i },
     { id: "mlbtv", name: "MLB.TV", kind: "package", league: "mlb", url: "https://www.mlb.com/tv", scheme: "mlbatbat://", re: /MLB\.?TV/i },
-    { id: "nhlespn", name: "ESPN app", label: "NHL on ESPN+", kind: "package", league: "nhl", url: "https://www.espn.com/watch/", scheme: "sportscenter://", re: /$^/ },
+    { id: "nhlespn", name: "ESPN", label: "NHL on ESPN+", kind: "package", league: "nhl", url: "https://www.espn.com/watch/", scheme: "sportscenter://", re: /$^/ },
     { id: "sundayticket", name: "NFL Sunday Ticket", kind: "package", league: "nfl", url: "https://tv.youtube.com/nfl/", scheme: "youtubetv://", re: /Sunday Ticket/i },
   ];
   const SVC = Object.fromEntries(SERVICES.map(s => [s.id, s]));
@@ -2581,6 +2582,8 @@ button.brand, button.brand span { color: var(--accent); }
       <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span>${g ? `<button class="circ" data-share="${g.lg.id}:${g.id}" aria-label="Share">${SHAREIC}</button>` : ""}</div>
       <div class="gc-lbl">${esc(label)}</div>
       <div class="gc-grid">${fmtTeam(a, h, ta)}<div class="gc-mid"><b>${gs === "in" ? '<i class="livedot"></i>' : ""}${esc(gs === "pre" && (g || comp.date) ? whenLabel(g?.date || comp.date) : status)}</b>${sub ? `<small>${esc(sub)}</small>` : ""}</div>${fmtTeam(h, a, th)}</div>`;
+    const net = g?.broadcast ? `${gs === "in" ? "Live on" : gs === "pre" ? "On" : "Aired on"} ${g.broadcast.replace(" / ", ", ")}` : "";
+    if (net || venue) html += `<div class="gc-info">${net ? `<span>${esc(net)}</span>` : ""}${venue ? `<span>${esc(venue)}</span>` : ""}</div>`;
     html += scorers(j, a, h);
     if (a.lines.length && h.lines.length) {
       const n = Math.max(a.lines.length, h.lines.length, lg.sport === "Baseball" ? 9 : 0);
@@ -2599,10 +2602,8 @@ button.brand, button.brand span { color: var(--accent); }
       const w = gs !== "post" && g.watch?.find(x => x.url);
       html += `<div class="gc-actions">${w ? `<a class="watchbig" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">${PLAY_BIG} Watch On ${esc(w.app)}</a>` : g.link ? `<a class="watchbig" href="${esc(g.link)}" target="_blank" rel="noopener">Open On ESPN</a>` : ""}
         <button class="belbig ${state.favGames[g.lg.id + ":" + g.id] ? "on" : ""}" data-favgame="${g.lg.id}:${g.id}" aria-label="${state.favGames[g.lg.id + ":" + g.id] ? "Remove this game from favorites" : "Favorite this game"}">${(state.favGames[g.lg.id + ":" + g.id] ? HEART_ON : HEART).replace(' width="15" height="15"', "")}</button>
-        ${gs !== "post" ? `<button class="belbig ${state.watched[g.lg.id + ":" + g.id] ? "on" : ""}" data-watchgame="${g.lg.id}:${g.id}" aria-label="${state.watched[g.lg.id + ":" + g.id] ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL_BIG}</button>` : ""}</div>
-        ${g.broadcast ? `<div class="gc-net">${gs === "in" ? "Live on" : gs === "pre" ? "On" : "Aired on"} ${esc(g.broadcast.replace(" / ", ", "))}</div>` : ""}`;
+        ${gs !== "post" ? `<button class="belbig ${state.watched[g.lg.id + ":" + g.id] ? "on" : ""}" data-watchgame="${g.lg.id}:${g.id}" aria-label="${state.watched[g.lg.id + ":" + g.id] ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL_BIG}</button>` : ""}</div>`;
     }
-    if (venue) html += `<div class="gc-net gc-venue">${esc(venue)}</div>`;
     if (!j) return html + `<div class="skel"></div><div class="skel"></div></div>`;
     const hasTable = !!(j.standings?.groups?.length || j.lastFiveGames?.length);
     const tabs = [["stats", "Stats"], ["plays", "Play-By-Play"], lg.soccer ? null : ["box", "Box Score"], hasTable ? ["table", lg.soccer ? "Tournament" : "Standings"] : null].filter(Boolean);
