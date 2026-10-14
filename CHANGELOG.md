@@ -17,7 +17,7 @@ Link stays up; no further work. All development continues on the classic beta.
 
 ## In beta (not on live yet)
 - **Auto-update** (Oct 14): the app checks for a newer version when you open it or come back to it, and loads it right away instead of showing a cached copy for up to 10 minutes.
-- **Card layout swap** (Oct 14): bell and Gamecast moved to the top right of each game card; the where-to-watch button moved down next to the odds line.
+- **Cleaner game cards** (Oct 14): where-to-watch stays on top, odds below. The Gamecast button is gone: tap anywhere on a game to open it.
 - **By Time matches By League** (Oct 14): By Time now uses the same game cards (abbreviations, records, odds line, bell, Gamecast), in start-time order with a small league tag on each card.
 - **Title case counts** (Oct 14): "2 Games", "3 Live · 8 Total".
 
