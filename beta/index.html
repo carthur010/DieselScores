@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014195405">
+<meta name="build" content="20261014195631">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -996,7 +996,7 @@ button.brand, button.brand span { color: var(--accent); }
     favs: new Set(store.get("favs", DEFAULT_FAVS)),
     favMeta: { ...MY_SETUP.favMeta, ...store.get("favMeta", {}) },   // key -> { lg, id, name, logo, color }
     next: store.get("next", {}),         // key -> { t, date, opp, oppLogo, at, none }
-    closed: new Set(),
+    closed: new Set(["other-live"]),   // Other Live Games starts collapsed
     alerts: store.get("alerts", false),
     alertPrefs: (() => {
       const d = {
@@ -2477,7 +2477,13 @@ button.brand, button.brand span { color: var(--accent); }
     // The feed
     const quiet = [];
     TEAM_LEAGUES.forEach(lg => { if (!pool.some(g => g.lg.id === lg.id) && !state.data[lg.id]?.error && !state.data[lg.id]?.events?.length) quiet.push(lg.short || lg.name); });
-    const feed = pool.filter(g => !shown.has(g.id));
+    let feed = pool.filter(g => !shown.has(g.id));
+    // Live tab: your leagues, teams and saved games up top; everything else tucked into a collapsed section below
+    let otherLive = [];
+    if (tab === "live") {
+      const yours = g => state.favLeagues.includes(g.lg.id) || isMine(g) || isWatched(g) || !!state.favGames?.[gameKey(g)];
+      otherLive = feed.filter(g => !yours(g)); feed = feed.filter(yours);
+    }
     if (feed.length && state.view === "league" && tab === "live") {
       // Live tab, By League: one "You Are Looking Live" section with a card grid per league inside
       const parts = TEAM_LEAGUES.map(lg => {
@@ -2500,14 +2506,16 @@ button.brand, button.brand span { color: var(--accent); }
       const title = tab === "live" ? "You Are Looking Live" : tab === "close" ? "Close Games" : dayLabel(state.date);
       html += block("feed", title, live && tab !== "live" ? `${live} Live · ${feed.length} Total` : countLabel(feed.length, feed), timeline(feed));
     } else if (tab === "live" && !shown.size) {
-      const upcoming = games.filter(g => g.state === "pre").sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
-      html += `<div class="block empty">Nothing live right now.${upcoming.length ? " Here's what's up next." : ""}</div>`;
+      const upcoming = games.filter(g => g.state === "pre" && (state.favLeagues.includes(g.lg.id) || isMine(g))).sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
+      html += `<div class="block empty">Nothing live in your leagues right now.${upcoming.length ? " Here's what's up next." : ""}</div>`;
       if (upcoming.length) html += block("upnext", "Up Next", countLabel(upcoming.length, upcoming), state.view === "league" ? `<div class="grid">${upcoming.map(card).join("")}</div>` : timeline(upcoming));
     } else if (tab === "close") {
       html += `<div class="block empty">No close games right now. Games show up here late with a tight score: under 5:00 in the 4th or 3rd, the 7th inning or later in baseball, or the 85th minute in soccer.</div>`;
     } else if (!specialsFor(tab).length) {
       html += `<div class="block empty">No games on ${esc(dayLabel(state.date))}.</div>`;
     }
+    if (otherLive.length) html += block("other-live", "Other Live Games", `${otherLive.length} in leagues you don't follow`,
+      state.view === "league" ? `<div class="grid">${otherLive.map(card).join("")}</div>` : timeline(otherLive));
     if (golfBelow) specialsFor(tab).forEach(e => { html += BLOCK[e.kind](e); });
     if (tab === "all" && quiet.length) html += `<p class="quiet">Off ${isToday() ? "today" : "this day"}: ${esc(quiet.join(", "))}</p>`;
     if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}${isToday() ? " · refreshes automatically" : ""}</p>`;
@@ -2807,7 +2815,7 @@ button.brand, button.brand span { color: var(--accent); }
     fromSettings = false; closeSheet(); closeGame();
     ["lsheet", "ssheet"].forEach(id => document.getElementById(id).hidden = true);
     syncLock();
-    state.closed.clear();
+    state.closed.clear(); state.closed.add("other-live");
     state.tab = store.get("home", "live");
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (!isToday()) setDate(new Date()); else render();
