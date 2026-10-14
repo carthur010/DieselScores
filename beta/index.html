@@ -466,26 +466,26 @@ button.brand span { color: var(--accent); }
   // Where to watch. Your setup: YouTube TV + every streaming app. First match wins.
   const WATCH = [
     { re: /^(MSG|MSG ?2|MSGSN|MSG Sportsnet|MSG\+|YES|YES Network)$/i, app: "Gotham Sports", url: "https://gothamsports.com/" },
-    { re: /^(ABC|CBS|NBC|FOX|CW|The CW|ESPN|ESPN2|ESPNU|ESPNEWS|SECN|SEC Network|SECN\+?|ACCN|ACC Network|BTN|Big Ten Network|FS1|FS2|TNT|TBS|truTV|NFL ?Net(work)?|NFLN|MLB ?Net(work)?|MLBN|NBA ?TV|NHL ?Net(work)?|CBSSN|CBS Sports Network|USA|USA Net(work)?|Golf|Golf Channel|Telemundo|Universo|Univision|UniMás|TUDN|Galavisión|ION|SNY|SportsNet NY)$/i, app: "YouTube TV", url: "https://tv.youtube.com/" },
-    { re: /ESPN\+|ESPN Unlimited|ESPN App|ESPN Deportes\+/i, app: "ESPN app", url: "https://www.espn.com/watch/" },
-    { re: /Peacock/i, app: "Peacock", url: "https://www.peacocktv.com/sports" },
-    { re: /Paramount\+|Paramount Plus|CBS Sports Golazo/i, app: "Paramount+", url: "https://www.paramountplus.com/live-tv/" },
-    { re: /Prime Video|Amazon|Prime/i, app: "Prime Video", url: "https://www.primevideo.com/" },
-    { re: /Apple TV|MLS Season Pass|MLS Pass/i, app: "Apple TV", url: "https://tv.apple.com/" },
-    { re: /Netflix/i, app: "Netflix", url: "https://www.netflix.com/" },
-    { re: /^(Max|HBO Max|truTV Max)$/i, app: "HBO Max", url: "https://play.hbomax.com/" },
+    { re: /^(ABC|CBS|NBC|FOX|CW|The CW|ESPN|ESPN2|ESPNU|ESPNEWS|SECN|SEC Network|SECN\+?|ACCN|ACC Network|BTN|Big Ten Network|FS1|FS2|TNT|TBS|truTV|NFL ?Net(work)?|NFLN|MLB ?Net(work)?|MLBN|NBA ?TV|NHL ?Net(work)?|CBSSN|CBS Sports Network|USA|USA Net(work)?|Golf|Golf Channel|Telemundo|Universo|Univision|UniMás|TUDN|Galavisión|ION|SNY|SportsNet NY)$/i, app: "YouTube TV", url: "https://tv.youtube.com/", scheme: "youtubetv://" },
+    { re: /ESPN\+|ESPN Unlimited|ESPN App|ESPN Deportes\+/i, app: "ESPN app", url: "https://www.espn.com/watch/", scheme: "sportscenter://" },
+    { re: /Peacock/i, app: "Peacock", url: "https://www.peacocktv.com/sports", scheme: "peacock://" },
+    { re: /Paramount\+|Paramount Plus|CBS Sports Golazo/i, app: "Paramount+", url: "https://www.paramountplus.com/live-tv/", scheme: "paramountplus://" },
+    { re: /Prime Video|Amazon|Prime/i, app: "Prime Video", url: "https://www.primevideo.com/", scheme: "aiv://" },
+    { re: /Apple TV|MLS Season Pass|MLS Pass/i, app: "Apple TV", url: "https://tv.apple.com/", scheme: "videos://" },
+    { re: /Netflix/i, app: "Netflix", url: "https://www.netflix.com/", scheme: "nflx://" },
+    { re: /^(Max|HBO Max|truTV Max)$/i, app: "HBO Max", url: "https://play.hbomax.com/", scheme: "hbomax://" },
     { re: /Fox One|FOX One|Fox Nation/i, app: "Fox One", url: "https://www.foxone.com/" },
     { re: /DAZN/i, app: "DAZN", url: "https://www.dazn.com/" },
     { re: /NBA League Pass/i, app: "NBA League Pass", url: "https://www.nba.com/watch/league-pass-stream" },
-    { re: /MLB\.?TV/i, app: "MLB.TV", url: "https://www.mlb.com/tv" },
+    { re: /MLB\.?TV/i, app: "MLB.TV", url: "https://www.mlb.com/tv", scheme: "mlbatbat://" },
     { re: /Victory\+/i, app: "Victory+", url: "https://www.victoryplus.com/" },
-    { re: /YouTube/i, app: "YouTube", url: "https://www.youtube.com/" },
+    { re: /YouTube/i, app: "YouTube", url: "https://www.youtube.com/", scheme: "youtube://" },
   ];
   // Out-of-market regional games (you're in NYC) go to the league package
   const OUT_OF_MARKET = {
     nba: { app: "NBA League Pass", url: "https://www.nba.com/watch/league-pass-stream" },
-    mlb: { app: "MLB.TV", url: "https://www.mlb.com/tv" },
-    nhl: { app: "ESPN app", url: "https://www.espn.com/watch/" },
+    mlb: { app: "MLB.TV", url: "https://www.mlb.com/tv", scheme: "mlbatbat://" },
+    nhl: { app: "ESPN app", url: "https://www.espn.com/watch/", scheme: "sportscenter://" },
   };
   // Soccer favorites are keyed "soccer:ABBR" so a club follows you across competitions
   const DEFAULT_FAVS = ["nba:NY", "nba:SAC", "nhl:NYR", "nhl:SJ", "mlb:NYM", "nfl:NYG", "soccer:ARS"];
@@ -660,7 +660,7 @@ button.brand span { color: var(--accent); }
     const add = (o, net) => {
       const x = out.find(x => x.app === o.app);
       if (x) { if (!x.nets.includes(net)) x.nets.push(net); }
-      else out.push({ app: o.app, url: o.url, nets: [net] });
+      else out.push({ app: o.app, url: o.url, scheme: o.scheme || "", nets: [net] });
     };
     nets.forEach(n => {
       const name = n.name.trim();
@@ -676,7 +676,7 @@ button.brand span { color: var(--accent); }
     if (g.state === "post" || !g.watch?.length) return g.broadcast && g.state !== "post" ? `<span class="net">${esc(g.broadcast)}</span>` : "";
     const [w, ...rest] = g.watch;
     const title = `${w.app}: ${w.nets.join(", ")}` + (rest.length ? ` · Also on ${rest.map(x => `${x.app} (${x.nets.join(", ")})`).join(", ")}` : "");
-    return `<a class="watch" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(title)}">${PLAY}<b>${esc(w.app)}</b>${w.nets[0].toLowerCase() === w.app.toLowerCase() ? "" : `<span>${esc(w.nets[0])}</span>`}${rest.length ? `<i>+${rest.length}</i>` : ""}</a>`;
+    return `<a class="watch" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener" title="${esc(title)}">${PLAY}<b>${esc(w.app)}</b>${w.nets[0].toLowerCase() === w.app.toLowerCase() ? "" : `<span>${esc(w.nets[0])}</span>`}${rest.length ? `<i>+${rest.length}</i>` : ""}</a>`;
   }
 
   // =====================================================================
@@ -1415,6 +1415,21 @@ button.brand span { color: var(--accent); }
     toggleFav(keyFor(t), { lg: t.lg, id: t.id, name: t.name, logo: t.logo, color: t.color, abbr: t.abbr });
   });
   document.getElementById("sheet-x").onclick = closeSheet;
+  // ---- Watch buttons: on phones try the app first, fall back to the website
+  const IS_MOBILE = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  document.addEventListener("click", e => {
+    const a = e.target.closest("a[data-app]");
+    if (!a || !IS_MOBILE) return;
+    e.preventDefault();
+    const web = a.href, appUrl = a.dataset.app;
+    let left = false;
+    const gone = () => { left = true; };
+    document.addEventListener("visibilitychange", () => { if (document.hidden) gone(); }, { once: true });
+    window.addEventListener("pagehide", gone, { once: true });
+    window.addEventListener("blur", gone, { once: true });
+    setTimeout(() => { if (!left && !document.hidden) window.location.href = web; }, 1400);
+    window.location.href = appUrl;
+  });
   // ---- League order editor
   function renderLeagueSheet() {
     const favs = state.favLeagues.filter(id => LG[id]);
