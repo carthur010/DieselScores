@@ -3,6 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Fix: radio broadcasts no longer show as TV (Brewers at Dodgers said "On ERADM, FS1"; ERADM is ESPN Radio). Only TV and streaming are listed now.
 - TV Settings is grouped into six sections: TV Networks, Streaming, Regional, League Passes, Spanish, Free To Watch. New picks: WNBA League Pass, ViX, Antenna (Free Over-The-Air: ABC, CBS, NBC, FOX, CW, ION, Telemundo, Univision) and Tubi.
 - New On My Services filter chip: only games you can watch with what you picked in TV Settings.
 - Live TV bundles now also match ESPN Deportes, FOX Deportes, beIN SPORTS, Tennis Channel and NFL RedZone.

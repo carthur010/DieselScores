@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014172606">
+<meta name="build" content="20261014183345">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1033,6 +1033,7 @@ button.brand, button.brand span { color: var(--accent); }
     const gstate = type.state || "pre";
     const nets = [];
     (comp.geoBroadcasts || []).forEach(b => {
+      if (/radio/i.test(b.type?.shortName || "")) return;   // ESPN lists radio too (e.g. "ERADM" = ESPN Radio); TV and streaming only
       const name = b.media?.shortName || b.media?.name;
       if (name) nets.push({ name, market: (b.market?.type || "national").toLowerCase() });
     });
