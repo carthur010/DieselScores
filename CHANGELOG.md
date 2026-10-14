@@ -3,6 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Regional network list expanded from Charles's RSN reference: Monumental (MNMT), MASN/MASN2, SportsNet Pittsburgh (SNP), Marquee (MARQ), Altitude (ALT), Space City (SCHN), Detroit SportsNet, team streaming apps (Jazz+, Suns+, Wild+, Blue Note+, BlazerVision, The Spot, MavsTV), Midco, SWX, YurView, legacy FanDuel networks and more now count as regional, so live TV bundles don't claim them and league passes treat them as local.
 - NBC Sports shorthand is recognized: NBCSBA, NBCSCA, NBCSP/NBCP (Philadelphia), NBCSB (Boston). Old names map to today's channels: NBCC → CHSN (Chicago), NBCW → Monumental (D.C.).
 - Fix: radio broadcasts no longer show as TV (Brewers at Dodgers said "On ERADM, FS1"; ERADM is ESPN Radio). Only TV and streaming are listed now.
 - TV Settings is grouped into six sections: TV Networks, Streaming, Regional, League Passes, Spanish, Free To Watch. New picks: WNBA League Pass, ViX, Antenna (Free Over-The-Air: ABC, CBS, NBC, FOX, CW, ION, Telemundo, Univision) and Tubi.

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014183913">
+<meta name="build" content="20261014184255">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -839,7 +839,7 @@ button.brand, button.brand span { color: var(--accent); }
     phl: { name: "Philadelphia", rsn: /NBC ?Sports ?Philadelphia|NBCS-?PHI/i },
     other: { name: "Other", rsn: /$^/ },
   };
-  const ANY_RSN = /^(MSG|MSG ?2|MSGSN|MSG\+|YES|SNY)$|NBC ?Sports|NBCS-|Spectrum ?SportsNet|SportsNet|FanDuel Sports|FDSN|NESN|CHSN|Marquee|Bally|Root Sports|Altitude|Monumental|KJZZ|Space City|Victory\+/i;
+  const ANY_RSN = /^(MSG|MSG ?2|MSGSN|MSG\+|MSG WNY|YES|SNY|MNMT|MASN2?|MASN\+|SNP|MARQ|ALT|SCHN|SNLA|SPEC SN|MIDCO|SWX|DSN|PSN|GCSEN|ABTV|BCSN|SEN|OC16|NSN|RSN|AZFS|HHN|BJHN|TGN|The Spot)$|NBC ?Sports|NBCS-|Spectrum ?Sport|SportsNet|Sports Network|Sports Net|FanDuel Sports|FDSN|FDSW|NESN|CHSN|Marquee|Bally|Root Sports|Altitude|Monumental|KJZZ|Space City|Victory\+|Gotham|MavsTV|Jazz\+|Suns\+|BlazerVision|Wild\+|Blue Note\+|Midco|YurView|Arizona'?s Family Sports|Hockey Network|Gameday Network|Angels Broadcast/i;
   // kind: bundle = live TV (carries the national channels and in-market regionals), stream, package, regional
   const SERVICES = [
     { id: "youtubetv", grp: "tv", name: "YouTube TV", kind: "bundle", url: "https://tv.youtube.com/", scheme: "youtubetv://", rsn: /SNY|SportsNet NY|NBC ?Sports|NBCS-/i },
@@ -1006,7 +1006,8 @@ button.brand, button.brand span { color: var(--accent); }
   // Network shorthand → the names the TV matching knows. NBC Sports Chicago became CHSN (2024),
   // NBC Sports Washington became Monumental (2023); NBCSN shut down in 2021.
   var NET_ALIAS = { NBCSBA: "NBCS-BA", NBCSCA: "NBCS-CA", NBCSP: "NBCS-PHI", NBCSPHI: "NBCS-PHI", NBCP: "NBCS-PHI",
-    NBCSB: "NBCS-BOS", NBCSBOS: "NBCS-BOS", NBCC: "CHSN", NBCSC: "CHSN", NBCW: "Monumental", NBCSW: "Monumental", NBCS: "NBC" };
+    NBCSB: "NBCS-BOS", NBCSBOS: "NBCS-BOS", NBCC: "CHSN", NBCSC: "CHSN", NBCW: "Monumental", NBCSW: "Monumental", NBCS: "NBC",
+    MNMT: "Monumental", MARQ: "Marquee", SPECSN: "Spectrum SportsNet", SNLA: "Spectrum SportsNet LA", FDSW: "FDSN West" };
   const netName = n => NET_ALIAS[String(n).trim().toUpperCase().replace(/\s+/g, "")] || String(n).trim();
   // No radio anywhere: some feeds list radio by name only
   var RADIO_NAME = /radio|^ERAD|SiriusXM|Sirius XM|Westwood One|TuneIn|Audacy|iHeart/i;
