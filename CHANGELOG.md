@@ -16,6 +16,7 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+- **Team strip matches the game cards** (Oct 14): the chips at the top are now mini game cards: league tag and time (or live clock) on top, both teams with logos stacked like the full cards (scores when live or final, records before), and where it's played, the TV app, or the live situation underneath.
 - **Live situation on cards** (Oct 14): live games show the situation where the odds go: down and distance (plus Red zone) in football, bases, outs and count in baseball, and the latest play in basketball, hockey and soccer when ESPN sends it.
 - **Auto-update** (Oct 14): the app checks for a newer version when you open it or come back to it, and loads it right away instead of showing a cached copy for up to 10 minutes.
 - **Cleaner game cards** (Oct 14): where-to-watch stays on top, odds below. The Gamecast button is gone: tap anywhere on a game to open it.

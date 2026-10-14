@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014090920">
+<meta name="build" content="20261014091341">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -298,6 +298,21 @@ section.closed .bhead { border-bottom: 0; }
 .ms.next .ms-s { display: grid; gap: 1px; align-content: center; font-size: 12px; color: var(--fg); }
 .ms.next .ms-s em { font-style: normal; font-weight: 500; font-size: 11px; color: var(--muted); }
 .ms.next .ms-s small { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.ms.mc { display: grid; grid-template-columns: none; gap: 5px; min-width: 190px; padding: 10px 12px; text-align: left; align-content: start; }
+.mc-top { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.mc-top .st { color: var(--muted); }
+.mc-top .st.live { color: var(--live); }
+.mc-top .st.final { color: var(--fg); }
+.mc-top small { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--gold, var(--accent)); }
+.mc-row { display: flex; align-items: center; gap: 7px; }
+.mc-row img, .mc-row > i { width: 20px; height: 20px; object-fit: contain; flex: 0 0 auto; }
+.mc-row b { font-family: var(--display); font-stretch: condensed; font-size: 18px; font-weight: 700; }
+.mc-row small { font-size: 12px; color: var(--muted); }
+.mc-row em { font-style: normal; font-family: var(--display); font-stretch: condensed; font-size: 19px; font-weight: 700; margin-left: auto; padding-left: 12px; }
+.mc-row.lose b, .mc-row.lose em { color: var(--muted); }
+.mc-fav { color: var(--star); font-size: 11px; }
+.mc-foot { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+.ms.mc.live .mc-foot { color: var(--fg); }
 .ms.add { display: flex; align-items: center; padding: 0 14px; color: var(--muted); font-weight: 600; font-size: 13px; border-style: dashed; }
 .ms.add:hover { color: var(--fg); }
 .lb-wrap { overflow-x: auto; }
@@ -1421,24 +1436,30 @@ button.brand, button.brand span { color: var(--accent); }
   }
 
   // Your teams strip
+  // Top strip: mini versions of the game cards
+  function miniRow(logo, abbr, rec, score, lose, fav) {
+    return `<span class="mc-row ${lose ? "lose" : ""}">${logo ? `<img src="${esc(logo)}" alt="">` : "<i></i>"}<b>${esc(abbr)}</b>${rec ? `<small>${esc(rec)}</small>` : ""}${fav ? '<span class="mc-fav" aria-label="Your team">★</span>' : ""}${score != null ? `<em>${esc(score)}</em>` : ""}</span>`;
+  }
   function stripChip(g) {
     const [a, h] = g.teams;
     if (!a || !h) return "";
-    const side = (t, o) => {
-      const lose = g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
-      return `<span class="ms-t ${lose ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="">` : ""}<b>${esc(t.abbr)}</b>${g.state === "pre" ? "" : `<em>${esc(t.score)}</em>`}</span>`;
-    };
-    return `<button class="ms ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" title="${esc(a.full + " at " + h.full)}">
-      ${side(a, h)}${side(h, a)}<span class="ms-s">${esc(g.status)}</span></button>`;
+    const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
+    const row = (t, o) => miniRow(t.logo, t.abbr, g.state === "pre" ? t.record : "", g.state === "pre" ? null : t.score, lose(t, o), isFavTeam(g.lg, t.abbr));
+    const sit = g.state === "in" ? (g.sit?.downDistanceText || (g.lg.sport === "Baseball" && g.sit?.outs != null ? `${g.sit.outs} out${g.sit.outs === 1 ? "" : "s"}` : "")) : "";
+    const foot = sit || (g.state !== "post" ? (g.watch?.[0]?.app || g.broadcast || "") : (g.series || g.lg.short || g.lg.name));
+    return `<button class="ms mc ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" title="${esc(a.full + " at " + h.full)}">
+      <span class="mc-top"><span class="lgtag">${esc(g.lg.short || g.lg.name)}</span><span class="st ${statusClass(g)}">${esc(g.status)}</span></span>
+      ${row(a, h)}${row(h, a)}${foot ? `<span class="mc-foot">${esc(foot)}</span>` : ""}</button>`;
   }
   function nextChip(k) {
     const m = state.favMeta[k], n = state.next[k];
     if (!m || !n || n.none || !n.date) return "";
     const tag = n.id ? "button" : "div";
-    return `<${tag} class="ms next" ${n.id ? `data-game="${esc(m.lg)}:${esc(n.id)}"` : ""} title="${esc(m.name)}: next game">
-      <span class="ms-t">${m.logo ? `<img src="${esc(m.logo)}" alt="">` : ""}<b>${esc(m.abbr || k.split(":")[1])}</b></span>
-      <span class="ms-t nx">${n.oppLogo ? `<img src="${esc(n.oppLogo)}" alt="">` : ""}<b>${esc(n.opp)}</b></span>
-      <span class="ms-s"><small>Next</small>${esc(whenLabel(n.date))}${n.place ? `<em>${esc(n.place)}</em>` : ""}</span></${tag}>`;
+    const me = miniRow(m.logo, m.abbr || k.split(":")[1], "", null, false, true), opp = miniRow(n.oppLogo, n.opp, "", null, false, false);
+    const lg = LG[m.lg];
+    return `<${tag} class="ms mc next" ${n.id ? `data-game="${esc(m.lg)}:${esc(n.id)}"` : ""} title="${esc(m.name)}: next game">
+      <span class="mc-top">${lg ? `<span class="lgtag">${esc(lg.short || lg.name)}</span>` : ""}<span class="st"><small>Next</small> ${esc(whenLabel(n.date))}</span></span>
+      ${n.at === "@" ? me + opp : opp + me}${n.place ? `<span class="mc-foot">${esc(n.place)}</span>` : ""}</${tag}>`;
   }
 
   // Golf leaderboard
