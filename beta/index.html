@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014103314">
+<meta name="build" content="20261014103422">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2668,9 +2668,11 @@ button.brand, button.brand span { color: var(--accent); }
   const nextDensity = () => DENS_ORDER.at((DENS_ORDER.indexOf(state.density) + 1) % 3);
   function paintDensBtn() {
     const b = document.getElementById("densbtn");
-    const next = nextDensity();
-    b.innerHTML = DENS_IC[next] + `<span>${DENS_NAME[next]}</span>`;
-    b.setAttribute("aria-label", `Switch to ${DENS_NAME[next]} scoreboard`);
+    // Shows the view you're on; tap to step to the next one
+    const cur = state.density, next = nextDensity();
+    b.innerHTML = DENS_IC[cur] + `<span>${DENS_NAME[cur]}</span>`;
+    b.setAttribute("aria-label", `${DENS_NAME[cur]} scoreboard. Tap for ${DENS_NAME[next]}`);
+    b.title = `Tap for ${DENS_NAME[next]}`;
   }
   function setDensity(v) {
     state.density = DENS_ORDER.includes(v) ? v : "expanded";
