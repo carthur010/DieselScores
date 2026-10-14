@@ -1092,11 +1092,9 @@ button.brand, button.brand span { color: var(--accent); }
     store.set("favMeta", state.favMeta);
   }
 
-  const REGIONS = { AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California", CO: "Colorado", CT: "Connecticut", DE: "Delaware", DC: "D.C.", FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa", KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland", MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi", MO: "Missouri", MT: "Montana", NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey", NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota", OH: "Ohio", OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina", SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont", VA: "Virginia", WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming",
-    AB: "Alberta", BC: "British Columbia", MB: "Manitoba", ON: "Ontario", QC: "Quebec", SK: "Saskatchewan", NS: "Nova Scotia" };
   function placeName(v) {
     const a = v?.address || {};
-    const city = a.city || "", region = a.state ? (REGIONS[a.state] || a.state) : (a.country && !/^(USA|United States)$/i.test(a.country) ? a.country : "");
+    const city = a.city || "", region = a.state ? a.state : (a.country && !/^(USA|United States)$/i.test(a.country) ? a.country : "");
     return [city, region].filter(Boolean).join(", ");
   }
   async function fetchNext(k) {
