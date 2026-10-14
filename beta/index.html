@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014185309">
+<meta name="build" content="20261014185721">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1985,7 +1985,8 @@ button.brand, button.brand span { color: var(--accent); }
   }
   const BLOCK = { golf: golfBlock };
 
-  function countLabel(n) { return `${n} Game${n === 1 ? "" : "s"}`; }
+  // "8 Games", or "8 Matches" when every game in the list is soccer
+  function countLabel(n, games) { const m = games?.length && games.every(g => g.lg?.soccer); return `${n} ${m ? (n === 1 ? "Match" : "Matches") : (n === 1 ? "Game" : "Games")}`; }
   function block(id, title, meta, body, icon) {
     const closed = state.closed.has(id);
     return `<section class="block ${closed ? "closed" : ""}" data-block="${esc(id)}">
@@ -2134,7 +2135,7 @@ button.brand, button.brand span { color: var(--accent); }
         if (!list.length) return;
         body += state.view === "league" ? `<h3 class="up-lg">${esc(LG[id].name)}</h3><div class="grid">${list.map(card).join("")}</div>` : timeline(list);
       });
-      html += block("up-" + ymd(date), date.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" }), countLabel(games.length), body);
+      html += block("up-" + ymd(date), date.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" }), countLabel(games.length, games), body);
     });
     if (!up.days.some(d => d.games.length)) html += `<div class="block empty">Nothing scheduled in the next three days for your leagues.</div>`;
     return html;
@@ -2181,7 +2182,7 @@ button.brand, button.brand span { color: var(--accent); }
       const picks = must.concat(other.slice(0, Math.max(0, 6 - must.length)));
       if (picks.length) {
         if (tab === "live") shown = new Set(picks.map(g => g.id));
-        html += block("worth", "Worth A Watch", countLabel(picks.length),
+        html += block("worth", "Worth A Watch", countLabel(picks.length, picks),
           `<div class="feat">${picks.map(featured).join("")}</div>`);
       }
     }
@@ -2201,7 +2202,7 @@ button.brand, button.brand span { color: var(--accent); }
       html += `<div class="mine-bar"><span>Following ${state.favs.size} team${state.favs.size === 1 ? "" : "s"}${pinN ? ` · ${pinN} favorite game${pinN === 1 ? "" : "s"}` : ""}</span><button class="chip" data-open-sheet>Edit Teams</button></div>`;
       if (mine.length) {
         const liveN = mine.filter(g => g.state === "in").length;
-        html += block("myteams", isToday() ? "Today" : dayLabel(state.date), liveN ? `${liveN} Live · ${mine.length} Total` : countLabel(mine.length),
+        html += block("myteams", isToday() ? "Today" : dayLabel(state.date), liveN ? `${liveN} Live · ${mine.length} Total` : countLabel(mine.length, mine),
           state.view === "league" ? `<div class="grid">${mine.map(card).join("")}</div>` : timeline(mine));
       } else {
         html += `<div class="block empty">None of your teams play ${isToday() ? "today" : "on " + esc(dayLabel(state.date))}.</div>`;
@@ -2236,7 +2237,7 @@ button.brand, button.brand span { color: var(--accent); }
           const list = games.filter(g => g.lg.id === id).sort((x, y) => ({ in: 0, pre: 1, post: 2 }[x.state] - { in: 0, pre: 1, post: 2 }[y.state]) || new Date(x.date) - new Date(y.date));
           if (list.length) {
             const liveN = list.filter(g => g.state === "in").length;
-            section = block("m-" + id, lg.name, liveN ? `${liveN} Live · ${list.length} Total` : countLabel(list.length),
+            section = block("m-" + id, lg.name, liveN ? `${liveN} Live · ${list.length} Total` : countLabel(list.length, list),
               state.view === "league" ? `<div class="grid">${list.map(card).join("")}</div>` : timeline(list));
           }
         }
@@ -2267,22 +2268,22 @@ button.brand, button.brand span { color: var(--accent); }
           <span class="crumb">${esc(lg.sport)} <span>› ${esc(lg.name)}</span></span></div>
           <div class="grid">${list.map(card).join("")}</div></div>`;
       }).join("");
-      html += block("feed", "You Are Looking Live", countLabel(feed.length), parts);
+      html += block("feed", "You Are Looking Live", countLabel(feed.length, feed), parts);
     } else if (feed.length && state.view === "league") {
       TEAM_LEAGUES.forEach(lg => {
         const list = feed.filter(g => g.lg.id === lg.id).sort((x, y) => ({ in: 0, pre: 1, post: 2 }[x.state] - { in: 0, pre: 1, post: 2 }[y.state]) || new Date(x.date) - new Date(y.date));
         if (!list.length) return;
         const liveN = list.filter(g => g.state === "in").length;
-        html += block(lg.id, lg.name, liveN ? `${liveN} Live · ${list.length} Total` : countLabel(list.length), `<div class="grid">${list.map(card).join("")}</div>`);
+        html += block(lg.id, lg.name, liveN ? `${liveN} Live · ${list.length} Total` : countLabel(list.length, list), `<div class="grid">${list.map(card).join("")}</div>`);
       });
     } else if (feed.length) {
       const live = feed.filter(g => g.state === "in").length;
       const title = tab === "live" ? "You Are Looking Live" : tab === "close" ? "Close Games" : dayLabel(state.date);
-      html += block("feed", title, live && tab !== "live" ? `${live} Live · ${feed.length} Total` : countLabel(feed.length), timeline(feed));
+      html += block("feed", title, live && tab !== "live" ? `${live} Live · ${feed.length} Total` : countLabel(feed.length, feed), timeline(feed));
     } else if (tab === "live" && !shown.size) {
       const upcoming = games.filter(g => g.state === "pre").sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
       html += `<div class="block empty">Nothing live right now.${upcoming.length ? " Here's what's up next." : ""}</div>`;
-      if (upcoming.length) html += block("upnext", "Up Next", countLabel(upcoming.length), state.view === "league" ? `<div class="grid">${upcoming.map(card).join("")}</div>` : timeline(upcoming));
+      if (upcoming.length) html += block("upnext", "Up Next", countLabel(upcoming.length, upcoming), state.view === "league" ? `<div class="grid">${upcoming.map(card).join("")}</div>` : timeline(upcoming));
     } else if (tab === "close") {
       html += `<div class="block empty">No close games right now. Games show up here late with a tight score: under 5:00 in the 4th or 3rd, the 7th inning or later in baseball, or the 85th minute in soccer.</div>`;
     } else if (!specialsFor(tab).length) {
@@ -2741,7 +2742,7 @@ button.brand, button.brand span { color: var(--accent); }
         }).join("")}</div>`;
       }
     }
-    html += leadersCard(j, a, h);
+    html += leadersCard(j, a, h, lg);
     html += lineupCard(j, a, h, lg);
     html += standingsCard(j, a, h, lg);
     if (!state.showOdds) html += `<div class="odds-off"><button class="linkbtn" data-odds="on">Show Betting Odds</button></div>`;
@@ -2754,7 +2755,7 @@ button.brand, button.brand span { color: var(--accent); }
     const find = (arr, x) => (arr || []).find(t => String(t.team?.id) === String(x.id) || t.team?.abbreviation === x.abbr);
     return arr => [find(arr, a), find(arr, h)];
   }
-  function leadersCard(j, a, h) {
+  function leadersCard(j, a, h, lg) {
     const [la, lh] = teamPair(j, a, h)((j.leaders || []).filter(t => t.leaders?.length));
     if (!la && !lh) return "";
     const pre = (j.header?.competitions?.[0]?.status?.type?.state || "pre") === "pre";
@@ -2767,7 +2768,7 @@ button.brand, button.brand span { color: var(--accent); }
       return `<div class="ld-p">${ph ? `<img class="ld-ph" src="${esc(typeof ph === "string" ? ph : "")}" alt="" loading="lazy">` : `<span class="ld-ph"></span>`}<b>${esc(l.athlete?.shortName || l.athlete?.displayName || "")}</b><small>${esc(l.displayValue || "")}</small></div>`;
     };
     const rows = cats.slice(0, 6).map(c => `<div class="ld-row">${person(pick(la, c.name))}<span class="ld-cat">${esc(c.label)}</span>${person(pick(lh, c.name))}</div>`).join("");
-    return `<div class="gc-c"><h3>${pre ? "Season Leaders" : "Game Leaders"}</h3><div class="ld-head"><span>${esc(a.abbr)}</span><span>${esc(h.abbr)}</span></div>${rows}</div>`;
+    return `<div class="gc-c"><h3>${pre ? "Season Leaders" : gameWord(lg) + " Leaders"}</h3><div class="ld-head"><span>${esc(a.abbr)}</span><span>${esc(h.abbr)}</span></div>${rows}</div>`;
   }
   // Team Stats order and names, per sport (Apple Sports order for soccer)
   const STAT_ORDER = {
@@ -2824,9 +2825,11 @@ button.brand, button.brand span { color: var(--accent); }
     })();
     return c?.ranks || null;
   }
-  // ---- Tournament / Standings tab: previous matches + the table
+  // Soccer says Match, everything else says Game
+  function gameWord(lg, plural) { return (lg?.soccer ? "Match" : "Game") + (plural ? (lg?.soccer ? "es" : "s") : ""); }
+  // ---- Tournament / Standings tab: previous games or matches + the table
   function tableTab(j, a, h, lg) {
-    let html = lastFiveCard(j, a, h);
+    let html = lastFiveCard(j, a, h, lg);
     const groups = (j.standings?.groups || []).filter(gr => gr.standings?.entries?.length);
     const isTeam = (e, x) => String(e.id) === String(x.id) || e.team === x.full || e.team === x.name;
     const show = groups.filter(gr => gr.standings.entries.some(e => isTeam(e, a) || isTeam(e, h)));
@@ -2871,7 +2874,7 @@ button.brand, button.brand span { color: var(--accent); }
     const benchHtml = bench.length ? `<div class="lu-bench"><div class="lu-bh"><span>Bench</span><span>Subs</span></div>${bench.map(p => `<div class="lu-b ${p.subbedIn ? "in" : ""}"><span class="j">${esc(p.jersey || "")}</span><span>${esc(p.athlete?.shortName || p.athlete?.displayName || "")}</span>${p.subbedIn ? '<i title="Came on">⇄</i>' : ""}</div>`).join("")}</div>` : "";
     return `<div class="gc-c"><h3>Starting Lineup</h3>${toggle}<div class="pitch">${rows}</div>${benchHtml}</div>`;
   }
-  function lastFiveCard(j, a, h) {
+  function lastFiveCard(j, a, h, lg) {
     const [fa, fh] = teamPair(j, a, h)(j.lastFiveGames || []);
     if (!fa && !fh) return "";
     const side = lfSide === 1 ? (fh || fa) : (fa || fh);
@@ -2885,7 +2888,7 @@ button.brand, button.brand span { color: var(--accent); }
         <span class="l5-o">${esc(e.opponent?.shortDisplayName || e.opponent?.displayName || e.opponent?.abbreviation || "")}</span>
         <span class="l5-r"><small>Final</small><span><b class="${res === "W" ? "w" : res === "L" ? "l" : ""}">${esc(res)}</b> ${esc(e.score || "")}</span></span></div>`;
     }).join("");
-    return `<div class="gc-c"><h3>Previous Matches</h3>${tabs}${rows || `<div class="foot">No recent games.</div>`}</div>`;
+    return `<div class="gc-c"><h3>Previous ${gameWord(lg, true)}</h3>${tabs}${rows || `<div class="foot">No recent ${gameWord(lg, true).toLowerCase()}.</div>`}</div>`;
   }
   // Standings feed (current season), all teams flattened
   async function loadStandings(lg, season) {

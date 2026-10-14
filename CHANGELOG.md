@@ -3,6 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Game vs. Match wording by sport: "Previous Games" and "Game Leaders" for NFL, NBA, MLB, NHL and college; "Previous Matches" and "Match Leaders" for soccer. Soccer-only lists count "Matches", mixed lists count "Games".
 - Game header: league, time, series, network, arena and city all sit in the middle column between the two teams. Long team names (Timberwolves, Diamondbacks) shrink to fit.
 - Game header info is stacked on three lines with no "On": network (FS1), arena (Dodger Stadium), city (Los Angeles, California). Same on every game.
 - Series lines read "MIL Leads 2-0" / "Tied 1-1" instead of ESPN's "MIL leads series 2-0".
