@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores</title>
-<meta name="build" content="20261014092018">
+<meta name="build" content="20261014100123">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores">
@@ -121,6 +121,9 @@ section.block { background: var(--surface); border: 1px solid var(--line); borde
 .set-sec.open .set-sec-h svg { transform: none; }
 .set-sec-b { padding: 0 14px 10px; display: grid; gap: 12px; }
 .set-sec-b .set-row:last-child { border-bottom: 0; }
+.rem-row { flex-wrap: nowrap; gap: 6px; }
+.rem-row .chip { flex: 1 1 0; justify-content: center; padding-inline: 4px; white-space: nowrap; min-width: 0; text-align: center; }
+.rem-lbl { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 4px; }
 .set-done { width: 100%; height: 46px; border-radius: 12px; background: var(--accent); color: var(--bg); font-weight: 700; font-size: 16px; margin-top: 6px; }
 .bhead h2 { margin: 0; font-family: var(--display); font-size: 24px; font-weight: 700; letter-spacing: .01em; }
 .bhead .meta { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
@@ -166,6 +169,26 @@ section.closed .bhead { border-bottom: 0; }
 .g { padding: 14px 16px 12px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); display: grid; gap: 6px; min-width: 0; }
 .g-top { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
 .g-top .st { color: var(--muted); }
+[data-density="compact"] .grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); }
+[data-density="compact"] .grid > .g:not(.mini) { grid-column: 1 / -1; }
+.g.mini { padding: 10px 12px; gap: 4px; align-content: start; }
+.g.mini.live { box-shadow: inset 3px 0 0 var(--live); }
+.mcg-top { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; min-height: 18px; }
+.mcg-top .st { color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+.mcg-top .st.live { color: var(--live); }
+.mcg-top .st.final { color: var(--fg); }
+.mcg-row { display: flex; align-items: center; gap: 7px; min-height: 26px; }
+.mcg-row img, .mcg-row > i { width: 22px; height: 22px; object-fit: contain; flex: 0 0 auto; }
+.mcg-row b { font-family: var(--display); font-stretch: condensed; font-size: 18px; font-weight: 700; white-space: nowrap; }
+.mcg-row b small { font-size: 11px; color: var(--muted); font-weight: 600; }
+.mcg-row em { font-style: normal; margin-left: auto; font-family: var(--display); font-stretch: condensed; font-weight: 700; font-size: 20px; }
+.g.mini .mcg-row em { min-width: 2ch; text-align: right; }
+.mcg-row.lose b, .mcg-row.lose em { color: var(--muted); }
+.mcg-row em.rec { font-family: var(--body); font-size: 12px; font-weight: 500; color: var(--muted); }
+.viewrow { display: flex; align-items: center; gap: 8px; }
+.densbtn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font-weight: 600; font-size: 13px; white-space: nowrap; }
+.densbtn svg { width: 16px; height: 16px; }
+.densbtn:hover { color: var(--fg); }
 .lgtag { font-size: 11px; font-weight: 800; letter-spacing: .04em; color: var(--accent); background: var(--accent-soft); padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
 .g-top .st.live { color: var(--live); }
 .g-top .st.final { color: var(--fg); }
@@ -278,7 +301,9 @@ section.closed .bhead { border-bottom: 0; }
   .f-sc { font-size: 42px; }
   .f-grid { grid-template-columns: minmax(60px, 1fr) auto minmax(80px, 1.1fr) auto minmax(60px, 1fr); }
   .grid { grid-template-columns: 1fr; }
-  .seg { order: 5; width: 100%; }
+  .viewrow { order: 5; width: 100%; }
+  .viewrow .seg { flex: 1; }
+  .densbtn { height: 38px; }
   .seg button { flex: 1; }
   .t { grid-template-columns: 64px 1fr auto 28px; gap: 8px; }
   .tt { font-size: 15px; }
@@ -459,6 +484,31 @@ button.t-go { background: var(--surface); cursor: pointer; }
 .ldr > div > b { display: block; font-size: 12px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
 .ldr p { margin: 0 0 8px; font-size: 14px; font-weight: 600; display: grid; }
 .ldr p small { color: var(--muted); font-weight: 500; font-size: 12px; }
+.ld-head { display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--muted); letter-spacing: .06em; margin-bottom: 4px; }
+.ld-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid var(--line); }
+.ld-row:first-of-type { border-top: 0; }
+.ld-p { display: grid; justify-items: center; gap: 3px; text-align: center; min-width: 0; }
+.ld-p b { font-size: 14px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ld-p small { font-size: 13px; font-weight: 700; }
+.ld-ph { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; background: var(--bg); border: 1px solid var(--line); display: block; }
+.ld-cat { font-size: 12px; color: var(--muted); text-align: center; max-width: 90px; }
+.gc-seg { display: flex; width: 100%; margin-bottom: 6px; }
+.gc-seg button { flex: 1; }
+.l5-row { display: grid; grid-template-columns: 44px 22px 24px 1fr auto; align-items: center; gap: 8px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.l5-row img, .l5-row > i { width: 24px; height: 24px; object-fit: contain; }
+.l5-d { font-size: 11px; color: var(--muted); line-height: 1.2; }
+.l5-at { color: var(--muted); font-size: 12px; }
+.l5-o { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l5-r { text-align: right; font-weight: 700; white-space: nowrap; display: grid; }
+.l5-r small { font-size: 11px; color: var(--muted); font-weight: 500; }
+.l5-r .w { color: #2e8b57; } .l5-r .l { color: var(--live); }
+.h3-teams { justify-content: space-between; }
+.h3-teams img, .h3-teams i { width: 24px; height: 24px; object-fit: contain; }
+.h3-teams span { flex: 1; text-align: center; }
+.so-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; align-items: center; }
+.so-row span { color: var(--muted); font-size: 12px; text-align: center; }
+.so-row b:last-child { text-align: right; }
+.sbar small { color: var(--muted); font-weight: 500; font-size: 11px; }
 .plays { display: grid; }
 .play { display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
 .play:last-child { border-bottom: 0; }
@@ -561,6 +611,26 @@ button.brand span { color: var(--accent); }
   --bg: #070b14; --surface: #0f1626; --surface-2: #141d30; --line: #1f2a42; --fg: #eef2fa;
   --muted: #8a95ae; --dim: #3c4862; --accent: #7fa2e6; --accent-soft: #14223f; --live: #ff4d63; --star: #c9b65e; --gold: #c9b65e; --gold-soft: #2a2716;
 }
+/* ---------- Color: Purple ---------- */
+:root[data-palette="purple"] {
+  --bg: #f7f5fa; --surface: #ffffff; --surface-2: #faf8fc; --line: #e3ddec; --fg: #17111f; --muted: #655c73; --dim: #b1a8bf; --accent: #5a2d81; --accent-soft: #ece4f4; --live: #e31837; --star: #a2aaad; --gold: #8a8d8f; --gold-soft: #eeeff0;
+}
+@media (prefers-color-scheme: dark) { :root[data-palette="purple"]:not([data-theme="light"]) {
+  --bg: #0d0a12; --surface: #17121f; --surface-2: #1d1727; --line: #2a2236; --fg: #f3eff8; --muted: #a197b0; --dim: #4b4158; --accent: #b48ce0; --accent-soft: #2a1d3b; --live: #ff5468; --star: #c4cacc; --gold: #c4cacc; --gold-soft: #24262a;
+} }
+:root[data-palette="purple"][data-theme="dark"] {
+  --bg: #0d0a12; --surface: #17121f; --surface-2: #1d1727; --line: #2a2236; --fg: #f3eff8; --muted: #a197b0; --dim: #4b4158; --accent: #b48ce0; --accent-soft: #2a1d3b; --live: #ff5468; --star: #c4cacc; --gold: #c4cacc; --gold-soft: #24262a;
+}
+/* ---------- Color: Orange ---------- */
+:root[data-palette="orange"] {
+  --bg: #fbf7f3; --surface: #ffffff; --surface-2: #fdfaf7; --line: #ecdfd2; --fg: #1a120b; --muted: #6e6053; --dim: #bcae9f; --accent: #e8590c; --accent-soft: #fde8da; --live: #c8102e; --star: #006bb6; --gold: #006bb6; --gold-soft: #e1eef8;
+}
+@media (prefers-color-scheme: dark) { :root[data-palette="orange"]:not([data-theme="light"]) {
+  --bg: #110c08; --surface: #1c140e; --surface-2: #231912; --line: #33251a; --fg: #faf3ec; --muted: #ad9c8b; --dim: #5a4a3b; --accent: #ff8a3d; --accent-soft: #3a2212; --live: #ff5468; --star: #5aa9e6; --gold: #5aa9e6; --gold-soft: #13253a;
+} }
+:root[data-palette="orange"][data-theme="dark"] {
+  --bg: #110c08; --surface: #1c140e; --surface-2: #231912; --line: #33251a; --fg: #faf3ec; --muted: #ad9c8b; --dim: #5a4a3b; --accent: #ff8a3d; --accent-soft: #3a2212; --live: #ff5468; --star: #5aa9e6; --gold: #5aa9e6; --gold-soft: #13253a;
+}
 .betatag { background: var(--fg) !important; color: var(--bg) !important; }
 button.brand, button.brand span { color: var(--accent); }
 .dates button.d.on { border-color: var(--gold); }
@@ -576,9 +646,12 @@ button.brand, button.brand span { color: var(--accent); }
       <button class="brand" id="brandbtn" aria-label="Home" title="Home">Score<span>s</span></button>
       <span class="livecount" id="livebug" hidden><span class="dot"></span><span id="liven">0</span><span class="lv-w"> live</span></span>
       <div class="spacer"></div>
-      <div class="seg" role="group" aria-label="Layout">
-        <button data-view="time">By Time</button>
-        <button data-view="league">By League</button>
+      <div class="viewrow">
+        <div class="seg" role="group" aria-label="Layout">
+          <button data-view="time">By Time</button>
+          <button data-view="league">By League</button>
+        </div>
+        <button class="densbtn" id="densbtn" aria-label="Switch to compact scoreboard" title="Compact / Expanded"></button>
       </div>
       <button class="iconbtn" id="homebtn" title="Home: today's live games" aria-label="Home">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
@@ -632,7 +705,7 @@ button.brand, button.brand span { color: var(--accent); }
     <div class="sheet-body">
       <p class="hint">Drag the handle to set the order. Your leagues show first on My Leagues and Upcoming.</p>
       <div class="res" id="lfav"></div>
-      <h3>Add more</h3>
+      <h3>Add More</h3>
       <div class="res" id="lrest"></div>
     </div>
   </div>
@@ -742,9 +815,9 @@ button.brand, button.brand span { color: var(--accent); }
     alerts: store.get("alerts", false),
     alertPrefs: (() => {
       const d = {
-        team:    { start: true, half: true, close: true, ot: true, lead: false, final: true },
-        watched: { start: true, half: true, close: true, ot: true, lead: true, final: true },
-        all:     { close: !!store.get("alerts", false), ot: !!store.get("alerts", false), upset: !!store.get("alerts", false), playoff: false },
+        team:    { start: true, score: false, redzone: false, period: false, half: true, close: true, ot: true, lead: false, comeback: true, final: true, remind: [15] },
+        watched: { start: true, score: true, redzone: true, period: false, half: true, close: true, ot: true, lead: true, comeback: true, final: true, remind: [5] },
+        all:     { close: !!store.get("alerts", false), ot: !!store.get("alerts", false), upset: !!store.get("alerts", false), comeback: false, nohit: false, playoff: false },
       };
       const saved = store.get("alertPrefs", null);
       return saved ? { team: { ...d.team, ...saved.team }, watched: { ...d.watched, ...saved.watched }, all: { ...d.all, ...saved.all } } : d;
@@ -752,6 +825,8 @@ button.brand, button.brand span { color: var(--accent); }
     watched: (() => { const w = store.get("watched", {}); const now = Date.now(); Object.keys(w).forEach(k => { if (now - w[k] > 2 * 864e5) delete w[k]; }); return w; })(),
     favLeagues: store.get("favLeagues", DEFAULT_FAV_LEAGUES),
     showOdds: store.get("showOdds", true),
+    density: store.get("density", "expanded"),       // "compact" | "expanded"
+    expandFavs: store.get("expandFavs", true),       // in Compact, keep your teams' games full size
     upcoming: { key: "", at: 0, days: [], loading: false },
     data: {},
     loading: false,
@@ -812,6 +887,7 @@ button.brand, button.brand span { color: var(--accent); }
       score: c.score ?? "",
       winner: !!c.winner,
       homeAway: c.homeAway,
+      hits: c.hits,
       record: c.records?.find(r => r.type === "total" || r.name === "overall")?.summary || c.records?.[0]?.summary || "",
       rank: c.curatedRank?.current && c.curatedRank.current <= 25 ? c.curatedRank.current : null,
     }));
@@ -880,22 +956,22 @@ button.brand, button.brand span { color: var(--accent); }
     const favAbbr = (g.odds?.details || "").match(/^([A-Z0-9&]{2,6})\s+-/)?.[1];
     if (g.state === "in") {
       score += 10;
-      if (g.close) { score += 50; reasons.push("Close game"); }
-      if (reg && g.period > reg) { score += 30; reasons.push(g.lg.sport === "Baseball" ? "Extra innings" : "Overtime"); }
+      if (g.close) { score += 50; reasons.push("Close Game"); }
+      if (reg && g.period > reg) { score += 30; reasons.push(g.lg.sport === "Baseball" ? "Extra Innings" : "Overtime"); }
       const leader = as > hs ? a : hs > as ? h : null;
       const favTeam = favAbbr ? g.teams.find(t => t.abbr === favAbbr) : null;
       const rankedFav = a.rank && !h.rank ? a : h.rank && !a.rank ? h : (a.rank && h.rank ? (a.rank < h.rank ? a : h) : null);
       const victim = favTeam || rankedFav;
       if (secondHalf && leader && victim && leader !== victim && margin > 0) {
-        score += 40; reasons.push(victim.rank ? `Upset alert: No. ${victim.rank} trails` : "Upset alert");
+        score += 40; reasons.push(victim.rank ? `Upset Alert: No. ${victim.rank} Trails` : "Upset Alert");
       }
-      if (g.rankedClash) { score += 20; reasons.push("Top 25 clash"); }
+      if (g.rankedClash) { score += 20; reasons.push("Top 25 Clash"); }
       if (g.playoff) { score += 25; reasons.push("Playoffs"); }
       if (!g.close && !reasons.length) score += Math.max(0, 15 - margin);
     } else if (g.state === "pre") {
       const mins = (new Date(g.date) - Date.now()) / 60000;
-      if (mins <= 45 && mins > -15) { score += 8; reasons.push("Starting soon"); }
-      if (g.rankedClash) { score += 6; reasons.push("Top 25 clash"); }
+      if (mins <= 45 && mins > -15) { score += 8; reasons.push("Starting Soon"); }
+      if (g.rankedClash) { score += 6; reasons.push("Top 25 Clash"); }
     }
     return { hype: score, reasons };
   }
@@ -1075,7 +1151,7 @@ button.brand, button.brand span { color: var(--accent); }
     state.loading = false;
     state.updatedAt = new Date();
     document.getElementById("refresh").classList.remove("spin");
-    if (isToday()) checkAlerts();
+    if (isToday()) { checkAlerts(); checkReminders(); }
     render();
     schedule();
     refreshNext();
@@ -1204,12 +1280,37 @@ button.brand, button.brand span { color: var(--accent); }
   // =====================================================================
   // Alert events: start, half (halftime/intermission), close, ot, lead (lead change), upset, playoff (playoff game starts), final
   const ALERT_EVENTS = {
-    team:    [["start", "Game start"], ["half", "Halftime"], ["close", "Close game"], ["ot", "Overtime"], ["lead", "Lead changes"], ["final", "Final score"]],
-    watched: [["start", "Game start"], ["half", "Halftime"], ["close", "Close game"], ["ot", "Overtime"], ["lead", "Lead changes"], ["final", "Final score"]],
-    all:     [["close", "Close games"], ["ot", "Overtime"], ["upset", "Upset alerts"], ["playoff", "Playoff games starting"]],
+    team:    [["start", "Game Start"], ["score", "Every Score"], ["redzone", "Red Zone"], ["period", "End Of Period"], ["half", "Halftime"], ["close", "Close Game"], ["ot", "Overtime"], ["lead", "Lead Changes"], ["comeback", "Comebacks"], ["final", "Final Score"]],
+    watched: [["start", "Game Start"], ["score", "Every Score"], ["redzone", "Red Zone"], ["period", "End Of Period"], ["half", "Halftime"], ["close", "Close Game"], ["ot", "Overtime"], ["lead", "Lead Changes"], ["comeback", "Comebacks"], ["final", "Final Score"]],
+    all:     [["close", "Close Games"], ["ot", "Overtime"], ["upset", "Upset Alerts"], ["comeback", "Big Comebacks"], ["nohit", "No-Hitter Watch"], ["playoff", "Playoff Games Starting"]],
   };
+  const REMIND_MINS = [30, 15, 10, 5, 1];
+  // How big a deficit counts as a comeback when it's erased
+  const COMEBACK = { Basketball: 15, Football: 14, Baseball: 4, Hockey: 2, Soccer: 2 };
   const seen = new Set();
   const snap = {};
+  const snapPrev = {};
+  // Pregame heads-ups: checked every 30 seconds without hitting the network
+  const reminded = new Set();
+  function checkReminders() {
+    if (!isToday()) return;
+    const now = Date.now();
+    allGames().forEach(g => {
+      if (g.state !== "pre" || !g.date) return;
+      const mins = (new Date(g.date) - now) / 60e3;
+      if (mins <= 0 || mins > 31) return;
+      const want = new Set([...(g.fav ? state.alertPrefs.team.remind || [] : []), ...(isWatched(g) ? state.alertPrefs.watched.remind || [] : [])]);
+      const due = [...want].filter(m => mins <= m && !reminded.has(g.id + ":r" + m)).sort((x, y) => x - y);
+      if (!due.length) return;
+      due.forEach(m => reminded.add(g.id + ":r" + m));      // crossed several at once? send just the closest
+      const m = due[0], [a, h] = g.teams;
+      const who = g.fav ? favName(g) : `${a.abbr} at ${h.abbr}`;
+      const left = Math.max(1, Math.round(mins));
+      const watch = g.watch?.[0] ? `Watch on ${g.watch[0].app}` : (g.broadcast || g.lg.short || g.lg.name);
+      notify(`${who} Starts In ${left} Min`, `${a.name || a.abbr} at ${h.name || h.abbr} · ${timeLabel(g.date)}`, watch, g.link, false, g.id + ":r" + m);
+    });
+  }
+  setInterval(checkReminders, 30000);
   let primed = false;
   function gameKey(g) { return g.lg.id + ":" + g.id; }
   function isWatched(g) { return !!state.watched[gameKey(g)]; }
@@ -1224,7 +1325,13 @@ button.brand, button.brand span { color: var(--accent); }
   function checkAlerts() {
     allGames().forEach(g => {
       const prev = snap[g.id];
-      const now = { state: g.state, leader: leaderOf(g), half: /halftime|^ht$|end of (the )?(1st|2nd)( period)?$/i.test(g.status) };
+      snapPrev[g.id] = prev;
+      const [ta, th] = g.teams;
+      const sa = +ta?.score || 0, sh = +th?.score || 0;
+      const now = { state: g.state, leader: leaderOf(g), half: /halftime|^ht$|end of (the )?(1st|2nd)( period)?$/i.test(g.status),
+        total: sa + sh, sa, sh, period: g.period || 0, red: !!g.sit?.isRedZone,
+        // biggest deficit each side has faced so far
+        defA: Math.max(prev?.defA || 0, sh - sa), defH: Math.max(prev?.defH || 0, sa - sh) };
       snap[g.id] = now;
       if (!primed || !prev) {
         // first look: remember what's already happened so nothing old fires
@@ -1236,6 +1343,19 @@ button.brand, button.brand span { color: var(--accent); }
       if (g.state === "in" && now.half && !prev.half) events.push("half");
       if (g.state === "in" && prev.leader && now.leader && prev.leader !== now.leader) events.push("lead");
       if (prev.state !== "post" && g.state === "post") events.push("final");
+      if (g.state === "in") {
+        if (now.total > prev.total && g.lg.sport !== "Basketball") events.push("score");
+        if (g.lg.sport === "Football" && now.red && !prev.red) events.push("redzone");
+        if (now.period > prev.period && prev.period > 0 && g.lg.sport !== "Baseball" && !now.half) events.push("period");
+        const need = COMEBACK[g.lg.soccer ? "Soccer" : g.lg.sport] || 0;
+        const k = g.id + ":comeback";
+        if (need && !seen.has(k) && ((now.defA >= need && now.sa >= now.sh) || (now.defH >= need && now.sh >= now.sa))) { seen.add(k); events.push("comeback"); }
+        if (g.lg.sport === "Baseball" && now.period >= 6) {
+          const nh = g.teams.find(t => t.hits === 0 || t.hits === "0");
+          const kk = g.id + ":nohit";
+          if (nh && !seen.has(kk)) { seen.add(kk); events.push("nohit"); }
+        }
+      }
       if (g.state === "in") triggers(g).forEach(tr => { const k = g.id + ":" + tr; if (!seen.has(k)) { seen.add(k); events.push(tr); } });
       const fired = new Set();
       events.forEach(ev => {
@@ -1268,14 +1388,22 @@ button.brand, button.brand span { color: var(--accent); }
       case "start": return notify(g.fav ? `${who} game is on` : `${who} is on`, `${a.name || a.abbr} at ${h.name || h.abbr}`, watch, g.link, false, k);
       case "playoff": return notify(`Playoffs: ${a.abbr} at ${h.abbr} is on`, g.note || g.series || `${a.name} at ${h.name}`, watch, g.link, false, k);
       case "half": return notify(`${who}: ${/end of/i.test(g.status) ? g.status : "Halftime"}`, line, watch, g.link, false, k);
-      case "lead": return notify(`${who}: Lead change`, `${leaderOf(g)} leads · ${line}`, watch, g.link, false, k);
-      case "close": return notify(`${g.fav || isWatched(g) ? who + ": " : ""}Close game`, line, watch, g.link, false, k);
-      case "ot": return notify(`${g.fav || isWatched(g) ? who + ": " : ""}${g.lg.sport === "Baseball" ? "Extra innings" : "Overtime"}`, line, watch, g.link, false, k);
-      case "upset": return notify(g.reasons.find(r => /Upset/.test(r)) || "Upset alert", line, watch, g.link, true, k);
+      case "lead": return notify(`${who}: Lead Change`, `${leaderOf(g)} leads · ${line}`, watch, g.link, false, k);
+      case "close": return notify(`${g.fav || isWatched(g) ? who + ": " : ""}Close Game`, line, watch, g.link, false, k);
+      case "ot": return notify(`${g.fav || isWatched(g) ? who + ": " : ""}${g.lg.sport === "Baseball" ? "Extra Innings" : "Overtime"}`, line, watch, g.link, false, k);
+      case "score": {
+        const scorer = (+a.score) - (+(snapPrev[g.id]?.sa ?? a.score)) > 0 ? a : h;
+        return notify(`${who}: ${scorer.abbr} Scores`, line, watch, g.link, false, k + ":" + a.score + "-" + h.score);
+      }
+      case "redzone": return notify(`${who}: Red Zone`, `${g.sit?.downDistanceText || ""}${g.sit?.downDistanceText ? " · " : ""}${line}`, watch, g.link, false, k + ":" + Date.now());
+      case "period": return notify(`${who}: ${g.status}`, line, watch, g.link, false, k + ":" + g.period);
+      case "comeback": return notify(`${who}: Comeback`, `${leaderOf(g) ? leaderOf(g) + " leads" : "All square"} after trailing big · ${line}`, watch, g.link, true, k);
+      case "nohit": { const t = g.teams.find(t => +t.hits === 0); return notify(`No-Hitter Watch: ${t?.abbr || ""}`, `${t?.name || t?.abbr} has no hits · ${g.status} · ${line}`, watch, g.link, true, k); }
+      case "upset": return notify(g.reasons.find(r => /Upset/.test(r)) || "Upset Alert", line, watch, g.link, true, k);
       case "final": {
         const me = g.teams.find(t => isFavTeam(g.lg, t.abbr)), opp = g.teams.find(t => t !== me);
         const res = g.fav && me && opp ? ((+me.score) > (+opp.score) ? "W" : (+me.score) < (+opp.score) ? "L" : "T") : "";
-        return notify(`${who} final${res ? ": " + res : ""}`, `${a.abbr} ${a.score}, ${h.abbr} ${h.score}`, g.lg.short || g.lg.name, g.link, res === "L", k);
+        return notify(`${who} Final${res ? ": " + res : ""}`, `${a.abbr} ${a.score}, ${h.abbr} ${h.score}`, g.lg.short || g.lg.name, g.link, res === "L", k);
       }
     }
   }
@@ -1285,7 +1413,7 @@ button.brand, button.brand span { color: var(--accent); }
     const g = findGame(key);
     if (state.watched[key]) {
       askPermission();
-      toast("Alerts on for this game", g ? `${g.teams[0]?.abbr} at ${g.teams[1]?.abbr}` : "", "Change what you get in Settings", "", false);
+      toast("Alerts On For This Game", g ? `${g.teams[0]?.abbr} at ${g.teams[1]?.abbr}` : "", "Change what you get in Settings", "", false);
     }
     render();
     if (openGameKey === key) repaintGame();
@@ -1329,7 +1457,7 @@ button.brand, button.brand span { color: var(--accent); }
   function bellBtn(g) {
     if (g.state === "post") return "";
     const k = g.lg.id + ":" + g.id, on = !!state.watched[k];
-    return `<button class="bellbtn ${on ? "on" : ""}" data-watchgame="${k}" aria-pressed="${on}" title="${on ? "Alerts on for this game" : "Get alerts for this game"}" aria-label="${on ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL}</button>`;
+    return `<button class="bellbtn ${on ? "on" : ""}" data-watchgame="${k}" aria-pressed="${on}" title="${on ? "Alerts On For This Game" : "Get alerts for this game"}" aria-label="${on ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL}</button>`;
   }
   function statusClass(g) { return g.state === "in" ? "live" : g.state === "post" ? "final" : ""; }
 
@@ -1345,7 +1473,7 @@ button.brand, button.brand span { color: var(--accent); }
       return `${bases}${outs}<span class="txt">${s.balls != null ? `${s.balls}-${s.strikes}` : ""}${s.lastPlay?.text ? " · " + esc(s.lastPlay.text) : ""}</span>`;
     }
     if (g.lg.sport === "Football" && s.downDistanceText) {
-      return `<span class="txt">${s.isRedZone ? '<b style="color:var(--live)">Red zone</b> · ' : ""}${esc(s.downDistanceText)}</span>`;
+      return `<span class="txt">${s.isRedZone ? '<b style="color:var(--live)">Red Zone</b> · ' : ""}${esc(s.downDistanceText)}</span>`;
     }
     // Basketball, hockey, soccer: the latest play when ESPN sends one
     if (s.lastPlay?.text) return `<span class="txt" title="${esc(s.lastPlay.text)}">${esc(s.lastPlay.text)}</span>`;
@@ -1371,6 +1499,7 @@ button.brand, button.brand span { color: var(--accent); }
     </div>`;
   }
   function card(g, showLg) {
+    if (state.density === "compact" && !(state.expandFavs && g.fav)) return miniCard(g, showLg === true);
     return `<article class="g tap" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(g.teams.map(x => x.name).join(" vs "))}: game details">
       <div class="g-top">${showLg === true ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span><span class="wslot">${watchPill(g)}</span></div>
       ${g.teams.map((t, i) => teamRow(g, t, i)).join("")}
@@ -1436,6 +1565,15 @@ button.brand, button.brand span { color: var(--accent); }
   }
 
   // Your teams strip
+  // Compact scoreboard card (CBS-style two-up grid)
+  function miniCard(g, showLg) {
+    const [a, h] = g.teams;
+    if (!a || !h) return "";
+    const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
+    const row = (t, o) => `<span class="mcg-row ${lose(t, o) ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<i></i>"}<b>${t.rank ? `<small>${t.rank}</small> ` : ""}${esc(t.abbr)}</b>${isFavTeam(g.lg, t.abbr) ? '<span class="mc-fav">★</span>' : ""}<em class="${g.state === "pre" ? "rec" : ""}">${esc(g.state === "pre" ? t.record : t.score)}</em></span>`;
+    return `<article class="g mini tap ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name)}: game details">
+      <span class="mcg-top">${showLg ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span></span>${row(a, h)}${row(h, a)}</article>`;
+  }
   // Top strip: mini versions of the game cards
   function miniRow(logo, abbr, rec, score, lose, fav) {
     return `<span class="mc-row ${lose ? "lose" : ""}">${logo ? `<img src="${esc(logo)}" alt="">` : "<i></i>"}<b>${esc(abbr)}</b>${rec ? `<small>${esc(rec)}</small>` : ""}${fav ? '<span class="mc-fav" aria-label="Your team">★</span>' : ""}${score != null ? `<em>${esc(score)}</em>` : ""}</span>`;
@@ -1483,7 +1621,7 @@ button.brand, button.brand span { color: var(--accent); }
           <td class="num ${toPar(r.today)}">${esc(r.today || "–")}</td>
           <td class="num">${esc(r.thru || "–")}</td></tr>`;
       }).join("")}</tbody></table></div>` : `<div class="empty">Tee times aren't posted yet.</div>`;
-    const more = e.link ? `<div class="f-act" style="padding-bottom:12px"><a class="f-link" href="${esc(e.link)}" target="_blank" rel="noopener">Full leaderboard</a></div>` : "";
+    const more = e.link ? `<div class="f-act" style="padding-bottom:12px"><a class="f-link" href="${esc(e.link)}" target="_blank" rel="noopener">Full Leaderboard</a></div>` : "";
     return block("ev-" + e.lg.id + e.id, `${e.lg.short || e.lg.name} · ${e.name}`, eventMeta(e), body + more);
   }
   const BLOCK = { golf: golfBlock };
@@ -1546,7 +1684,7 @@ button.brand, button.brand span { color: var(--accent); }
       { id: "teams", label: "My Teams", n: games.filter(g => g.fav).length || null },
       { id: "mine", label: "My Leagues" },
       { id: "upcoming", label: "Upcoming" },
-      { id: "close", label: "Close games", n: closeN, hot: closeN > 0 },
+      { id: "close", label: "Close Games", n: closeN, hot: closeN > 0 },
     ];
     const cfb = games.filter(g => g.lg.id === "ncaaf");
     LEAGUES.filter(lg => (MAIN_TABS.includes(lg.id) && counts[lg.id] > 0) || state.tab === lg.id).forEach(lg => {
@@ -1591,7 +1729,7 @@ button.brand, button.brand span { color: var(--accent); }
     const up = state.upcoming;
     if (!up.days?.length) return '<div class="skel"></div><div class="skel"></div>';
     const order = upcomingIds();
-    let html = `<div class="mine-bar"><span>Next 3 days · your teams, then your leagues</span><button class="chip" data-edit-leagues>Edit leagues</button></div>`;
+    let html = `<div class="mine-bar"><span>Next 3 days · your teams, then your leagues</span><button class="chip" data-edit-leagues>Edit Leagues</button></div>`;
     up.days.forEach(({ date, games }) => {
       games = games.map(g => ({ ...g, fav: g.teams.some(t => isFavTeam(g.lg, t.abbr)) }));
       if (!games.length) return;
@@ -1636,7 +1774,7 @@ button.brand, button.brand span { color: var(--accent); }
       const playing = new Set(mine.flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
       const nexts = isToday() ? [...state.favs].filter(k => !playing.has(k) && state.next[k]?.date)
         .sort((a, b) => favRank(a) - favRank(b)) : [];
-      html += `<div class="mystrip" aria-label="Your teams">${mine.map(stripChip).join("")}${nexts.map(nextChip).join("")}<button class="ms add" data-open-sheet>${state.favs.size ? "+ Teams" : "+ Follow teams"}</button></div>`;
+      html += `<div class="mystrip" aria-label="Your teams">${mine.map(stripChip).join("")}${nexts.map(nextChip).join("")}<button class="ms add" data-open-sheet>${state.favs.size ? "+ Teams" : "+ Follow Teams"}</button></div>`;
     }
 
     // Worth A Watch: always at the top of Live and All. Only games that earned it:
@@ -1666,7 +1804,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (tab === "teams") {
       const ORD = { in: 0, pre: 1, post: 2 };
       const mine = games.filter(g => g.fav).sort((a, b) => (ORD[a.state] - ORD[b.state]) || gameRank(a) - gameRank(b));
-      html += `<div class="mine-bar"><span>Following ${state.favs.size} team${state.favs.size === 1 ? "" : "s"}</span><button class="chip" data-open-sheet>Edit teams</button></div>`;
+      html += `<div class="mine-bar"><span>Following ${state.favs.size} team${state.favs.size === 1 ? "" : "s"}</span><button class="chip" data-open-sheet>Edit Teams</button></div>`;
       if (mine.length) {
         const liveN = mine.filter(g => g.state === "in").length;
         html += block("myteams", isToday() ? "Today" : dayLabel(state.date), liveN ? `${liveN} Live · ${mine.length} Total` : countLabel(mine.length),
@@ -1693,7 +1831,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (tab === "mine") {
       const order = state.favLeagues.filter(id => LG[id]).concat(LEAGUES.map(l => l.id).filter(id => !state.favLeagues.includes(id)));
       const off = [];
-      html += `<div class="mine-bar"><span>Your leagues first, in your order</span><button class="chip" data-edit-leagues>Edit order</button></div>`;
+      html += `<div class="mine-bar"><span>Your leagues first, in your order</span><button class="chip" data-edit-leagues>Edit Order</button></div>`;
       let dividerDone = false;
       order.forEach(id => {
         const lg = LG[id], isFav = state.favLeagues.includes(id);
@@ -1709,7 +1847,7 @@ button.brand, button.brand span { color: var(--accent); }
           }
         }
         if (!section) { if (isFav) off.push(lg.short || lg.name); return; }
-        if (!isFav && !dividerDone) { html += `<h3 class="mine-div">Other leagues</h3>`; dividerDone = true; }
+        if (!isFav && !dividerDone) { html += `<h3 class="mine-div">Other Leagues</h3>`; dividerDone = true; }
         html += section;
       });
       if (off.length) html += `<p class="quiet">No games ${isToday() ? "today" : "this day"}: ${esc(off.join(", "))}</p>`;
@@ -2056,7 +2194,7 @@ button.brand, button.brand span { color: var(--accent); }
     clearTimeout(gameTimer);
     const el = document.getElementById("gsheet");
     if (!quiet) {
-      gameTab = "stats"; lastSummary = null;
+      gameTab = "stats"; lastSummary = null; lfSide = 0;
       el.innerHTML = gameShell(g, null, lg);
       el.hidden = false; el.scrollTop = 0;
     }
@@ -2114,7 +2252,7 @@ button.brand, button.brand span { color: var(--accent); }
     html += `</div>`;
     if (g) {
       const w = gs !== "post" && g.watch?.[0];
-      html += `<div class="gc-actions">${w ? `<a class="watchbig" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">${PLAY_BIG} Watch on ${esc(w.app)}</a>` : g.link ? `<a class="watchbig" href="${esc(g.link)}" target="_blank" rel="noopener">Open on ESPN</a>` : ""}
+      html += `<div class="gc-actions">${w ? `<a class="watchbig" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">${PLAY_BIG} Watch On ${esc(w.app)}</a>` : g.link ? `<a class="watchbig" href="${esc(g.link)}" target="_blank" rel="noopener">Open On ESPN</a>` : ""}
         ${gs !== "post" ? `<button class="belbig ${state.watched[g.lg.id + ":" + g.id] ? "on" : ""}" data-watchgame="${g.lg.id}:${g.id}" aria-label="${state.watched[g.lg.id + ":" + g.id] ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL_BIG}</button>` : ""}</div>
         ${g.broadcast ? `<div class="gc-net">${gs === "in" ? "Live on" : gs === "pre" ? "On" : "Aired on"} ${esc(g.broadcast.replace(" / ", ", "))}</div>` : ""}`;
     }
@@ -2123,7 +2261,7 @@ button.brand, button.brand span { color: var(--accent); }
     const tabs = [["stats", "Stats"], ["plays", "Play-By-Play"], ["box", "Box Score"]];
     html += `<div class="gtabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${gameTab === k}" class="${gameTab === k ? "on" : ""}" data-gtab="${k}">${l}</button>`).join("")}</div>`;
     html += gameTab === "stats" ? statsTab(j, a, h, lg) : gameTab === "plays" ? playsTab(j, lg) : boxTab(j);
-    if (g?.link) html += `<a class="ext" href="${esc(g.link)}" target="_blank" rel="noopener">Open full Gamecast on ESPN</a>`;
+    if (g?.link) html += `<a class="ext" href="${esc(g.link)}" target="_blank" rel="noopener">Open Full Gamecast On ESPN</a>`;
     return html + `</div>`;
   }
   function scorers(j, a, h) {
@@ -2147,7 +2285,7 @@ button.brand, button.brand span { color: var(--accent); }
     const sp = typeof pc.spread === "number" ? pc.spread : null;
     const fmt = n => n == null || n === "" ? "–" : (n > 0 ? "+" + n : String(n));
     const so = x => x?.spreadOdds != null ? `<br><small>${fmt(x.spreadOdds)}</small>` : "";
-    const foot = pc.provider?.name ? `<div class="foot">Odds by ${esc(pc.provider.name)}</div>` : "";
+    const foot = pc.provider?.name ? `<div class="foot">Odds By ${esc(pc.provider.name)}</div>` : "";
     if (sp != null || pc.overUnder != null || pc.homeTeamOdds?.moneyLine != null) {
       return `<div class="gc-c">${head}<table class="tbl"><thead><tr><th>Team</th><th>${lineName}</th><th>Total</th><th>Moneyline</th></tr></thead><tbody>
         <tr><td>${esc(a.abbr)}</td><td>${sp != null ? fmt(-sp) : "–"}${so(pc.awayTeamOdds)}</td><td>${pc.overUnder != null ? "O " + pc.overUnder : "–"}${pc.overOdds != null ? `<br><small>${fmt(pc.overOdds)}</small>` : ""}</td><td>${fmt(pc.awayTeamOdds?.moneyLine)}</td></tr>
@@ -2179,24 +2317,194 @@ button.brand, button.brand span { color: var(--accent); }
       const stats = (tA.statistics || []).map(s => {
         const o = (tH.statistics || []).find(x => x.name === s.name || x.label === s.label);
         const av = num(s.displayValue), hv = num(o?.displayValue);
-        return o && !isNaN(av) && !isNaN(hv) && !/-/.test(String(s.displayValue).slice(1)) ? { label: s.label || s.name, a: s.displayValue, h: o.displayValue, av, hv } : null;
-      }).filter(Boolean).slice(0, 9);
+        return o && !isNaN(av) && !isNaN(hv) && !/-/.test(String(s.displayValue).slice(1)) ? { name: s.name, label: s.label || s.name, a: s.displayValue, h: o.displayValue, av, hv } : null;
+      }).filter(Boolean).slice(0, 12);
       if (stats.length) {
         const ca = readable(a.color), ch = readable(h.color);
-        html += `<div class="gc-c"><h3>Team Stats</h3><div class="sbar" style="margin-top:0;font-weight:700"><span style="text-align:left;color:var(--fg)">${esc(a.abbr)}</span><span></span><span style="color:var(--fg)">${esc(h.abbr)}</span></div>${stats.map(s => {
+        // Before a game these are season numbers, so show each team's league rank next to them
+        const pre = (j.header?.competitions?.[0]?.status?.type?.state || "pre") === "pre";
+        const rk = pre ? teamRanks(lg) : null;
+        const rankOf = (x, s) => rk?.[String(x.id)]?.[s.name];
+        const tag = r => r ? ` <small>(${ord(r)})</small>` : "";
+        html += `<div class="gc-c"><h3 class="h3-teams">${logoImg(a)}<span>${pre ? "Team Stats · Season" : "Team Stats"}</span>${logoImg(h)}</h3>${stats.map(s => {
           const tot = Math.abs(s.av) + Math.abs(s.hv) || 1, l = Math.max(.04, Math.abs(s.av) / tot), r = Math.max(.04, Math.abs(s.hv) / tot);
-          return `<div class="sbar"><b>${esc(s.a)}</b><span>${esc(s.label)}</span><b>${esc(s.h)}</b></div>
+          return `<div class="sbar"><b>${esc(s.a)}${tag(rankOf(a, s))}</b><span>${esc(s.label)}</span><b>${rankOf(h, s) ? `<small>(${ord(rankOf(h, s))})</small> ` : ""}${esc(s.h)}</b></div>
             <div class="bar-track" style="--l:${l}fr;--r:${r}fr"><i style="background:${ca}"></i><i style="background:${ch}"></i></div>`;
         }).join("")}</div>`;
       }
     }
-    const leaders = (j.leaders || []).filter(t => t.leaders?.length);
-    if (leaders.length) {
-      html += `<div class="gc-c"><h3>Leaders</h3><div class="ldr">${leaders.slice(0, 2).map(t => `<div><b>${esc(t.team?.abbreviation || "")}</b>${
-        t.leaders.slice(0, 3).map(c => { const l = c.leaders?.[0]; return l ? `<p>${esc(l.athlete?.displayName || "")}<small>${esc(c.displayName || "")}: ${esc(l.displayValue || "")}</small></p>` : ""; }).join("")}</div>`).join("")}</div></div>`;
-    }
-    if (!state.showOdds) html += `<div class="odds-off"><button class="linkbtn" data-odds="on">Show betting odds</button></div>`;
+    html += leadersCard(j, a, h);
+    html += lastFiveCard(j, a, h);
+    html += standingsCard(j, a, h, lg);
+    if (!state.showOdds) html += `<div class="odds-off"><button class="linkbtn" data-odds="on">Show Betting Odds</button></div>`;
     return html || `<div class="empty">No stats yet.</div>`;
+  }
+  // ---- Pregame and season context (CBS-style)
+  let lfSide = 0;                       // Last 5 Games: 0 = away, 1 = home
+  const standCache = {};                // "lg|season" -> { entries, at }
+  function teamPair(j, a, h) {
+    const find = (arr, x) => (arr || []).find(t => String(t.team?.id) === String(x.id) || t.team?.abbreviation === x.abbr);
+    return arr => [find(arr, a), find(arr, h)];
+  }
+  function leadersCard(j, a, h) {
+    const [la, lh] = teamPair(j, a, h)((j.leaders || []).filter(t => t.leaders?.length));
+    if (!la && !lh) return "";
+    const pre = (j.header?.competitions?.[0]?.status?.type?.state || "pre") === "pre";
+    const cats = [];
+    (la || lh).leaders.forEach(c => { if (!cats.some(x => x.name === c.name)) cats.push({ name: c.name, label: c.displayName || c.name }); });
+    const pick = (tm, name) => tm?.leaders.find(c => c.name === name)?.leaders?.[0];
+    const person = l => {
+      if (!l) return `<div class="ld-p"><span class="ld-ph"></span><b>–</b></div>`;
+      const ph = l.athlete?.headshot?.href || l.athlete?.headshot || "";
+      return `<div class="ld-p">${ph ? `<img class="ld-ph" src="${esc(typeof ph === "string" ? ph : "")}" alt="" loading="lazy">` : `<span class="ld-ph"></span>`}<b>${esc(l.athlete?.shortName || l.athlete?.displayName || "")}</b><small>${esc(l.displayValue || "")}</small></div>`;
+    };
+    const rows = cats.slice(0, 6).map(c => `<div class="ld-row">${person(pick(la, c.name))}<span class="ld-cat">${esc(c.label)}</span>${person(pick(lh, c.name))}</div>`).join("");
+    return `<div class="gc-c"><h3>${pre ? "Season Leaders" : "Game Leaders"}</h3><div class="ld-head"><span>${esc(a.abbr)}</span><span>${esc(h.abbr)}</span></div>${rows}</div>`;
+  }
+  // League ranks for every team stat (ESPN's league-wide team stats table). ESPN's own rank when it has one,
+  // otherwise ranked here from every team's value. Lower is better for "against", turnovers, fouls and penalties.
+  const rankCache = {};
+  function teamRanks(lg) {
+    const c = rankCache[lg.id];
+    if (c && Date.now() - c.at < 60 * 60e3) return c.ranks;
+    if (c?.pending) return null;
+    rankCache[lg.id] = { pending: true, at: Date.now(), ranks: c?.ranks || null };
+    (async () => {
+      try {
+        const r = await fetch("https://site.web.api.espn.com/apis/common/v3/sports/" + lg.path + "/statistics/byteam?region=us&lang=en&contentorigin=espn&limit=400" + (lg.extra ? lg.extra.replace(/&?groups=\d+/, "") : ""));
+        const jj = await r.json();
+        const heads = jj.categories || [];
+        const vals = {};   // name -> [{id, v, r}]
+        (jj.teams || []).forEach(tm => (tm.categories || []).forEach((cat, i) => {
+          if (/^Opponent/i.test(cat.displayName || "")) return;
+          const names = heads[i]?.names || [];
+          names.forEach((n, k) => {
+            const v = cat.values?.[k]; if (v == null || isNaN(v)) return;
+            (vals[n] = vals[n] || []).push({ id: String(tm.team?.id), v: +v, r: parseInt(cat.ranks?.[k]) || 0 });
+          });
+        }));
+        // Per-game versions of totals (e.g. shots against per game), since the game feed shows averages
+        const games = {};
+        (vals.games || vals.gamesPlayed || []).forEach(x => games[x.id] = x.v);
+        Object.keys(vals).forEach(n => {
+          if (/^avg/.test(n) || /pct|percent|games/i.test(n)) return;
+          const base = n.replace(/Total$/, "");
+          const avg = "avg" + base[0].toUpperCase() + base.slice(1);
+          if (vals[avg]) return;
+          vals[avg] = vals[n].filter(x => games[x.id] > 0).map(x => ({ id: x.id, v: x.v / games[x.id], r: 0 }));
+        });
+        const ranks = {};
+        Object.entries(vals).forEach(([n, list]) => {
+          const low = /against|allowed|turnover|giveaway|foul|penalt|lost|losses|interception|sacked/i.test(n) && !/pct|percent/i.test(n);
+          list.forEach(x => {
+            const r = 1 + list.filter(y => low ? y.v < x.v - 1e-9 : y.v > x.v + 1e-9).length;
+            (ranks[x.id] = ranks[x.id] || {})[n] = r;
+          });
+        });
+        rankCache[lg.id] = { at: Date.now(), ranks };
+      } catch { rankCache[lg.id] = { at: Date.now(), ranks: {} }; }
+      if (openGameKey && openGameKey.startsWith(lg.id + ":")) repaintGame();
+    })();
+    return c?.ranks || null;
+  }
+  function lastFiveCard(j, a, h) {
+    const [fa, fh] = teamPair(j, a, h)(j.lastFiveGames || []);
+    if (!fa && !fh) return "";
+    const side = lfSide === 1 ? (fh || fa) : (fa || fh);
+    const evs = (side?.events || []).slice().sort((x, y) => new Date(y.gameDate) - new Date(x.gameDate)).slice(0, 5);
+    const tabs = `<div class="seg gc-seg"><button class="${side === fa ? "on" : ""}" data-lf="0">${esc(a.abbr)}</button><button class="${side === fh ? "on" : ""}" data-lf="1">${esc(h.abbr)}</button></div>`;
+    const rows = evs.map(e => {
+      const d = e.gameDate ? new Date(e.gameDate) : null;
+      const res = (e.gameResult || "").toUpperCase();
+      return `<div class="l5-row"><span class="l5-d">${d ? esc(d.toLocaleDateString(undefined, { weekday: "short" })) + "<br>" + esc(d.toLocaleDateString(undefined, { month: "numeric", day: "numeric" })) : ""}</span>
+        <span class="l5-at">${esc(e.atVs || "")}</span>${e.opponentLogo || e.opponent?.logo ? `<img src="${esc(e.opponentLogo || e.opponent.logo)}" alt="">` : "<i></i>"}
+        <span class="l5-o">${esc(e.opponent?.shortDisplayName || e.opponent?.displayName || e.opponent?.abbreviation || "")}</span>
+        <span class="l5-r"><small>Final</small><span><b class="${res === "W" ? "w" : res === "L" ? "l" : ""}">${esc(res)}</b> ${esc(e.score || "")}</span></span></div>`;
+    }).join("");
+    return `<div class="gc-c"><h3>Last 5 Games</h3>${tabs}${rows || `<div class="foot">No recent games.</div>`}</div>`;
+  }
+  // Standings feed (current season), all teams flattened
+  async function loadStandings(lg, season) {
+    const key = lg.id + "|" + season;
+    const c = standCache[key];
+    if (c && (c.entries || c.pending) && Date.now() - c.at < 30 * 60e3) return c.pending || c.entries;
+    const pending = (async () => {
+      try {
+        // site.web.api with type=0&level=1 returns the live, league-wide table for the season
+        let r = await fetch("https://site.web.api.espn.com/apis/v2/sports/" + lg.path + "/standings?type=0&level=1&seasontype=2" + (season ? "&season=" + season : "")).catch(() => null);
+        if (!r || !r.ok) r = await fetch("https://site.api.espn.com/apis/v2/sports/" + lg.path + "/standings" + (season ? "?season=" + season : ""));
+        const jj = r.ok ? await r.json() : null;
+        const out = [];
+        const walk = n => { (n?.standings?.entries || []).forEach(e => out.push(e)); (n?.children || []).forEach(walk); };
+        walk(jj);
+        standCache[key] = { entries: out, at: Date.now() };
+        return out;
+      } catch { standCache[key] = { entries: [], at: Date.now() }; return []; }
+    })();
+    standCache[key] = { pending, at: Date.now() };
+    return pending;
+  }
+  function standEntries(j, lg) {
+    const season = j.header?.season?.year || "";
+    const c = standCache[lg.id + "|" + season];
+    if (c?.entries) return c.entries;
+    if (!c) loadStandings(lg, season).then(() => { if (lastSummary === j) repaintGame(); });
+    return null;
+  }
+  const statOf = (e, ...keys) => {
+    const s = (e?.stats || []).find(x => keys.includes(x.type) || keys.includes(x.name));
+    return s ? (s.summary || s.displayValue || "") : "";
+  };
+  const numOf = (e, ...keys) => { const s = (e?.stats || []).find(x => keys.includes(x.type) || keys.includes(x.name)); return s ? Number(s.value ?? parseFloat(s.displayValue)) : NaN; };
+  function entryFor(entries, x) { return entries.find(e => String(e.team?.id) === String(x.id) || e.team?.abbreviation === x.abbr); }
+  function standingsCard(j, a, h, lg) {
+    const entries = standEntries(j, lg);
+    const recs = c => c?.record || [];
+    const hc = (j.header?.competitions?.[0]?.competitors || []);
+    const ca = hc.find(c => String(c.team?.id) === String(a.id)), ch = hc.find(c => String(c.team?.id) === String(h.id));
+    const fromHeader = (c, type) => recs(c).find(r => r.type === type)?.summary || "";
+    const ea = entries && entryFor(entries, a), eh = entries && entryFor(entries, h);
+    const val = (e, c, keys, hdr) => (e ? statOf(e, ...keys) : "") || (hdr ? fromHeader(c, hdr) : "");
+    const clean = s => String(s || "").replace(/, \d+ PTS$/, "");
+    const rows = [
+      ["Record", val(ea, ca, ["total", "overall"], "total"), val(eh, ch, ["total", "overall"], "total")],
+      ["Away / Home", val(ea, ca, ["road"], "road"), val(eh, ch, ["home"], "home")],
+      ["Conference", val(ea, ca, ["vsconf"]), val(eh, ch, ["vsconf"])],
+      ["Division", val(ea, ca, ["vsdiv"]), val(eh, ch, ["vsdiv"])],
+      ["Last 10", val(ea, ca, ["lasttengames"]), val(eh, ch, ["lasttengames"])],
+      ["Streak", val(ea, ca, ["streak"]), val(eh, ch, ["streak"])],
+      [lg.sport === "Hockey" || lg.soccer ? "Goal Differential" : "Point Differential", val(ea, ca, ["pointsdiff", "pointdifferential"]), val(eh, ch, ["pointsdiff", "pointdifferential"])],
+    ].map(r => [r[0], clean(r[1]), clean(r[2])]).filter(r => r[1] || r[2]);
+    if (!rows.length) return entries === null ? `<div class="gc-c"><h3>Standings Overview</h3><div class="foot" style="margin:0">Loading…</div></div>` : "";
+    return `<div class="gc-c"><h3 class="h3-teams">${logoImg(a)}<span>Standings Overview</span>${logoImg(h)}</h3>${rows.map(r => `<div class="so-row"><b>${esc(r[1] || "–")}</b><span>${esc(r[0])}</span><b>${esc(r[2] || "–")}</b></div>`).join("")}</div>`;
+  }
+  function logoImg(x) { return x.logo ? `<img src="${esc(x.logo)}" alt="">` : `<i></i>`; }
+  function ordinal(n) { return ord(n); }
+  // League Rankings: per-game scoring, defense and differential ranked across the league
+  function rankingsCard(j, a, h, lg) {
+    const entries = standEntries(j, lg);
+    if (!entries?.length) return "";
+    const ea = entryFor(entries, a), eh = entryFor(entries, h);
+    if (!ea || !eh) return "";
+    const gp = e => numOf(e, "gamesplayed") || ((numOf(e, "wins") || 0) + (numOf(e, "losses") || 0) + (numOf(e, "otlosses", "ties") || 0)) || NaN;
+    const metric = (e, k) => { const g = gp(e); const v = numOf(e, k); return g > 0 && !isNaN(v) ? v / g : NaN; };
+    const word = lg.sport === "Hockey" || lg.soccer ? "Goals" : lg.sport === "Baseball" ? "Runs" : "Points";
+    const defs = [
+      { label: word + " For / Game", k: "pointsfor", hi: true },
+      { label: word + " Against / Game", k: "pointsagainst", hi: false },
+    ];
+    const rows = defs.map(d => {
+      const all = entries.map(e => metric(e, d.k)).filter(v => !isNaN(v));
+      const va = metric(ea, d.k), vh = metric(eh, d.k);
+      if (isNaN(va) || isNaN(vh) || all.length < 4) return "";
+      const rank = v => 1 + all.filter(x => d.hi ? x > v + 1e-9 : x < v - 1e-9).length;
+      const fmt = v => v >= 20 ? v.toFixed(1) : v.toFixed(2);
+      // longer bar = better rank
+      const sa = all.length + 1 - rank(va), sh = all.length + 1 - rank(vh), tot = sa + sh || 1;
+      return `<div class="sbar"><b>${fmt(va)} <small>(${ord(rank(va))})</small></b><span>${esc(d.label)}</span><b><small>(${ord(rank(vh))})</small> ${fmt(vh)}</b></div>
+        <div class="bar-track" style="--l:${Math.max(.06, sa / tot)}fr;--r:${Math.max(.06, sh / tot)}fr"><i style="background:${readable(a.color)}"></i><i style="background:${readable(h.color)}"></i></div>`;
+    }).join("");
+    return rows ? `<div class="gc-c"><h3 class="h3-teams">${logoImg(a)}<span>League Rankings</span>${logoImg(h)}</h3>${rows}</div>` : "";
   }
   function playsTab(j, lg) {
     let plays = [];
@@ -2237,6 +2545,8 @@ button.brand, button.brand span { color: var(--accent); }
   });
   document.getElementById("gsheet").addEventListener("click", async e => {
     if (e.target.closest("[data-gclose]")) { closeGame(); return; }
+    const lf = e.target.closest("[data-lf]");
+    if (lf) { lfSide = +lf.dataset.lf; repaintGame(); return; }
     const gt = e.target.closest("[data-gtab]");
     if (gt) { gameTab = gt.dataset.gtab; repaintGame(); return; }
     const od = e.target.closest("[data-odds]");
@@ -2257,9 +2567,51 @@ button.brand, button.brand span { color: var(--accent); }
   });
 
   // ---- Settings
+  const DENS_IC = {
+    compact: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>',
+    expanded: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3.5" width="18" height="7" rx="1.5"/><rect x="3" y="13.5" width="18" height="7" rx="1.5"/></svg>',
+  };
+  function paintDensBtn() {
+    const b = document.getElementById("densbtn");
+    const next = state.density === "compact" ? "expanded" : "compact";
+    b.innerHTML = DENS_IC[next] + `<span>${next === "compact" ? "Compact" : "Expanded"}</span>`;
+    b.setAttribute("aria-label", `Switch to ${next} scoreboard`);
+  }
+  function setDensity(v) {
+    state.density = v === "compact" ? "compact" : "expanded";
+    store.set("density", state.density);
+    document.documentElement.dataset.density = state.density;
+    paintDensBtn();
+  }
+  document.getElementById("densbtn").onclick = () => { setDensity(state.density === "compact" ? "expanded" : "compact"); render(); };
+  document.documentElement.dataset.density = state.density;
+  paintDensBtn();
+  // Pinch the scoreboard to switch: pinch in for Compact, out for Expanded (iOS Safari gesture events)
+  (() => {
+    const main = document.getElementById("main");
+    let s0 = 1, done = false;
+    main.addEventListener("gesturestart", e => { e.preventDefault(); s0 = e.scale || 1; done = false; }, { passive: false });
+    main.addEventListener("gesturechange", e => {
+      e.preventDefault();
+      if (done) return;
+      const r = (e.scale || 1) / s0;
+      if (r < 0.8 && state.density !== "compact") { done = true; setDensity("compact"); render(); toast("Compact Scoreboard", "", "", "", false); }
+      else if (r > 1.25 && state.density !== "expanded") { done = true; setDensity("expanded"); render(); toast("Expanded Scoreboard", "", "", "", false); }
+    }, { passive: false });
+    // Two-finger touch pinch for other browsers
+    let d0 = 0;
+    const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+    main.addEventListener("touchstart", e => { if (e.touches.length === 2) { d0 = dist(e.touches); done = false; } }, { passive: true });
+    main.addEventListener("touchmove", e => {
+      if (e.touches.length !== 2 || !d0 || done || "ongesturechange" in window) return;
+      const r = dist(e.touches) / d0;
+      if (r < 0.75 && state.density !== "compact") { done = true; setDensity("compact"); render(); }
+      else if (r > 1.3 && state.density !== "expanded") { done = true; setDensity("expanded"); render(); }
+    }, { passive: true });
+  })();
   function applyTheme() {
     const pal = store.get("palette", "red");
-    if (pal === "green" || pal === "navy") document.documentElement.dataset.palette = pal; else delete document.documentElement.dataset.palette;
+    if (["green", "navy", "purple", "orange"].includes(pal)) document.documentElement.dataset.palette = pal; else delete document.documentElement.dataset.palette;
     const t = store.get("theme", "system");
     if (t === "system") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
   }
@@ -2272,7 +2624,7 @@ button.brand, button.brand span { color: var(--accent); }
     store.set("alerts", on);
     if (on) {
       try { if ("Notification" in window && Notification.permission === "default") await Notification.requestPermission(); } catch {}
-      toast("Alerts on", "You'll get a heads-up when a game turns close, goes to overtime, or an upset starts brewing.", "Works while Scores is open");
+      toast("Alerts On", "You'll get a heads-up when a game turns close, goes to overtime, or an upset starts brewing.", "Works while Scores is open");
     }
   }
   function segRow(label, key, value, options, hint) {
@@ -2281,8 +2633,9 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function alertGroup(group, label, hint) {
     const prefs = state.alertPrefs[group];
+    const rem = group === "all" ? "" : `<div class="rem-lbl">Heads-Up Before Start</div><div class="toggles rem-row">${REMIND_MINS.map(m => { const on = (prefs.remind || []).includes(m); return `<button class="chip ${on ? "on" : ""}" data-remind-group="${group}" data-remind="${m}" aria-pressed="${on}" aria-label="${m} minute${m === 1 ? "" : "s"} before">${m} Min</button>`; }).join("")}</div>`;
     return `<div class="set-row set-col"><div class="set-lbl">${esc(label)}<small>${esc(hint)}</small></div>
-      <div class="toggles">${ALERT_EVENTS[group].map(([ev, name]) => `<button class="chip ${prefs[ev] ? "on" : ""}" data-alert-group="${group}" data-alert-ev="${ev}" aria-pressed="${!!prefs[ev]}">${esc(name)}</button>`).join("")}</div></div>`;
+      <div class="toggles">${ALERT_EVENTS[group].map(([ev, name]) => `<button class="chip ${prefs[ev] ? "on" : ""}" data-alert-group="${group}" data-alert-ev="${ev}" aria-pressed="${!!prefs[ev]}">${esc(name)}</button>`).join("")}</div>${rem}</div>`;
   }
   let setOpen = store.get("setOpen", { display: false, alerts: false });
   function setSection(id, title, sub, body) {
@@ -2291,23 +2644,25 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function renderSettings() {
     const teams = state.favs.size, leagues = state.favLeagues.length;
-    const on = Object.values(state.alertPrefs).reduce((n, g) => n + Object.values(g).filter(Boolean).length, 0);
+    const on = Object.values(state.alertPrefs).reduce((n, g) => n + Object.values(g).reduce((c, v) => c + (Array.isArray(v) ? v.length : v ? 1 : 0), 0), 0);
     document.getElementById("settings-body").innerHTML =
       `<div class="set-row"><div class="set-lbl">My Teams<small>Following ${teams} team${teams === 1 ? "" : "s"}</small></div><button class="chip" data-set-open="teams">Edit</button></div>` +
-      `<div class="set-row"><div class="set-lbl">My Leagues<small>${leagues} league${leagues === 1 ? "" : "s"} in your order</small></div><button class="chip" data-set-open="leagues">Edit order</button></div>` +
+      `<div class="set-row"><div class="set-lbl">My Leagues<small>${leagues} league${leagues === 1 ? "" : "s"} in your order</small></div><button class="chip" data-set-open="leagues">Edit Order</button></div>` +
       setSection("display", "Layout & Display", "Open to, layout, color, appearance, odds",
-        segRow("Open to", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens") +
+        segRow("Open To", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens") +
         segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
-        segRow("Color", "palette", store.get("palette", "red"), [["red", "Red"], ["navy", "Navy"], ["green", "Green"]]) +
+        segRow("Scoreboard", "density", state.density, [["compact", "Compact"], ["expanded", "Expanded"]], "Or pinch the scores: in for Compact, out for Expanded") +
+        segRow("Always Expand My Teams", "expandFavs", state.expandFavs ? "on" : "off", [["on", "On"], ["off", "Off"]], "In Compact, your teams' games stay full size") +
+        segRow("Color", "palette", store.get("palette", "red"), [["red", "Red"], ["navy", "Navy"], ["green", "Green"], ["purple", "Purple"], ["orange", "Orange"]]) +
         segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
-        segRow("Betting odds", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "Lines on game cards and in Gamecast")) +
+        segRow("Betting Odds", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "Lines on game cards and in Gamecast")) +
       setSection("alerts", "Alerts", `${on} alert${on === 1 ? "" : "s"} on`,
-        alertGroup("team", "My teams", "Games with teams you follow") +
-        alertGroup("watched", "Games you're watching", "Tap the bell on any game to add it") +
-        alertGroup("all", "All games", "Anything that turns interesting, any team") +
-        `<div class="set-row"><div class="set-lbl">Test alerts<small>${esc(notifyStatus())}. Alerts work while Scores is open.</small></div><button class="chip" data-test-alert>Send test</button></div>`) +
+        alertGroup("team", "My Teams", "Games with teams you follow") +
+        alertGroup("watched", "Games You're Watching", "Tap the bell on any game to add it") +
+        alertGroup("all", "All Games", "Anything that turns interesting, any team") +
+        `<div class="set-row"><div class="set-lbl">Test Alerts<small>${esc(notifyStatus())}. Alerts work while Scores is open.</small></div><button class="chip" data-test-alert>Send Test</button></div>`) +
       `<button class="set-done" data-set-done>Done</button>` +
-      `<p class="hint set-foot">${location.pathname.includes("/beta") ? `You're on the beta. <a href="../">Open the live app</a>` : `Want to try new features early? <a href="beta/">Open the beta</a>`}</p>`;
+      `<p class="hint set-foot">${location.pathname.includes("/beta") ? `You're on the beta. <a href="../">Open The Live App</a>` : `Want to try new features early? <a href="beta/">Open The Beta</a>`}</p>`;
   }
   function openSettings() { renderSettings(); document.getElementById("ssheet").hidden = false; }
   document.getElementById("settingsbtn").onclick = openSettings;
@@ -2321,9 +2676,20 @@ button.brand, button.brand span { color: var(--accent); }
       if (key === "view") { state.view = val; store.set("view3", val); }
       if (key === "theme") { store.set("theme", val); applyTheme(); }
       if (key === "palette") { store.set("palette", val); applyTheme(); }
+      if (key === "density") setDensity(val);
+      if (key === "expandFavs") { state.expandFavs = val === "on"; store.set("expandFavs", state.expandFavs); }
       if (key === "odds") { state.showOdds = val === "on"; store.set("showOdds", state.showOdds); }
 
       renderSettings(); render();
+      return;
+    }
+    const rb = e.target.closest("[data-remind-group]");
+    if (rb) {
+      const grp = rb.dataset.remindGroup, m = +rb.dataset.remind, list = state.alertPrefs[grp].remind || [];
+      state.alertPrefs[grp].remind = list.includes(m) ? list.filter(x => x !== m) : [...list, m].sort((x, y) => y - x);
+      store.set("alertPrefs", state.alertPrefs);
+      if (state.alertPrefs[grp].remind.length) askPermission();
+      renderSettings();
       return;
     }
     const ab = e.target.closest("[data-alert-group]");
@@ -2336,9 +2702,9 @@ button.brand, button.brand span { color: var(--accent); }
       return;
     }
     if (e.target.closest("[data-test-alert]")) {
-      toast("Test alert", "In-app alerts are working.", "", "", false);
+      toast("Test Alert", "In-app alerts are working.", "", "", false);
       await askPermission();
-      if ("Notification" in window && Notification.permission === "granted") notify("Test alert", "Phone notifications are working too.", "", "", false, "test");
+      if ("Notification" in window && Notification.permission === "granted") notify("Test Alert", "Phone notifications are working too.", "", "", false, "test");
       renderSettings();
       return;
     }

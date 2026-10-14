@@ -16,6 +16,9 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+_Nothing new. Beta matches live as of Oct 14, 10:00 AM._
+
+## Oct 14, 2026: Live (10:00 AM)
 - **Title Case everywhere** (Oct 14): every label, button, tab, heading and alert name now capitalizes each word (My Teams, All Games, Test Alerts, Send Test, Game Start, Red Zone, Edit Order, Full Leaderboard, Watch On YouTube TV…). Hints and descriptions stay as normal sentences.
 - **Pregame heads-ups** (Oct 14): get a reminder 30, 15, 10, 5 or 1 minute before your teams' games (and games you've belled). Pick any mix in Settings → Alerts. If you open the app late, you get the closest one, not a pile.
 - **New alerts** (Oct 14): Every score (not hoops), Red zone (football), End of period, Comebacks (erasing a 15-pt NBA, 14-pt football, 4-run, or 2-goal deficit), and for all games: Big comebacks and No-hitter watch (6th inning on).
