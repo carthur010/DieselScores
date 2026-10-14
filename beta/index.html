@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014190541">
+<meta name="build" content="20261014190925">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -823,8 +823,8 @@ button.brand, button.brand span { color: var(--accent); }
     // Leaderboards and events
     { id: "pga",    name: "PGA Tour", short: "PGA", sport: "Golf", path: "golf/pga", kind: "golf" },
     { id: "lpga",   name: "LPGA", sport: "Golf", path: "golf/lpga", kind: "golf" },
-    { id: "atp",    name: "ATP Tour", short: "ATP", sport: "Tennis", path: "tennis/atp", kind: "tennis" },
-    { id: "wta",    name: "WTA Tour", short: "WTA", sport: "Tennis", path: "tennis/wta", kind: "tennis" },
+    { id: "atp",    name: "Men's Tennis", sport: "Tennis", path: "tennis/atp", kind: "tennis" },
+    { id: "wta",    name: "Women's Tennis", sport: "Tennis", path: "tennis/wta", kind: "tennis" },
   ];
   const LG = Object.fromEntries(LEAGUES.map(l => [l.id, l]));
   const TEAM_LEAGUES = LEAGUES.filter(l => !l.kind);
