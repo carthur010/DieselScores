@@ -6,12 +6,12 @@ Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 
 > Beta 2.0 (/beta2) is now a snapshot of beta from Oct 14, 1:57 PM. The old Apple Sports redesign moved to /beta2-apple and stays parked. Its best ideas (game card, Upcoming tab, Stats/Odds, drag-to-reorder) now live in the classic beta.
 
-## In beta: TV Settings (was high priority)
+## Live: TV Settings (shipped Oct 14)
 - [ ] Each user picks the services they have (YouTube TV, Hulu + Live TV, Sling, Fubo, DirecTV Stream, cable login, Peacock, Paramount+, Max, ESPN+, Prime Video, Apple TV, League Pass, MLB.TV, NHL app); watch buttons only show those
 - [ ] Home market or ZIP code so regional networks (MSG, YES, SNY, NBC Sports) and blackouts show correctly
 - [ ] "Not on your services" note when nothing matches
 
-## In beta: Simple view
+## Live: Simple view (shipped Oct 14)
 - [ ] A **Simple** scoreboard option beside Compact and Expanded: just a list of games grouped by league (league logo and name, then time, two team logos and names, score, bell). No cards, odds or extras. Reference: a Bundesliga list with five 9:30 AM games stacked.
 
 ## Waiting to ship (in beta now)
@@ -20,6 +20,7 @@ Nothing. Everything shipped to live on Oct 14. Still worth a real-phone check: e
 ## Future features (Charles)
 - **Any Game That's On**: one tap for "I just want something on." Picks the best game live right now, ranked by closeness, stakes and whether it's on your services, with a Watch button.
 - **Rivalry**: tag rivalry games and boost them in Worth A Watch and alerts. Especially college (Texas vs. OU, Bama vs. Auburn, USC vs. UCLA), plus pro (Giants vs. Dodgers, Yankees vs. Red Sox). Starting list: [Bleacher Report, The 100 Most Heated Rivalries in Sports](https://bleacherreport.com/articles/1128435-the-100-most-heated-rivalries-in-sports).
+- **Halftime countdown**: a live clock on the game card showing how long until the second half starts (about 15 min in college football, 13 in the NFL and NBA, 15 in soccer). Could pair with a "Second Half Starting" alert.
 
 ## Alert ideas (not built yet)
 - Postponed / delayed / weather delay for your teams
