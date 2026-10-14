@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
+<meta name="build" content="20261014090427">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2347,6 +2348,18 @@ button.brand, button.brand span { color: var(--accent); }
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && isToday() && state.updatedAt && Date.now() - state.updatedAt > 25000) loadAll();
   });
+  // GitHub Pages lets browsers keep the page for ~10 minutes. Check for a newer build and jump to it.
+  async function checkForUpdate() {
+    if (!location.protocol.startsWith("http")) return;
+    try {
+      const mine = document.querySelector('meta[name="build"]')?.content;
+      const html = await (await fetch(location.pathname + "?check=" + Date.now(), { cache: "no-store" })).text();
+      const latest = (html.match(/<meta name="build" content="(\d+)">/) || [])[1];
+      if (mine && latest && latest !== mine) location.replace(location.pathname + "?v=" + latest + location.hash);
+    } catch {}
+  }
+  checkForUpdate();
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) checkForUpdate(); });
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   }
