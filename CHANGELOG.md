@@ -3,6 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- **Red color scheme**: brick red (#A93439) with black, white and a cream background, plus gold (#AC9841) for favorite stars, the selected date, Playoffs tags, the golf leader row and "Next" labels. Red app icon. Settings has a **Color** option to switch back to the classic green.
 - **Alert options** in Settings, in three groups you can mix and match:
   - **My teams**: game start, halftime, close game, overtime, lead changes, final score (W/L).
   - **Games you're watching**: tap the bell on any game (card, Worth A Watch row, or game screen) to get alerts for just that game. Same options.

@@ -8,8 +8,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#f3f5f4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0b110f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#fdf8e9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e0c0b" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -408,6 +408,38 @@ button.brand span { color: var(--accent); }
   .sheet { place-items: end center; padding: 0; }
   .sheet-card { border-radius: 14px 14px 0 0; max-height: 88vh; }
 }
+
+/* ---------- Color: Red (default) with cream, black and white ---------- */
+:root {
+  --bg: #fdf8e9; --surface: #ffffff; --surface-2: #fbf6e8; --line: #e8dfc8; --fg: #000000;
+  --muted: #6b6356; --dim: #b4ab98; --accent: #a93439; --accent-soft: #f5e3df; --live: #d21f2b; --star: #ac9841; --gold: #ac9841; --gold-soft: #f3ecd6;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e0c0b; --surface: #181513; --surface-2: #1f1b18; --line: #2e2824; --fg: #ffffff;
+  --muted: #a69d90; --dim: #554d45; --accent: #e0676b; --accent-soft: #3a1d1e; --live: #ff5a5f; --star: #c9b65e; --gold: #c9b65e; --gold-soft: #2c2716;
+} }
+:root[data-theme="dark"] {
+  --bg: #0e0c0b; --surface: #181513; --surface-2: #1f1b18; --line: #2e2824; --fg: #ffffff;
+  --muted: #a69d90; --dim: #554d45; --accent: #e0676b; --accent-soft: #3a1d1e; --live: #ff5a5f; --star: #c9b65e; --gold: #c9b65e; --gold-soft: #2c2716;
+}
+/* ---------- Color: Green (classic) ---------- */
+:root[data-palette="green"] {
+  --bg: #f3f5f4; --surface: #ffffff; --surface-2: #f7f9f8; --line: #dfe5e2; --fg: #111816;
+  --muted: #66736e; --dim: #a3aeaa; --accent: #0b7a52; --accent-soft: #e2f2ea; --live: #d6263b; --star: #e0a400; --gold: #0b7a52; --gold-soft: #e2f2ea;
+}
+@media (prefers-color-scheme: dark) { :root[data-palette="green"]:not([data-theme="light"]) {
+  --bg: #0b110f; --surface: #121a17; --surface-2: #17211d; --line: #22302b; --fg: #eef3f1;
+  --muted: #8d9b96; --dim: #4c5a55; --accent: #3fcf8e; --accent-soft: #15302a; --live: #ff5468; --star: #ffc933; --gold: #3fcf8e; --gold-soft: #15302a;
+} }
+:root[data-palette="green"][data-theme="dark"] {
+  --bg: #0b110f; --surface: #121a17; --surface-2: #17211d; --line: #22302b; --fg: #eef3f1;
+  --muted: #8d9b96; --dim: #4c5a55; --accent: #3fcf8e; --accent-soft: #15302a; --live: #ff5468; --star: #ffc933; --gold: #3fcf8e; --gold-soft: #15302a;
+}
+.betatag { background: var(--fg) !important; color: var(--bg) !important; }
+.dates button.d.on { border-color: var(--gold); }
+.lb .lead td { background: var(--gold-soft); }
+.ms.next .ms-s small { color: var(--gold); }
+.why.gold { color: var(--gold); background: var(--gold-soft); }
 </style>
 </head>
 <body>
@@ -1247,7 +1279,7 @@ button.brand span { color: var(--accent); }
     const lgLabel = (g.lg.short || g.lg.name) + (g.note ? " · " + g.note : "");
     const why = g.reasons || [];
     return `<div class="f">
-      <div class="f-lg">${esc(lgLabel)}</div>${why.length ? `<div class="f-why">${why.map(r => `<span class="${/Upset/.test(r) ? "why hot" : "why"}">${esc(r)}</span>`).join("")}</div>` : ""}
+      <div class="f-lg">${esc(lgLabel)}</div>${why.length ? `<div class="f-why">${why.map(r => `<span class="${/Upset/.test(r) ? "why hot" : /Playoff/.test(r) ? "why gold" : "why"}">${esc(r)}</span>`).join("")}</div>` : ""}
       <div class="f-grid">
         ${side(a)}${score(a, h)}
         <div class="f-mid"><span class="s ${g.state === "in" ? "live" : ""}">${esc(g.status)}</span>${sub ? `<span class="sub">${sub}</span>` : ""}</div>
@@ -1773,6 +1805,8 @@ button.brand span { color: var(--accent); }
 
   // ---- Settings
   function applyTheme() {
+    const pal = store.get("palette", "red");
+    if (pal === "green") document.documentElement.dataset.palette = "green"; else delete document.documentElement.dataset.palette;
     const t = store.get("theme", "system");
     if (t === "system") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
   }
@@ -1802,6 +1836,7 @@ button.brand span { color: var(--accent); }
     document.getElementById("settings-body").innerHTML =
       segRow("Open to", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["mine", "My Leagues"]], "The tab you see when the app opens") +
       segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
+      segRow("Color", "palette", store.get("palette", "red"), [["red", "Red"], ["green", "Green"]]) +
       segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
       `<h3 class="set-h">Alerts</h3>` +
       alertGroup("team", "My teams", "Games with teams you follow") +
@@ -1823,6 +1858,7 @@ button.brand span { color: var(--accent); }
       if (key === "home") { store.set("home", val); state.tab = val; }
       if (key === "view") { state.view = val; store.set("view3", val); }
       if (key === "theme") { store.set("theme", val); applyTheme(); }
+      if (key === "palette") { store.set("palette", val); applyTheme(); }
 
       renderSettings(); render();
       return;
