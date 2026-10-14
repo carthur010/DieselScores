@@ -3,365 +3,343 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Scores</title>
+<title>Scoreline</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Scores">
+<meta name="apple-mobile-web-app-title" content="Scoreline">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#edf0f5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#060a14" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b110f" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700;800&family=Archivo:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: broadcast graphics. Chyron section bars with a gold tab, boxed score numerals,
-   team-color stripes. Compact = Sofascore-style list, Expanded = Apple Sports-style rows. */
+/* Layout: date strip on top, Apple-style "My Teams" scoreboard rows, then CBS-style collapsible two-column league grids */
 :root {
-  --bg: #edf0f5;
+  --bg: #f3f5f4;
   --surface: #ffffff;
-  --surface-2: #f4f6fa;
-  --line: #d8deea;
-  --fg: #0b1222;
-  --muted: #59647d;
-  --dim: #a1abc0;
-  --chyron: #0b1733;
-  --chyron-2: #1a2b55;
-  --on-chyron: #ffffff;
-  --accent: #1747d1;
-  --accent-soft: #e2e9fd;
-  --gold: #f2b400;
-  --on-gold: #1a1300;
-  --live: #df1b2f;
+  --line: #dfe5e2;
+  --fg: #111816;
+  --muted: #66736e;
+  --dim: #a3aeaa;
+  --accent: #0b7a52;
+  --accent-soft: #e2f2ea;
+  --live: #d6263b;
   --star: #e0a400;
-  --display: "Saira Condensed", "Arial Narrow", "Roboto Condensed", Arial, sans-serif;
-  --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #060a14; --surface: #0d1423; --surface-2: #121b2f; --line: #1e2a43; --fg: #edf1fa;
-    --muted: #8a95ae; --dim: #3c4862; --chyron: #18264a; --chyron-2: #22335f; --on-chyron: #ffffff;
-    --accent: #86a8ff; --accent-soft: #16224a; --gold: #ffc72c; --on-gold: #1a1300; --live: #ff4a5c; --star: #ffc933;
-    color-scheme: dark;
+    --bg: #0b110f; --surface: #121a17; --line: #22302b; --fg: #eef3f1;
+    --muted: #8d9b96; --dim: #4c5a55; --accent: #3fcf8e; --accent-soft: #15302a;
+    --live: #ff5468; --star: #ffc933; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #060a14; --surface: #0d1423; --surface-2: #121b2f; --line: #1e2a43; --fg: #edf1fa;
-  --muted: #8a95ae; --dim: #3c4862; --chyron: #18264a; --chyron-2: #22335f; --on-chyron: #ffffff;
-  --accent: #86a8ff; --accent-soft: #16224a; --gold: #ffc72c; --on-gold: #1a1300; --live: #ff4a5c; --star: #ffc933;
-  color-scheme: dark;
+  --bg: #0b110f; --surface: #121a17; --line: #22302b; --fg: #eef3f1;
+  --muted: #8d9b96; --dim: #4c5a55; --accent: #3fcf8e; --accent-soft: #15302a;
+  --live: #ff5468; --star: #ffc933; color-scheme: dark;
 }
 * { box-sizing: border-box; }
-[hidden] { display: none !important; }
 html, body { margin: 0; }
 body {
   background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px;
   -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums;
 }
-button, input { font: inherit; color: inherit; }
-button { background: none; border: 0; cursor: pointer; padding: 0; }
-button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
 a { color: inherit; text-decoration: none; }
 .wrap { max-width: 980px; margin: 0 auto; padding-inline: 16px; }
 
-/* ---------- Header ---------- */
+/* Header */
 header.top {
-  position: sticky; top: 0; z-index: 20; padding-top: env(safe-area-inset-top, 0px);
-  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
 }
-.bar { display: flex; align-items: center; gap: 8px; padding-block: 12px 4px; }
-.brand {
-  font-family: var(--display); font-weight: 800; font-style: italic; font-size: 25px; line-height: 1;
-  letter-spacing: .06em; text-transform: uppercase; background: var(--chyron); color: var(--on-chyron);
-  padding: 6px 18px 5px 10px; border-left: 5px solid var(--gold);
-  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; padding-block: 14px 6px; }
+.brand { font-family: var(--display); font-weight: 700; font-size: 32px; letter-spacing: .01em; line-height: 1; }
+.brand span { color: var(--accent); }
+.livecount {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--live);
+  border: 1px solid color-mix(in srgb, var(--live) 40%, transparent); border-radius: 99px; padding: 3px 9px;
 }
-.livebug {
-  display: inline-flex; align-items: center; gap: 5px; font-family: var(--display); font-weight: 700;
-  font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #fff; background: var(--live);
-  padding: 3px 8px 2px;
-}
-.livebug[hidden] { display: none !important; }
-.dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; animation: pulse 1.6s infinite; }
+.livecount[hidden] { display: none !important; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--live); animation: pulse 1.6s infinite; }
 @keyframes pulse { 50% { opacity: .3; } }
 .spacer { flex: 1; }
-.iconbtn { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 6px; color: var(--muted); position: relative; flex: 0 0 auto; }
+.iconbtn { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; color: var(--muted); position: relative; }
 .iconbtn:hover { background: var(--surface); color: var(--fg); }
 .iconbtn svg { width: 20px; height: 20px; }
-.iconbtn[aria-pressed="true"] { color: var(--gold); }
-.iconbtn .v-e { display: none; }
-.iconbtn.expanded .v-c { display: none; }
-.iconbtn.expanded .v-e { display: block; }
-.iconbtn input[type=date] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.iconbtn input[type=date] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .spin svg { animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.dates { display: flex; align-items: center; gap: 2px; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }
+.dates { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }
 .dates::-webkit-scrollbar { display: none; }
-.dates button.d {
-  flex: 0 0 auto; padding: 9px 11px 10px; font-weight: 600; color: var(--muted); white-space: nowrap;
-  border-bottom: 3px solid transparent; font-size: 14px;
+.dates button {
+  flex: 0 0 auto; padding: 10px 12px 12px; font-weight: 600; color: var(--muted); white-space: nowrap;
+  border-bottom: 3px solid transparent;
 }
-.dates button.d.on { color: var(--fg); border-color: var(--gold); }
-.dates button.d:hover { color: var(--fg); }
-.dates .iconbtn { width: 34px; height: 34px; }
+.dates button.on { color: var(--fg); border-color: var(--accent); }
+.dates button:hover { color: var(--fg); }
 
-.controls { display: flex; align-items: center; gap: 8px; padding-block: 10px; }
-.tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; margin-left: -16px; padding-left: 16px; }
-.tabs::-webkit-scrollbar { display: none; }
+.leagues { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-block: 10px; margin-inline: -16px; padding-inline: 16px; }
+.leagues::-webkit-scrollbar { display: none; }
 .chip {
-  flex: 0 0 auto; font-size: 13px; font-weight: 600; padding: 6px 11px; border-radius: 4px;
-  border: 1px solid var(--line); background: var(--surface); color: var(--muted); white-space: nowrap;
+  flex: 0 0 auto; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 99px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--muted);
 }
-.chip.on { background: var(--chyron); color: var(--on-chyron); border-color: var(--chyron); }
-.chip .n { opacity: .65; margin-left: 5px; font-weight: 500; }
-.chip.hot:not(.on) { border-color: var(--gold); color: var(--fg); background: color-mix(in srgb, var(--gold) 22%, var(--surface)); }
-.chip.livechip.hot:not(.on) { border-color: var(--live); background: color-mix(in srgb, var(--live) 12%, var(--surface)); }
-.seg { display: inline-flex; flex: 0 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 2px; }
-.seg button { font-size: 12px; font-weight: 700; padding: 5px 9px; border-radius: 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-.seg button.on { background: var(--gold); color: var(--on-gold); }
+.chip.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.chip .n { opacity: .6; margin-left: 4px; font-weight: 500; }
+.chip.hot:not(.on) { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.chip.hot .n { opacity: 1; font-weight: 700; }
 
-main { padding-block: 4px 56px; display: grid; gap: 16px; }
-.updated { font-size: 12px; color: var(--muted); text-align: right; margin: 0; }
-.quiet { font-size: 13px; color: var(--muted); text-align: center; margin: 0; }
+main { padding-block: 16px 48px; display: grid; gap: 18px; }
+.updated { font-size: 12px; color: var(--muted); text-align: right; }
 
-/* ---------- Section chyron ---------- */
-section.block { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
-.bhead { display: flex; align-items: center; gap: 10px; padding: 9px 10px 9px 0; background: var(--chyron); color: var(--on-chyron); }
-.bhead::before { content: ""; width: 7px; align-self: stretch; margin-block: -9px; background: var(--gold); flex: 0 0 auto; }
-.bhead h2 { margin: 0; font-family: var(--display); font-style: italic; font-size: 20px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; line-height: 1.1; }
-.bhead .meta { color: color-mix(in srgb, var(--on-chyron) 70%, transparent); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.bhead .ico { width: 18px; height: 18px; color: var(--gold); flex: 0 0 auto; }
-.bhead .tog { margin-left: auto; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 4px; background: rgba(255,255,255,.1); color: var(--on-chyron); flex: 0 0 auto; }
-.bhead .tog svg { width: 15px; height: 15px; transition: transform .2s; }
+/* Sections */
+section.block { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.bhead { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.bhead h2 { margin: 0; font-family: var(--display); font-size: 22px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; }
+.bhead .meta { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.bhead h2 { white-space: nowrap; }
+.bhead .tog { margin-left: auto; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; background: var(--bg); color: var(--muted); }
+.bhead .tog svg { width: 16px; height: 16px; transition: transform .2s; }
 section.closed .tog svg { transform: rotate(180deg); }
 section.closed .bbody { display: none; }
+section.closed .bhead { border-bottom: 0; }
+.star-ico { color: var(--star); width: 20px; height: 20px; }
 
-/* ---------- Shared bits ---------- */
-.star { width: 24px; height: 24px; display: grid; place-items: center; color: var(--dim); flex: 0 0 auto; border-radius: 4px; }
-.star svg { width: 14px; height: 14px; }
+/* Apple-style featured rows */
+.feat { padding: 4px 16px; }
+.f { padding-block: 16px; border-bottom: 1px solid var(--line); }
+.f:last-child { border-bottom: 0; }
+.f-lg { text-align: center; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; min-height: 15px; }
+.f-grid { display: grid; grid-template-columns: minmax(70px, 1fr) minmax(52px, auto) minmax(96px, 1.2fr) minmax(52px, auto) minmax(70px, 1fr); align-items: center; gap: 6px; }
+.f-team { display: grid; justify-items: center; gap: 4px; position: relative; text-align: center; min-width: 0; }
+.f-team img { width: 52px; height: 52px; object-fit: contain; }
+.f-team .nm { font-size: 14px; font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.f-team.fav .nm { color: var(--fg); }
+.f-sc { font-family: var(--display); font-weight: 700; font-size: 52px; line-height: 1; text-align: center; }
+.f-sc.lose { color: var(--dim); }
+.f-sc.rec { font-family: var(--body); font-size: 14px; font-weight: 500; color: var(--muted); }
+.f-mid { text-align: center; display: grid; gap: 4px; }
+.f-mid .s { font-size: 17px; font-weight: 700; }
+.f-mid .s.live { color: var(--live); }
+.f-mid .sub { font-size: 12px; color: var(--muted); }
+.f-act { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+.f-link { font-size: 12px; color: var(--accent); font-weight: 600; }
+.f-link:hover { text-decoration: underline; }
+
+/* Star buttons */
+.star { width: 24px; height: 24px; display: grid; place-items: center; color: var(--dim); flex: 0 0 auto; border-radius: 6px; }
+.star svg { width: 15px; height: 15px; }
 .star.on { color: var(--star); }
 .star:hover { color: var(--star); }
-.tag {
-  display: inline-block; font-family: var(--display); font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-  color: var(--on-gold); background: var(--gold); padding: 2px 7px 1px; white-space: nowrap; line-height: 1.3;
+.f-team .star { position: absolute; top: -4px; left: 0; }
+.f-team.home .star { left: auto; right: 0; }
+
+/* CBS-style compact grid */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.g { padding: 14px 16px 12px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); display: grid; gap: 6px; min-width: 0; }
+.g-top { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
+.g-top .st { color: var(--muted); }
+.g-top .st.live { color: var(--live); }
+.g-top .st.final { color: var(--fg); }
+.g-top .net { margin-left: auto; color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; }
+.close {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--accent); background: var(--accent-soft); padding: 2px 6px; border-radius: 4px;
 }
-.tag.hot { background: var(--live); color: #fff; }
-.tag.cool { background: var(--accent-soft); color: var(--accent); }
+.row { display: grid; grid-template-columns: 24px 30px 1fr auto; align-items: center; gap: 8px; min-height: 34px; }
+.row img { width: 28px; height: 28px; object-fit: contain; }
+.row .who { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.row .ab { font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: .01em; }
+.row .rk { font-size: 12px; color: var(--muted); }
+.row .rc { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.row .poss { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); align-self: center; }
+.row .sc { font-family: var(--display); font-weight: 700; font-size: 24px; min-width: 2ch; text-align: right; }
+.row.lose .ab, .row.lose .sc { color: var(--muted); }
+.row .odds { font-size: 13px; color: var(--muted); }
+.g-foot { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); min-height: 18px; }
+.g-foot .txt { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.g-foot a { color: var(--accent); font-weight: 600; white-space: nowrap; }
+.g-foot a:hover { text-decoration: underline; }
+.diamond { width: 26px; height: 22px; flex: 0 0 auto; }
+.diamond rect { fill: none; stroke: var(--dim); stroke-width: 1.5; }
+.diamond rect.on { fill: var(--accent); stroke: var(--accent); }
+.outs { display: inline-flex; gap: 3px; }
+.outs i { width: 6px; height: 6px; border-radius: 50%; border: 1px solid var(--dim); }
+.outs i.on { background: var(--fg); border-color: var(--fg); }
+
+/* Your teams strip */
+.mystrip { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }
+.mystrip::-webkit-scrollbar { display: none; }
+.ms { flex: 0 0 auto; display: grid; grid-template-columns: auto auto; column-gap: 10px; row-gap: 2px; align-items: center;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; }
+.ms.live { border-color: color-mix(in srgb, var(--live) 45%, var(--line)); }
+.ms-t { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+.ms-t img { width: 18px; height: 18px; object-fit: contain; }
+.ms-t b { font-family: var(--display); font-size: 17px; font-weight: 700; }
+.ms-t em { font-style: normal; font-family: var(--display); font-size: 17px; font-weight: 700; margin-left: auto; padding-left: 6px; }
+.ms-t.lose b, .ms-t.lose em { color: var(--muted); }
+.ms-s { grid-column: 2; grid-row: 1 / span 2; font-size: 12px; font-weight: 600; color: var(--muted); padding-left: 10px; border-left: 1px solid var(--line); align-self: stretch; display: grid; align-items: center; white-space: nowrap; }
+.ms.live .ms-s { color: var(--live); }
+.ms .ms-t:nth-child(2) { grid-row: 2; }
+.ms .ms-t:nth-child(1) { grid-row: 1; }
+.f-why { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.why { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 3px 8px; border-radius: 5px; }
+.why.hot { color: var(--live); background: color-mix(in srgb, var(--live) 12%, transparent); }
+
+/* Where to watch */
+.wslot { margin-left: auto; min-width: 0; display: flex; justify-content: flex-end; }
 .watch {
   display: inline-flex; align-items: center; gap: 5px; max-width: 100%; min-width: 0;
   font-size: 12px; font-weight: 500; padding: 3px 9px; border-radius: 99px;
-  background: var(--accent-soft); color: var(--accent); white-space: nowrap;
+  background: var(--accent-soft); color: var(--accent); white-space: nowrap; text-transform: none; letter-spacing: 0;
 }
 .watch b { font-weight: 700; }
 .watch span { color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
 .watch i { font-style: normal; font-weight: 700; opacity: .7; }
 .watch:hover { background: var(--accent); color: var(--bg); }
 .watch:hover span { color: inherit; }
-.net { font-size: 12px; color: var(--muted); }
-.diamond { width: 26px; height: 22px; flex: 0 0 auto; vertical-align: middle; }
-.diamond rect { fill: none; stroke: var(--dim); stroke-width: 1.5; }
-.diamond rect.on { fill: var(--gold); stroke: var(--gold); }
-.outs { display: inline-flex; gap: 3px; vertical-align: middle; }
-.outs i { width: 6px; height: 6px; border-radius: 50%; border: 1px solid var(--dim); }
-.outs i.on { background: var(--fg); border-color: var(--fg); }
-.stripe { width: 3px; height: 18px; background: var(--tc, var(--line)); flex: 0 0 auto; border-radius: 1px; }
+.g-top .net { margin-left: 0; max-width: 100%; }
+.t-watch { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding-left: 32px; min-width: 0; }
+.f-mid .watch { justify-self: center; }
 
-/* ---------- Your teams strip ---------- */
-.mystrip { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }
-.mystrip::-webkit-scrollbar { display: none; }
-.ms { flex: 0 0 auto; display: flex; align-items: stretch; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
-.ms-teams { display: grid; gap: 3px; padding: 7px 10px; }
-.ms-t { display: flex; align-items: center; gap: 6px; font-size: 14px; }
-.ms-t img { width: 18px; height: 18px; object-fit: contain; }
-.ms-t b { font-family: var(--display); font-size: 17px; font-weight: 700; letter-spacing: .02em; }
-.ms-t em { font-style: normal; font-family: var(--display); font-size: 17px; font-weight: 800; margin-left: auto; padding-left: 10px; }
-.ms-t.lose b, .ms-t.lose em { color: var(--muted); }
-.ms-s { display: grid; place-items: center; padding: 0 10px; font-family: var(--display); font-size: 14px; font-weight: 700; letter-spacing: .03em; background: var(--chyron); color: var(--on-chyron); white-space: nowrap; text-transform: uppercase; }
-.ms.live .ms-s { background: var(--live); }
-.ms.next .ms-teams { align-content: center; }
-.ms.next .ms-s { background: var(--surface-2); color: var(--fg); text-transform: none; font-family: var(--body); font-size: 12px; font-weight: 600; display: grid; gap: 1px; padding: 6px 10px; text-align: left; place-items: center start; }
-.ms.next .ms-s small { font-family: var(--display); font-weight: 800; letter-spacing: .1em; color: var(--gold); font-size: 11px; text-transform: uppercase; }
-.ms.add { align-items: center; padding: 0 14px; color: var(--muted); font-weight: 600; font-size: 13px; gap: 6px; border-style: dashed; }
-.ms.add:hover { color: var(--fg); }
+/* View toggle */
+.seg { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 3px; gap: 2px; }
+.seg button { font-size: 13px; font-weight: 600; padding: 6px 10px; border-radius: 7px; color: var(--muted); white-space: nowrap; }
+.seg button.on { background: var(--accent); color: var(--bg); }
 
-/* ---------- Compact (Sofascore-style) ---------- */
-.plain { display: grid; gap: 8px; }
-.ph-btn { display: flex; gap: 8px; align-items: baseline; width: 100%; text-align: left; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; padding: 2px 0; }
-.chev { margin-left: auto; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: var(--surface); border: 1px solid var(--line); color: var(--muted); flex: 0 0 auto; align-self: center; }
-.chev svg { width: 13px; height: 13px; transition: transform .2s; }
-.closed > .ph .chev svg, .tl-group.closed .tl-head .chev svg { transform: rotate(180deg); }
-.plain.closed > .card { display: none; }
-.tl-group.closed .tl-body { display: none; }
-.tl-group.closed .tl-head { padding-bottom: 14px; }
-.tl-head { width: 100%; text-align: left; cursor: pointer; }
-.tl-head .chev { background: transparent; border: 0; }
-.tl-head .cnt { margin-left: auto; font-size: 13px; color: var(--muted); white-space: nowrap; }
-.tl-head .cnt b { color: var(--live); font-weight: 600; }
-.tl-head .cnt + .chev { margin-left: 0; }
-.ph { margin: 4px 2px 0; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: flex; gap: 8px; align-items: baseline; }
-.ph span { font-weight: 500; letter-spacing: 0; text-transform: none; }
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
-.tl-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px 4px; }
-.tl-badge { min-width: 40px; height: 28px; white-space: nowrap; display: grid; place-items: center; background: var(--chyron); color: var(--on-chyron); font-family: var(--display); font-style: italic; font-weight: 800; font-size: 14px; letter-spacing: .04em; flex: 0 0 auto; max-width: 110px; overflow: hidden; clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%); padding: 0 11px 0 7px; }
-.tl-head .crumb { font-weight: 700; font-size: 15px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Sofascore-style timeline */
+.tl-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px 6px; }
+.tl-badge { min-width: 38px; height: 38px; padding-inline: 6px; white-space: nowrap; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: .02em; flex: 0 0 auto; max-width: 92px; overflow: hidden; }
+.tl-head .crumb { font-weight: 700; font-size: 15px; }
 .tl-head .crumb span { color: var(--muted); font-weight: 500; }
-.tl-group { border-bottom: 8px solid var(--bg); }
+.tl-group { border-bottom: 6px solid var(--bg); }
 .tl-group:last-child { border-bottom: 0; }
-.t { display: grid; grid-template-columns: 74px minmax(0, 1fr) auto 38px; align-items: center; gap: 12px; padding: 10px 16px; }
-.t.tap { cursor: pointer; }
-.t.tap:hover { background: var(--surface-2); }
-.t-time { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
-.t-time .st { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.t { display: grid; grid-template-columns: 76px 1fr auto 28px; align-items: center; gap: 10px; padding: 10px 16px; }
+.t + .t { border-top: 1px solid var(--line); }
+.t-time { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.t-time .st { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .t-time .st.live { color: var(--live); }
+.t-time .st.final { color: var(--fg); }
 .t-teams { display: grid; gap: 6px; min-width: 0; }
-.tt { display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 17px; }
-.tt img, .tt .nologo { width: 22px; height: 22px; object-fit: contain; flex: 0 0 auto; }
+.tt { display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 16px; font-weight: 500; }
+.tt img { width: 22px; height: 22px; object-fit: contain; flex: 0 0 auto; }
 .tt .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tt .rk { font-size: 13px; color: var(--muted); }
 .tt.lose { color: var(--muted); }
-.tt .favmark { color: var(--star); display: grid; flex: 0 0 auto; }
-.tt .favmark svg { width: 12px; height: 12px; }
-.t-why { font-size: 12px; font-weight: 600; color: var(--muted); padding-left: 32px; }
-.t-why .hot { color: var(--live); }
-.t-sc { display: grid; gap: 6px; justify-items: end; font-size: 17px; font-weight: 600; line-height: 1.45; }
+.tt .mini { width: 18px; height: 18px; }
+.tt .mini svg { width: 13px; height: 13px; }
+.tt .mini:not(.on) { opacity: .45; }
+.t-sc { display: grid; gap: 6px; text-align: right; font-family: var(--display); font-weight: 700; font-size: 20px; line-height: 22px; }
 .t-sc.live { color: var(--live); }
-.t-sc .lose { color: var(--muted); font-weight: 500; }
-.t-btn { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line); color: var(--accent); background: var(--surface); }
-.t-btn:hover { border-color: var(--accent); }
+.t-sc .lose { color: var(--muted); }
+.t-go { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line); color: var(--muted); }
+.t-go:hover { color: var(--accent); border-color: var(--accent); }
+.t-go svg { width: 14px; height: 14px; }
+.t.fav { background: color-mix(in srgb, var(--star) 4%, transparent); }
 
-/* ---------- Expanded (Apple Sports-style rows) ---------- */
-.feat { padding: 0 16px; }
-.f { padding-block: 16px; border-bottom: 1px solid var(--line); }
-.f:last-child { border-bottom: 0; }
-.f-lg { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-.f-why { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-.f-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(48px, auto) minmax(92px, auto) minmax(48px, auto) minmax(0, 1fr); align-items: center; gap: 8px; }
-.f-team { display: grid; justify-items: center; gap: 5px; position: relative; text-align: center; min-width: 0; }
-.f-team img { width: 50px; height: 50px; object-fit: contain; }
-.f-team .bar2 { width: 28px; height: 3px; background: var(--tc, var(--line)); border-radius: 2px; }
-.f-team .nm { font-size: 14px; font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-.f-team.fav .nm { color: var(--fg); }
-.f-team .star { position: absolute; top: -4px; left: 0; }
-.f-team.home .star { left: auto; right: 0; }
-.f-sc { font-family: var(--display); font-weight: 800; font-size: 50px; line-height: 1; text-align: center; letter-spacing: -.01em; }
-.f-sc.lose { color: var(--dim); }
-.f-sc.rec { font-family: var(--body); font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
-.f-mid { text-align: center; display: grid; gap: 5px; justify-items: center; }
-.f-mid .s { font-family: var(--display); font-size: 17px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; background: var(--chyron); color: var(--on-chyron); padding: 3px 10px 2px; white-space: nowrap; }
-.f-mid .s.live { background: var(--live); }
-.f-mid .s.pre { background: transparent; color: var(--fg); padding-inline: 0; font-size: 19px; }
-.f-mid .sub { font-size: 12px; color: var(--muted); }
-.f-act { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
-.f-link { font-size: 12px; color: var(--accent); font-weight: 600; }
-.f-link:hover { text-decoration: underline; }
+.empty, .err { padding: 22px 16px; color: var(--muted); text-align: center; }
+.err { color: var(--live); }
+.quiet { font-size: 13px; color: var(--muted); text-align: center; }
+.skel { height: 96px; border-radius: 14px; background: linear-gradient(90deg, var(--surface), var(--line), var(--surface)); background-size: 200% 100%; animation: sh 1.2s infinite; }
+@keyframes sh { to { background-position: -200% 0; } }
 
-/* ---------- Leaderboards & events ---------- */
+@media (max-width: 480px) {
+  .f-team img { width: 42px; height: 42px; }
+  .f-sc { font-size: 42px; }
+  .f-grid { grid-template-columns: minmax(60px, 1fr) auto minmax(80px, 1.1fr) auto minmax(60px, 1fr); }
+  .grid { grid-template-columns: 1fr; }
+  .seg { order: 5; width: 100%; }
+  .seg button { flex: 1; }
+  .t { grid-template-columns: 64px 1fr auto 28px; gap: 8px; }
+  .tt { font-size: 15px; }
+  .g { border-right: 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+[hidden] { display: none !important; }
+:root { --surface-2: #f7f9f8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --surface-2: #17211d; } }
+:root[data-theme="dark"] { --surface-2: #17211d; }
+.iconbtn[aria-pressed="true"] { color: var(--accent); }
+.bar .iconbtn { flex: 0 0 auto; }
+.chip.livechip.hot:not(.on) { border-color: color-mix(in srgb, var(--live) 50%, var(--line)); color: var(--live); background: color-mix(in srgb, var(--live) 8%, var(--surface)); }
+.ms.next { grid-template-columns: auto auto; }
+.ms.next .ms-t.nx b { font-size: 14px; color: var(--muted); }
+.ms.next .ms-s { display: grid; gap: 1px; align-content: center; font-size: 12px; color: var(--fg); }
+.ms.next .ms-s small { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.ms.add { display: flex; align-items: center; padding: 0 14px; color: var(--muted); font-weight: 600; font-size: 13px; border-style: dashed; }
+.ms.add:hover { color: var(--fg); }
 .lb-wrap { overflow-x: auto; }
 .lb { width: 100%; border-collapse: collapse; font-size: 14px; }
 .lb th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .lb td { padding: 7px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .lb td:nth-child(2) { white-space: normal; }
 .lb tr:last-child td { border-bottom: 0; }
-.lb .num { text-align: right; font-family: var(--display); font-weight: 700; font-size: 17px; }
+.lb .num { text-align: right; font-family: var(--display); font-weight: 700; font-size: 18px; }
 .lb th.num { font-family: var(--body); font-size: 11px; }
 .lb .under { color: var(--live); }
-.lb .pos { font-family: var(--display); font-weight: 700; font-size: 16px; width: 44px; color: var(--muted); }
+.lb .pos { font-family: var(--display); font-weight: 700; font-size: 17px; width: 44px; color: var(--muted); }
 .lb .pl { display: flex; align-items: center; gap: 8px; }
-.lb .pl img { width: 18px; height: 12px; object-fit: cover; border-radius: 1px; }
-.lb .lead td { background: color-mix(in srgb, var(--gold) 10%, transparent); }
-.ev { display: grid; grid-template-columns: 82px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 14px; }
-.ev + .ev { border-top: 1px solid var(--line); }
-.ev .lbl { font-family: var(--display); font-weight: 700; font-size: 14px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
-.ev .main { min-width: 0; display: grid; gap: 3px; }
-.ev .main .ln { display: flex; gap: 8px; align-items: center; min-width: 0; }
-.ev .main .ln span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ev .main .ln.win { font-weight: 700; }
-.ev .main .ln.lose { color: var(--muted); }
-.ev .main img { width: 16px; height: 11px; object-fit: cover; }
-.ev .right { font-size: 13px; color: var(--muted); text-align: right; white-space: nowrap; }
-.ev .right.live { color: var(--live); font-weight: 700; }
-.ev .sets { display: flex; gap: 4px; margin-left: auto; font-family: var(--display); font-weight: 700; }
-.ev .sets b { min-width: 16px; text-align: center; }
-.ev.is-live { background: color-mix(in srgb, var(--live) 5%, transparent); }
-
-.empty, .err { padding: 22px 16px; color: var(--muted); text-align: center; }
-.err { color: var(--live); }
-.skel { height: 96px; border-radius: 6px; background: linear-gradient(90deg, var(--surface), var(--line), var(--surface)); background-size: 200% 100%; animation: sh 1.2s infinite; }
-@keyframes sh { to { background-position: -200% 0; } }
-
-/* ---------- Team search sheet ---------- */
-.sheet { position: fixed; inset: 0; z-index: 50; background: rgba(4, 8, 18, .55); display: grid; place-items: center; padding: 16px; }
-.sheet-card { width: min(560px, 100%); max-height: min(80vh, 760px); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-.sheet .bhead h2 { font-size: 19px; }
-.sheet-body { padding: 14px; display: grid; gap: 12px; overflow-y: auto; }
-.sheet input[type=search] { width: 100%; padding: 11px 12px; font-size: 16px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); }
+.lb .pl img { width: 18px; height: 12px; object-fit: cover; }
+.lb .lead td { background: var(--accent-soft); }
+.sheet { position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, .45); display: grid; place-items: center; padding: 16px; }
+.sheet-card { width: min(560px, 100%); max-height: min(80vh, 760px); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.sheet-body { padding: 14px 16px; display: grid; gap: 12px; overflow-y: auto; }
+.sheet input[type=search] { width: 100%; padding: 11px 12px; font: inherit; font-size: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); }
 .sheet h3 { margin: 4px 0 0; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .res { display: grid; }
-.res-row { display: grid; grid-template-columns: 4px 28px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 4px; border-bottom: 1px solid var(--line); }
+.res-row { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 9px 2px; border-bottom: 1px solid var(--line); }
+.res-row .stripe { display: none; }
 .res-row:last-child { border-bottom: 0; }
 .res-row img { width: 28px; height: 28px; object-fit: contain; }
-.res-row .stripe { height: 28px; }
 .res-row .nm { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .res-row .nm small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
-.res-row .follow { font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 4px; border: 1px solid var(--line); white-space: nowrap; }
-.res-row .follow.on { background: var(--chyron); color: var(--on-chyron); border-color: var(--chyron); }
+.res-row .follow { font: inherit; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); white-space: nowrap; cursor: pointer; }
+.res-row .follow.on { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 .sheet .hint { font-size: 13px; color: var(--muted); margin: 0; }
-
-/* ---------- Alerts ---------- */
 .toasts { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 10px); right: 12px; left: 12px; z-index: 60; display: grid; justify-items: end; gap: 8px; pointer-events: none; }
-.toast {
-  pointer-events: auto; width: min(380px, 100%); background: var(--chyron); color: var(--on-chyron);
-  border-left: 6px solid var(--gold); padding: 10px 12px; display: grid; gap: 3px; box-shadow: 0 10px 30px rgba(0,0,0,.3);
-  animation: slide .25s ease-out;
-}
+.toast { pointer-events: auto; width: min(380px, 100%); background: var(--fg); color: var(--bg); border-left: 5px solid var(--accent); border-radius: 10px; padding: 10px 14px; display: grid; gap: 3px; box-shadow: 0 10px 30px rgba(0,0,0,.25); animation: slide .25s ease-out; }
 .toast.hot { border-left-color: var(--live); }
-.toast b { font-family: var(--display); font-style: italic; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; font-size: 15px; }
+.toast b { font-family: var(--display); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; font-size: 16px; }
 .toast span { font-size: 14px; }
 .toast small { font-size: 12px; opacity: .75; }
 @keyframes slide { from { transform: translateY(-10px); opacity: 0; } }
-
+header.top { top: 0; padding-top: env(safe-area-inset-top, 0px); }
+.bhead h2 { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 480px) {
-  .f-team img { width: 40px; height: 40px; }
-  .f-sc { font-size: 40px; }
-  .f-grid { grid-template-columns: minmax(0, 1fr) minmax(40px, auto) minmax(76px, auto) minmax(40px, auto) minmax(0, 1fr); gap: 6px; }
-  .f-mid .s { font-size: 15px; padding-inline: 7px; }
-  .t { grid-template-columns: 64px minmax(0, 1fr) auto 36px; gap: 10px; padding-inline: 14px; }
-  .t-btn { width: 36px; height: 36px; }
-  .tt { font-size: 16px; }
-  .t-time { font-size: 13px; }
-  .brand { font-size: 20px; padding: 5px 15px 4px 8px; }
-  .bar { gap: 2px; }
-  .iconbtn { width: 34px; }
-  .livebug { margin-left: 6px; }
-  .livebug .lw { display: none; }
-  .controls .tabs { margin-right: -16px; padding-right: 16px; }
-  .ev { grid-template-columns: 64px minmax(0, 1fr) auto; }
-  .sheet { place-items: end center; padding: 0; }
+  .bar { gap: 6px 4px; }
+  .brand { font-size: 28px; }
+  .bar .iconbtn { width: 34px; }
   .lb td, .lb th { padding-inline: 7px; }
   .lb .pos { width: 32px; }
-  .lb .pl { white-space: normal; }
-  .sheet-card { border-radius: 10px 10px 0 0; max-height: 88vh; }
+  .sheet { place-items: end center; padding: 0; }
+  .sheet-card { border-radius: 14px 14px 0 0; max-height: 88vh; }
 }
-@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
 <header class="top">
   <div class="wrap">
     <div class="bar">
-      <div class="brand">Scores</div>
-      <span class="livebug" id="livebug" hidden><span class="dot"></span><span id="liven">0</span><span class="lw"> Live</span></span>
+      <div class="brand">Score<span>line</span></div>
+      <span class="livecount" id="livebug" hidden><span class="dot"></span><span id="liven">0</span> live</span>
       <div class="spacer"></div>
-      <button class="iconbtn" id="viewbtn" title="Switch to expanded view" aria-label="Switch layout">
-        <svg class="v-c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-        <svg class="v-e" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/></svg>
-      </button>
+      <div class="seg" role="group" aria-label="Layout">
+        <button data-view="time">By time</button>
+        <button data-view="league">By league</button>
+      </div>
       <button class="iconbtn" id="teamsbtn" title="Your teams" aria-label="Search and follow teams">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       </button>
@@ -377,9 +355,7 @@ section.closed .bbody { display: none; }
 </header>
 
 <div class="wrap">
-  <div class="controls">
-    <div class="tabs" id="tabs" role="tablist" aria-label="Filter games"></div>
-  </div>
+  <div class="leagues" id="tabs" role="tablist" aria-label="Filter games"></div>
   <main id="main">
     <div class="skel"></div><div class="skel"></div><div class="skel"></div>
   </main>
@@ -493,7 +469,7 @@ section.closed .bbody { display: none; }
   const state = {
     date: startOfDay(new Date()),
     tab: store.get("tab2", "live"),
-    view: store.get("view2", "compact"),
+    view: store.get("view3", "league"),
     favs: new Set(store.get("favs", DEFAULT_FAVS)),
     favMeta: store.get("favMeta", {}),   // key -> { lg, id, name, logo, color }
     next: store.get("next", {}),         // key -> { t, date, opp, oppLogo, at, none }
@@ -952,7 +928,7 @@ section.closed .bbody { display: none; }
   }
 
   // =====================================================================
-  // Rendering: pieces
+  // Rendering: pieces (V1 look)
   // =====================================================================
   function starBtn(lg, t, extraClass = "") {
     const k = favKey(lg, t.abbr), on = state.favs.has(k);
@@ -970,114 +946,130 @@ section.closed .bbody { display: none; }
         <rect x="16.5" y="8.5" width="7" height="7" transform="rotate(45 20 12)" class="${s.onFirst ? "on" : ""}"/>
         <rect x="2.5" y="8.5" width="7" height="7" transform="rotate(45 6 12)" class="${s.onThird ? "on" : ""}"/></svg>`;
       const outs = `<span class="outs" aria-label="${s.outs} outs">${[0, 1, 2].map(i => `<i class="${i < s.outs ? "on" : ""}"></i>`).join("")}</span>`;
-      return `${bases}${outs}${s.balls != null ? `<span>${s.balls}-${s.strikes}</span>` : ""}`;
+      return `${bases}${outs}<span class="txt">${s.balls != null ? `${s.balls}-${s.strikes}` : ""}${s.lastPlay?.text ? " · " + esc(s.lastPlay.text) : ""}</span>`;
     }
     if (g.lg.sport === "Football" && s.downDistanceText) {
-      return `${s.isRedZone ? '<span class="tag hot">Red zone</span>' : ""}<span>${esc(s.downDistanceText)}</span>`;
+      return `<span class="txt">${s.isRedZone ? '<b style="color:var(--live)">Red zone</b> · ' : ""}${esc(s.downDistanceText)}</span>`;
     }
     return "";
   }
-
-  function tagsFor(g, { includeClose = true } = {}) {
-    return (g.reasons || []).filter(r => includeClose || r !== "Close game")
-      .map(r => `<span class="tag ${/Upset/.test(r) ? "hot" : /Starting/.test(r) ? "cool" : ""}">${esc(r)}</span>`).join("");
+  function footText(g) {
+    const sit = situation(g);
+    if (sit) return sit;
+    if (g.state === "pre" && g.odds?.details) return `<span class="txt">${esc(g.odds.details)}${g.odds.ou ? " · O/U " + esc(g.odds.ou) : ""}${g.note ? " · " + esc(g.note) : ""}</span>`;
+    return `<span class="txt">${esc(g.note)}</span>`;
   }
 
-  // Compact row (Sofascore): time + clock, names, plain scores, one round button
-  function compactRow(g, why = "") {
+  // By league: card grid
+  function teamRow(g, t, i) {
+    const other = g.teams[1 - i];
+    const lose = g.state === "post" && other && !t.winner && other.winner;
+    const poss = g.state === "in" && g.sit?.possession && g.sit.possession === t.id;
+    return `<div class="row ${lose ? "lose" : ""}">
+      ${starBtn(g.lg, t)}
+      ${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<span></span>"}
+      <span class="who">${t.rank ? `<span class="rk">${t.rank}</span>` : ""}<span class="ab" title="${esc(t.full)}">${esc(t.abbr)}</span><span class="rc">${esc(t.record)}</span>${poss ? '<span class="poss" title="Possession"></span>' : ""}</span>
+      ${g.state === "pre" ? "" : `<span class="sc">${esc(t.score)}</span>`}
+    </div>`;
+  }
+  function card(g) {
+    return `<article class="g">
+      <div class="g-top"><span class="st ${statusClass(g)}">${esc(g.status)}</span><span class="wslot">${watchPill(g)}</span></div>
+      ${g.teams.map((t, i) => teamRow(g, t, i)).join("")}
+      <div class="g-foot">${footText(g)}${g.link ? `<a href="${esc(g.link)}" target="_blank" rel="noopener">Gamecast</a>` : ""}</div>
+    </article>`;
+  }
+
+  // By time: Sofascore-style list
+  function tlRow(g) {
     const [a, h] = g.teams;
     if (!a || !h) return "";
-    const lose = (t, o) => (g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score) && false);
+    const lose = (t, o) => g.state === "post" && o.winner && !t.winner;
     const st = g.state === "pre" ? (g.status === timeLabel(g.date) ? "" : g.status) : g.status;
-    const team = (t, o, at) => `<div class="tt ${g.state === "post" && o.winner && !t.winner ? "lose" : ""}">
-        ${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : '<span class="nologo"></span>'}
-        <span class="nm" title="${esc(t.full)}">${at ? "@ " : ""}${t.rank ? `<span class="rk">${t.rank}</span> ` : ""}${esc(t.name)}</span>
-        ${isFavTeam(g.lg, t.abbr) ? `<span class="favmark" aria-label="Following">${STAR}</span>` : ""}
+    const team = (t, o, at) => `<div class="tt ${lose(t, o) ? "lose" : ""}">
+        ${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : ""}
+        <span class="nm" title="${esc(t.full)}">${at ? "@ " : ""}${t.rank ? t.rank + " " : ""}${esc(t.name)}</span>
+        ${starBtn(g.lg, t, "mini")}
       </div>`;
-    const sc = (t, o) => `<span class="${g.state === "post" && o.winner && !t.winner ? "lose" : ""}">${esc(t.score)}</span>`;
-    const scores = g.state === "pre" ? "<span></span>" : `<div class="t-sc ${g.state === "in" ? "live" : ""}">${sc(a, h)}${sc(h, a)}</div>`;
-    const w = g.state !== "post" && g.watch?.[0];
-    const btn = w ? `<a class="t-btn" href="${esc(w.url)}" target="_blank" rel="noopener" title="Watch on ${esc(w.app)} (${esc(w.nets.join(", "))})" aria-label="Watch on ${esc(w.app)}">${PLAY_BIG}</a>` : "<span></span>";
-    return `<div class="t ${g.link ? "tap" : ""}" ${g.link ? `data-href="${esc(g.link)}"` : ""}>
+    const scores = g.state === "pre" ? "<span></span>" :
+      `<div class="t-sc ${g.state === "in" ? "live" : ""}"><span class="${lose(a, h) ? "lose" : ""}">${esc(a.score)}</span><span class="${lose(h, a) ? "lose" : ""}">${esc(h.score)}</span></div>`;
+    const pill = g.state !== "post" ? watchPill(g) : "";
+    return `<div class="t ${g.fav ? "fav" : ""}">
       <div class="t-time"><span>${esc(timeLabel(g.date))}</span><span class="st ${statusClass(g)}">${esc(st || "–")}</span></div>
-      <div class="t-teams">${team(a, h, false)}${team(h, a, true)}${why ? `<div class="t-why">${why}</div>` : ""}</div>
+      <div class="t-teams">${team(a, h, false)}${team(h, a, true)}${pill ? `<div class="t-watch">${pill}</div>` : ""}</div>
       ${scores}
-      ${btn}
+      ${g.link ? `<a class="t-go" href="${esc(g.link)}" target="_blank" rel="noopener" aria-label="Open Gamecast">${ARROW}</a>` : "<span></span>"}
     </div>`;
   }
-  function whyLine(g) {
-    return [esc(g.lg.short || g.lg.name)].concat((g.reasons || []).map(r => `<span class="${/Upset/.test(r) ? "hot" : ""}">${esc(r)}</span>`)).join(" · ");
-  }
-
-  // Expanded row (Apple Sports)
-  function expandedRow(g, showTags = false) {
-    const [a, h] = g.teams;
-    if (!a || !h) return "";
-    const side = t => `<div class="f-team ${t.homeAway === "home" ? "home" : ""} ${isFavTeam(g.lg, t.abbr) ? "fav" : ""}">${starBtn(g.lg, t)}
-        ${t.logo ? `<img src="${esc(t.logo)}" alt="">` : ""}<i class="bar2" style="--tc:${esc(t.color || "")}"></i><span class="nm">${t.rank ? t.rank + " " : ""}${esc(t.name)}</span></div>`;
-    const score = (t, o) => {
-      if (g.state === "pre") return `<div class="f-sc rec">${esc(t.record)}</div>`;
-      const lose = (g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score));
-      return `<div class="f-sc ${lose ? "lose" : ""}">${esc(t.score)}</div>`;
-    };
-    let sub = situation(g);
-    if (!sub && g.state === "pre" && g.odds?.details) sub = esc(g.odds.details);
-    const lgLabel = (g.lg.short || g.lg.name) + (g.note ? " · " + g.note : "");
-    const tags = showTags === true ? tagsFor(g) : "";
-    const sClass = g.state === "in" ? "live" : g.state === "pre" ? "pre" : "";
-    return `<div class="f">
-      <div class="f-lg">${esc(lgLabel)}</div>${tags ? `<div class="f-why">${tags}</div>` : ""}
-      <div class="f-grid">
-        ${side(a)}${score(a, h)}
-        <div class="f-mid"><span class="s ${sClass}">${esc(g.status)}</span>${sub ? `<span class="sub">${sub}</span>` : ""}</div>
-        ${score(h, a)}${side(h)}
-      </div>
-      <div class="f-act">${g.state !== "post" ? watchPill(g) : ""}${g.link ? `<a class="f-link" href="${esc(g.link)}" target="_blank" rel="noopener">Gamecast</a>` : ""}</div>
-    </div>`;
-  }
-
-  function groupedList(list, rowFn) {
+  function timeline(list) {
     const sorted = list.slice().sort((x, y) => (new Date(x.date) - new Date(y.date)) || x.lg.id.localeCompare(y.lg.id));
     const groups = [];
     sorted.forEach(g => {
       const last = groups[groups.length - 1];
       if (last && last.lg.id === g.lg.id) last.games.push(g); else groups.push({ lg: g.lg, games: [g] });
     });
-    return groups.map(gr => {
-      const note = gr.games[0].note && gr.games.every(x => x.note === gr.games[0].note) ? " · " + gr.games[0].note : "";
-      const gid = "grp-" + gr.lg.id, closed = state.closed.has(gid);
-      const liveN = gr.games.filter(x => x.state === "in").length;
-      return `<div class="tl-group ${closed ? "closed" : ""}">
-        <button class="tl-head" data-tog="${gid}" aria-expanded="${!closed}"><span class="tl-badge">${esc(gr.lg.short || gr.lg.name)}</span>
-          <span class="crumb">${esc(gr.lg.sport)} <span>› ${esc(gr.lg.name)}${esc(note)}</span></span>
-          <span class="cnt">${closed ? (liveN ? `<b>${liveN} live</b>` : `${gr.games.length} game${gr.games.length > 1 ? "s" : ""}`) : ""}</span><i class="chev">${CHEV}</i></button>
-        <div class="tl-body">
-        ${rowFn === expandedRow ? `<div class="feat">${gr.games.map(g => expandedRow(g)).join("")}</div>` : gr.games.map(g => rowFn(g)).join("")}
-      </div></div>`;
-    }).join("");
+    return groups.map(gr => `<div class="tl-group">
+      <div class="tl-head"><span class="tl-badge">${esc(gr.lg.short || gr.lg.name)}</span>
+        <span class="crumb">${esc(gr.lg.sport)} <span>› ${esc(gr.lg.name)}${gr.games[0].note && gr.games.every(x => x.note === gr.games[0].note) ? " · " + esc(gr.games[0].note) : ""}</span></span></div>
+      ${gr.games.map(tlRow).join("")}
+    </div>`).join("");
   }
 
+  // Worth Watching: Apple Sports-style rows
+  function featured(g) {
+    const [a, h] = g.teams;
+    if (!a || !h) return "";
+    const side = t => `<div class="f-team ${t.homeAway === "home" ? "home" : ""} ${isFavTeam(g.lg, t.abbr) ? "fav" : ""}">${starBtn(g.lg, t)}
+        ${t.logo ? `<img src="${esc(t.logo)}" alt="">` : ""}<span class="nm">${esc(t.name)}</span></div>`;
+    const score = (t, o) => {
+      if (g.state === "pre") return `<div class="f-sc rec">${esc(t.record)}</div>`;
+      const lose = (g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score));
+      return `<div class="f-sc ${lose ? "lose" : ""}">${esc(t.score)}</div>`;
+    };
+    let sub = "";
+    if (g.state === "pre" && g.odds?.details) sub = esc(g.odds.details);
+    else if (g.state === "in" && g.sit?.downDistanceText) sub = esc(g.sit.downDistanceText);
+    const pill = g.state !== "post" && g.watch?.length ? `<span>${watchPill(g)}</span>` : "";
+    const lgLabel = (g.lg.short || g.lg.name) + (g.note ? " · " + g.note : "");
+    const why = g.reasons || [];
+    return `<div class="f">
+      <div class="f-lg">${esc(lgLabel)}</div>${why.length ? `<div class="f-why">${why.map(r => `<span class="${/Upset/.test(r) ? "why hot" : "why"}">${esc(r)}</span>`).join("")}</div>` : ""}
+      <div class="f-grid">
+        ${side(a)}${score(a, h)}
+        <div class="f-mid"><span class="s ${g.state === "in" ? "live" : ""}">${esc(g.status)}</span>${sub ? `<span class="sub">${sub}</span>` : ""}</div>
+        ${score(h, a)}${side(h)}
+      </div>
+      <div class="f-act">${pill}${g.link ? `<a class="f-link" href="${esc(g.link)}" target="_blank" rel="noopener">Gamecast</a>` : ""}</div>
+    </div>`;
+  }
+
+  // Your teams strip
   function stripChip(g) {
     const [a, h] = g.teams;
     if (!a || !h) return "";
     const side = (t, o) => {
       const lose = g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
-      return `<span class="ms-t ${lose ? "lose" : ""}"><i class="stripe" style="--tc:${esc(t.color || "")};height:14px"></i>${t.logo ? `<img src="${esc(t.logo)}" alt="">` : ""}<b>${esc(t.abbr)}</b>${g.state === "pre" ? "" : `<em>${esc(t.score)}</em>`}</span>`;
+      return `<span class="ms-t ${lose ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="">` : ""}<b>${esc(t.abbr)}</b>${g.state === "pre" ? "" : `<em>${esc(t.score)}</em>`}</span>`;
     };
     return `<a class="ms ${g.state === "in" ? "live" : ""}" href="${esc(g.link || "#")}" target="_blank" rel="noopener" title="${esc(a.full + " at " + h.full)}">
-      <span class="ms-teams">${side(a, h)}${side(h, a)}</span><span class="ms-s">${esc(g.status)}</span></a>`;
+      ${side(a, h)}${side(h, a)}<span class="ms-s">${esc(g.status)}</span></a>`;
   }
-
   function nextChip(k) {
     const m = state.favMeta[k], n = state.next[k];
     if (!m || !n || n.none || !n.date) return "";
     return `<div class="ms next" title="${esc(m.name)}: next game">
-      <span class="ms-teams"><span class="ms-t"><i class="stripe" style="--tc:${esc(m.color || "")};height:14px"></i>${m.logo ? `<img src="${esc(m.logo)}" alt="">` : ""}<b>${esc(m.abbr || k.split(":")[1])}</b></span></span>
-      <span class="ms-s"><small>Next</small>${esc(whenLabel(n.date))}<span style="color:var(--muted)">${esc(n.at)} ${esc(n.opp)}</span></span></div>`;
+      <span class="ms-t">${m.logo ? `<img src="${esc(m.logo)}" alt="">` : ""}<b>${esc(m.abbr || k.split(":")[1])}</b></span>
+      <span class="ms-t nx">${n.oppLogo ? `<img src="${esc(n.oppLogo)}" alt="">` : ""}<b>${esc(n.at)} ${esc(n.opp)}</b></span>
+      <span class="ms-s"><small>Next</small>${esc(whenLabel(n.date))}</span></div>`;
   }
 
-  // Leaderboards & events
-  function toPar(v) { const s = String(v ?? ""); return s.startsWith("-") ? "under" : ""; }
+  // Golf leaderboard
+  function toPar(v) { return String(v ?? "").startsWith("-") ? "under" : ""; }
+  function eventMeta(e) {
+    if (e.state === "in") return e.detail || "Live";
+    if (e.state === "pre") return "Starts " + whenLabel(e.date);
+    return e.detail || "Final";
+  }
   function golfBlock(e) {
     const rows = e.rows.slice(0, 10);
     const leadTotal = rows[0]?.total;
@@ -1087,52 +1079,18 @@ section.closed .bbody { display: none; }
         const hot = /^-\d/.test(r.today) && parseInt(r.today) <= -5;
         return `<tr class="${r.total && r.total === leadTotal ? "lead" : ""}">
           <td class="pos">${esc(r.pos || "–")}</td>
-          <td><span class="pl">${r.flag ? `<img src="${esc(r.flag)}" alt="">` : ""}${esc(r.name)}${hot ? ' <span class="tag hot">Hot</span>' : ""}</span></td>
+          <td><span class="pl">${r.flag ? `<img src="${esc(r.flag)}" alt="">` : ""}${esc(r.name)}${hot ? ' <span class="why hot">Hot</span>' : ""}</span></td>
           <td class="num ${toPar(r.total)}">${esc(r.total || "–")}</td>
           <td class="num ${toPar(r.today)}">${esc(r.today || "–")}</td>
           <td class="num">${esc(r.thru || "–")}</td></tr>`;
       }).join("")}</tbody></table></div>` : `<div class="empty">Tee times aren't posted yet.</div>`;
     const more = e.link ? `<div class="f-act" style="padding-bottom:12px"><a class="f-link" href="${esc(e.link)}" target="_blank" rel="noopener">Full leaderboard</a></div>` : "";
-    return block("ev-" + e.lg.id + e.id, `${e.lg.short || e.lg.name} · ${e.name}`, eventMeta(e), body + more, `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 18V3l7 3-7 3"/><ellipse cx="12" cy="19" rx="6" ry="2"/></svg>`);
+    return block("ev-" + e.lg.id + e.id, `${e.lg.short || e.lg.name} · ${e.name}`, eventMeta(e), body + more);
   }
-  function eventMeta(e) {
-    if (e.state === "in") return e.detail || "Live";
-    if (e.state === "pre") return "Starts " + whenLabel(e.date);
-    return e.detail || "Final";
-  }
-  function raceBlock(e) {
-    const body = e.sessions.map(s => `<div class="ev ${s.state === "in" ? "is-live" : ""}">
-      <span class="lbl">${esc(s.abbr)}</span>
-      <span class="main">${s.top.length ? s.top.map((p, i) => `<span class="ln ${i === 0 && s.state === "post" ? "win" : ""}"><span>${i + 1}. ${p.flag ? `<img src="${esc(p.flag)}" alt=""> ` : ""}${esc(p.name)}</span></span>`).join("") : `<span class="ln"><span style="color:var(--muted)">${esc(whenLabel(s.date))}</span></span>`}</span>
-      <span class="right ${s.state === "in" ? "live" : ""}">${esc(s.state === "pre" ? "" : (s.detail || (s.state === "post" ? "Final" : "Live")))}</span></div>`).join("");
-    return block("ev-" + e.lg.id + e.id, `${e.lg.short || e.lg.name} · ${e.name}`, eventMeta(e), body || `<div class="empty">Schedule coming soon.</div>`);
-  }
-  function duelRows(list, showSets) {
-    return list.map(m => {
-      const line = (p) => `<span class="ln ${m.state === "post" ? (p.winner ? "win" : "lose") : ""}">${p.flag ? `<img src="${esc(p.flag)}" alt="">` : ""}<span>${esc(p.name)}</span>${showSets && p.sets.length ? `<span class="sets">${p.sets.map(v => `<b>${esc(v)}</b>`).join("")}</span>` : ""}</span>`;
-      return `<div class="ev ${m.state === "in" ? "is-live" : ""}">
-        <span class="lbl">${esc(m.round || m.note || "")}</span>
-        <span class="main">${line(m.a)}${line(m.b)}</span>
-        <span class="right ${m.state === "in" ? "live" : ""}">${esc(m.state === "pre" && m.date ? whenLabel(m.date) : (m.detail || ""))}</span></div>`;
-    }).join("");
-  }
-  function mmaBlock(e) {
-    // ESPN lists prelims first; the main event is last
-    const fights = e.fights.slice(-6).reverse();
-    return block("ev-" + e.lg.id + e.id, `UFC · ${e.name}`, eventMeta(e), duelRows(fights, false) || `<div class="empty">Fight card coming soon.</div>`);
-  }
-  function tennisBlock(e) {
-    const ms = e.matches.slice(0, 8);
-    if (!ms.length) return "";
-    return block("ev-" + e.lg.id + e.id, `${e.lg.short || e.lg.name} · ${e.name}`, eventMeta(e), duelRows(ms, true));
-  }
-  const BLOCK = { golf: golfBlock, race: raceBlock, mma: mmaBlock, tennis: tennisBlock };
+  const BLOCK = { golf: golfBlock };
 
   function block(id, title, meta, body, icon) {
     const closed = state.closed.has(id);
-    if (state.view === "compact") {
-      return `<section class="plain ${closed ? "closed" : ""}"><h2 class="ph" data-tog="${esc(id)}"><button class="ph-btn" aria-expanded="${!closed}">${esc(title)}${meta ? `<span>${esc(meta)}</span>` : ""}<i class="chev">${CHEV}</i></button></h2><div class="card">${body}</div></section>`;
-    }
     return `<section class="block ${closed ? "closed" : ""}" data-block="${esc(id)}">
       <div class="bhead">${icon || ""}<h2>${esc(title)}</h2>${meta ? `<span class="meta">${esc(meta)}</span>` : ""}
         <button class="tog" data-tog="${esc(id)}" aria-expanded="${!closed}" aria-label="${closed ? "Expand" : "Collapse"} ${esc(title)}">${CHEV}</button></div>
@@ -1203,9 +1161,7 @@ section.closed .bbody { display: none; }
   }
 
   function render() {
-    const vb = document.getElementById("viewbtn");
-    vb.classList.toggle("expanded", state.view === "expanded");
-    vb.title = state.view === "expanded" ? "Expanded view (tap for compact)" : "Compact view (tap for expanded)";
+    document.querySelectorAll("[data-view]").forEach(b => { const on = b.dataset.view === state.view; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
     const ab = document.getElementById("alertbtn");
     ab.setAttribute("aria-pressed", state.alerts);
     ab.title = state.alerts ? "Close-game alerts are on" : "Close-game alerts are off";
@@ -1224,7 +1180,6 @@ section.closed .bbody { display: none; }
 
     const tab = state.tab;
     const pool = poolFor(tab, games);
-    const rowFn = state.view === "expanded" ? expandedRow : compactRow;
     let html = "";
 
     // Your teams strip: today's games plus the next game for everyone else
@@ -1245,7 +1200,7 @@ section.closed .bbody { display: none; }
       if (picks.length >= 1 && (tab === "all" || picks.some(g => g.state === "in"))) {
         if (tab === "live") shown = new Set(picks.map(g => g.id));
         html += block("worth", "Worth Watching", strong.length ? `${strong.length} worth a look` : "best of what's on",
-          state.view === "compact" ? `<div class="tl-group">${picks.map(g => compactRow(g, whyLine(g))).join("")}</div>` : `<div class="feat">${picks.map(g => expandedRow(g, true)).join("")}</div>`, BOLT);
+          `<div class="feat">${picks.map(featured).join("")}</div>`, '<span class="star-ico" style="color:var(--live)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg></span>');
       }
     }
 
@@ -1256,14 +1211,21 @@ section.closed .bbody { display: none; }
     const quiet = [];
     TEAM_LEAGUES.forEach(lg => { if (!pool.some(g => g.lg.id === lg.id) && !state.data[lg.id]?.error && !state.data[lg.id]?.events?.length) quiet.push(lg.short || lg.name); });
     const feed = pool.filter(g => !shown.has(g.id));
-    if (feed.length) {
+    if (feed.length && state.view === "league") {
+      TEAM_LEAGUES.forEach(lg => {
+        const list = feed.filter(g => g.lg.id === lg.id).sort((x, y) => ({ in: 0, pre: 1, post: 2 }[x.state] - { in: 0, pre: 1, post: 2 }[y.state]) || new Date(x.date) - new Date(y.date));
+        if (!list.length) return;
+        const liveN = list.filter(g => g.state === "in").length;
+        html += block(lg.id, lg.name, liveN ? `${liveN} live · ${list.length} total` : `${list.length} game${list.length > 1 ? "s" : ""}`, `<div class="grid">${list.map(card).join("")}</div>`);
+      });
+    } else if (feed.length) {
       const live = feed.filter(g => g.state === "in").length;
       const title = tab === "live" ? (shown.size ? "Also live" : "Live now") : tab === "close" ? "Close games" : dayLabel(state.date);
-      html += block("feed", title, live && tab !== "live" ? `${live} live · ${feed.length} total` : `${feed.length} game${feed.length > 1 ? "s" : ""}`, groupedList(feed, rowFn));
+      html += block("feed", title, live && tab !== "live" ? `${live} live · ${feed.length} total` : `${feed.length} game${feed.length > 1 ? "s" : ""}`, timeline(feed));
     } else if (tab === "live" && !shown.size) {
       const upcoming = games.filter(g => g.state === "pre").sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
       html += `<div class="block empty">Nothing live right now.${upcoming.length ? " Here's what's up next." : ""}</div>`;
-      if (upcoming.length) html += block("upnext", "Up next", `${upcoming.length} games`, groupedList(upcoming, rowFn));
+      if (upcoming.length) html += block("upnext", "Up next", `${upcoming.length} games`, state.view === "league" ? `<div class="grid">${upcoming.map(card).join("")}</div>` : timeline(upcoming));
     } else if (tab === "close") {
       html += `<div class="block empty">No close games right now. Games show up here late with a tight score: under 5:00 in the 4th or 3rd, the 7th inning or later in baseball, or the 85th minute in soccer.</div>`;
     } else if (!specialsFor(tab).length) {
@@ -1365,17 +1327,14 @@ section.closed .bbody { display: none; }
   document.getElementById("q").addEventListener("input", search);
   document.getElementById("teamsbtn").onclick = openSheet;
   document.getElementById("refresh").onclick = () => loadAll();
-  document.getElementById("viewbtn").onclick = () => {
-    state.view = state.view === "expanded" ? "compact" : "expanded"; store.set("view2", state.view); render();
-    toast(state.view === "expanded" ? "Expanded view" : "Compact view", state.view === "expanded" ? "Big scoreboard rows" : "Dense list, sorted by start time", "");
-  };
+  document.querySelectorAll("[data-view]").forEach(b => b.onclick = () => { state.view = b.dataset.view; store.set("view3", state.view); render(); });
   document.getElementById("alertbtn").onclick = async () => {
     state.alerts = !state.alerts;
     store.set("alerts", state.alerts);
     render();
     if (state.alerts) {
       try { if ("Notification" in window && Notification.permission === "default") await Notification.requestPermission(); } catch {}
-      toast("Alerts on", "You'll get a heads-up when a game turns close, goes to overtime, or an upset starts brewing.", "Works while Scores is open");
+      toast("Alerts on", "You'll get a heads-up when a game turns close, goes to overtime, or an upset starts brewing.", "Works while Scoreline is open");
     } else {
       toast("Alerts off", "No more heads-ups for close games.", "");
     }
