@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014134405">
+<meta name="build" content="20261014134704">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -731,11 +731,13 @@ button.brand, button.brand span { color: var(--accent); }
     <div class="bhead"><h2 id="sheet-h">Your Teams</h2>
       <button class="tog" id="sheet-x" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="sheet-body">
+      <p class="hint" id="sheet-intro" hidden>Welcome to Scores. Follow a few teams to get started: tap Follow on a suggestion or search for any team. You can change these anytime.</p>
       <input type="search" id="q" placeholder="Search any team: Mets, Arsenal, Duke…" autocomplete="off" aria-label="Search teams">
       <div class="res" id="results"></div>
       <div id="suggest"></div>
       <h3>Following <span class="h3-note">drag ☰ to set your order</span></h3>
       <div class="res" id="following"></div>
+      <button class="set-done" id="sheet-done">Done</button>
     </div>
   </div>
 </div>
@@ -866,8 +868,30 @@ button.brand, button.brand span { color: var(--accent); }
     favMeta: {"nfl:NE": {"lg": "nfl", "id": "17", "abbr": "NE", "name": "New England Patriots", "color": "#002a5c", "logo": "https://a.espncdn.com/i/teamlogos/nfl/500/ne.png"}, "nhl:SJ": {"lg": "nhl", "id": "18", "abbr": "SJ", "name": "San Jose Sharks", "color": "#00788a", "logo": "https://a.espncdn.com/i/teamlogos/nhl/500/sj.png"}, "ncaaf:USC": {"lg": "ncaaf", "id": "30", "abbr": "USC", "name": "USC Trojans", "color": "#9d2235", "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/30.png"}, "soccer:NEW": {"lg": "epl", "id": "361", "abbr": "NEW", "name": "Newcastle United", "color": "#000000", "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/361.png"}, "soccer:ARS": {"lg": "epl", "id": "359", "abbr": "ARS", "name": "Arsenal", "color": "#e20520", "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/359.png"}, "nba:NY": {"lg": "nba", "id": "18", "abbr": "NY", "name": "New York Knicks", "color": "#1d428a", "logo": "https://a.espncdn.com/i/teamlogos/nba/500/ny.png"}, "nhl:NYR": {"lg": "nhl", "id": "13", "abbr": "NYR", "name": "New York Rangers", "color": "#0056ae", "logo": "https://a.espncdn.com/i/teamlogos/nhl/500/nyr.png"}, "ncaaf:UCLA": {"lg": "ncaaf", "id": "26", "abbr": "UCLA", "name": "UCLA Bruins", "color": "#2774ae", "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/26.png"}, "nba:SAC": {"lg": "nba", "id": "23", "abbr": "SAC", "name": "Sacramento Kings", "color": "#5a2d81", "logo": "https://a.espncdn.com/i/teamlogos/nba/500/sac.png"}, "mlb:SF": {"lg": "mlb", "id": "26", "abbr": "SF", "name": "San Francisco Giants", "color": "#000000", "logo": "https://a.espncdn.com/i/teamlogos/mlb/500/sf.png"}, "mlb:ARI": {"lg": "mlb", "id": "29", "abbr": "ARI", "name": "Arizona Diamondbacks", "color": "#aa182c", "logo": "https://a.espncdn.com/i/teamlogos/mlb/500/ari.png"}, "mlb:NYM": {"lg": "mlb", "id": "21", "abbr": "NYM", "name": "New York Mets", "color": "#002d72", "logo": "https://a.espncdn.com/i/teamlogos/mlb/500/nym.png"}, "ncaam:UCLA": {"lg": "ncaam", "id": "26", "abbr": "UCLA", "name": "UCLA Bruins", "color": "#2774ae", "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/26.png"}, "soccer:MIL": {"lg": "seriea", "id": "103", "abbr": "MIL", "name": "AC Milan", "color": "#e4002b", "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/103.png"}},
     favLeagues: ["mlb", "nhl", "nfl", "ncaaf", "epl", "ucl", "nba", "pga", "facup", "laliga", "seriea", "bund", "uel", "ncaam"],
   };
-  const DEFAULT_FAVS = MY_SETUP.favs;
-  const DEFAULT_FAV_LEAGUES = MY_SETUP.favLeagues;
+  // Everyone else starts fresh: no teams (they pick on first visit) and a general league order
+  const DEFAULT_FAVS = [];
+  const DEFAULT_FAV_LEAGUES = ["nfl", "nba", "mlb", "nhl", "ncaaf", "epl", "ucl", "ncaam"];
+  // Saved setups that can be loaded with a link (?me) or a code in Settings
+  const SETUPS = { me: MY_SETUP, charles: MY_SETUP };
+  // ?me (or ?setup=charles) loads that setup on this browser, then tidies the address bar
+  (() => {
+    try {
+      const q = new URLSearchParams(location.search);
+      const code = q.has("me") ? "me" : (q.get("setup") || "").toLowerCase();
+      const s = SETUPS[code];
+      if (!s) return;
+      const P = location.pathname.includes("/beta") ? "scoreline-beta:" : "scoreline:";
+      localStorage.setItem("scoreline-shared:favs", JSON.stringify(s.favs));
+      localStorage.setItem("scoreline-shared:favMeta", JSON.stringify(s.favMeta));
+      localStorage.setItem("scoreline-shared:favLeagues", JSON.stringify(s.favLeagues));
+      localStorage.setItem("scoreline-shared:onboarded", "true");
+      localStorage.setItem("scoreline-shared:owner", JSON.stringify(code === "me" ? "charles" : code));
+      localStorage.removeItem(P + "next");
+      q.delete("me"); q.delete("setup");
+      history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : "") + location.hash);
+      window.__setupLoaded = true;
+    } catch {}
+  })();
   const DEFAULT_META = Object.fromEntries(Object.entries(MY_SETUP.favMeta).map(([k, m]) => [k, m.lg]));
   const API = "https://site.api.espn.com/apis/site/v2/sports/";
 
@@ -875,7 +899,7 @@ button.brand, button.brand span { color: var(--accent); }
   // Storage (best effort) and state
   // =====================================================================
   // Teams and leagues live in one shared spot, so beta and live always show the same setup on this device
-  const SHARED = new Set(["favs", "favMeta", "favLeagues"]);
+  const SHARED = new Set(["favs", "favMeta", "favLeagues", "onboarded", "owner"]);
   const store = {
     get(k, d) {
       try {
@@ -2066,7 +2090,9 @@ button.brand, button.brand span { color: var(--accent); }
   // =====================================================================
   let results = [], searchTimer = null, searchSeq = 0;
   const LG_BY_SLUG = Object.fromEntries(TEAM_LEAGUES.map(l => [l.path, l.id]));
-  function openSheet() {
+  function openSheet(welcome) {
+    document.getElementById("sheet-h").textContent = welcome === true ? "Pick Your Teams" : "Your Teams";
+    document.getElementById("sheet-intro").hidden = welcome !== true;
     document.getElementById("sheet").hidden = false;
     setTimeout(() => document.getElementById("q").focus(), 50);
     renderSheet();
@@ -2208,6 +2234,7 @@ button.brand, button.brand span { color: var(--accent); }
     toggleFav(keyFor(t), { lg: t.lg, id: t.id, name: t.name, logo: t.logo, color: t.color, abbr: t.abbr });
   });
   document.getElementById("sheet-x").onclick = closeSheet;
+  document.getElementById("sheet-done").onclick = closeSheet;
   let tdrag = null;
   const folEl = document.getElementById("following");
   folEl.addEventListener("pointerdown", e => {
@@ -2874,7 +2901,8 @@ button.brand, button.brand span { color: var(--accent); }
     document.getElementById("settings-body").innerHTML =
       `<div class="set-row"><div class="set-lbl">My Teams<small>Following ${teams} team${teams === 1 ? "" : "s"}</small></div><button class="chip" data-set-open="teams">Edit</button></div>` +
       `<div class="set-row"><div class="set-lbl">My Leagues<small>${leagues} league${leagues === 1 ? "" : "s"} in your order</small></div><button class="chip" data-set-open="leagues">Edit Order</button></div>` +
-      `<div class="set-row"><div class="set-lbl">Reset To My Setup<small>Puts back Charles's 14 teams and 14 leagues, in order</small></div><button class="chip" data-reset-setup>Reset</button></div>` +
+      (store.get("owner", "") ? `<div class="set-row"><div class="set-lbl">Reset To My Setup<small>Puts back your saved teams and leagues, in order</small></div><button class="chip" data-reset-setup>Reset</button></div>` : "") +
+      `<div class="set-row"><div class="set-lbl">Load A Setup<small>Have a setup code? Enter it to load those teams and leagues</small></div><button class="chip" data-load-setup>Enter Code</button></div>` +
       setSection("display", "Layout & Display", "Open to, layout, color, appearance, odds",
         segRow("Open To", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens") +
         segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
@@ -2951,9 +2979,18 @@ button.brand, button.brand span { color: var(--accent); }
     }
     const sec = e.target.closest("[data-set-sec]");
     if (sec) { const k = sec.dataset.setSec; setOpen[k] = !setOpen[k]; store.set("setOpen", setOpen); renderSettings(); return; }
+    if (e.target.closest("[data-load-setup]")) {
+      const code = (prompt("Setup code") || "").trim().toLowerCase();
+      if (!code) return;
+      if (!SETUPS[code]) { toast("Code Not Found", "Check the spelling and try again", "", "", false); return; }
+      store.set("owner", code === "me" ? "charles" : code);
+      e.target.closest("[data-load-setup]").setAttribute("data-reset-setup", "");
+    }
     if (e.target.closest("[data-reset-setup]")) {
-      state.favs = new Set(MY_SETUP.favs); state.favMeta = { ...state.favMeta, ...MY_SETUP.favMeta }; state.favLeagues = [...MY_SETUP.favLeagues];
-      store.set("favs", MY_SETUP.favs); store.set("favMeta", state.favMeta); store.set("favLeagues", state.favLeagues);
+      const S = SETUPS[store.get("owner", "")] || MY_SETUP;
+      state.favs = new Set(S.favs); state.favMeta = { ...state.favMeta, ...S.favMeta }; state.favLeagues = [...S.favLeagues];
+      store.set("onboarded", true);
+      store.set("favs", [...state.favs]); store.set("favMeta", state.favMeta); store.set("favLeagues", state.favLeagues);
       state.next = {}; store.set("next", {});
       toast("Setup Restored", "Your teams and leagues are back in your order", "", "", false);
       renderSettings(); render(); refreshNext();
@@ -3009,6 +3046,10 @@ button.brand, button.brand span { color: var(--accent); }
 
   renderDates();
   loadAll();
+  // First visit for someone new: no saved teams yet, so open Pick Your Teams
+  if (window.__setupLoaded) toast("Setup Loaded", "Your teams and leagues are on this device", "", "", false);
+  else if (!store.get("onboarded", false) && !store.get("favs", []).length) { store.set("onboarded", true); setTimeout(() => openSheet(true), 600); }
+  else if (!store.get("onboarded", false)) store.set("onboarded", true);
 })();
 </script>
 </body>
