@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014183529">
+<meta name="build" content="20261014183913">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1003,6 +1003,11 @@ button.brand, button.brand span { color: var(--accent); }
   // =====================================================================
   // Normalize team-sport games
   // =====================================================================
+  // Network shorthand → the names the TV matching knows. NBC Sports Chicago became CHSN (2024),
+  // NBC Sports Washington became Monumental (2023); NBCSN shut down in 2021.
+  var NET_ALIAS = { NBCSBA: "NBCS-BA", NBCSCA: "NBCS-CA", NBCSP: "NBCS-PHI", NBCSPHI: "NBCS-PHI", NBCP: "NBCS-PHI",
+    NBCSB: "NBCS-BOS", NBCSBOS: "NBCS-BOS", NBCC: "CHSN", NBCSC: "CHSN", NBCW: "Monumental", NBCSW: "Monumental", NBCS: "NBC" };
+  const netName = n => NET_ALIAS[String(n).trim().toUpperCase().replace(/\s+/g, "")] || String(n).trim();
   // No radio anywhere: some feeds list radio by name only
   var RADIO_NAME = /radio|^ERAD|SiriusXM|Sirius XM|Westwood One|TuneIn|Audacy|iHeart/i;
   function normalize(ev, lg) {
@@ -1036,10 +1041,10 @@ button.brand, button.brand span { color: var(--accent); }
     const nets = [];
     (comp.geoBroadcasts || []).forEach(b => {
       if (/radio/i.test(b.type?.shortName || "")) return;   // ESPN lists radio too (e.g. "ERADM" = ESPN Radio); TV and streaming only
-      const name = b.media?.shortName || b.media?.name;
+      const name = (b.media?.shortName || b.media?.name) && netName(b.media.shortName || b.media.name);
       if (name && !RADIO_NAME.test(name)) nets.push({ name, market: (b.market?.type || "national").toLowerCase() });
     });
-    (comp.broadcasts || []).forEach(b => (b.names || []).forEach(name => {
+    (comp.broadcasts || []).forEach(b => (b.names || []).map(netName).forEach(name => {
       if (name && !RADIO_NAME.test(name) && !nets.some(n => n.name === name)) nets.push({ name, market: (b.market || "national").toLowerCase() });
     }));
     const broadcast = nets.map(n => n.name).filter((v, i, a) => a.indexOf(v) === i).slice(0, 2).join(" / ");

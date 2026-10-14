@@ -3,6 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- NBC Sports shorthand is recognized: NBCSBA, NBCSCA, NBCSP/NBCP (Philadelphia), NBCSB (Boston). Old names map to today's channels: NBCC → CHSN (Chicago), NBCW → Monumental (D.C.).
 - Fix: radio broadcasts no longer show as TV (Brewers at Dodgers said "On ERADM, FS1"; ERADM is ESPN Radio). Only TV and streaming are listed now.
 - TV Settings is grouped into six sections: TV Networks, Streaming, Regional, League Passes, Spanish, Free To Watch. New picks: WNBA League Pass, ViX, Antenna (Free Over-The-Air: ABC, CBS, NBC, FOX, CW, ION, Telemundo, Univision) and Tubi.
 - New On My Services filter chip: only games you can watch with what you picked in TV Settings.
