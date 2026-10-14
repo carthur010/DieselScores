@@ -29,8 +29,10 @@
   --accent-soft: #e2f2ea;
   --live: #d6263b;
   --star: #e0a400;
-  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
-  --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  /* Apple devices use their built-in SF Pro (Apple's license doesn't allow hosting the files);
+     everything else falls back to Barlow from Google Fonts. */
+  --display: -apple-system, BlinkMacSystemFont, "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: -apple-system, BlinkMacSystemFont, "Barlow", "Helvetica Neue", Arial, sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -326,6 +328,9 @@ section.closed .bhead { border-bottom: 0; }
 .lrow .follow { font: inherit; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); white-space: nowrap; cursor: pointer; }
 .lrow .follow.on { background: var(--surface); color: var(--muted); }
 .betatag { font-style: normal; font-family: var(--body); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #fff; background: #e8590c; border-radius: 4px; padding: 2px 6px; margin-left: 6px; vertical-align: middle; }
+/* SF Pro's condensed width for scores and headers, where the device supports it */
+.brand, .bhead h2, .row .ab, .row .sc, .f-sc, .ms-t b, .ms-t em, .lb .num, .lb .pos, .lnum, .toast b { font-stretch: condensed; }
+.f-sc, .row .sc, .ms-t em, .lb .num { letter-spacing: -0.01em; }
 @keyframes slide { from { transform: translateY(-10px); opacity: 0; } }
 header.top { top: 0; padding-top: env(safe-area-inset-top, 0px); }
 button.brand { background: none; border: 0; padding: 0; cursor: pointer; color: var(--fg); }
