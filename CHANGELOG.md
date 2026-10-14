@@ -2,7 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
-## Beta 2.0 (at /beta2, separate app)
+## Beta 2.0 (at /beta2, separate app) · PARKED Oct 14
+Link stays up; no further work. All development continues on the classic beta.
+
 - **Apple Sports-style redesign**: dark gradient, big title, menu pill (Home / My Teams / any league), one glass panel with **Yesterday / Today / Upcoming**.
 - Centered scoreboard rows with big condensed scores, records before games, odds or network under the time, stars on your teams.
 - **Home** = My Teams, Worth A Watch, then your leagues in order. **My Teams** view adds Up Next. Each league has its own view.

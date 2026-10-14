@@ -4,6 +4,8 @@ Live: https://carthur010.github.io/DieselScores/
 Beta: https://carthur010.github.io/DieselScores/beta/
 Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 
+> Beta 2.0 (Apple Sports look, /beta2) is parked. Ideas from it that could come to the classic beta later: Upcoming tab, game card Stats/Odds tabs, drag-to-reorder leagues.
+
 ## Waiting to ship (in beta now)
 - [ ] SF Pro fonts on Apple devices
 - [ ] Watch buttons open the app first on phones, website fallback (test each app: YouTube TV, Peacock, Paramount+, HBO Max)
