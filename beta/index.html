@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014134704">
+<meta name="build" content="20261014135040">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -872,8 +872,8 @@ button.brand, button.brand span { color: var(--accent); }
   const DEFAULT_FAVS = [];
   const DEFAULT_FAV_LEAGUES = ["nfl", "nba", "mlb", "nhl", "ncaaf", "epl", "ucl", "ncaam"];
   // Saved setups that can be loaded with a link (?me) or a code in Settings
-  const SETUPS = { me: MY_SETUP, charles: MY_SETUP };
-  // ?me (or ?setup=charles) loads that setup on this browser, then tidies the address bar
+  const SETUPS = { me: MY_SETUP, ca: MY_SETUP };
+  // ?me (or ?setup=ca) loads that setup on this browser, then tidies the address bar
   (() => {
     try {
       const q = new URLSearchParams(location.search);
@@ -885,7 +885,7 @@ button.brand, button.brand span { color: var(--accent); }
       localStorage.setItem("scoreline-shared:favMeta", JSON.stringify(s.favMeta));
       localStorage.setItem("scoreline-shared:favLeagues", JSON.stringify(s.favLeagues));
       localStorage.setItem("scoreline-shared:onboarded", "true");
-      localStorage.setItem("scoreline-shared:owner", JSON.stringify(code === "me" ? "charles" : code));
+      localStorage.setItem("scoreline-shared:owner", JSON.stringify(code === "me" ? "ca" : code));
       localStorage.removeItem(P + "next");
       q.delete("me"); q.delete("setup");
       history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : "") + location.hash);
@@ -2983,7 +2983,7 @@ button.brand, button.brand span { color: var(--accent); }
       const code = (prompt("Setup code") || "").trim().toLowerCase();
       if (!code) return;
       if (!SETUPS[code]) { toast("Code Not Found", "Check the spelling and try again", "", "", false); return; }
-      store.set("owner", code === "me" ? "charles" : code);
+      store.set("owner", code === "me" ? "ca" : code);
       e.target.closest("[data-load-setup]").setAttribute("data-reset-setup", "");
     }
     if (e.target.closest("[data-reset-setup]")) {
