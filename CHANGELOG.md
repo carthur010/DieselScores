@@ -2,6 +2,10 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## In beta: iPhone App Notifications
+- In the iOS app, alerts now come through as real iPhone notifications.
+- Start reminders (30, 15, 10, 5, 1 Min) are booked on the phone ahead of time, so they arrive even when Scores is closed. Live score alerts still need the app open.
+
 ## Oct 14, 2026: iOS App Shell
 - Added `app/`, a Capacitor iOS project that wraps the live site. App name Scores, bundle id com.carthur.scores, Scores icon and dark splash.
 

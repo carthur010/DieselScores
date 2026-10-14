@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014135557">
+<meta name="build" content="20261014142351">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1293,6 +1293,7 @@ button.brand, button.brand span { color: var(--accent); }
     state.updatedAt = new Date();
     document.getElementById("refresh").classList.remove("spin");
     if (isToday()) { checkAlerts(); checkReminders(); }
+    syncScheduled();
     render();
     schedule();
     refreshNext();
@@ -1460,7 +1461,7 @@ button.brand, button.brand span { color: var(--accent); }
       const who = g.fav ? favName(g) : `${a.abbr} at ${h.abbr}`;
       const left = Math.max(1, Math.round(mins));
       const watch = g.watch?.[0] ? `Watch on ${g.watch[0].app}` : (g.broadcast || g.lg.short || g.lg.name);
-      notify(`${who} Starts In ${left} Min`, `${a.name || a.abbr} at ${h.name || h.abbr} · ${timeLabel(g.date)}`, watch, g.link, false, g.id + ":r" + m);
+      notify(`${who} Starts In ${left} Min`, `${a.name || a.abbr} at ${h.name || h.abbr} · ${timeLabel(g.date)}`, watch, g.link, false, g.id + ":r" + m, !!LN);
     });
   }
   setInterval(checkReminders, 30000);
@@ -1562,6 +1563,7 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function toggleWatch(key) {
     if (state.watched[key]) delete state.watched[key]; else state.watched[key] = Date.now();
+    syncScheduled();
     store.set("watched", state.watched);
     const g = findGame(key);
     if (state.watched[key]) {
@@ -1571,8 +1573,47 @@ button.brand, button.brand span { color: var(--accent); }
     render();
     if (openGameKey === key) repaintGame();
   }
-  function notify(title, line, where, link, hot, tagKey) {
+  // iOS app: real iPhone notifications through the native plugin
+  var LN = window.Capacitor?.isNativePlatform?.() ? window.Capacitor.Plugins?.LocalNotifications : null;
+  var nativePerm = "prompt";
+  if (LN) {
+    LN.checkPermissions().then(p => { nativePerm = p.display; syncScheduled(); }).catch(() => {});
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) LN.checkPermissions().then(p => { nativePerm = p.display; }).catch(() => {}); });
+  }
+  function nid(key) { let h = 0; for (const c of String(key)) h = (h * 31 + c.charCodeAt(0)) | 0; return Math.abs(h) % 2000000000 || 1; }
+  // Heads-ups get booked on the phone ahead of time, so they still arrive when the app is closed
+  async function syncScheduled() {
+    if (!LN || nativePerm !== "granted") return;
+    const now = Date.now(), want = [];
+    allGames().forEach(g => {
+      if (g.state !== "pre" || !g.date) return;
+      const start = new Date(g.date).getTime();
+      const mins = new Set([...(g.fav ? state.alertPrefs.team.remind || [] : []), ...(isWatched(g) ? state.alertPrefs.watched.remind || [] : [])]);
+      const [a, h] = g.teams;
+      const who = g.fav ? favName(g) : `${a.abbr} at ${h.abbr}`;
+      const watch = g.watch?.[0] ? `Watch on ${g.watch[0].app}` : (g.broadcast || g.lg.short || g.lg.name);
+      mins.forEach(m => {
+        const at = start - m * 60e3;
+        if (at <= now + 5e3) return;
+        want.push({ id: nid(g.id + ":r" + m), title: `${who} Starts In ${m} Min`, body: `${a.name || a.abbr} at ${h.name || h.abbr} · ${timeLabel(g.date)}\n${watch}`, schedule: { at: new Date(at), allowWhileIdle: true }, extra: { kind: "remind" } });
+      });
+    });
+    try {
+      const pend = (await LN.getPending()).notifications || [];
+      const keep = new Set(want.map(n => n.id));
+      const stale = pend.filter(n => n.extra?.kind === "remind" && !keep.has(Number(n.id)));
+      if (stale.length) await LN.cancel({ notifications: stale.map(n => ({ id: Number(n.id) })) });
+      const have = new Set(pend.map(n => Number(n.id)));
+      const add = want.filter(n => !have.has(n.id)).slice(0, 60);
+      if (add.length) await LN.schedule({ notifications: add });
+    } catch {}
+  }
+  function notify(title, line, where, link, hot, tagKey, osOff) {
     toast(title, line, where, link, hot);
+    if (LN) {
+      if (!osOff && nativePerm === "granted") LN.schedule({ notifications: [{ id: nid(tagKey || title + Date.now()), title, body: [line, where].filter(Boolean).join("\n") }] }).catch(() => {});
+      return;
+    }
     try {
       if ("Notification" in window && Notification.permission === "granted") {
         const opts = { body: [line, where].filter(Boolean).join("\n"), tag: tagKey, data: { url: link || location.href } };
@@ -1583,6 +1624,7 @@ button.brand, button.brand span { color: var(--accent); }
     } catch {}
   }
   function notifyStatus() {
+    if (LN) return nativePerm === "granted" ? "Notifications allowed" : nativePerm === "denied" ? "Notifications are off for Scores in your iPhone's Settings" : "Notifications not allowed yet";
     if (!("Notification" in window)) return /iPhone|iPad/.test(navigator.userAgent) ? "Add Scores to your home screen to allow notifications" : "This browser doesn't support notifications";
     if (Notification.permission === "granted") return "Notifications allowed";
     if (Notification.permission === "denied") return "Notifications are blocked in your phone's settings";
@@ -2943,13 +2985,14 @@ button.brand, button.brand span { color: var(--accent); }
   }
   applyTheme();
   async function askPermission() {
+    if (LN) { try { nativePerm = (await LN.requestPermissions()).display; syncScheduled(); } catch {} return; }
     try { if ("Notification" in window && Notification.permission === "default") await Notification.requestPermission(); } catch {}
   }
   async function setAlerts(on) {
     state.alerts = on;
     store.set("alerts", on);
     if (on) {
-      try { if ("Notification" in window && Notification.permission === "default") await Notification.requestPermission(); } catch {}
+      await askPermission();
       toast("Alerts On", "You'll get a heads-up when a game turns close, goes to overtime, or an upset starts brewing.", "Works while Scores is open");
     }
   }
@@ -2994,7 +3037,7 @@ button.brand, button.brand span { color: var(--accent); }
         alertGroup("team", "My Teams", "Games with teams you follow") +
         alertGroup("watched", "Games You're Watching", "Tap the bell on any game to add it") +
         alertGroup("all", "All Games", "Anything that turns interesting, any team") +
-        `<div class="set-row"><div class="set-lbl">Test Alerts<small>${esc(notifyStatus())}. Alerts work while Scores is open.</small></div><button class="chip" data-test-alert>Send Test</button></div>`) +
+        `<div class="set-row"><div class="set-lbl">Test Alerts<small>${esc(notifyStatus())}. ${LN ? "Start reminders arrive even when Scores is closed. Live alerts need it open." : "Alerts work while Scores is open."}</small></div><button class="chip" data-test-alert>Send Test</button></div>`) +
       `<button class="set-done" data-set-done>Done</button>` +
       `<p class="hint set-foot">${location.pathname.includes("/beta") ? `You're on the beta. <a href="../">Open The Live App</a>` : `Want to try new features early? <a href="beta/">Open The Beta</a>`}</p>`;
   }
@@ -3029,7 +3072,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (rb) {
       const grp = rb.dataset.remindGroup, m = +rb.dataset.remind, list = state.alertPrefs[grp].remind || [];
       state.alertPrefs[grp].remind = list.includes(m) ? list.filter(x => x !== m) : [...list, m].sort((x, y) => y - x);
-      store.set("alertPrefs", state.alertPrefs);
+      store.set("alertPrefs", state.alertPrefs); syncScheduled();
       if (state.alertPrefs[grp].remind.length) askPermission();
       renderSettings();
       return;
@@ -3038,7 +3081,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (ab) {
       const grp = ab.dataset.alertGroup, ev = ab.dataset.alertEv;
       state.alertPrefs[grp][ev] = !state.alertPrefs[grp][ev];
-      store.set("alertPrefs", state.alertPrefs);
+      store.set("alertPrefs", state.alertPrefs); syncScheduled();
       if (state.alertPrefs[grp][ev]) askPermission();
       renderSettings();
       return;
@@ -3046,7 +3089,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (e.target.closest("[data-test-alert]")) {
       toast("Test Alert", "In-app alerts are working.", "", "", false);
       await askPermission();
-      if ("Notification" in window && Notification.permission === "granted") notify("Test Alert", "Phone notifications are working too.", "", "", false, "test");
+      if (LN ? nativePerm === "granted" : ("Notification" in window && Notification.permission === "granted")) notify("Test Alert", "Phone notifications are working too.", "", "", false, "test");
       renderSettings();
       return;
     }
