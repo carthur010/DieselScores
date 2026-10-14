@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014184255">
+<meta name="build" content="20261014184425">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -827,7 +827,7 @@ button.brand, button.brand span { color: var(--accent); }
 
   // Where to watch. Your setup: YouTube TV + every streaming app. First match wins.
   // ---- Where to watch: what each service carries, filtered by the services you pick in TV Settings
-  const NATIONAL = /^(ABC|CBS|NBC|FOX|CW|The CW|ESPN|ESPN2|ESPNU|ESPNEWS|SECN|SEC Network|SECN\+?|ACCN|ACC Network|BTN|Big Ten Network|FS1|FS2|TNT|TBS|truTV|NFL ?Net(work)?|NFLN|MLB ?Net(work)?|MLBN|NBA ?TV|NHL ?Net(work)?|CBSSN|CBS Sports Network|USA|USA Net(work)?|Golf|Golf Channel|Telemundo|Universo|Univision|UniMás|TUDN|Galavisión|ION|ESPN Deportes|FOX Deportes|beIN SPORTS|beIN Sports|Tennis Channel|NFL RedZone)$/i;
+  const NATIONAL = /^(ABC|CBS|NBC|FOX|CW|The CW|ESPN|ESPN2|ESPNU|ESPNEWS|SECN|SEC Network|ACCN|ACC Network|BTN|Big Ten Network|FS1|FS2|TNT|TBS|truTV|NFL ?Net(work)?|NFLN|MLB ?Net(work)?|MLBN|NBA ?TV|NHL ?Net(work)?|NHLN|CNBC|CBSSN|CBS Sports Network|USA|USA Net(work)?|Golf|Golf Channel|Telemundo|Universo|Univision|UniMás|TUDN|Galavisión|ION|ESPN Deportes|FOX Deportes|beIN SPORTS|beIN Sports|beIN SPORTS en Español|beIN Sports en Espanol|Tennis Channel|NFL RedZone)$/i;
   // Home markets and their regional sports networks
   const MARKETS = {
     nyc: { name: "New York", rsn: /^(MSG|MSG ?2|MSGSN|MSG Sportsnet|MSG\+|YES|YES Network|SNY|SportsNet NY)$/i },
@@ -849,7 +849,7 @@ button.brand, button.brand span { color: var(--accent); }
     { id: "directv", grp: "tv", name: "DirecTV Stream", kind: "bundle", url: "https://stream.directv.com/", scheme: "dtvnow://", rsn: /./ },
     { id: "cable", grp: "tv", name: "Cable / Satellite", kind: "bundle", url: "", scheme: "", rsn: /./ },
     { id: "gotham", grp: "regional", name: "Gotham Sports", kind: "regional", url: "https://gothamsports.com/", re: /^(MSG|MSG ?2|MSGSN|MSG Sportsnet|MSG\+|YES|YES Network)$/i },
-    { id: "espnplus", grp: "stream", name: "ESPN", label: "ESPN+ / ESPN", kind: "stream", url: "https://www.espn.com/watch/", scheme: "sportscenter://", re: /ESPN\+|ESPN Unlimited|ESPN App|ESPN Deportes\+/i },
+    { id: "espnplus", grp: "stream", name: "ESPN", label: "ESPN+ / ESPN", kind: "stream", url: "https://www.espn.com/watch/", scheme: "sportscenter://", re: /ESPN\+|ESPN Unlimited|ESPN App|ESPN Deportes\+|^ESPN3$|^ACCNX$|ACC Network Extra|^SECN\+$|SEC Network\+|Big 12 Now/i },
     { id: "peacock", grp: "stream", name: "Peacock", kind: "stream", url: "https://www.peacocktv.com/sports", scheme: "peacock://", re: /Peacock/i },
     { id: "paramount", grp: "stream", name: "Paramount+", kind: "stream", url: "https://www.paramountplus.com/live-tv/", scheme: "paramountplus://", re: /Paramount\+|Paramount Plus|CBS Sports Golazo/i },
     { id: "max", grp: "stream", name: "HBO Max", kind: "stream", url: "https://play.hbomax.com/", scheme: "hbomax://", re: /^(Max|HBO Max|truTV Max)$/i },
@@ -1007,7 +1007,7 @@ button.brand, button.brand span { color: var(--accent); }
   // NBC Sports Washington became Monumental (2023); NBCSN shut down in 2021.
   var NET_ALIAS = { NBCSBA: "NBCS-BA", NBCSCA: "NBCS-CA", NBCSP: "NBCS-PHI", NBCSPHI: "NBCS-PHI", NBCP: "NBCS-PHI",
     NBCSB: "NBCS-BOS", NBCSBOS: "NBCS-BOS", NBCC: "CHSN", NBCSC: "CHSN", NBCW: "Monumental", NBCSW: "Monumental", NBCS: "NBC",
-    MNMT: "Monumental", MARQ: "Marquee", SPECSN: "Spectrum SportsNet", SNLA: "Spectrum SportsNet LA", FDSW: "FDSN West" };
+    MNMT: "Monumental", MARQ: "Marquee", SPECSN: "Spectrum SportsNet", SNLA: "Spectrum SportsNet LA", FDSW: "FDSN West", TC: "Tennis Channel", NFLREDZONE: "NFL RedZone", REDZONE: "NFL RedZone", GOLF: "Golf Channel" };
   const netName = n => NET_ALIAS[String(n).trim().toUpperCase().replace(/\s+/g, "")] || String(n).trim();
   // No radio anywhere: some feeds list radio by name only
   var RADIO_NAME = /radio|^ERAD|SiriusXM|Sirius XM|Westwood One|TuneIn|Audacy|iHeart/i;
