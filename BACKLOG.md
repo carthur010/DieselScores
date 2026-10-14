@@ -11,6 +11,9 @@ Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 - [ ] Home market or ZIP code so regional networks (MSG, YES, SNY, NBC Sports) and blackouts show correctly
 - [ ] "Not on your services" note when nothing matches
 
+## Next up: Simple view
+- [ ] A **Simple** scoreboard option beside Compact and Expanded: just a list of games grouped by league (league logo and name, then time, two team logos and names, score, bell). No cards, odds or extras. Reference: a Bundesliga list with five 9:30 AM games stacked.
+
 ## Waiting to ship (in beta now)
 Nothing. Everything shipped to live on Oct 14. Still worth a real-phone check: each watch app opening (YouTube TV, Peacock, Paramount+, HBO Max) and game-day betting odds on the card.
 
