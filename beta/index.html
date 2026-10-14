@@ -331,6 +331,13 @@ section.closed .bhead { border-bottom: 0; }
 /* SF Pro's condensed width for scores and headers, where the device supports it */
 .brand, .bhead h2, .row .ab, .row .sc, .f-sc, .ms-t b, .ms-t em, .lb .num, .lb .pos, .lnum, .toast b { font-stretch: condensed; }
 .f-sc, .row .sc, .ms-t em, .lb .num { letter-spacing: -0.01em; }
+.set-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.set-lbl { font-weight: 600; display: grid; gap: 2px; min-width: 0; }
+.set-lbl small { font-weight: 400; font-size: 12px; color: var(--muted); }
+.set-seg { flex: 0 0 auto; }
+.set-seg button { font-size: 13px; padding: 6px 10px; }
+.set-foot { padding-top: 6px; }
+.set-foot a { color: var(--accent); font-weight: 600; }
 @keyframes slide { from { transform: translateY(-10px); opacity: 0; } }
 header.top { top: 0; padding-top: env(safe-area-inset-top, 0px); }
 button.brand { background: none; border: 0; padding: 0; cursor: pointer; color: var(--fg); }
@@ -365,8 +372,8 @@ button.brand span { color: var(--accent); }
       <button class="iconbtn" id="teamsbtn" title="Your teams" aria-label="Search and follow teams">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       </button>
-      <button class="iconbtn" id="alertbtn" title="Close-game alerts" aria-label="Close-game alerts" aria-pressed="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>
+      <button class="iconbtn" id="settingsbtn" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
       </button>
       <button class="iconbtn" id="refresh" title="Refresh scores" aria-label="Refresh scores">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
@@ -393,6 +400,13 @@ button.brand span { color: var(--accent); }
       <h3>Following</h3>
       <div class="res" id="following"></div>
     </div>
+  </div>
+</div>
+<div class="sheet" id="ssheet" hidden role="dialog" aria-modal="true" aria-labelledby="ssheet-h">
+  <div class="sheet-card">
+    <div class="bhead"><h2 id="ssheet-h">Settings</h2>
+      <button class="tog" id="ssheet-x" aria-label="Done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="sheet-body" id="settings-body"></div>
   </div>
 </div>
 <div class="sheet" id="lsheet" hidden role="dialog" aria-modal="true" aria-labelledby="lsheet-h">
@@ -503,7 +517,7 @@ button.brand span { color: var(--accent); }
 
   const state = {
     date: startOfDay(new Date()),
-    tab: store.get("tab2", "live"),
+    tab: store.get("home", "live"),
     view: store.get("view3", "league"),
     favs: new Set(store.get("favs", DEFAULT_FAVS)),
     favMeta: store.get("favMeta", {}),   // key -> { lg, id, name, logo, color }
@@ -1214,9 +1228,6 @@ button.brand span { color: var(--accent); }
 
   function render() {
     document.querySelectorAll("[data-view]").forEach(b => { const on = b.dataset.view === state.view; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
-    const ab = document.getElementById("alertbtn");
-    ab.setAttribute("aria-pressed", state.alerts);
-    ab.title = state.alerts ? "Close-game alerts are on" : "Close-game alerts are off";
     renderDates();
     const games = allGames();
     renderTabs(games);
@@ -1475,12 +1486,12 @@ button.brand span { color: var(--accent); }
   document.getElementById("main").addEventListener("click", e => {
     if (e.target.closest("[data-edit-leagues]")) { renderLeagueSheet(); document.getElementById("lsheet").hidden = false; }
   });
-  document.addEventListener("keydown", e => { if (e.key === "Escape") { closeSheet(); document.getElementById("lsheet").hidden = true; } });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { closeSheet(); document.getElementById("lsheet").hidden = true; document.getElementById("ssheet").hidden = true; } });
   document.getElementById("q").addEventListener("input", search);
   document.getElementById("teamsbtn").onclick = openSheet;
   function goHome() {
     closeSheet();
-    state.tab = "live"; store.set("tab2", "live");
+    state.tab = store.get("home", "live");
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (!isToday()) setDate(new Date()); else render();
   }
@@ -1488,17 +1499,57 @@ button.brand span { color: var(--accent); }
   document.getElementById("brandbtn").onclick = goHome;
   document.getElementById("refresh").onclick = () => loadAll();
   document.querySelectorAll("[data-view]").forEach(b => b.onclick = () => { state.view = b.dataset.view; store.set("view3", state.view); render(); });
-  document.getElementById("alertbtn").onclick = async () => {
-    state.alerts = !state.alerts;
-    store.set("alerts", state.alerts);
-    render();
-    if (state.alerts) {
+  // ---- Settings
+  function applyTheme() {
+    const t = store.get("theme", "system");
+    if (t === "system") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
+  }
+  applyTheme();
+  async function setAlerts(on) {
+    state.alerts = on;
+    store.set("alerts", on);
+    if (on) {
       try { if ("Notification" in window && Notification.permission === "default") await Notification.requestPermission(); } catch {}
       toast("Alerts on", "You'll get a heads-up when a game turns close, goes to overtime, or an upset starts brewing.", "Works while Scores is open");
-    } else {
-      toast("Alerts off", "No more heads-ups for close games.", "");
     }
-  };
+  }
+  function segRow(label, key, value, options, hint) {
+    return `<div class="set-row"><div class="set-lbl">${esc(label)}${hint ? `<small>${esc(hint)}</small>` : ""}</div>
+      <div class="seg set-seg">${options.map(([v, l]) => `<button data-set="${key}" data-val="${v}" class="${String(value) === String(v) ? "on" : ""}">${esc(l)}</button>`).join("")}</div></div>`;
+  }
+  function renderSettings() {
+    const teams = state.favs.size, leagues = state.favLeagues.length;
+    document.getElementById("settings-body").innerHTML =
+      segRow("Open to", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["mine", "My Leagues"]], "The tab you see when the app opens") +
+      segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
+      segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
+      segRow("Close-game alerts", "alerts", state.alerts ? "on" : "off", [["on", "On"], ["off", "Off"]], "Close games, overtime, upsets. Works while the app is open") +
+      `<div class="set-row"><div class="set-lbl">My Teams<small>Following ${teams} team${teams === 1 ? "" : "s"}</small></div><button class="chip" data-set-open="teams">Edit</button></div>` +
+      `<div class="set-row"><div class="set-lbl">My Leagues<small>${leagues} league${leagues === 1 ? "" : "s"} in your order</small></div><button class="chip" data-set-open="leagues">Edit order</button></div>` +
+      `<p class="hint set-foot">${location.pathname.includes("/beta") ? `You're on the beta. <a href="../">Open the live app</a>` : `Want to try new features early? <a href="beta/">Open the beta</a>`}</p>`;
+  }
+  function openSettings() { renderSettings(); document.getElementById("ssheet").hidden = false; }
+  document.getElementById("settingsbtn").onclick = openSettings;
+  document.getElementById("ssheet-x").onclick = () => { document.getElementById("ssheet").hidden = true; };
+  document.getElementById("ssheet").addEventListener("click", async e => {
+    if (e.target.id === "ssheet") { document.getElementById("ssheet").hidden = true; return; }
+    const b = e.target.closest("[data-set]");
+    if (b) {
+      const key = b.dataset.set, val = b.dataset.val;
+      if (key === "home") { store.set("home", val); state.tab = val; }
+      if (key === "view") { state.view = val; store.set("view3", val); }
+      if (key === "theme") { store.set("theme", val); applyTheme(); }
+      if (key === "alerts") await setAlerts(val === "on");
+      renderSettings(); render();
+      return;
+    }
+    const o = e.target.closest("[data-set-open]");
+    if (o) {
+      document.getElementById("ssheet").hidden = true;
+      if (o.dataset.setOpen === "teams") openSheet();
+      else { renderLeagueSheet(); document.getElementById("lsheet").hidden = false; }
+    }
+  });
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && isToday() && state.updatedAt && Date.now() - state.updatedAt > 25000) loadAll();
   });

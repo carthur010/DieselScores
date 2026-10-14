@@ -7,6 +7,7 @@ Beta: https://carthur010.github.io/DieselScores/beta/
 - [ ] SF Pro fonts on Apple devices
 - [ ] Watch buttons open the app first on phones, website fallback (test each app: YouTube TV, Peacock, Paramount+, HBO Max)
 - [ ] "You Are Looking Live" section in By League view on the Live tab
+- [ ] Settings panel (gear icon): Open to, Layout, Appearance, Close-game alerts, My Teams, My Leagues
 
 ## Idea backlog (from SportsDudes)
 1. **"This guy is going off" tracker** (Ben): flag big individual games live, like a no-hitter in progress, hat trick, triple-double, big NFL stat lines.
