@@ -3,6 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Networks trimmed to leagues Scores covers: Tennis Channel and CNBC removed. New Free To Watch pick, Free Sports Channels: Mountain West Network, WCC Network, BYUtv, Stadium (college), beIN SPORTS XTRA (soccer) and Fubo Sports Network. Skipped: horse racing, cricket, motorsports, combat, outdoor and news-only channels.
 - National network codes from Charles's national list: NHLN, CNBC, TC (Tennis Channel), GOLF, NFL RedZone and beIN SPORTS en Español count as national channels. Digital-only college feeds (SECN+, ACCNX, ESPN3, Big 12 Now) now point to the ESPN app instead of live TV bundles.
 - Regional network list expanded from Charles's RSN reference: Monumental (MNMT), MASN/MASN2, SportsNet Pittsburgh (SNP), Marquee (MARQ), Altitude (ALT), Space City (SCHN), Detroit SportsNet, team streaming apps (Jazz+, Suns+, Wild+, Blue Note+, BlazerVision, The Spot, MavsTV), Midco, SWX, YurView, legacy FanDuel networks and more now count as regional, so live TV bundles don't claim them and league passes treat them as local.
 - NBC Sports shorthand is recognized: NBCSBA, NBCSCA, NBCSP/NBCP (Philadelphia), NBCSB (Boston). Old names map to today's channels: NBCC → CHSN (Chicago), NBCW → Monumental (D.C.).
