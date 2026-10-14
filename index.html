@@ -191,37 +191,37 @@ section.closed .bbody { display: none; }
 .ms.add:hover { color: var(--fg); }
 
 /* ---------- Compact (Sofascore-style) ---------- */
-.tl-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px 6px; }
-.tl-badge { min-width: 40px; height: 30px; padding-inline: 7px; white-space: nowrap; display: grid; place-items: center; background: var(--chyron); color: var(--on-chyron); font-family: var(--display); font-style: italic; font-weight: 800; font-size: 14px; letter-spacing: .04em; flex: 0 0 auto; max-width: 110px; overflow: hidden; clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%); padding-right: 10px; }
-.tl-head .crumb { font-weight: 700; font-size: 14px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plain { display: grid; gap: 8px; }
+.ph { margin: 4px 2px 0; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: flex; gap: 8px; align-items: baseline; }
+.ph span { font-weight: 500; letter-spacing: 0; text-transform: none; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.tl-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px 4px; }
+.tl-badge { min-width: 40px; height: 28px; white-space: nowrap; display: grid; place-items: center; background: var(--chyron); color: var(--on-chyron); font-family: var(--display); font-style: italic; font-weight: 800; font-size: 14px; letter-spacing: .04em; flex: 0 0 auto; max-width: 110px; overflow: hidden; clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%); padding: 0 11px 0 7px; }
+.tl-head .crumb { font-weight: 700; font-size: 15px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tl-head .crumb span { color: var(--muted); font-weight: 500; }
-.tl-group { border-bottom: 6px solid var(--bg); }
+.tl-group { border-bottom: 8px solid var(--bg); }
 .tl-group:last-child { border-bottom: 0; }
-.t { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto 28px; align-items: center; gap: 10px; padding: 9px 14px; }
-.t + .t { border-top: 1px solid var(--line); }
-.t-time { display: grid; gap: 3px; font-size: 13px; color: var(--muted); justify-items: start; }
-.t-time .st { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.t { display: grid; grid-template-columns: 74px minmax(0, 1fr) auto 38px; align-items: center; gap: 12px; padding: 10px 16px; }
+.t.tap { cursor: pointer; }
+.t.tap:hover { background: var(--surface-2); }
+.t-time { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+.t-time .st { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .t-time .st.live { color: var(--live); }
-.t-time .st.final { color: var(--fg); }
-.t-teams { display: grid; gap: 5px; min-width: 0; }
-.tt { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 15px; font-weight: 500; }
-.tt img { width: 22px; height: 22px; object-fit: contain; flex: 0 0 auto; }
+.t-teams { display: grid; gap: 6px; min-width: 0; }
+.tt { display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 17px; }
+.tt img, .tt .nologo { width: 22px; height: 22px; object-fit: contain; flex: 0 0 auto; }
 .tt .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tt .rk { font-size: 12px; color: var(--muted); font-weight: 600; }
+.tt .rk { font-size: 13px; color: var(--muted); }
 .tt.lose { color: var(--muted); }
-.tt .poss { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); flex: 0 0 auto; }
-.tt .star { width: 18px; height: 18px; }
-.tt .star svg { width: 12px; height: 12px; }
-.tt .star:not(.on) { opacity: .5; }
-.t-extra { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding-left: 11px; min-width: 0; font-size: 12px; color: var(--muted); }
-.t-sc { display: grid; gap: 5px; justify-items: end; }
-.t-sc span { min-width: 32px; text-align: center; font-family: var(--display); font-weight: 800; font-size: 18px; line-height: 24px; padding-inline: 5px; background: var(--chyron); color: var(--on-chyron); border-radius: 3px; }
-.t-sc span.lose { background: var(--surface-2); color: var(--muted); }
-.t-sc.live span:not(.lose) { background: var(--live); }
-.t-go { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line); color: var(--muted); }
-.t-go:hover { color: var(--fg); border-color: var(--fg); }
-.t-go svg { width: 14px; height: 14px; }
-.t.fav { background: color-mix(in srgb, var(--star) 5%, transparent); }
+.tt .favmark { color: var(--star); display: grid; flex: 0 0 auto; }
+.tt .favmark svg { width: 12px; height: 12px; }
+.t-why { font-size: 12px; font-weight: 600; color: var(--muted); padding-left: 32px; }
+.t-why .hot { color: var(--live); }
+.t-sc { display: grid; gap: 6px; justify-items: end; font-size: 17px; font-weight: 600; line-height: 1.45; }
+.t-sc.live { color: var(--live); }
+.t-sc .lose { color: var(--muted); font-weight: 500; }
+.t-btn { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line); color: var(--accent); background: var(--surface); }
+.t-btn:hover { border-color: var(--accent); }
 
 /* ---------- Expanded (Apple Sports-style rows) ---------- */
 .feat { padding: 0 16px; }
@@ -319,8 +319,10 @@ section.closed .bbody { display: none; }
   .f-sc { font-size: 40px; }
   .f-grid { grid-template-columns: minmax(0, 1fr) minmax(40px, auto) minmax(76px, auto) minmax(40px, auto) minmax(0, 1fr); gap: 6px; }
   .f-mid .s { font-size: 15px; padding-inline: 7px; }
-  .t { grid-template-columns: 60px minmax(0, 1fr) auto 26px; gap: 8px; padding-inline: 12px; }
-  .tt { font-size: 14px; }
+  .t { grid-template-columns: 64px minmax(0, 1fr) auto 36px; gap: 10px; padding-inline: 14px; }
+  .t-btn { width: 36px; height: 36px; }
+  .tt { font-size: 16px; }
+  .t-time { font-size: 13px; }
   .brand { font-size: 20px; padding: 5px 15px 4px 8px; }
   .bar { gap: 2px; }
   .iconbtn { width: 34px; }
@@ -520,6 +522,7 @@ section.closed .bbody { display: none; }
   const STAR_O = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></svg>';
   const CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 15l6-6 6 6"/></svg>';
   const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 6l6 6-6 6"/></svg>';
+  const PLAY_BIG = '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M7 4.5v15l13-7.5z"/></svg>';
   const PLAY = '<svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><path d="M7 4.5v15l13-7.5z"/></svg>';
   const BOLT = '<svg class="ico" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>';
 
@@ -968,29 +971,30 @@ section.closed .bbody { display: none; }
       .map(r => `<span class="tag ${/Upset/.test(r) ? "hot" : /Starting/.test(r) ? "cool" : ""}">${esc(r)}</span>`).join("");
   }
 
-  // Compact row (Sofascore)
-  function compactRow(g) {
+  // Compact row (Sofascore): time + clock, names, plain scores, one round button
+  function compactRow(g, why = "") {
     const [a, h] = g.teams;
     if (!a || !h) return "";
-    const lose = (t, o) => g.state === "post" && o.winner && !t.winner;
-    const trailing = (t, o) => g.state === "in" && (+t.score) < (+o.score);
+    const lose = (t, o) => (g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score) && false);
     const st = g.state === "pre" ? (g.status === timeLabel(g.date) ? "" : g.status) : g.status;
-    const team = (t, o, at) => `<div class="tt ${lose(t, o) ? "lose" : ""}">
-        <i class="stripe" style="--tc:${esc(t.color || "")}"></i>
-        ${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : ""}
+    const team = (t, o, at) => `<div class="tt ${g.state === "post" && o.winner && !t.winner ? "lose" : ""}">
+        ${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : '<span class="nologo"></span>'}
         <span class="nm" title="${esc(t.full)}">${at ? "@ " : ""}${t.rank ? `<span class="rk">${t.rank}</span> ` : ""}${esc(t.name)}</span>
-        ${g.state === "in" && g.sit?.possession && g.sit.possession === t.id ? '<i class="poss" title="Possession"></i>' : ""}
-        ${starBtn(g.lg, t)}
+        ${isFavTeam(g.lg, t.abbr) ? `<span class="favmark" aria-label="Following">${STAR}</span>` : ""}
       </div>`;
-    const scores = g.state === "pre" ? "<span></span>" :
-      `<div class="t-sc ${g.state === "in" ? "live" : ""}"><span class="${lose(a, h) || trailing(a, h) ? "lose" : ""}">${esc(a.score)}</span><span class="${lose(h, a) || trailing(h, a) ? "lose" : ""}">${esc(h.score)}</span></div>`;
-    const extras = [situation(g), g.state !== "post" ? watchPill(g) : ""].filter(Boolean).join("");
-    return `<div class="t ${g.fav ? "fav" : ""}">
+    const sc = (t, o) => `<span class="${g.state === "post" && o.winner && !t.winner ? "lose" : ""}">${esc(t.score)}</span>`;
+    const scores = g.state === "pre" ? "<span></span>" : `<div class="t-sc ${g.state === "in" ? "live" : ""}">${sc(a, h)}${sc(h, a)}</div>`;
+    const w = g.state !== "post" && g.watch?.[0];
+    const btn = w ? `<a class="t-btn" href="${esc(w.url)}" target="_blank" rel="noopener" title="Watch on ${esc(w.app)} (${esc(w.nets.join(", "))})" aria-label="Watch on ${esc(w.app)}">${PLAY_BIG}</a>` : "<span></span>";
+    return `<div class="t ${g.link ? "tap" : ""}" ${g.link ? `data-href="${esc(g.link)}"` : ""}>
       <div class="t-time"><span>${esc(timeLabel(g.date))}</span><span class="st ${statusClass(g)}">${esc(st || "–")}</span></div>
-      <div class="t-teams">${team(a, h, false)}${team(h, a, true)}${extras ? `<div class="t-extra">${extras}</div>` : ""}</div>
+      <div class="t-teams">${team(a, h, false)}${team(h, a, true)}${why ? `<div class="t-why">${why}</div>` : ""}</div>
       ${scores}
-      ${g.link ? `<a class="t-go" href="${esc(g.link)}" target="_blank" rel="noopener" aria-label="Open Gamecast">${ARROW}</a>` : "<span></span>"}
+      ${btn}
     </div>`;
+  }
+  function whyLine(g) {
+    return [esc(g.lg.short || g.lg.name)].concat((g.reasons || []).map(r => `<span class="${/Upset/.test(r) ? "hot" : ""}">${esc(r)}</span>`)).join(" · ");
   }
 
   // Expanded row (Apple Sports)
@@ -1109,6 +1113,9 @@ section.closed .bbody { display: none; }
   const BLOCK = { golf: golfBlock, race: raceBlock, mma: mmaBlock, tennis: tennisBlock };
 
   function block(id, title, meta, body, icon) {
+    if (state.view === "compact") {
+      return `<section class="plain"><h2 class="ph">${esc(title)}${meta ? `<span>${esc(meta)}</span>` : ""}</h2><div class="card">${body}</div></section>`;
+    }
     const closed = state.closed.has(id);
     return `<section class="block ${closed ? "closed" : ""}" data-block="${esc(id)}">
       <div class="bhead">${icon || ""}<h2>${esc(title)}</h2>${meta ? `<span class="meta">${esc(meta)}</span>` : ""}
@@ -1222,7 +1229,7 @@ section.closed .bbody { display: none; }
       if (picks.length >= 1 && (tab === "all" || picks.some(g => g.state === "in"))) {
         if (tab === "live") shown = new Set(picks.map(g => g.id));
         html += block("worth", "Worth Watching", strong.length ? `${strong.length} worth a look` : "best of what's on",
-          `<div class="feat">${picks.map(g => expandedRow(g, true)).join("")}</div>`, BOLT);
+          state.view === "compact" ? `<div class="tl-group">${picks.map(g => compactRow(g, whyLine(g))).join("")}</div>` : `<div class="feat">${picks.map(g => expandedRow(g, true)).join("")}</div>`, BOLT);
       }
     }
 
@@ -1311,6 +1318,8 @@ section.closed .bbody { display: none; }
   }
 
   document.getElementById("main").addEventListener("click", e => {
+    const row = e.target.closest(".t[data-href]");
+    if (row && !e.target.closest("a, button")) { window.open(row.dataset.href, "_blank", "noopener"); return; }
     const fav = e.target.closest("[data-fav]");
     if (fav) {
       let meta = null;
