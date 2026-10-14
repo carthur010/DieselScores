@@ -3,6 +3,9 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- TV Settings is grouped into six sections: TV Networks, Streaming, Regional, League Passes, Spanish, Free To Watch. New picks: WNBA League Pass, ViX, Antenna (Free Over-The-Air: ABC, CBS, NBC, FOX, CW, ION, Telemundo, Univision) and Tubi.
+- New On My Services filter chip: only games you can watch with what you picked in TV Settings.
+- Live TV bundles now also match ESPN Deportes, FOX Deportes, beIN SPORTS, Tennis Channel and NFL RedZone.
 - Upset Alert now follows the SportsDudes rule: the team leading in the second half was +200 or longer on the pregame moneyline (a 2-to-1 underdog). The pregame line is remembered so live odds can't change it. Badge reads like "Upset Alert: BUR +650". PSG over City (+130) no longer counts.
 - Watch buttons and TV lines say "ESPN" instead of "ESPN app".
 - Game card: the TV line ("On ESPN+, MNMT") and the arena now sit in the header under the time, instead of below the Watch button.
