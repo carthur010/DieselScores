@@ -2,7 +2,7 @@
 
 Newest first. Beta changes move to Live when shipped.
 
-## In beta (not on live yet)
+## Oct 14, 2026: Live (2:55 PM)
 - Welcome screen now lets new people pick their leagues as well as their teams. It's titled "Welcome To Scores".
 
 ## Oct 14, 2026: Live (2:40 PM): iPhone App Notifications
