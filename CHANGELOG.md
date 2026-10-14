@@ -2,7 +2,7 @@
 
 Newest first. Beta changes move to Live when shipped.
 
-## In beta (not on live yet)
+## Oct 14, 2026: Live (5:00 PM)
 - College football by conference (Faiz's ask): on the NCAAF, CFB Top 25 and Power 4 tabs, a second row of chips filters by conference (ACC, American, Big 12, Big Ten, Conference USA, Independents, Mid-American, Mountain West, Pac-12, SEC, Sun Belt). Only conferences with games that day show, with counts. Your pick is remembered.
 - Same conference row for Men's and Women's College Hoops (ACC through West Coast, alphabetical like ESPN). Each league remembers its own pick.
 
