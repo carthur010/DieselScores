@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014142351">
+<meta name="build" content="20261014145030">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -732,12 +732,14 @@ button.brand, button.brand span { color: var(--accent); }
     <div class="bhead"><h2 id="sheet-h">Your Teams</h2>
       <button class="tog" id="sheet-x" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="sheet-body">
-      <p class="hint" id="sheet-intro" hidden>Welcome to Scores. Follow a few teams to get started: tap Follow on a suggestion or search for any team. You can change these anytime.</p>
+      <p class="hint" id="sheet-intro" hidden>Follow a few teams and pick your leagues to get started. You can change these anytime in Settings.</p>
       <input type="search" id="q" placeholder="Search any team: Mets, Arsenal, Duke…" autocomplete="off" aria-label="Search teams">
       <div class="res" id="results"></div>
       <div id="suggest"></div>
       <h3>Following <span class="h3-note">drag ☰ to set your order</span></h3>
       <div class="res" id="following"></div>
+      <div id="sheet-lgs" hidden><h3>Your Leagues <span class="h3-note">tap to add or remove</span></h3>
+        <div class="toggles" id="sheet-lglist"></div></div>
       <button class="set-done" id="sheet-done">Done</button>
     </div>
   </div>
@@ -2206,8 +2208,10 @@ button.brand, button.brand span { color: var(--accent); }
   let results = [], searchTimer = null, searchSeq = 0;
   const LG_BY_SLUG = Object.fromEntries(TEAM_LEAGUES.map(l => [l.path, l.id]));
   function openSheet(welcome) {
-    document.getElementById("sheet-h").textContent = welcome === true ? "Pick Your Teams" : "Your Teams";
+    document.getElementById("sheet-h").textContent = welcome === true ? "Welcome To Scores" : "Your Teams";
     document.getElementById("sheet-intro").hidden = welcome !== true;
+    document.getElementById("sheet-lgs").hidden = welcome !== true;
+    renderSheetLeagues();
     document.getElementById("sheet").hidden = false;
     setTimeout(() => document.getElementById("q").focus(), 50);
     renderSheet();
@@ -2391,7 +2395,18 @@ button.brand, button.brand span { color: var(--accent); }
         <span class="lnum"></span><span class="nm">${esc(l.name)}</span>
         <button class="follow" data-ltoggle="${l.id}">Add</button><span></span></div>`).join("");
   }
-  function saveLeagues() { store.set("favLeagues", state.favLeagues); renderLeagueSheet(); render(); }
+  function saveLeagues() { store.set("favLeagues", state.favLeagues); renderLeagueSheet(); renderSheetLeagues(); render(); }
+  // Welcome screen: pick leagues alongside teams
+  function renderSheetLeagues() {
+    const el = document.getElementById("sheet-lglist"); if (!el) return;
+    el.innerHTML = LEAGUES.map(l => { const on = state.favLeagues.includes(l.id); return `<button class="chip ${on ? "on" : ""}" data-sheet-lg="${l.id}" aria-pressed="${on}">${esc(l.name)}</button>`; }).join("");
+  }
+  document.getElementById("sheet-lglist").addEventListener("click", e => {
+    const b = e.target.closest("[data-sheet-lg]"); if (!b) return;
+    const id = b.dataset.sheetLg;
+    state.favLeagues = state.favLeagues.includes(id) ? state.favLeagues.filter(x => x !== id) : [...state.favLeagues, id];
+    saveLeagues();
+  });
   let ldrag = null;
   const lfav = document.getElementById("lfav");
   lfav.addEventListener("pointerdown", e => {

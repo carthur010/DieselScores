@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## In beta (not on live yet)
+- Welcome screen now lets new people pick their leagues as well as their teams. It's titled "Welcome To Scores".
+
 ## Oct 14, 2026: Live (2:40 PM): iPhone App Notifications
 - In the iOS app, alerts now come through as real iPhone notifications.
 - Start reminders (30, 15, 10, 5, 1 Min) are booked on the phone ahead of time, so they arrive even when Scores is closed. Live score alerts still need the app open.
