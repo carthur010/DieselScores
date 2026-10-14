@@ -16,6 +16,8 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+- **Settings back button** (Oct 14): closing My Teams or My Leagues after opening it from Settings drops you back in Settings, not on the scoreboard.
+- **Scroll fix** (Oct 14): popups (Teams, Leagues, Settings, game card) lock the page behind them, so swiping scrolls the list you're in instead of the scores underneath.
 - **Settings reorganized** (Oct 14): My Teams and My Leagues up top. **Layout & Display** and **Alerts** are collapsible sections (closed by default, and the app remembers what you leave open). The Alerts header shows how many alerts are on.
 - **Tap Scores to go home** (Oct 14): the logo (and the house icon) jumps to today on your home tab, closes anything open and re-expands collapsed sections.
 - **Golf on All and Live** (Oct 14): PGA and LPGA leaderboards only show there while a round is being played, and sit below the games. Before and between rounds they stay on the PGA, LPGA and My Leagues tabs.

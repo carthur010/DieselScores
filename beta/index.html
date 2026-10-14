@@ -310,7 +310,10 @@ section.closed .bhead { border-bottom: 0; }
 .lb .lead td { background: var(--accent-soft); }
 .sheet { position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, .45); display: grid; place-items: center; padding: 16px; }
 .sheet-card { width: min(560px, 100%); max-height: min(80vh, 760px); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
-.sheet-body { padding: 14px 16px; display: grid; gap: 12px; overflow-y: auto; }
+.sheet-body { padding: 14px 16px; display: grid; gap: 12px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.sheet { overscroll-behavior: contain; }
+html.locked, html.locked body { overflow: hidden; }
+body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .sheet input[type=search] { width: 100%; padding: 11px 12px; font: inherit; font-size: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); }
 .sheet h3 { margin: 4px 0 0; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .res { display: grid; }
@@ -1739,7 +1742,11 @@ button.brand, button.brand span { color: var(--accent); }
     renderSheet();
     ensureMeta([...state.favs]).then(renderSheet);
   }
-  function closeSheet() { document.getElementById("sheet").hidden = true; }
+  // Sheets opened from Settings return to Settings when closed
+  let fromSettings = false;
+  function backToSettings() { if (fromSettings) { fromSettings = false; openSettings(); } }
+  function closeSheet() { const el = document.getElementById("sheet"); if (el.hidden) return; el.hidden = true; backToSettings(); }
+  function closeLeagues() { const el = document.getElementById("lsheet"); if (el.hidden) return; el.hidden = true; backToSettings(); }
   function resRow(t, i, list) {
     const k = keyFor(t), on = state.favs.has(k);
     return `<div class="res-row">${t.logo ? `<img src="${esc(t.logo)}" alt="">` : "<span></span>"}
@@ -1878,7 +1885,7 @@ button.brand, button.brand span { color: var(--accent); }
   lfav.addEventListener("pointerup", endLDrag);
   lfav.addEventListener("pointercancel", endLDrag);
   document.getElementById("lsheet").addEventListener("click", e => {
-    if (e.target.id === "lsheet") { document.getElementById("lsheet").hidden = true; return; }
+    if (e.target.id === "lsheet") { closeLeagues(); return; }
     const tg = e.target.closest("[data-ltoggle]");
     if (tg) {
       const id = tg.dataset.ltoggle;
@@ -1886,16 +1893,17 @@ button.brand, button.brand span { color: var(--accent); }
       saveLeagues();
     }
   });
-  document.getElementById("lsheet-x").onclick = () => { document.getElementById("lsheet").hidden = true; };
+  document.getElementById("lsheet-x").onclick = closeLeagues;
   document.getElementById("main").addEventListener("click", e => {
     if (e.target.closest("[data-edit-leagues]")) { renderLeagueSheet(); document.getElementById("lsheet").hidden = false; }
   });
-  document.addEventListener("keydown", e => { if (e.key === "Escape") { closeSheet(); document.getElementById("lsheet").hidden = true; document.getElementById("ssheet").hidden = true; closeGame(); } });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { fromSettings = false; closeSheet(); document.getElementById("lsheet").hidden = true; document.getElementById("ssheet").hidden = true; closeGame(); } });
   document.getElementById("q").addEventListener("input", search);
   document.getElementById("teamsbtn").onclick = openSheet;
   function goHome() {
-    closeSheet(); closeGame();
+    fromSettings = false; closeSheet(); closeGame();
     ["lsheet", "ssheet"].forEach(id => document.getElementById(id).hidden = true);
+    syncLock();
     state.closed.clear();
     state.tab = store.get("home", "live");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1925,7 +1933,6 @@ button.brand, button.brand span { color: var(--accent); }
   function ord(n) { const s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
   function closeGame() {
     document.getElementById("gsheet").hidden = true;
-    document.documentElement.style.overflow = "";
     clearTimeout(gameTimer); openGameKey = null; lastSummary = null;
   }
   function repaintGame() {
@@ -1946,7 +1953,6 @@ button.brand, button.brand span { color: var(--accent); }
       gameTab = "stats"; lastSummary = null;
       el.innerHTML = gameShell(g, null, lg);
       el.hidden = false; el.scrollTop = 0;
-      document.documentElement.style.overflow = "hidden";
     }
     let j = null;
     try {
@@ -2233,10 +2239,31 @@ button.brand, button.brand span { color: var(--accent); }
     const o = e.target.closest("[data-set-open]");
     if (o) {
       document.getElementById("ssheet").hidden = true;
+      fromSettings = true;
       if (o.dataset.setOpen === "teams") openSheet();
       else { renderLeagueSheet(); document.getElementById("lsheet").hidden = false; }
     }
   });
+  // Page scroll lock (iOS ignores overflow:hidden alone, so pin the body in place)
+  const LOCKERS = ["sheet", "ssheet", "lsheet", "gsheet"].map(id => document.getElementById(id));
+  let lockY = 0, isLocked = false;
+  function syncLock() {
+    const want = LOCKERS.some(el => !el.hidden);
+    if (want === isLocked) return;
+    isLocked = want;
+    const b = document.body, h = document.documentElement;
+    if (want) {
+      lockY = window.scrollY;
+      b.style.top = -lockY + "px";
+      b.classList.add("locked"); h.classList.add("locked");
+    } else {
+      b.classList.remove("locked"); h.classList.remove("locked");
+      b.style.top = "";
+      window.scrollTo(0, lockY);
+    }
+  }
+  const lockObs = new MutationObserver(syncLock);
+  LOCKERS.forEach(el => lockObs.observe(el, { attributes: true, attributeFilter: ["hidden"] }));
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && isToday() && state.updatedAt && Date.now() - state.updatedAt > 25000) loadAll();
   });
