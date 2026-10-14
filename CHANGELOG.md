@@ -17,6 +17,9 @@ Newest first. Beta changes move to Live when shipped.
 - **Watch buttons open the app first** on phones (YouTube TV, ESPN, Peacock, Paramount+, Prime Video, Apple TV, Netflix, HBO Max, MLB), with a website fallback. Desktop opens the website.
 - **SF Pro fonts** on Apple devices (Apple's system font), Barlow everywhere else.
 
+## Oct 14, 2026: Live
+- **Late-night fix**: after midnight, games from last night that are still being played show on Today (they were disappearing at midnight).
+
 ## Oct 13, 2026: Live
 - **Beta channel** at /beta with its own settings, orange icon and Beta tag.
 - **Worth A Watch**: every live playoff game is included, with a Playoffs tag and series status.
