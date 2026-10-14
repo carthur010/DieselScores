@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014091341">
+<meta name="build" content="20261014092925">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -166,6 +166,22 @@ section.closed .bhead { border-bottom: 0; }
 .g { padding: 14px 16px 12px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); display: grid; gap: 6px; min-width: 0; }
 .g-top { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
 .g-top .st { color: var(--muted); }
+[data-density="compact"] .grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); }
+[data-density="compact"] .grid > .g:not(.mini) { grid-column: 1 / -1; }
+.g.mini { padding: 10px 12px; gap: 4px; align-content: start; }
+.g.mini.live { box-shadow: inset 3px 0 0 var(--live); }
+.mcg-top { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; min-height: 18px; }
+.mcg-top .st { color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+.mcg-top .st.live { color: var(--live); }
+.mcg-top .st.final { color: var(--fg); }
+.mcg-row { display: flex; align-items: center; gap: 7px; min-height: 26px; }
+.mcg-row img, .mcg-row > i { width: 22px; height: 22px; object-fit: contain; flex: 0 0 auto; }
+.mcg-row b { font-family: var(--display); font-stretch: condensed; font-size: 18px; font-weight: 700; white-space: nowrap; }
+.mcg-row b small { font-size: 11px; color: var(--muted); font-weight: 600; }
+.mcg-row em { font-style: normal; margin-left: auto; font-family: var(--display); font-stretch: condensed; font-weight: 700; font-size: 20px; }
+.g.mini .mcg-row em { min-width: 2ch; text-align: right; }
+.mcg-row.lose b, .mcg-row.lose em { color: var(--muted); }
+.mcg-row em.rec { font-family: var(--body); font-size: 12px; font-weight: 500; color: var(--muted); }
 .lgtag { font-size: 11px; font-weight: 800; letter-spacing: .04em; color: var(--accent); background: var(--accent-soft); padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
 .g-top .st.live { color: var(--live); }
 .g-top .st.final { color: var(--fg); }
@@ -459,6 +475,31 @@ button.t-go { background: var(--surface); cursor: pointer; }
 .ldr > div > b { display: block; font-size: 12px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
 .ldr p { margin: 0 0 8px; font-size: 14px; font-weight: 600; display: grid; }
 .ldr p small { color: var(--muted); font-weight: 500; font-size: 12px; }
+.ld-head { display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--muted); letter-spacing: .06em; margin-bottom: 4px; }
+.ld-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid var(--line); }
+.ld-row:first-of-type { border-top: 0; }
+.ld-p { display: grid; justify-items: center; gap: 3px; text-align: center; min-width: 0; }
+.ld-p b { font-size: 14px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ld-p small { font-size: 13px; font-weight: 700; }
+.ld-ph { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; background: var(--bg); border: 1px solid var(--line); display: block; }
+.ld-cat { font-size: 12px; color: var(--muted); text-align: center; max-width: 90px; }
+.gc-seg { display: flex; width: 100%; margin-bottom: 6px; }
+.gc-seg button { flex: 1; }
+.l5-row { display: grid; grid-template-columns: 44px 22px 24px 1fr auto; align-items: center; gap: 8px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.l5-row img, .l5-row > i { width: 24px; height: 24px; object-fit: contain; }
+.l5-d { font-size: 11px; color: var(--muted); line-height: 1.2; }
+.l5-at { color: var(--muted); font-size: 12px; }
+.l5-o { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l5-r { text-align: right; font-weight: 700; white-space: nowrap; display: grid; }
+.l5-r small { font-size: 11px; color: var(--muted); font-weight: 500; }
+.l5-r .w { color: #2e8b57; } .l5-r .l { color: var(--live); }
+.h3-teams { justify-content: space-between; }
+.h3-teams img, .h3-teams i { width: 24px; height: 24px; object-fit: contain; }
+.h3-teams span { flex: 1; text-align: center; }
+.so-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; align-items: center; }
+.so-row span { color: var(--muted); font-size: 12px; text-align: center; }
+.so-row b:last-child { text-align: right; }
+.sbar small { color: var(--muted); font-weight: 500; font-size: 11px; }
 .plays { display: grid; }
 .play { display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
 .play:last-child { border-bottom: 0; }
@@ -752,6 +793,8 @@ button.brand, button.brand span { color: var(--accent); }
     watched: (() => { const w = store.get("watched", {}); const now = Date.now(); Object.keys(w).forEach(k => { if (now - w[k] > 2 * 864e5) delete w[k]; }); return w; })(),
     favLeagues: store.get("favLeagues", DEFAULT_FAV_LEAGUES),
     showOdds: store.get("showOdds", true),
+    density: store.get("density", "expanded"),       // "compact" | "expanded"
+    expandFavs: store.get("expandFavs", true),       // in Compact, keep your teams' games full size
     upcoming: { key: "", at: 0, days: [], loading: false },
     data: {},
     loading: false,
@@ -1371,6 +1414,7 @@ button.brand, button.brand span { color: var(--accent); }
     </div>`;
   }
   function card(g, showLg) {
+    if (state.density === "compact" && !(state.expandFavs && g.fav)) return miniCard(g, showLg === true);
     return `<article class="g tap" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(g.teams.map(x => x.name).join(" vs "))}: game details">
       <div class="g-top">${showLg === true ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span><span class="wslot">${watchPill(g)}</span></div>
       ${g.teams.map((t, i) => teamRow(g, t, i)).join("")}
@@ -1436,6 +1480,15 @@ button.brand, button.brand span { color: var(--accent); }
   }
 
   // Your teams strip
+  // Compact scoreboard card (CBS-style two-up grid)
+  function miniCard(g, showLg) {
+    const [a, h] = g.teams;
+    if (!a || !h) return "";
+    const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
+    const row = (t, o) => `<span class="mcg-row ${lose(t, o) ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<i></i>"}<b>${t.rank ? `<small>${t.rank}</small> ` : ""}${esc(t.abbr)}</b>${isFavTeam(g.lg, t.abbr) ? '<span class="mc-fav">★</span>' : ""}<em class="${g.state === "pre" ? "rec" : ""}">${esc(g.state === "pre" ? t.record : t.score)}</em></span>`;
+    return `<article class="g mini tap ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name)}: game details">
+      <span class="mcg-top">${showLg ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span></span>${row(a, h)}${row(h, a)}</article>`;
+  }
   // Top strip: mini versions of the game cards
   function miniRow(logo, abbr, rec, score, lose, fav) {
     return `<span class="mc-row ${lose ? "lose" : ""}">${logo ? `<img src="${esc(logo)}" alt="">` : "<i></i>"}<b>${esc(abbr)}</b>${rec ? `<small>${esc(rec)}</small>` : ""}${fav ? '<span class="mc-fav" aria-label="Your team">★</span>' : ""}${score != null ? `<em>${esc(score)}</em>` : ""}</span>`;
@@ -2056,7 +2109,7 @@ button.brand, button.brand span { color: var(--accent); }
     clearTimeout(gameTimer);
     const el = document.getElementById("gsheet");
     if (!quiet) {
-      gameTab = "stats"; lastSummary = null;
+      gameTab = "stats"; lastSummary = null; lfSide = 0;
       el.innerHTML = gameShell(g, null, lg);
       el.hidden = false; el.scrollTop = 0;
     }
@@ -2190,13 +2243,131 @@ button.brand, button.brand span { color: var(--accent); }
         }).join("")}</div>`;
       }
     }
-    const leaders = (j.leaders || []).filter(t => t.leaders?.length);
-    if (leaders.length) {
-      html += `<div class="gc-c"><h3>Leaders</h3><div class="ldr">${leaders.slice(0, 2).map(t => `<div><b>${esc(t.team?.abbreviation || "")}</b>${
-        t.leaders.slice(0, 3).map(c => { const l = c.leaders?.[0]; return l ? `<p>${esc(l.athlete?.displayName || "")}<small>${esc(c.displayName || "")}: ${esc(l.displayValue || "")}</small></p>` : ""; }).join("")}</div>`).join("")}</div></div>`;
-    }
+    html += leadersCard(j, a, h);
+    html += rankingsCard(j, a, h, lg);
+    html += lastFiveCard(j, a, h);
+    html += standingsCard(j, a, h, lg);
     if (!state.showOdds) html += `<div class="odds-off"><button class="linkbtn" data-odds="on">Show betting odds</button></div>`;
     return html || `<div class="empty">No stats yet.</div>`;
+  }
+  // ---- Pregame and season context (CBS-style)
+  let lfSide = 0;                       // Last 5 Games: 0 = away, 1 = home
+  const standCache = {};                // "lg|season" -> { entries, at }
+  function teamPair(j, a, h) {
+    const find = (arr, x) => (arr || []).find(t => String(t.team?.id) === String(x.id) || t.team?.abbreviation === x.abbr);
+    return arr => [find(arr, a), find(arr, h)];
+  }
+  function leadersCard(j, a, h) {
+    const [la, lh] = teamPair(j, a, h)((j.leaders || []).filter(t => t.leaders?.length));
+    if (!la && !lh) return "";
+    const pre = (j.header?.competitions?.[0]?.status?.type?.state || "pre") === "pre";
+    const cats = [];
+    (la || lh).leaders.forEach(c => { if (!cats.some(x => x.name === c.name)) cats.push({ name: c.name, label: c.displayName || c.name }); });
+    const pick = (tm, name) => tm?.leaders.find(c => c.name === name)?.leaders?.[0];
+    const person = l => {
+      if (!l) return `<div class="ld-p"><span class="ld-ph"></span><b>–</b></div>`;
+      const ph = l.athlete?.headshot?.href || l.athlete?.headshot || "";
+      return `<div class="ld-p">${ph ? `<img class="ld-ph" src="${esc(typeof ph === "string" ? ph : "")}" alt="" loading="lazy">` : `<span class="ld-ph"></span>`}<b>${esc(l.athlete?.shortName || l.athlete?.displayName || "")}</b><small>${esc(l.displayValue || "")}</small></div>`;
+    };
+    const rows = cats.slice(0, 6).map(c => `<div class="ld-row">${person(pick(la, c.name))}<span class="ld-cat">${esc(c.label)}</span>${person(pick(lh, c.name))}</div>`).join("");
+    return `<div class="gc-c"><h3>${pre ? "Season Leaders" : "Game Leaders"}</h3><div class="ld-head"><span>${esc(a.abbr)}</span><span>${esc(h.abbr)}</span></div>${rows}</div>`;
+  }
+  function lastFiveCard(j, a, h) {
+    const [fa, fh] = teamPair(j, a, h)(j.lastFiveGames || []);
+    if (!fa && !fh) return "";
+    const side = lfSide === 1 ? (fh || fa) : (fa || fh);
+    const evs = (side?.events || []).slice(0, 5);
+    const tabs = `<div class="seg gc-seg"><button class="${side === fa ? "on" : ""}" data-lf="0">${esc(a.abbr)}</button><button class="${side === fh ? "on" : ""}" data-lf="1">${esc(h.abbr)}</button></div>`;
+    const rows = evs.map(e => {
+      const d = e.gameDate ? new Date(e.gameDate) : null;
+      const res = (e.gameResult || "").toUpperCase();
+      return `<div class="l5-row"><span class="l5-d">${d ? esc(d.toLocaleDateString(undefined, { weekday: "short" })) + "<br>" + esc(d.toLocaleDateString(undefined, { month: "numeric", day: "numeric" })) : ""}</span>
+        <span class="l5-at">${esc(e.atVs || "")}</span>${e.opponentLogo || e.opponent?.logo ? `<img src="${esc(e.opponentLogo || e.opponent.logo)}" alt="">` : "<i></i>"}
+        <span class="l5-o">${esc(e.opponent?.shortDisplayName || e.opponent?.displayName || e.opponent?.abbreviation || "")}</span>
+        <span class="l5-r"><small>Final</small><span><b class="${res === "W" ? "w" : res === "L" ? "l" : ""}">${esc(res)}</b> ${esc(e.score || "")}</span></span></div>`;
+    }).join("");
+    return `<div class="gc-c"><h3>Last 5 Games</h3>${tabs}${rows || `<div class="foot">No recent games.</div>`}</div>`;
+  }
+  // Standings feed (current season), all teams flattened
+  async function loadStandings(lg, season) {
+    const key = lg.id + "|" + season;
+    const c = standCache[key];
+    if (c && (c.entries || c.pending) && Date.now() - c.at < 30 * 60e3) return c.pending || c.entries;
+    const pending = (async () => {
+      try {
+        const r = await fetch("https://site.api.espn.com/apis/v2/sports/" + lg.path + "/standings" + (season ? "?season=" + season : ""));
+        const jj = r.ok ? await r.json() : null;
+        const out = [];
+        const walk = n => { (n?.standings?.entries || []).forEach(e => out.push(e)); (n?.children || []).forEach(walk); };
+        walk(jj);
+        standCache[key] = { entries: out, at: Date.now() };
+        return out;
+      } catch { standCache[key] = { entries: [], at: Date.now() }; return []; }
+    })();
+    standCache[key] = { pending, at: Date.now() };
+    return pending;
+  }
+  function standEntries(j, lg) {
+    const season = j.header?.season?.year || "";
+    const c = standCache[lg.id + "|" + season];
+    if (c?.entries) return c.entries;
+    if (!c) loadStandings(lg, season).then(() => { if (lastSummary === j) repaintGame(); });
+    return null;
+  }
+  const statOf = (e, ...keys) => {
+    const s = (e?.stats || []).find(x => keys.includes(x.type) || keys.includes(x.name));
+    return s ? (s.summary || s.displayValue || "") : "";
+  };
+  const numOf = (e, ...keys) => { const s = (e?.stats || []).find(x => keys.includes(x.type) || keys.includes(x.name)); return s ? Number(s.value ?? parseFloat(s.displayValue)) : NaN; };
+  function entryFor(entries, x) { return entries.find(e => String(e.team?.id) === String(x.id) || e.team?.abbreviation === x.abbr); }
+  function standingsCard(j, a, h, lg) {
+    const entries = standEntries(j, lg);
+    const recs = c => c?.record || [];
+    const hc = (j.header?.competitions?.[0]?.competitors || []);
+    const ca = hc.find(c => String(c.team?.id) === String(a.id)), ch = hc.find(c => String(c.team?.id) === String(h.id));
+    const fromHeader = (c, type) => recs(c).find(r => r.type === type)?.summary || "";
+    const ea = entries && entryFor(entries, a), eh = entries && entryFor(entries, h);
+    const val = (e, c, keys, hdr) => (e ? statOf(e, ...keys) : "") || (hdr ? fromHeader(c, hdr) : "");
+    const clean = s => String(s || "").replace(/, \d+ PTS$/, "");
+    const rows = [
+      ["Record", val(ea, ca, ["total", "overall"], "total"), val(eh, ch, ["total", "overall"], "total")],
+      ["Away / Home", val(ea, ca, ["road"], "road"), val(eh, ch, ["home"], "home")],
+      ["Conference", val(ea, ca, ["vsconf"]), val(eh, ch, ["vsconf"])],
+      ["Division", val(ea, ca, ["vsdiv"]), val(eh, ch, ["vsdiv"])],
+      ["Last 10", val(ea, ca, ["lasttengames"]), val(eh, ch, ["lasttengames"])],
+      ["Streak", val(ea, ca, ["streak"]), val(eh, ch, ["streak"])],
+      [lg.sport === "Hockey" || lg.soccer ? "Goal Differential" : "Point Differential", val(ea, ca, ["pointsdiff", "pointdifferential"]), val(eh, ch, ["pointsdiff", "pointdifferential"])],
+    ].map(r => [r[0], clean(r[1]), clean(r[2])]).filter(r => r[1] || r[2]);
+    if (!rows.length) return entries === null ? `<div class="gc-c"><h3>Standings Overview</h3><div class="foot" style="margin:0">Loading…</div></div>` : "";
+    return `<div class="gc-c"><h3 class="h3-teams">${logoImg(a)}<span>Standings Overview</span>${logoImg(h)}</h3>${rows.map(r => `<div class="so-row"><b>${esc(r[1] || "–")}</b><span>${esc(r[0])}</span><b>${esc(r[2] || "–")}</b></div>`).join("")}</div>`;
+  }
+  function logoImg(x) { return x.logo ? `<img src="${esc(x.logo)}" alt="">` : `<i></i>`; }
+  function ordinal(n) { return ord(n); }
+  // League Rankings: per-game scoring, defense and differential ranked across the league
+  function rankingsCard(j, a, h, lg) {
+    const entries = standEntries(j, lg);
+    if (!entries?.length) return "";
+    const ea = entryFor(entries, a), eh = entryFor(entries, h);
+    if (!ea || !eh) return "";
+    const gp = e => numOf(e, "gamesplayed") || ((numOf(e, "wins") || 0) + (numOf(e, "losses") || 0) + (numOf(e, "otlosses", "ties") || 0)) || NaN;
+    const metric = (e, k) => { const g = gp(e); const v = numOf(e, k); return g > 0 && !isNaN(v) ? v / g : NaN; };
+    const word = lg.sport === "Hockey" || lg.soccer ? "Goals" : lg.sport === "Baseball" ? "Runs" : "Points";
+    const defs = [
+      { label: word + " For / Game", k: "pointsfor", hi: true },
+      { label: word + " Against / Game", k: "pointsagainst", hi: false },
+    ];
+    const rows = defs.map(d => {
+      const all = entries.map(e => metric(e, d.k)).filter(v => !isNaN(v));
+      const va = metric(ea, d.k), vh = metric(eh, d.k);
+      if (isNaN(va) || isNaN(vh) || all.length < 4) return "";
+      const rank = v => 1 + all.filter(x => d.hi ? x > v + 1e-9 : x < v - 1e-9).length;
+      const fmt = v => v >= 20 ? v.toFixed(1) : v.toFixed(2);
+      // longer bar = better rank
+      const sa = all.length + 1 - rank(va), sh = all.length + 1 - rank(vh), tot = sa + sh || 1;
+      return `<div class="sbar"><b>${fmt(va)} <small>(${ord(rank(va))})</small></b><span>${esc(d.label)}</span><b><small>(${ord(rank(vh))})</small> ${fmt(vh)}</b></div>
+        <div class="bar-track" style="--l:${Math.max(.06, sa / tot)}fr;--r:${Math.max(.06, sh / tot)}fr"><i style="background:${readable(a.color)}"></i><i style="background:${readable(h.color)}"></i></div>`;
+    }).join("");
+    return rows ? `<div class="gc-c"><h3 class="h3-teams">${logoImg(a)}<span>League Rankings</span>${logoImg(h)}</h3>${rows}</div>` : "";
   }
   function playsTab(j, lg) {
     let plays = [];
@@ -2237,6 +2408,8 @@ button.brand, button.brand span { color: var(--accent); }
   });
   document.getElementById("gsheet").addEventListener("click", async e => {
     if (e.target.closest("[data-gclose]")) { closeGame(); return; }
+    const lf = e.target.closest("[data-lf]");
+    if (lf) { lfSide = +lf.dataset.lf; repaintGame(); return; }
     const gt = e.target.closest("[data-gtab]");
     if (gt) { gameTab = gt.dataset.gtab; repaintGame(); return; }
     const od = e.target.closest("[data-odds]");
@@ -2257,6 +2430,35 @@ button.brand, button.brand span { color: var(--accent); }
   });
 
   // ---- Settings
+  function setDensity(v) {
+    state.density = v === "compact" ? "compact" : "expanded";
+    store.set("density", state.density);
+    document.documentElement.dataset.density = state.density;
+  }
+  document.documentElement.dataset.density = state.density;
+  // Pinch the scoreboard to switch: pinch in for Compact, out for Expanded (iOS Safari gesture events)
+  (() => {
+    const main = document.getElementById("main");
+    let s0 = 1, done = false;
+    main.addEventListener("gesturestart", e => { e.preventDefault(); s0 = e.scale || 1; done = false; }, { passive: false });
+    main.addEventListener("gesturechange", e => {
+      e.preventDefault();
+      if (done) return;
+      const r = (e.scale || 1) / s0;
+      if (r < 0.8 && state.density !== "compact") { done = true; setDensity("compact"); render(); toast("Compact scoreboard", "", "", "", false); }
+      else if (r > 1.25 && state.density !== "expanded") { done = true; setDensity("expanded"); render(); toast("Expanded scoreboard", "", "", "", false); }
+    }, { passive: false });
+    // Two-finger touch pinch for other browsers
+    let d0 = 0;
+    const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+    main.addEventListener("touchstart", e => { if (e.touches.length === 2) { d0 = dist(e.touches); done = false; } }, { passive: true });
+    main.addEventListener("touchmove", e => {
+      if (e.touches.length !== 2 || !d0 || done || "ongesturechange" in window) return;
+      const r = dist(e.touches) / d0;
+      if (r < 0.75 && state.density !== "compact") { done = true; setDensity("compact"); render(); }
+      else if (r > 1.3 && state.density !== "expanded") { done = true; setDensity("expanded"); render(); }
+    }, { passive: true });
+  })();
   function applyTheme() {
     const pal = store.get("palette", "red");
     if (pal === "green" || pal === "navy") document.documentElement.dataset.palette = pal; else delete document.documentElement.dataset.palette;
@@ -2298,6 +2500,8 @@ button.brand, button.brand span { color: var(--accent); }
       setSection("display", "Layout & Display", "Open to, layout, color, appearance, odds",
         segRow("Open to", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens") +
         segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
+        segRow("Scoreboard", "density", state.density, [["compact", "Compact"], ["expanded", "Expanded"]], "Or pinch the scores: in for Compact, out for Expanded") +
+        segRow("Always expand my teams", "expandFavs", state.expandFavs ? "on" : "off", [["on", "On"], ["off", "Off"]], "In Compact, your teams' games stay full size") +
         segRow("Color", "palette", store.get("palette", "red"), [["red", "Red"], ["navy", "Navy"], ["green", "Green"]]) +
         segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
         segRow("Betting odds", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "Lines on game cards and in Gamecast")) +
@@ -2321,6 +2525,8 @@ button.brand, button.brand span { color: var(--accent); }
       if (key === "view") { state.view = val; store.set("view3", val); }
       if (key === "theme") { store.set("theme", val); applyTheme(); }
       if (key === "palette") { store.set("palette", val); applyTheme(); }
+      if (key === "density") setDensity(val);
+      if (key === "expandFavs") { state.expandFavs = val === "on"; store.set("expandFavs", state.expandFavs); }
       if (key === "odds") { state.showOdds = val === "on"; store.set("showOdds", state.showOdds); }
 
       renderSettings(); render();

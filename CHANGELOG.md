@@ -16,7 +16,12 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
-_Nothing new. Beta matches live as of Oct 14, 9:20 AM._
+- **Compact or Expanded scoreboard** (Oct 14): Settings → Layout & Display → Scoreboard. Compact is a two-up grid of small score cards (CBS style); Expanded is the full cards. Pinch the scores to switch (in for Compact, out for Expanded). **Always expand my teams** keeps your teams' games full size in Compact.
+- **More in the game card** (Oct 14), on the Stats tab:
+  - **Season Leaders** before a game (Game Leaders during and after), head to head with player photos.
+  - **League Rankings**: scoring and defense per game, with each team's rank in the league.
+  - **Last 5 Games** with a toggle for each team: date, opponent, W/L and score.
+  - **Standings Overview**: record, away/home, conference, division, last 10, streak and point (or goal) differential.
 
 ## Oct 14, 2026: Live (9:20 AM)
 - **Team strip matches the game cards** (Oct 14): the chips at the top are now mini game cards: league tag and time (or live clock) on top, both teams with logos stacked like the full cards (scores when live or final, records before), and where it's played, the TV app, or the live situation underneath.
