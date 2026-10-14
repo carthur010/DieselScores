@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014194649">
+<meta name="build" content="20261014195405">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -96,6 +96,22 @@ header.top {
 
 .confs { padding-top: 0; }
 .confs .chip { font-size: 13px; padding: 5px 11px; }
+.chip.pick { display: inline-flex; align-items: center; gap: 4px; }
+.chip .caret { width: 14px; height: 14px; margin-left: 2px; }
+.pk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.pk-tile { display: grid; gap: 3px; text-align: left; padding: 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); }
+.pk-tile b { font-family: var(--display); font-size: 19px; font-weight: 700; line-height: 1.1; }
+.pk-tile small { color: var(--muted); font-size: 12px; display: inline-flex; align-items: center; gap: 5px; }
+.pk-tile.on { border-color: var(--accent); background: var(--accent-soft); }
+.pk-tile.pk-off b { color: var(--muted); }
+.pk-live { width: 7px; height: 7px; border-radius: 50%; background: var(--live); display: inline-block; }
+.pk-list { display: grid; }
+.pk-list h3 { margin: 14px 0 4px; }
+.pk-row { display: grid; grid-template-columns: 1fr auto 22px; align-items: center; gap: 10px; padding: 14px 4px; border-bottom: 1px solid var(--line); text-align: left; font-size: 16px; }
+.pk-row.on { font-weight: 700; }
+.pk-row small { color: var(--muted); font-size: 13px; }
+.pk-row small.hot { color: var(--live); font-weight: 700; }
+.pk-row .ck { width: 20px; height: 20px; color: var(--accent); grid-column: 3; }
 .leagues { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-block: 10px; margin-inline: -16px; padding-inline: 16px; }
 .leagues::-webkit-scrollbar { display: none; }
 .chip {
@@ -786,6 +802,13 @@ button.brand, button.brand span { color: var(--accent); }
     <div class="bhead"><h2 id="ssheet-h">Settings</h2>
       <button class="tog" id="ssheet-x" aria-label="Done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="sheet-body" id="settings-body"></div>
+  </div>
+</div>
+<div class="sheet" id="pksheet" hidden role="dialog" aria-modal="true" aria-labelledby="pk-h">
+  <div class="sheet-card">
+    <div class="bhead"><h2 id="pk-h">Leagues</h2>
+      <button class="tog" id="pk-x" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="sheet-body" id="pk-body"></div>
   </div>
 </div>
 <div class="sheet" id="lsheet" hidden role="dialog" aria-modal="true" aria-labelledby="lsheet-h">
@@ -2020,6 +2043,8 @@ button.brand, button.brand span { color: var(--accent); }
     return block("ev-" + e.lg.id + e.id, `${e.lg.short || e.lg.name} · ${e.name}`, eventMeta(e), body + more);
   }
   // Tennis: the day's singles matches, live first, then results, then what's next
+  const CARET = '<svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>';
+  const CHECK = '<svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
   function tennisDay(e) { const day = ymd(state.date); return e.matches.filter(m => !/doubles/i.test(m.group) && (m.state === "in" || (m.date && ymd(new Date(m.date)) === day))); }
   function tennisBlock(e) {
     const list = tennisDay(e);
@@ -2176,34 +2201,65 @@ button.brand, button.brand span { color: var(--accent); }
   };
   const confLg = tab => ["ncaaf", "cfb25", "p4"].includes(tab) ? "ncaaf" : CONFS[tab] ? tab : null;
   const inConf = (g, c) => g.teams.some(t => t.conf === c);
-  function renderConfs(games) {
-    const el = document.getElementById("confs");
-    // Tennis tabs: a row of tournaments playing that day, busiest first
+  // One "Conference ▾" / "Tournament ▾" button under the tabs; the choices open in the picker sheet
+  function subOptions(games) {
     if (LG[state.tab]?.kind === "tennis") {
-      const lgId = state.tab, evs = allSpecial().filter(e => e.lg.id === lgId).map(e => ({ e, list: tennisDay(e) })).filter(x => x.list.length)
+      const lgId = state.tab;
+      const evs = allSpecial().filter(e => e.lg.id === lgId).map(e => ({ e, list: tennisDay(e) })).filter(x => x.list.length)
         .sort((x, y) => y.list.filter(m => m.state === "in").length - x.list.filter(m => m.state === "in").length || y.list.length - x.list.length);
-      el.hidden = evs.length < 2;
-      if (el.hidden) return;
+      if (evs.length < 2) return null;
       const cur = state.conf[lgId] || "";
-      const short = n => n.replace(/^(Rolex|Dongfeng Voyah|Vanda Pharmaceuticals|BNP Paribas|Mutua|Internazionali BNL d'Italia)\s+/i, "").replace(/\s+(Women's|Men's)?\s*Championships?$/i, "").replace(/ Open$/i, " Open");
-      el.innerHTML = `<button class="chip ${!cur ? "on" : ""}" data-conf="">All Tournaments</button>` + evs.map(({ e, list }) => { const live = list.filter(m => m.state === "in").length;
-        return `<button class="chip ${cur === String(e.id) ? "on" : ""} ${live ? "hot" : ""}" data-conf="${esc(e.id)}">${esc(short(e.name))}<span class="n">${live ? live + " Live" : list.length}</span></button>`; }).join("");
-      el.querySelectorAll("button").forEach(b => b.onclick = () => { state.conf[lgId] = b.dataset.conf; store.set("conf", state.conf); render(); });
-      return;
+      const short = n => n.replace(/^(Rolex|Dongfeng Voyah|Vanda Pharmaceuticals|BNP Paribas|Mutua)\s+/i, "").replace(/\s+(Women's|Men's)\s+Championships?$/i, "");
+      return { title: "Tournaments", label: cur ? short(evs.find(x => String(x.e.id) === cur)?.e.name || "Tournament") : "All Tournaments",
+        items: [{ label: "All Tournaments", on: !cur, tab: lgId, conf: "" }].concat(evs.map(({ e, list }) => { const live = list.filter(m => m.state === "in").length;
+          return { label: short(e.name), n: live ? `${live} Live` : list.length, hot: !!live, on: cur === String(e.id), tab: lgId, conf: String(e.id) }; })) };
     }
     const lg = confLg(state.tab), C = CONFS[lg];
-    const pool = lg ? games.filter(g => g.lg.id === lg) : [];
-    el.hidden = !pool.length;
-    if (!pool.length) return;
+    if (!lg) return null;
+    const pool = games.filter(g => g.lg.id === lg);
+    if (!pool.length) return null;
     const cur = state.conf[lg] || "";
     const rank = c => (C.order.indexOf(c) + 1) || 999;
-    const ids = [...new Set(pool.flatMap(g => g.teams.map(t => t.conf)).filter(c => c && C.name[c]))]
-      .sort((x, y) => rank(x) - rank(y) || C.name[x].localeCompare(C.name[y]));
-    if (cur && !ids.includes(cur)) ids.push(cur);
-    el.innerHTML = `<button class="chip ${!cur ? "on" : ""}" data-conf="">All Conferences</button>` + ids.map(c =>
-      `<button class="chip ${cur === c ? "on" : ""}" data-conf="${c}">${esc(C.name[c] || "Conference")}<span class="n">${pool.filter(g => inConf(g, c)).length}</span></button>`).join("");
-    el.querySelectorAll("button").forEach(b => b.onclick = () => { state.conf[lg] = b.dataset.conf; store.set("conf", state.conf); render(); });
+    const ids = [...new Set(pool.flatMap(g => g.teams.map(t => t.conf)).filter(c => c && C.name[c]))].sort((x, y) => rank(x) - rank(y) || C.name[x].localeCompare(C.name[y]));
+    const items = [{ label: "All Games", on: state.tab === lg && !cur, tab: lg, conf: "", n: pool.length }];
+    if (lg === "ncaaf") {
+      items.push({ label: "Top 25", on: state.tab === "cfb25" && !cur, tab: "cfb25", conf: "", n: pool.filter(g => g.teams.some(t => t.rank)).length });
+      items.push({ label: "Power 4", on: state.tab === "p4" && !cur, tab: "p4", conf: "", n: pool.filter(g => g.p4).length });
+    }
+    ids.forEach(c => items.push({ label: C.name[c], on: cur === c, tab: lg, conf: c, n: pool.filter(g => inConf(g, c)).length }));
+    const on = items.find(i => i.on);
+    return { title: lg === "ncaaf" ? "College Football" : LG[lg].name, label: on ? on.label : "All Games", items, section: true };
   }
+  let subOpts = null;
+  function renderConfs(games) {
+    const el = document.getElementById("confs");
+    subOpts = subOptions(games);
+    el.hidden = !subOpts;
+    if (!subOpts) return;
+    el.innerHTML = `<button class="chip pick on" data-pick="sub" aria-haspopup="dialog">${esc(subOpts.label)}${CARET}</button>`;
+    el.querySelector("[data-pick]").onclick = () => openPicker("sub");
+  }
+  // ---- The picker sheet: leagues grid, or a sub-filter list with a checkmark (like ESPN's)
+  let pickCounts = { counts: {}, live: {} };
+  function openPicker(mode) {
+    const el = document.getElementById("pksheet"), body = document.getElementById("pk-body");
+    if (mode === "sub" && subOpts) {
+      document.getElementById("pk-h").textContent = subOpts.title;
+      body.innerHTML = `<div class="pk-list">${subOpts.items.map((i, k) => `${subOpts.section && k === (subOpts.items.findIndex(x => x.conf)) ? `<h3>Conferences</h3>` : ""}
+        <button class="pk-row ${i.on ? "on" : ""}" data-pk-tab="${esc(i.tab)}" data-pk-conf="${esc(i.conf)}"><span>${esc(i.label)}</span>${i.n != null ? `<small class="${i.hot ? "hot" : ""}">${esc(i.n)}</small>` : ""}${i.on ? CHECK : ""}</button>`).join("")}</div>`;
+    } else {
+      document.getElementById("pk-h").textContent = "Leagues";
+      const { counts, live } = pickCounts;
+      const tile = lg => `<button class="pk-tile ${state.tab === lg.id || confLg(state.tab) === lg.id ? "on" : ""} ${counts[lg.id] ? "" : "pk-off"}" data-pk-tab="${lg.id}" data-pk-conf="">
+        <b>${esc(lg.short || lg.name)}</b><small>${live[lg.id] ? `<i class="pk-live"></i>${live[lg.id]} Live` : counts[lg.id] ? `${counts[lg.id]} ${lg.kind ? (counts[lg.id] === 1 ? "Event" : "Events") : lg.soccer ? (counts[lg.id] === 1 ? "Match" : "Matches") : (counts[lg.id] === 1 ? "Game" : "Games")}` : (isToday() ? "None Today" : "None This Day")}</small></button>`;
+      const mine = state.favLeagues.map(id => LG[id]).filter(Boolean);
+      const rest = LEAGUES.filter(l => !state.favLeagues.includes(l.id)).sort((a, b) => (counts[b.id] ? 1 : 0) - (counts[a.id] ? 1 : 0));
+      body.innerHTML = `${mine.length ? `<h3>Your Leagues</h3><div class="pk-grid">${mine.map(tile).join("")}</div>` : ""}<h3>${mine.length ? "More Leagues" : "All Leagues"}</h3><div class="pk-grid">${rest.map(tile).join("")}</div>`;
+    }
+    el.hidden = false;
+    syncLock();
+  }
+  function closePicker() { document.getElementById("pksheet").hidden = true; syncLock(); }
   // Games you can actually watch right now or later today with the services in TV Settings
   function onMyServices(g) { return g.state !== "post" && !!g.watch?.length; }
   function poolFor(tab, games) {
@@ -2245,19 +2301,15 @@ button.brand, button.brand span { color: var(--accent); }
       { id: "close", label: "Close Games", n: closeN, hot: closeN > 0 },
       { id: "onmine", label: "On My Services", n: games.filter(onMyServices).length },
     ];
-    const cfb = games.filter(g => g.lg.id === "ncaaf");
-    LEAGUES.filter(lg => ((MAIN_TABS.includes(lg.id) || state.favLeagues.includes(lg.id)) && counts[lg.id] > 0) || state.tab === lg.id).forEach(lg => {
-      chips.push({ id: lg.id, label: lg.short || lg.name, n: counts[lg.id] || 0 });
-      if (lg.id === "ncaaf") {
-        chips.push({ id: "cfb25", label: "CFB Top 25", n: cfb.filter(g => g.teams.some(t => t.rank)).length });
-        chips.push({ id: "p4", label: "Power 4", n: cfb.filter(g => g.p4).length });
-      }
-    });
-    if (["cfb25", "p4"].includes(state.tab) && !chips.some(c => c.id === state.tab))
-      chips.push({ id: state.tab, label: state.tab === "p4" ? "Power 4" : "CFB Top 25", n: 0 });
-    el.innerHTML = chips.map(c =>
-      `<button class="chip ${c.cls || ""} ${state.tab === c.id ? "on" : ""} ${c.hot ? "hot" : ""}" role="tab" aria-selected="${state.tab === c.id}" data-id="${c.id}">${esc(c.label)}${c.n != null ? `<span class="n">${c.n}</span>` : ""}</button>`).join("");
-    el.querySelectorAll("button").forEach(b => b.onclick = () => { state.tab = b.dataset.id; store.set("tab2", state.tab); render(); });
+    // Leagues live behind one picker instead of a long chip row
+    pickCounts = { counts, live: {} };
+    games.forEach(g => { if (g.state === "in") pickCounts.live[g.lg.id] = (pickCounts.live[g.lg.id] || 0) + 1; });
+    allSpecial().forEach(e => { if (e.state === "in") pickCounts.live[e.lg.id] = (pickCounts.live[e.lg.id] || 0) + 1; });
+    const curLg = confLg(state.tab) || (LG[state.tab] ? state.tab : null);
+    el.innerHTML = `<button class="chip pick ${curLg ? "on" : ""}" data-pick="leagues" aria-haspopup="dialog">${esc(curLg ? (LG[curLg].short || LG[curLg].name) : "Leagues")}${curLg && counts[curLg] ? `<span class="n">${counts[curLg]}</span>` : ""}${CARET}</button>`
+      + chips.map(c => `<button class="chip ${c.cls || ""} ${state.tab === c.id ? "on" : ""} ${c.hot ? "hot" : ""}" role="tab" aria-selected="${state.tab === c.id}" data-id="${c.id}">${esc(c.label)}${c.n != null ? `<span class="n">${c.n}</span>` : ""}</button>`).join("");
+    el.querySelectorAll("[data-id]").forEach(b => b.onclick = () => { state.tab = b.dataset.id; store.set("tab2", state.tab); render(); });
+    el.querySelector("[data-pick]").onclick = () => openPicker("leagues");
   }
 
   // ---- Upcoming: the next three days for your leagues and teams
@@ -2735,11 +2787,20 @@ button.brand, button.brand span { color: var(--accent); }
     }
   });
   document.getElementById("lsheet-x").onclick = closeLeagues;
+  document.getElementById("pk-x").onclick = closePicker;
+  document.getElementById("pksheet").addEventListener("click", e => {
+    if (e.target.id === "pksheet") { closePicker(); return; }
+    const b = e.target.closest("[data-pk-tab]"); if (!b) return;
+    const tab = b.dataset.pkTab, conf = b.dataset.pkConf, lg = confLg(tab) || tab;
+    state.tab = tab; store.set("tab2", tab);
+    if (LG[lg] && (CONFS[lg] || LG[lg].kind === "tennis")) { state.conf[lg] = conf; store.set("conf", state.conf); }
+    closePicker(); render(); window.scrollTo({ top: 0, behavior: "smooth" });
+  });
   document.getElementById("main").addEventListener("click", e => {
     if (e.target.closest("[data-edit-leagues]")) { renderLeagueSheet(); document.getElementById("lsheet").hidden = false; }
   });
   document.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.classList?.contains("tap")) { e.preventDefault(); e.target.click(); } });
-  document.addEventListener("keydown", e => { if (e.key === "Escape") { fromSettings = false; closeSheet(); document.getElementById("lsheet").hidden = true; document.getElementById("ssheet").hidden = true; closeGame(); } });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { fromSettings = false; closeSheet(); document.getElementById("lsheet").hidden = true; document.getElementById("ssheet").hidden = true; closePicker(); closeGame(); } });
   document.getElementById("q").addEventListener("input", search);
   document.getElementById("teamsbtn").onclick = openSheet;
   function goHome() {
@@ -3437,7 +3498,7 @@ button.brand, button.brand span { color: var(--accent); }
     }
   });
   // Page scroll lock (iOS ignores overflow:hidden alone, so pin the body in place)
-  const LOCKERS = ["sheet", "ssheet", "lsheet", "gsheet"].map(id => document.getElementById(id));
+  const LOCKERS = ["sheet", "ssheet", "lsheet", "gsheet", "pksheet"].map(id => document.getElementById(id));
   let lockY = 0, isLocked = false;
   function syncLock() {
     const want = LOCKERS.some(el => !el.hidden);

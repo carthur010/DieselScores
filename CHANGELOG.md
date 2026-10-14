@@ -7,6 +7,7 @@ Newest first. Beta changes move to Live when shipped.
 - New solo Tennis app on Live Tennis API: Live and Upcoming, ATP/WTA filter, live game points and who's serving, match detail sheet, call counter for the free 100/day.
 
 ## In beta (not on live yet)
+- Easier league switching (Jack's feedback): league chips are replaced by one Leagues ▾ button that opens a picker (Your Leagues first, then More Leagues, each tile showing live or game counts). Inside a league, one dropdown (All Games ▾, Big Ten ▾, Shanghai Masters ▾) opens an ESPN-style list with a checkmark: Top 25, Power 4 and conferences for college football, conferences for college hoops, tournaments for tennis.
 - Tennis tabs get a tournament row (like conferences in college): All Tournaments, then each event playing that day, busiest and live first, with counts. Sponsor names trimmed ("Rolex Shanghai Masters" → "Shanghai Masters").
 - Search results are tappable, not just followable: tap a team's name for its own page (logo, record, Follow button, Up Next and Previous Games, each opening the game card), or tap a league to jump to its tab.
 - Tennis matches are tappable: a match view with player photos and flags, seeds, status, round and court, a set-by-set score with tiebreaks, a Full Draw button and Match Stats bars (aces, double faults, serve %, break points) when ESPN has them.
