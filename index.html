@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores</title>
-<meta name="build" content="20261014100123">
+<meta name="build" content="20261014102004">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores">
@@ -539,6 +539,10 @@ button.t-go { background: var(--surface); cursor: pointer; }
 .bellbtn { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; flex: 0 0 auto; }
 .bellbtn.on { color: var(--bg); background: var(--accent); border-color: var(--accent); }
 .g-foot .bellbtn { margin-left: auto; }
+.g-foot .heartbtn + .bellbtn { margin-left: 0; }
+.heartbtn.on { color: var(--bg); background: var(--live); border-color: var(--live); }
+.belbig[data-favgame].on { background: color-mix(in srgb, var(--live) 14%, transparent); color: var(--live); border-color: var(--live); }
+.pin-mark { color: var(--live); margin-left: auto; font-size: 13px; }
 .g-foot .bellbtn + .linkbtn { margin-left: 0; }
 .nxt { display: grid; }
 .nxt-row[data-game] { cursor: pointer; }
@@ -824,6 +828,8 @@ button.brand, button.brand span { color: var(--accent); }
     })(),
     watched: (() => { const w = store.get("watched", {}); const now = Date.now(); Object.keys(w).forEach(k => { if (now - w[k] > 2 * 864e5) delete w[k]; }); return w; })(),
     favLeagues: store.get("favLeagues", DEFAULT_FAV_LEAGUES),
+    // Favorite games (just that game, not the team). key "lg:id" -> { at, date }. Dropped 2 days after the game.
+    favGames: (() => { const f = store.get("favGames", {}); const now = Date.now(); Object.keys(f).forEach(k => { if (now - new Date(f[k].date || f[k].at).getTime() > 2 * 864e5) delete f[k]; }); return f; })(),
     showOdds: store.get("showOdds", true),
     density: store.get("density", "expanded"),       // "compact" | "expanded"
     expandFavs: store.get("expandFavs", true),       // in Compact, keep your teams' games full size
@@ -1164,7 +1170,19 @@ button.brand, button.brand span { color: var(--accent); }
     state.timer = setTimeout(() => { if (!document.hidden) loadAll(); else schedule(); }, anyLive ? 30000 : 120000);
   }
 
-  function allGames() { return TEAM_LEAGUES.flatMap(lg => state.data[lg.id]?.events || []).map(g => ({ ...g, fav: g.teams.some(t => isFavTeam(g.lg, t.abbr)) })); }
+  function allGames() { return TEAM_LEAGUES.flatMap(lg => state.data[lg.id]?.events || []).map(g => ({ ...g, fav: g.teams.some(t => isFavTeam(g.lg, t.abbr)), pin: !!state.favGames[g.lg.id + ":" + g.id] })); }
+  const isMine = g => g.fav || g.pin;
+  function toggleFavGame(key) {
+    const g = findGame(key);
+    if (state.favGames[key]) delete state.favGames[key];
+    else {
+      state.favGames[key] = { at: Date.now(), date: g?.date || new Date().toISOString() };
+      toast("Favorite Game", g ? `${g.teams[0]?.abbr} at ${g.teams[1]?.abbr} is pinned to the top` : "Pinned to the top", "Tap the heart again to remove it", "", false);
+    }
+    store.set("favGames", state.favGames);
+    render();
+    if (openGameKey === key) repaintGame();
+  }
   function allSpecial() { return EVENT_LEAGUES.flatMap(lg => state.data[lg.id]?.special || []); }
 
   // =====================================================================
@@ -1459,6 +1477,12 @@ button.brand, button.brand span { color: var(--accent); }
     const k = g.lg.id + ":" + g.id, on = !!state.watched[k];
     return `<button class="bellbtn ${on ? "on" : ""}" data-watchgame="${k}" aria-pressed="${on}" title="${on ? "Alerts On For This Game" : "Get alerts for this game"}" aria-label="${on ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL}</button>`;
   }
+  const HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M12 20s-7-4.4-9-9.2C1.6 7.3 4 4 7.3 4c2 0 3.4 1.1 4.7 2.7C13.3 5.1 14.7 4 16.7 4 20 4 22.4 7.3 21 10.8 19 15.6 12 20 12 20z"/></svg>';
+  const HEART_ON = HEART.replace('fill="none"', 'fill="currentColor"');
+  function heartBtn(g) {
+    const k = g.lg.id + ":" + g.id, on = !!state.favGames[k];
+    return `<button class="bellbtn heartbtn ${on ? "on" : ""}" data-favgame="${k}" aria-pressed="${on}" title="${on ? "Favorite Game" : "Favorite this game"}" aria-label="${on ? "Remove this game from favorites" : "Favorite this game"}">${on ? HEART_ON : HEART}</button>`;
+  }
   function statusClass(g) { return g.state === "in" ? "live" : g.state === "post" ? "final" : ""; }
 
   function situation(g) {
@@ -1503,7 +1527,7 @@ button.brand, button.brand span { color: var(--accent); }
     return `<article class="g tap" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(g.teams.map(x => x.name).join(" vs "))}: game details">
       <div class="g-top">${showLg === true ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span><span class="wslot">${watchPill(g)}</span></div>
       ${g.teams.map((t, i) => teamRow(g, t, i)).join("")}
-      <div class="g-foot">${footText(g)}${bellBtn(g)}</div>
+      <div class="g-foot">${footText(g)}${heartBtn(g)}${bellBtn(g)}</div>
     </article>`;
   }
 
@@ -1560,7 +1584,7 @@ button.brand, button.brand span { color: var(--accent); }
         <div class="f-mid"><span class="s ${g.state === "in" ? "live" : ""}">${esc(g.status)}</span>${sub ? `<span class="sub">${sub}</span>` : ""}</div>
         ${score(h, a)}${side(h)}
       </div>
-      <div class="f-act">${pill}${bellBtn(g)}</div>
+      <div class="f-act">${pill}${heartBtn(g)}${bellBtn(g)}</div>
     </div>`;
   }
 
@@ -1572,7 +1596,7 @@ button.brand, button.brand span { color: var(--accent); }
     const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
     const row = (t, o) => `<span class="mcg-row ${lose(t, o) ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<i></i>"}<b>${t.rank ? `<small>${t.rank}</small> ` : ""}${esc(t.abbr)}</b>${isFavTeam(g.lg, t.abbr) ? '<span class="mc-fav">★</span>' : ""}<em class="${g.state === "pre" ? "rec" : ""}">${esc(g.state === "pre" ? t.record : t.score)}</em></span>`;
     return `<article class="g mini tap ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name)}: game details">
-      <span class="mcg-top">${showLg ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span></span>${row(a, h)}${row(h, a)}</article>`;
+      <span class="mcg-top">${showLg ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span>${g.pin ? '<span class="pin-mark" aria-label="Favorite game">♥</span>' : ""}</span>${row(a, h)}${row(h, a)}</article>`;
   }
   // Top strip: mini versions of the game cards
   function miniRow(logo, abbr, rec, score, lose, fav) {
@@ -1586,7 +1610,7 @@ button.brand, button.brand span { color: var(--accent); }
     const sit = g.state === "in" ? (g.sit?.downDistanceText || (g.lg.sport === "Baseball" && g.sit?.outs != null ? `${g.sit.outs} out${g.sit.outs === 1 ? "" : "s"}` : "")) : "";
     const foot = sit || (g.state !== "post" ? (g.watch?.[0]?.app || g.broadcast || "") : (g.series || g.lg.short || g.lg.name));
     return `<button class="ms mc ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" title="${esc(a.full + " at " + h.full)}">
-      <span class="mc-top"><span class="lgtag">${esc(g.lg.short || g.lg.name)}</span><span class="st ${statusClass(g)}">${esc(g.status)}</span></span>
+      <span class="mc-top"><span class="lgtag">${esc(g.lg.short || g.lg.name)}</span><span class="st ${statusClass(g)}">${esc(g.status)}</span>${g.pin ? '<span class="pin-mark" aria-label="Favorite game">♥</span>' : ""}</span>
       ${row(a, h)}${row(h, a)}${foot ? `<span class="mc-foot">${esc(foot)}</span>` : ""}</button>`;
   }
   function nextChip(k) {
@@ -1657,7 +1681,7 @@ button.brand, button.brand span { color: var(--accent); }
     switch (tab) {
       case "live": return games.filter(g => g.state === "in");
       case "all": case "mine": return games;
-      case "teams": return games.filter(g => g.fav);
+      case "teams": return games.filter(isMine);
       case "close": return games.filter(g => g.close);
       case "cfb25": return games.filter(g => g.lg.id === "ncaaf" && g.teams.some(t => t.rank));
       case "p4": return games.filter(g => g.lg.id === "ncaaf" && g.p4);
@@ -1681,7 +1705,7 @@ button.brand, button.brand span { color: var(--accent); }
     const chips = [
       { id: "live", label: "Live", n: liveN, hot: liveN > 0, cls: "livechip" },
       { id: "all", label: "All" },
-      { id: "teams", label: "My Teams", n: games.filter(g => g.fav).length || null },
+      { id: "teams", label: "My Teams", n: games.filter(isMine).length || null },
       { id: "mine", label: "My Leagues" },
       { id: "upcoming", label: "Upcoming" },
       { id: "close", label: "Close Games", n: closeN, hot: closeN > 0 },
@@ -1731,13 +1755,13 @@ button.brand, button.brand span { color: var(--accent); }
     const order = upcomingIds();
     let html = `<div class="mine-bar"><span>Next 3 days · your teams, then your leagues</span><button class="chip" data-edit-leagues>Edit Leagues</button></div>`;
     up.days.forEach(({ date, games }) => {
-      games = games.map(g => ({ ...g, fav: g.teams.some(t => isFavTeam(g.lg, t.abbr)) }));
+      games = games.map(g => ({ ...g, fav: g.teams.some(t => isFavTeam(g.lg, t.abbr)), pin: !!state.favGames[g.lg.id + ":" + g.id] }));
       if (!games.length) return;
       const byTime = (x, y) => new Date(x.date) - new Date(y.date);
-      const mine = games.filter(g => g.fav).sort((x, y) => gameRank(x) - gameRank(y) || byTime(x, y));
+      const mine = games.filter(isMine).sort((x, y) => (y.pin - x.pin) || gameRank(x) - gameRank(y) || byTime(x, y));
       let body = "";
-      if (mine.length) body += state.view === "league" ? `<h3 class="up-lg">My Teams</h3><div class="grid">${mine.map(card).join("")}</div>`
-        : `<h3 class="up-lg">My Teams</h3>${timeline(mine)}`;
+      if (mine.length) body += state.view === "league" ? `<h3 class="up-lg">My Teams & Games</h3><div class="grid">${mine.map(card).join("")}</div>`
+        : `<h3 class="up-lg">My Teams & Games</h3>${timeline(mine)}`;
       order.forEach(id => {
         const list = games.filter(g => g.lg.id === id && !g.fav).sort(byTime);
         if (!list.length) return;
@@ -1770,7 +1794,7 @@ button.brand, button.brand span { color: var(--accent); }
 
     // Your teams strip: today's games plus the next game for everyone else
     if (["live", "all", "mine"].includes(tab)) {
-      const mine = games.filter(g => g.fav).sort((a, b) => ({ in: 0, pre: 1, post: 2 }[a.state] - { in: 0, pre: 1, post: 2 }[b.state]) || gameRank(a) - gameRank(b));
+      const mine = games.filter(isMine).sort((a, b) => ({ in: 0, pre: 1, post: 2 }[a.state] - { in: 0, pre: 1, post: 2 }[b.state]) || (b.pin - a.pin) || gameRank(a) - gameRank(b));
       const playing = new Set(mine.flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
       const nexts = isToday() ? [...state.favs].filter(k => !playing.has(k) && state.next[k]?.date)
         .sort((a, b) => favRank(a) - favRank(b)) : [];
@@ -1803,8 +1827,9 @@ button.brand, button.brand span { color: var(--accent); }
     // My Teams: today's games for teams you follow, then everyone's next game
     if (tab === "teams") {
       const ORD = { in: 0, pre: 1, post: 2 };
-      const mine = games.filter(g => g.fav).sort((a, b) => (ORD[a.state] - ORD[b.state]) || gameRank(a) - gameRank(b));
-      html += `<div class="mine-bar"><span>Following ${state.favs.size} team${state.favs.size === 1 ? "" : "s"}</span><button class="chip" data-open-sheet>Edit Teams</button></div>`;
+      const mine = games.filter(isMine).sort((a, b) => (ORD[a.state] - ORD[b.state]) || (b.pin - a.pin) || gameRank(a) - gameRank(b));
+      const pinN = Object.keys(state.favGames).length;
+      html += `<div class="mine-bar"><span>Following ${state.favs.size} team${state.favs.size === 1 ? "" : "s"}${pinN ? ` · ${pinN} favorite game${pinN === 1 ? "" : "s"}` : ""}</span><button class="chip" data-open-sheet>Edit Teams</button></div>`;
       if (mine.length) {
         const liveN = mine.filter(g => g.state === "in").length;
         html += block("myteams", isToday() ? "Today" : dayLabel(state.date), liveN ? `${liveN} Live · ${mine.length} Total` : countLabel(mine.length),
@@ -2253,6 +2278,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (g) {
       const w = gs !== "post" && g.watch?.[0];
       html += `<div class="gc-actions">${w ? `<a class="watchbig" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">${PLAY_BIG} Watch On ${esc(w.app)}</a>` : g.link ? `<a class="watchbig" href="${esc(g.link)}" target="_blank" rel="noopener">Open On ESPN</a>` : ""}
+        <button class="belbig ${state.favGames[g.lg.id + ":" + g.id] ? "on" : ""}" data-favgame="${g.lg.id}:${g.id}" aria-label="${state.favGames[g.lg.id + ":" + g.id] ? "Remove this game from favorites" : "Favorite this game"}">${(state.favGames[g.lg.id + ":" + g.id] ? HEART_ON : HEART).replace(' width="15" height="15"', "")}</button>
         ${gs !== "post" ? `<button class="belbig ${state.watched[g.lg.id + ":" + g.id] ? "on" : ""}" data-watchgame="${g.lg.id}:${g.id}" aria-label="${state.watched[g.lg.id + ":" + g.id] ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL_BIG}</button>` : ""}</div>
         ${g.broadcast ? `<div class="gc-net">${gs === "in" ? "Live on" : gs === "pre" ? "On" : "Aired on"} ${esc(g.broadcast.replace(" / ", ", "))}</div>` : ""}`;
     }
@@ -2533,6 +2559,8 @@ button.brand, button.brand span { color: var(--accent); }
     }).join("")).join("");
   }
   document.addEventListener("click", e => {
+    const fg = e.target.closest("[data-favgame]");
+    if (fg) { e.preventDefault(); toggleFavGame(fg.dataset.favgame); return; }
     const w = e.target.closest("[data-watchgame]");
     if (w) { e.preventDefault(); toggleWatch(w.dataset.watchgame); return; }
     const b = e.target.closest("[data-game]");

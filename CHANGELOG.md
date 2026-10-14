@@ -16,6 +16,9 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+_Nothing new. Beta matches live as of Oct 14, 10:20 AM._
+
+## Oct 14, 2026: Live (10:20 AM)
 - **Favorite Games** (Oct 14): tap the heart on any game (cards, Worth A Watch, or the game card) to favorite just that game, not the team. It pins to the top strip, shows on My Teams and Upcoming with your teams, and gets a heart on Compact cards. Favorites clear themselves two days after the game.
 
 ## Oct 14, 2026: Live (10:00 AM)
