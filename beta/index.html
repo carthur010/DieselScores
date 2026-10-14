@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014095630">
+<meta name="build" content="20261014100011">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -121,6 +121,8 @@ section.block { background: var(--surface); border: 1px solid var(--line); borde
 .set-sec.open .set-sec-h svg { transform: none; }
 .set-sec-b { padding: 0 14px 10px; display: grid; gap: 12px; }
 .set-sec-b .set-row:last-child { border-bottom: 0; }
+.rem-row { flex-wrap: nowrap; gap: 6px; }
+.rem-row .chip { flex: 1 1 0; justify-content: center; padding-inline: 4px; white-space: nowrap; min-width: 0; text-align: center; }
 .rem-lbl { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 4px; }
 .set-done { width: 100%; height: 46px; border-radius: 12px; background: var(--accent); color: var(--bg); font-weight: 700; font-size: 16px; margin-top: 6px; }
 .bhead h2 { margin: 0; font-family: var(--display); font-size: 24px; font-weight: 700; letter-spacing: .01em; }
@@ -1305,7 +1307,7 @@ button.brand, button.brand span { color: var(--accent); }
       const who = g.fav ? favName(g) : `${a.abbr} at ${h.abbr}`;
       const left = Math.max(1, Math.round(mins));
       const watch = g.watch?.[0] ? `Watch on ${g.watch[0].app}` : (g.broadcast || g.lg.short || g.lg.name);
-      notify(`${who} starts in ${left} min`, `${a.name || a.abbr} at ${h.name || h.abbr} · ${timeLabel(g.date)}`, watch, g.link, false, g.id + ":r" + m);
+      notify(`${who} Starts In ${left} Min`, `${a.name || a.abbr} at ${h.name || h.abbr} · ${timeLabel(g.date)}`, watch, g.link, false, g.id + ":r" + m);
     });
   }
   setInterval(checkReminders, 30000);
@@ -2631,7 +2633,7 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function alertGroup(group, label, hint) {
     const prefs = state.alertPrefs[group];
-    const rem = group === "all" ? "" : `<div class="rem-lbl">Heads-Up Before Start</div><div class="toggles">${REMIND_MINS.map(m => { const on = (prefs.remind || []).includes(m); return `<button class="chip ${on ? "on" : ""}" data-remind-group="${group}" data-remind="${m}" aria-pressed="${on}">${m} min</button>`; }).join("")}</div>`;
+    const rem = group === "all" ? "" : `<div class="rem-lbl">Heads-Up Before Start</div><div class="toggles rem-row">${REMIND_MINS.map(m => { const on = (prefs.remind || []).includes(m); return `<button class="chip ${on ? "on" : ""}" data-remind-group="${group}" data-remind="${m}" aria-pressed="${on}" aria-label="${m} minute${m === 1 ? "" : "s"} before">${m} Min</button>`; }).join("")}</div>`;
     return `<div class="set-row set-col"><div class="set-lbl">${esc(label)}<small>${esc(hint)}</small></div>
       <div class="toggles">${ALERT_EVENTS[group].map(([ev, name]) => `<button class="chip ${prefs[ev] ? "on" : ""}" data-alert-group="${group}" data-alert-ev="${ev}" aria-pressed="${!!prefs[ev]}">${esc(name)}</button>`).join("")}</div>${rem}</div>`;
   }
