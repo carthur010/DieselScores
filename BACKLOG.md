@@ -31,6 +31,8 @@ Nothing. Everything shipped to live on Oct 14. Still worth a real-phone check: e
 - Real push alerts with the app closed (needs a small server or the iOS app)
 
 ## Idea backlog (from SportsDudes)
+- [ ] **Tighten Upset Alert** (Ben): today any betting favorite trailing in the second half counts, so PSG vs. City (near pick'em) fired. Require a real underdog: 7+ pt spread NFL/NBA, 10+ CFB, +150 or longer moneyline in soccer/NHL/MLB.
+- [ ] **College football by conference** (Faiz): SEC, Big Ten, Big 12, ACC etc. as filters or sections, like Bleacher Report. Faiz also said the expanded view beats Bleacher Report's UI.
 1. **"This guy is going off" tracker** (Ben): flag big individual games live, like a no-hitter in progress, hat trick, triple-double, big NFL stat lines.
 2. **Upset Alert section** (Faiz): its own section for any underdog currently leading. Built for live bets.
 3. **Rank sports by importance** (Faiz, Ben): first-open setup to rank sports/leagues so the home page only shows what you care about. Partly built: My Leagues tab + Edit order.
