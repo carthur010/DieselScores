@@ -315,6 +315,16 @@ section.closed .bhead { border-bottom: 0; }
 .toast b { font-family: var(--display); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; font-size: 16px; }
 .toast span { font-size: 14px; }
 .toast small { font-size: 12px; opacity: .75; }
+.mine-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 13px; }
+.mine-div { margin: 6px 2px -6px; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.lrow { display: grid; grid-template-columns: 22px minmax(0, 1fr) 34px 34px auto; align-items: center; gap: 8px; padding: 8px 2px; border-bottom: 1px solid var(--line); }
+.lrow:last-child { border-bottom: 0; }
+.lrow .nm { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lnum { font-family: var(--display); font-weight: 700; color: var(--muted); }
+.lbtn { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.lbtn:disabled { opacity: .3; cursor: default; }
+.lrow .follow { font: inherit; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); white-space: nowrap; cursor: pointer; }
+.lrow .follow.on { background: var(--surface); color: var(--muted); }
 @keyframes slide { from { transform: translateY(-10px); opacity: 0; } }
 header.top { top: 0; padding-top: env(safe-area-inset-top, 0px); }
 button.brand { background: none; border: 0; padding: 0; cursor: pointer; color: var(--fg); }
@@ -376,6 +386,18 @@ button.brand span { color: var(--accent); }
       <div class="res" id="results"></div>
       <h3>Following</h3>
       <div class="res" id="following"></div>
+    </div>
+  </div>
+</div>
+<div class="sheet" id="lsheet" hidden role="dialog" aria-modal="true" aria-labelledby="lsheet-h">
+  <div class="sheet-card">
+    <div class="bhead"><h2 id="lsheet-h">My Leagues</h2>
+      <button class="tog" id="lsheet-x" aria-label="Done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="sheet-body">
+      <p class="hint">Use the arrows to set the order. Your leagues show first on the My Leagues tab.</p>
+      <div class="res" id="lfav"></div>
+      <h3>Add more</h3>
+      <div class="res" id="lrest"></div>
     </div>
   </div>
 </div>
@@ -461,6 +483,7 @@ button.brand span { color: var(--accent); }
   };
   // Soccer favorites are keyed "soccer:ABBR" so a club follows you across competitions
   const DEFAULT_FAVS = ["nba:NY", "nba:SAC", "nhl:NYR", "nhl:SJ", "mlb:NYM", "nfl:NYG", "soccer:ARS"];
+  const DEFAULT_FAV_LEAGUES = ["nba", "nhl", "nfl", "ncaaf", "mlb", "epl", "ucl", "pga"];
   const DEFAULT_META = { "nba:NY": "nba", "nba:SAC": "nba", "nhl:NYR": "nhl", "nhl:SJ": "nhl", "mlb:NYM": "mlb", "nfl:NYG": "nfl", "soccer:ARS": "epl" };
   const API = "https://site.api.espn.com/apis/site/v2/sports/";
 
@@ -481,6 +504,7 @@ button.brand span { color: var(--accent); }
     next: store.get("next", {}),         // key -> { t, date, opp, oppLogo, at, none }
     closed: new Set(),
     alerts: store.get("alerts", false),
+    favLeagues: store.get("favLeagues", DEFAULT_FAV_LEAGUES),
     data: {},
     loading: false,
     updatedAt: null,
@@ -1133,7 +1157,7 @@ button.brand span { color: var(--accent); }
   function poolFor(tab, games) {
     switch (tab) {
       case "live": return games.filter(g => g.state === "in");
-      case "all": return games;
+      case "all": case "mine": return games;
       case "close": return games.filter(g => g.close);
       case "cfb25": return games.filter(g => g.lg.id === "ncaaf" && g.teams.some(t => t.rank));
       case "p4": return games.filter(g => g.lg.id === "ncaaf" && g.p4);
@@ -1158,6 +1182,7 @@ button.brand span { color: var(--accent); }
     const chips = [
       { id: "live", label: "Live", n: liveN, hot: liveN > 0, cls: "livechip" },
       { id: "all", label: "All" },
+      { id: "mine", label: "My Leagues" },
       { id: "close", label: "Close games", n: closeN, hot: closeN > 0 },
     ];
     const cfb = games.filter(g => g.lg.id === "ncaaf");
@@ -1198,7 +1223,7 @@ button.brand span { color: var(--accent); }
     let html = "";
 
     // Your teams strip: today's games plus the next game for everyone else
-    if (["live", "all"].includes(tab)) {
+    if (["live", "all", "mine"].includes(tab)) {
       const mine = games.filter(g => g.fav).sort((a, b) => ({ in: 0, pre: 1, post: 2 }[a.state] - { in: 0, pre: 1, post: 2 }[b.state]) || new Date(a.date) - new Date(b.date));
       const playing = new Set(mine.flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
       const nexts = isToday() ? [...state.favs].filter(k => !playing.has(k) && state.next[k]?.date)
@@ -1219,7 +1244,36 @@ button.brand span { color: var(--accent); }
       }
     }
 
-    // Golf, F1, UFC, tennis
+    // My Leagues: your leagues first, in your order, then everything else
+    if (tab === "mine") {
+      const order = state.favLeagues.filter(id => LG[id]).concat(LEAGUES.map(l => l.id).filter(id => !state.favLeagues.includes(id)));
+      const off = [];
+      html += `<div class="mine-bar"><span>Your leagues first, in your order</span><button class="chip" data-edit-leagues>Edit order</button></div>`;
+      let dividerDone = false;
+      order.forEach(id => {
+        const lg = LG[id], isFav = state.favLeagues.includes(id);
+        let section = "";
+        if (lg.kind) {
+          section = allSpecial().filter(e => e.lg.id === id).map(e => BLOCK[e.kind] ? BLOCK[e.kind](e) : "").join("");
+        } else {
+          const list = games.filter(g => g.lg.id === id).sort((x, y) => ({ in: 0, pre: 1, post: 2 }[x.state] - { in: 0, pre: 1, post: 2 }[y.state]) || new Date(x.date) - new Date(y.date));
+          if (list.length) {
+            const liveN = list.filter(g => g.state === "in").length;
+            section = block("m-" + id, lg.name, liveN ? `${liveN} live · ${list.length} total` : `${list.length} game${list.length > 1 ? "s" : ""}`,
+              state.view === "league" ? `<div class="grid">${list.map(card).join("")}</div>` : timeline(list));
+          }
+        }
+        if (!section) { if (isFav) off.push(lg.short || lg.name); return; }
+        if (!isFav && !dividerDone) { html += `<h3 class="mine-div">Other leagues</h3>`; dividerDone = true; }
+        html += section;
+      });
+      if (off.length) html += `<p class="quiet">No games ${isToday() ? "today" : "this day"}: ${esc(off.join(", "))}</p>`;
+      if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}${isToday() ? " · refreshes automatically" : ""}</p>`;
+      main.innerHTML = html;
+      return;
+    }
+
+    // Golf
     specialsFor(tab).forEach(e => { html += BLOCK[e.kind](e); });
 
     // The feed
@@ -1346,7 +1400,42 @@ button.brand span { color: var(--accent); }
     toggleFav(keyFor(t), { lg: t.lg, id: t.id, name: t.name, logo: t.logo, color: t.color, abbr: t.abbr });
   });
   document.getElementById("sheet-x").onclick = closeSheet;
-  document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+  // ---- League order editor
+  function renderLeagueSheet() {
+    const favs = state.favLeagues.filter(id => LG[id]);
+    const arrow = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="${d ? "M6 9l6 6 6-6" : "M6 15l6-6 6 6"}"/></svg>`;
+    document.getElementById("lfav").innerHTML = favs.length ? favs.map((id, i) => `<div class="lrow">
+        <span class="lnum">${i + 1}</span><span class="nm">${esc(LG[id].name)}</span>
+        <button class="lbtn" data-lmove="${id}" data-dir="-1" ${i === 0 ? "disabled" : ""} aria-label="Move ${esc(LG[id].name)} up">${arrow(false)}</button>
+        <button class="lbtn" data-lmove="${id}" data-dir="1" ${i === favs.length - 1 ? "disabled" : ""} aria-label="Move ${esc(LG[id].name)} down">${arrow(true)}</button>
+        <button class="follow on" data-ltoggle="${id}">Remove</button></div>`).join("") : '<p class="hint">No leagues picked yet.</p>';
+    document.getElementById("lrest").innerHTML = LEAGUES.filter(l => !favs.includes(l.id)).map(l => `<div class="lrow">
+        <span class="lnum"></span><span class="nm">${esc(l.name)}</span><span></span><span></span>
+        <button class="follow" data-ltoggle="${l.id}">Add</button></div>`).join("");
+  }
+  function saveLeagues() { store.set("favLeagues", state.favLeagues); renderLeagueSheet(); render(); }
+  document.getElementById("lsheet").addEventListener("click", e => {
+    if (e.target.id === "lsheet") { document.getElementById("lsheet").hidden = true; return; }
+    const mv = e.target.closest("[data-lmove]");
+    if (mv) {
+      const id = mv.dataset.lmove, dir = +mv.dataset.dir, arr = state.favLeagues.filter(x => LG[x]);
+      const i = arr.indexOf(id), j = i + dir;
+      if (i < 0 || j < 0 || j >= arr.length) return;
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+      state.favLeagues = arr; saveLeagues(); return;
+    }
+    const tg = e.target.closest("[data-ltoggle]");
+    if (tg) {
+      const id = tg.dataset.ltoggle;
+      state.favLeagues = state.favLeagues.includes(id) ? state.favLeagues.filter(x => x !== id) : [...state.favLeagues, id];
+      saveLeagues();
+    }
+  });
+  document.getElementById("lsheet-x").onclick = () => { document.getElementById("lsheet").hidden = true; };
+  document.getElementById("main").addEventListener("click", e => {
+    if (e.target.closest("[data-edit-leagues]")) { renderLeagueSheet(); document.getElementById("lsheet").hidden = false; }
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { closeSheet(); document.getElementById("lsheet").hidden = true; } });
   document.getElementById("q").addEventListener("input", search);
   document.getElementById("teamsbtn").onclick = openSheet;
   function goHome() {
