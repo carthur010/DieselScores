@@ -397,6 +397,13 @@ button.t-go { background: var(--surface); cursor: pointer; }
 .bellbtn.on { color: var(--bg); background: var(--accent); border-color: var(--accent); }
 .g-foot .bellbtn { margin-left: auto; }
 .g-foot .bellbtn + .linkbtn { margin-left: 0; }
+.nxt { display: grid; }
+.nxt-row { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.nxt-row:last-child { border-bottom: 0; }
+.nxt-row img { width: 32px; height: 32px; object-fit: contain; }
+.nxt-row .nm { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nxt-row small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+.nxt-row .when { text-align: right; font-weight: 600; font-size: 14px; white-space: nowrap; }
 @keyframes slide { from { transform: translateY(-10px); opacity: 0; } }
 header.top { top: 0; padding-top: env(safe-area-inset-top, 0px); }
 button.brand { background: none; border: 0; padding: 0; cursor: pointer; color: var(--fg); }
@@ -1383,6 +1390,7 @@ button.brand, button.brand span { color: var(--accent); }
     switch (tab) {
       case "live": return games.filter(g => g.state === "in");
       case "all": case "mine": return games;
+      case "teams": return games.filter(g => g.fav);
       case "close": return games.filter(g => g.close);
       case "cfb25": return games.filter(g => g.lg.id === "ncaaf" && g.teams.some(t => t.rank));
       case "p4": return games.filter(g => g.lg.id === "ncaaf" && g.p4);
@@ -1407,6 +1415,7 @@ button.brand, button.brand span { color: var(--accent); }
     const chips = [
       { id: "live", label: "Live", n: liveN, hot: liveN > 0, cls: "livechip" },
       { id: "all", label: "All" },
+      { id: "teams", label: "My Teams", n: games.filter(g => g.fav).length || null },
       { id: "mine", label: "My Leagues" },
       { id: "close", label: "Close games", n: closeN, hot: closeN > 0 },
     ];
@@ -1467,6 +1476,33 @@ button.brand, button.brand span { color: var(--accent); }
         html += block("worth", "Worth A Watch", `${picks.length} game${picks.length > 1 ? "s" : ""}`,
           `<div class="feat">${picks.map(featured).join("")}</div>`);
       }
+    }
+
+    // My Teams: today's games for teams you follow, then everyone's next game
+    if (tab === "teams") {
+      const ORD = { in: 0, pre: 1, post: 2 };
+      const mine = games.filter(g => g.fav).sort((a, b) => (ORD[a.state] - ORD[b.state]) || new Date(a.date) - new Date(b.date));
+      html += `<div class="mine-bar"><span>Following ${state.favs.size} team${state.favs.size === 1 ? "" : "s"}</span><button class="chip" data-open-sheet>Edit teams</button></div>`;
+      if (mine.length) {
+        const liveN = mine.filter(g => g.state === "in").length;
+        html += block("myteams", isToday() ? "Today" : dayLabel(state.date), liveN ? `${liveN} live · ${mine.length} total` : `${mine.length} game${mine.length > 1 ? "s" : ""}`,
+          state.view === "league" ? `<div class="grid">${mine.map(card).join("")}</div>` : timeline(mine));
+      } else {
+        html += `<div class="block empty">None of your teams play ${isToday() ? "today" : "on " + esc(dayLabel(state.date))}.</div>`;
+      }
+      const playing = new Set(mine.flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
+      const ups = [...state.favs].filter(k => !playing.has(k)).map(k => ({ k, m: state.favMeta[k], n: state.next[k] }))
+        .filter(x => x.m).sort((a, b) => (a.n?.date ? new Date(a.n.date) : Infinity) - (b.n?.date ? new Date(b.n.date) : Infinity));
+      if (ups.length) {
+        html += block("upnextteams", "Up Next", "", `<div class="nxt">${ups.map(({ k, m, n }) => `<div class="nxt-row">
+            ${m.logo ? `<img src="${esc(m.logo)}" alt="">` : "<span></span>"}
+            <span class="nm">${esc(m.name || m.abbr)}<small>${esc(LG[m.lg]?.short || LG[m.lg]?.name || "")}</small></span>
+            <span class="when">${n?.date ? `${esc(n.at)} ${esc(n.opp)}<small>${esc(whenLabel(n.date))}</small>` : n?.none ? "<small>No games scheduled</small>" : "<small>Checking…</small>"}</span>
+          </div>`).join("")}</div>`);
+      }
+      if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}${isToday() ? " · refreshes automatically" : ""}</p>`;
+      main.innerHTML = html;
+      return;
     }
 
     // My Leagues: your leagues first, in your order, then everything else
@@ -1852,7 +1888,7 @@ button.brand, button.brand span { color: var(--accent); }
   function renderSettings() {
     const teams = state.favs.size, leagues = state.favLeagues.length;
     document.getElementById("settings-body").innerHTML =
-      segRow("Open to", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["mine", "My Leagues"]], "The tab you see when the app opens") +
+      segRow("Open to", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"]], "The tab you see when the app opens") +
       segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
       segRow("Color", "palette", store.get("palette", "red"), [["red", "Red"], ["navy", "Navy"], ["green", "Green"]]) +
       segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +

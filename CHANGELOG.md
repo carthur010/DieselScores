@@ -3,6 +3,8 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- **My Teams tab**: today's games for teams you follow (with a count on the tab), then an **Up Next** list with every other team's next game. Edit teams button at the top. Also available under Settings → Open to.
+- **Gamecast pill** styled to match the watch button.
 - **Red color scheme**: brick red (#A93439) with black, white and a cream background, plus gold (#AC9841) for favorite stars, the selected date, Playoffs tags, the golf leader row and "Next" labels. Red app icon. Settings has a **Color** option: Red, Navy (#07357A with gold and a red live color) or the classic Green. Live scores use #E31837.
 - **Alert options** in Settings, in three groups you can mix and match:
   - **My teams**: game start, halftime, close game, overtime, lead changes, final score (W/L).
