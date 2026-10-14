@@ -3,6 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Search finds leagues too: typing NFL, Tennis, Premier, CFB and so on shows a Leagues section with Follow buttons above the team results. Following a league adds it to My Leagues.
 - Tennis: Men's Tennis (ATP) and Women's Tennis (WTA) tabs. Each tournament shows the day's singles matches (live first, then results, then upcoming) with round, flags, set scores, winners in bold and tiebreak scores, plus a Full Draw link.
 - Game vs. Match wording by sport: "Previous Games" and "Game Leaders" for NFL, NBA, MLB, NHL and college; "Previous Matches" and "Match Leaders" for soccer. Soccer-only lists count "Matches", mixed lists count "Games".
 - Game header: league, time, series, network, arena and city sit as one tight stack, centered in the middle column between the two teams. Long team names (Timberwolves, Diamondbacks) shrink to fit.

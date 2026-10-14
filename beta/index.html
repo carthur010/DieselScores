@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014190925">
+<meta name="build" content="20261014191244">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -405,6 +405,7 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .h3-note { text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 12px; margin-left: 6px; }
 #suggest h3 { margin-bottom: 4px; }
 .res-row img { width: 28px; height: 28px; object-fit: contain; }
+.lg-badge { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-size: 8.5px; font-weight: 800; letter-spacing: .02em; }
 .res-row .nm { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .res-row .nm small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
 .res-row .follow { font: inherit; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); white-space: nowrap; cursor: pointer; }
@@ -754,7 +755,7 @@ button.brand, button.brand span { color: var(--accent); }
       <button class="tog" id="sheet-x" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="sheet-body">
       <p class="hint" id="sheet-intro" hidden>Follow a few teams and pick your leagues to get started. You can change these anytime in Settings.</p>
-      <input type="search" id="q" placeholder="Search any team: Mets, Arsenal, Duke…" autocomplete="off" aria-label="Search teams">
+      <input type="search" id="q" placeholder="Search teams and leagues: Mets, NFL, Tennis…" autocomplete="off" aria-label="Search teams and leagues">
       <div class="res" id="results"></div>
       <div id="suggest"></div>
       <h3>Following <span class="h3-note">drag ☰ to set your order</span></h3>
@@ -2400,11 +2401,37 @@ button.brand, button.brand span { color: var(--accent); }
     const show = !document.getElementById("q").value.trim() && sugg.length;
     el.innerHTML = show ? `<h3>Suggested</h3><div class="res">${sugg.map((t, i) => resRow(t, i, "s")).join("")}</div>` : "";
   }
-  function drawResults() {
+  // League search: name, short name, sport and common nicknames ("cfb", "premier", "tennis")
+  const LG_ALIAS = { ncaaf: "cfb ncaa football college", ncaam: "cbb ncaa basketball college march madness", ncaaw: "ncaa basketball college",
+    epl: "epl pl premier english", ucl: "ucl champions", uel: "europa", uecl: "conference", uwcl: "uwcl champions women",
+    wsl: "wsl women super", laliga: "la liga spain spanish", seriea: "serie a italy italian", bund: "bundesliga germany german",
+    ligue1: "ligue 1 france french", facup: "fa cup", mls: "mls major league soccer", nwsl: "nwsl women soccer",
+    atp: "atp men tennis", wta: "wta women tennis", pga: "pga golf", lpga: "lpga golf women" };
+  function leagueMatches(q) {
+    const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!words.length) return [];
+    return LEAGUES.filter(l => {
+      const hay = [l.name, l.short, l.id, l.sport, LG_ALIAS[l.id]].filter(Boolean).join(" ").toLowerCase().replace(/[’']/g, "");
+      const toks = hay.split(/[^a-z0-9+]+/);
+      return words.every(w => { w = w.replace(/[’']/g, ""); return toks.some(t => t.startsWith(w)) || hay.includes(w); });
+    }).slice(0, 6);
+  }
+  function lgRow(l) {
+    const on = state.favLeagues.includes(l.id);
+    return `<div class="res-row"><span class="lg-badge">${esc((l.short || (l.name.split(" ").length > 1 ? l.name.split(" ").map(w => w[0]).join("") : l.name)).replace(/[^A-Za-z0-9]/g, "").slice(0, 5).toUpperCase())}</span>
+      <span class="nm">${esc(l.name)}<small>${esc(l.sport)} · League</small></span>
+      <button class="follow ${on ? "on" : ""}" data-follow-lg="${l.id}">${on ? "Following" : "Follow"}</button></div>`;
+  }
+  function drawResults(searching) {
     const el = document.getElementById("results");
     const q = document.getElementById("q").value.trim();
-    if (!q) { el.innerHTML = '<p class="hint">Type a team, city or school. Covers the NFL, MLB, NBA, WNBA, NHL, college football and hoops, and the major soccer leagues.</p>'; return; }
-    el.innerHTML = results.length ? results.map((t, i) => resRow(t, i, "r")).join("") : '<p class="hint">No teams match that.</p>';
+    if (!q) { el.innerHTML = '<p class="hint">Type a team, city, school or league. Covers the NFL, MLB, NBA, WNBA, NHL, college football and hoops, the major soccer leagues, golf and tennis.</p>'; return; }
+    const lgs = leagueMatches(q);
+    const lgHtml = lgs.length ? `<h3>Leagues</h3><div class="res">${lgs.map(lgRow).join("")}</div>` : "";
+    const teamHtml = searching ? '<p class="hint">Searching teams…</p>'
+      : results.length ? `${lgs.length ? "<h3>Teams</h3>" : ""}<div class="res">${results.map((t, i) => resRow(t, i, "r")).join("")}</div>`
+      : lgs.length ? "" : '<p class="hint">No teams or leagues match that.</p>';
+    el.innerHTML = lgHtml + teamHtml;
   }
   function search() {
     clearTimeout(searchTimer);
@@ -2413,7 +2440,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (!q) { results = []; drawResults(); return; }
     searchTimer = setTimeout(async () => {
       const seq = ++searchSeq;
-      document.getElementById("results").innerHTML = '<p class="hint">Searching…</p>';
+      drawResults(true);
       try {
         const j = await (await fetch("https://site.api.espn.com/apis/common/v3/search?type=team&limit=40&query=" + encodeURIComponent(q))).json();
         if (seq !== searchSeq) return;
@@ -2472,6 +2499,8 @@ button.brand, button.brand span { color: var(--accent); }
   });
   document.getElementById("sheet").addEventListener("click", e => {
     if (e.target.id === "sheet") return closeSheet();
+    const fl = e.target.closest("[data-follow-lg]");
+    if (fl) { const id = fl.dataset.followLg; state.favLeagues = state.favLeagues.includes(id) ? state.favLeagues.filter(x => x !== id) : [...state.favLeagues, id]; saveLeagues(); drawResults(); return; }
     const b = e.target.closest(".follow");
     if (!b) return;
     const t = (b.dataset.list === "r" ? results : b.dataset.list === "s" ? sugg : following)[+b.dataset.i];
