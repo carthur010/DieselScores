@@ -453,6 +453,8 @@ button.t-go { background: var(--surface); cursor: pointer; }
 .g-foot .bellbtn { margin-left: auto; }
 .g-foot .bellbtn + .linkbtn { margin-left: 0; }
 .nxt { display: grid; }
+.nxt-row[data-game] { cursor: pointer; }
+.nxt-row[data-game]:hover { background: var(--accent-soft); }
 .nxt-row { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line); }
 .nxt-row:last-child { border-bottom: 0; }
 .nxt-row img { width: 32px; height: 32px; object-fit: contain; }
@@ -1112,7 +1114,7 @@ button.brand, button.brand span { color: var(--accent); }
       const opp = cs.find(c => c !== me);
       return { date: ev.date, opp: opp?.team?.abbreviation || opp?.team?.shortDisplayName || "TBD",
         oppLogo: opp?.team?.logos?.[0]?.href || opp?.team?.logo || "", at: me?.homeAway === "away" ? "@" : "vs",
-        place: placeName(ev.competitions?.[0]?.venue) };
+        place: placeName(ev.competitions?.[0]?.venue), id: String(ev.id || "") };
     };
     let found = null;
     try {
@@ -1126,7 +1128,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (!isToday()) return;
     const playing = new Set(allGames().flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
     const todo = [...state.favs].filter(k => !playing.has(k))
-      .filter(k => { const c = state.next[k]; return !c || (c.date && c.place === undefined) || Date.now() - c.t > 3 * 3600e3 || (c.date && new Date(c.date) < Date.now() - 4 * 3600e3); });
+      .filter(k => { const c = state.next[k]; return !c || (c.date && (c.place === undefined || c.id === undefined)) || Date.now() - c.t > 3 * 3600e3 || (c.date && new Date(c.date) < Date.now() - 4 * 3600e3); });
     if (!todo.length) return;
     await ensureMeta(todo);
     await Promise.allSettled(todo.map(fetchNext));
@@ -1402,10 +1404,11 @@ button.brand, button.brand span { color: var(--accent); }
   function nextChip(k) {
     const m = state.favMeta[k], n = state.next[k];
     if (!m || !n || n.none || !n.date) return "";
-    return `<div class="ms next" title="${esc(m.name)}: next game">
+    const tag = n.id ? "button" : "div";
+    return `<${tag} class="ms next" ${n.id ? `data-game="${esc(m.lg)}:${esc(n.id)}"` : ""} title="${esc(m.name)}: next game">
       <span class="ms-t">${m.logo ? `<img src="${esc(m.logo)}" alt="">` : ""}<b>${esc(m.abbr || k.split(":")[1])}</b></span>
       <span class="ms-t nx">${n.oppLogo ? `<img src="${esc(n.oppLogo)}" alt="">` : ""}<b>${esc(n.opp)}</b></span>
-      <span class="ms-s"><small>Next</small>${esc(whenLabel(n.date))}${n.place ? `<em>${esc(n.place)}</em>` : ""}</span></div>`;
+      <span class="ms-s"><small>Next</small>${esc(whenLabel(n.date))}${n.place ? `<em>${esc(n.place)}</em>` : ""}</span></${tag}>`;
   }
 
   // Golf leaderboard
@@ -1624,7 +1627,7 @@ button.brand, button.brand span { color: var(--accent); }
       const ups = [...state.favs].filter(k => !playing.has(k)).map(k => ({ k, m: state.favMeta[k], n: state.next[k] }))
         .filter(x => x.m).sort((a, b) => (a.n?.date ? new Date(a.n.date) : Infinity) - (b.n?.date ? new Date(b.n.date) : Infinity));
       if (ups.length) {
-        html += block("upnextteams", "Up Next", "", `<div class="nxt">${ups.map(({ k, m, n }) => `<div class="nxt-row">
+        html += block("upnextteams", "Up Next", "", `<div class="nxt">${ups.map(({ k, m, n }) => `<div class="nxt-row" ${n?.id ? `data-game="${esc(m.lg)}:${esc(n.id)}" role="button" tabindex="0"` : ""}>
             ${m.logo ? `<img src="${esc(m.logo)}" alt="">` : "<span></span>"}
             <span class="nm">${esc(m.name || m.abbr)}<small>${esc(LG[m.lg]?.short || LG[m.lg]?.name || "")}</small></span>
             <span class="when">${n?.date ? `${esc(n.opp)}<small>${esc(whenLabel(n.date))}${n.place ? " · " + esc(n.place) : ""}</small>` : n?.none ? "<small>No games scheduled</small>" : "<small>Checking…</small>"}</span>
@@ -1931,6 +1934,7 @@ button.brand, button.brand span { color: var(--accent); }
     } catch {}
     if (openGameKey !== key) return;
     if (!j && !quiet && g?.link) { window.open(g.link, "_blank", "noopener"); closeGame(); return; }
+    if (!j && !lastSummary) { el.innerHTML = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:var(--accent);--ch:var(--accent)"></div><div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button></div><div class="gc-lbl">Couldn't load this game. Try again in a bit.</div></div></div>`; return; }
     if (j) lastSummary = j;
     repaintGame();
     const st = lastSummary?.header?.competitions?.[0]?.status?.type?.state || g?.state;
@@ -1954,11 +1958,12 @@ button.brand, button.brand span { color: var(--accent); }
     const fmtTeam = (x, o, t) => `<div class="gc-team">${gs === "pre" ? "" : `<div class="big ${lose(x, o) ? "lose" : ""}">${esc(x.score)}</div>`}
       ${x.logo ? `<img src="${esc(x.logo)}" alt="">` : ""}<b>${x.rank ? `<i>${x.rank}</i> ` : ""}${esc(x.name || x.abbr)}</b><small>${esc(x.record)}</small>${g && t?.abbr ? starBtn(g.lg, t) : ""}</div>`;
     const sub = [g?.series || comp.series?.summary].filter(Boolean)[0] || "";
+    const venue = !g && comp.venue ? [comp.venue.fullName, placeName(comp.venue)].filter(Boolean).join(" · ") : "";
     const label = [lg.short || lg.name, g?.note].filter(Boolean).join(" · ");
     let html = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:${readable(a.color)};--ch:${readable(h.color)}"></div>
       <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span>${g ? `<button class="circ" data-share="${g.lg.id}:${g.id}" aria-label="Share">${SHAREIC}</button>` : ""}</div>
       <div class="gc-lbl">${esc(label)}</div>
-      <div class="gc-grid">${fmtTeam(a, h, ta)}<div class="gc-mid"><b>${gs === "in" ? '<i class="livedot"></i>' : ""}${esc(gs === "pre" && g ? whenLabel(g.date) : status)}</b>${sub ? `<small>${esc(sub)}</small>` : ""}</div>${fmtTeam(h, a, th)}</div>`;
+      <div class="gc-grid">${fmtTeam(a, h, ta)}<div class="gc-mid"><b>${gs === "in" ? '<i class="livedot"></i>' : ""}${esc(gs === "pre" && (g || comp.date) ? whenLabel(g?.date || comp.date) : status)}</b>${sub ? `<small>${esc(sub)}</small>` : ""}</div>${fmtTeam(h, a, th)}</div>`;
     html += scorers(j, a, h);
     if (a.lines.length && h.lines.length) {
       const n = Math.max(a.lines.length, h.lines.length, lg.sport === "Baseball" ? 9 : 0);
@@ -1979,6 +1984,7 @@ button.brand, button.brand span { color: var(--accent); }
         ${gs !== "post" ? `<button class="belbig ${state.watched[g.lg.id + ":" + g.id] ? "on" : ""}" data-watchgame="${g.lg.id}:${g.id}" aria-label="${state.watched[g.lg.id + ":" + g.id] ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL_BIG}</button>` : ""}</div>
         ${g.broadcast ? `<div class="gc-net">${gs === "in" ? "Live on" : gs === "pre" ? "On" : "Aired on"} ${esc(g.broadcast.replace(" / ", ", "))}</div>` : ""}`;
     }
+    if (!g && venue) html += `<div class="gc-net" style="margin-top:14px">${esc(venue)}</div>`;
     if (!j) return html + `<div class="skel"></div><div class="skel"></div></div>`;
     const tabs = [["stats", "Stats"], ["plays", "Play-By-Play"], ["box", "Box Score"]];
     html += `<div class="gtabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${gameTab === k}" class="${gameTab === k ? "on" : ""}" data-gtab="${k}">${l}</button>`).join("")}</div>`;
