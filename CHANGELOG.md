@@ -16,6 +16,11 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+_Nothing new. Beta matches live as of Oct 14._
+
+## Oct 14, 2026: Live (big update, 8:55 AM)
+Everything from the beta shipped to live: the new red look (Navy and Green in Settings), Apple-style game card, Upcoming tab, alerts, drag to reorder teams and leagues, suggested teams, and the rest below. Also fixed during the pre-ship check: the odds card no longer says "Not posted yet" on a live game when ESPN's game details are missing.
+
 - **Reorder your teams** (Oct 14): drag the ☰ handle in Your Teams. Your order sets how teams line up in the top strip, My Teams and Up Next (live games still go first).
 - **Suggested teams** (Oct 14): Your Teams suggests teams near the ones you follow (New York, Bay Area, Sacramento and more), then popular picks. One tap to follow.
 - **Settings back button** (Oct 14): closing My Teams or My Leagues after opening it from Settings drops you back in Settings, not on the scoreboard.

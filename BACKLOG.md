@@ -7,16 +7,7 @@ Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 > Beta 2.0 (Apple Sports look, /beta2) is parked. Its best ideas (game card, Upcoming tab, Stats/Odds, drag-to-reorder) now live in the classic beta.
 
 ## Waiting to ship (in beta now)
-- [ ] SF Pro fonts on Apple devices
-- [ ] Watch buttons open the app first on phones, website fallback (test each app: YouTube TV, Peacock, Paramount+, HBO Max)
-- [ ] "You Are Looking Live" section in By League view on the Live tab
-- [ ] Settings panel (gear icon): Open to, Layout, Appearance, Close-game alerts, My Teams, My Leagues
-- [ ] In-app game details screen (replaces Gamecast links)
-- [ ] Alert options (my teams / watched games / all games), game bell, test alert button
-- [ ] Apple-style game card in Scores colors, with Stats / Play-By-Play / Box Score tabs
-- [ ] Betting odds toggle (Settings, or Hide right on the odds card)
-- [ ] Upcoming tab (next 3 days)
-- [ ] Drag-to-reorder in My Leagues
+Nothing. Everything shipped to live on Oct 14. Still worth a real-phone check: each watch app opening (YouTube TV, Peacock, Paramount+, HBO Max) and game-day betting odds on the card.
 
 ## Idea backlog (from SportsDudes)
 1. **"This guy is going off" tracker** (Ben): flag big individual games live, like a no-hitter in progress, hat trick, triple-double, big NFL stat lines.

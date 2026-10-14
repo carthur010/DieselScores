@@ -2137,7 +2137,7 @@ button.brand, button.brand span { color: var(--accent); }
     let html = "";
     const odds = oddsCard(j, a, h, lg);
     if (odds && state.showOdds) html += odds;
-    else if (!odds && state.showOdds && (j.header?.competitions?.[0]?.status?.type?.state || "pre") === "pre")
+    else if (!odds && state.showOdds && (j.header?.competitions?.[0]?.status?.type?.state || findGame(openGameKey)?.state || "pre") === "pre")
       html += `<div class="gc-c"><h3>Betting Odds<button class="linkbtn" data-odds="off">Hide</button></h3><div class="foot" style="margin:0">Not posted yet. Lines usually show up the day of the game.</div></div>`;
     const wp = (j.winprobability || []).map(x => x.homeWinPercentage).filter(x => typeof x === "number");
     if (wp.length > 2) {
