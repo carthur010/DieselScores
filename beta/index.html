@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014152007">
+<meta name="build" content="20261014165401">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -94,6 +94,8 @@ header.top {
 .dates button.on { color: var(--fg); border-color: var(--accent); }
 .dates button:hover { color: var(--fg); }
 
+.confs { padding-top: 0; }
+.confs .chip { font-size: 13px; padding: 5px 11px; }
 .leagues { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-block: 10px; margin-inline: -16px; padding-inline: 16px; }
 .leagues::-webkit-scrollbar { display: none; }
 .chip {
@@ -722,6 +724,7 @@ button.brand, button.brand span { color: var(--accent); }
 
 <div class="wrap">
   <div class="leagues" id="tabs" role="tablist" aria-label="Filter games"></div>
+  <div class="leagues confs" id="confs" hidden aria-label="Filter by conference"></div>
   <main id="main">
     <div class="skel"></div><div class="skel"></div><div class="skel"></div>
   </main>
@@ -918,6 +921,7 @@ button.brand, button.brand span { color: var(--accent); }
   const state = {
     date: startOfDay(new Date()),
     tab: store.get("home", "live"),
+    conf: store.get("cfbConf", ""),
     view: store.get("view3", "league"),
     favs: new Set(store.get("favs", DEFAULT_FAVS)),
     favMeta: { ...MY_SETUP.favMeta, ...store.get("favMeta", {}) },   // key -> { lg, id, name, logo, color }
@@ -1004,7 +1008,9 @@ button.brand, button.brand span { color: var(--accent); }
       hits: c.hits,
       record: c.records?.find(r => r.type === "total" || r.name === "overall")?.summary || c.records?.[0]?.summary || "",
       rank: c.curatedRank?.current && c.curatedRank.current <= 25 ? c.curatedRank.current : null,
+      conf: c.team?.conferenceId || "",
     }));
+    if (ev.groups?.isConference && ev.groups.id && ev.groups.shortName) CONF_NAME[ev.groups.id] = ev.groups.shortName;
     teams.sort((a, b) => (a.homeAway === "away" ? -1 : 1) - (b.homeAway === "away" ? -1 : 1));
     // Playoff series: show each team's series wins ("2-0") instead of the regular-season record
     const sc = comp.series?.type === "playoff" ? comp.series.competitors || [] : [];
@@ -1957,7 +1963,29 @@ button.brand, button.brand span { color: var(--accent); }
     if (on) on.scrollIntoView({ inline: "center", block: "nearest" });
   }
 
+  // College football conferences, in ESPN's order (FBS first); names fill in from the feed too
+  const CONF_ORDER = ["1", "151", "4", "5", "12", "18", "15", "17", "9", "8", "37"];
+  var CONF_NAME = { 1: "ACC", 151: "American", 4: "Big 12", 5: "Big Ten", 12: "Conference USA", 18: "Independents", 15: "Mid-American", 17: "Mountain West", 9: "Pac-12", 8: "SEC", 37: "Sun Belt" };
+  const CFB_TABS = ["ncaaf", "cfb25", "p4"];
+  const inConf = (g, c) => g.teams.some(t => t.conf === c);
+  function renderConfs(games) {
+    const el = document.getElementById("confs");
+    const cfb = games.filter(g => g.lg.id === "ncaaf");
+    const show = CFB_TABS.includes(state.tab) && cfb.length > 0;
+    el.hidden = !show;
+    if (!show) return;
+    const ids = [...new Set(cfb.flatMap(g => g.teams.map(t => t.conf)).filter(c => c && CONF_NAME[c]))]
+      .sort((x, y) => (CONF_ORDER.indexOf(x) + 1 || 99) - (CONF_ORDER.indexOf(y) + 1 || 99) || CONF_NAME[x].localeCompare(CONF_NAME[y]));
+    if (state.conf && !ids.includes(state.conf)) ids.push(state.conf);
+    el.innerHTML = `<button class="chip ${!state.conf ? "on" : ""}" data-conf="">All Conferences</button>` + ids.map(c =>
+      `<button class="chip ${state.conf === c ? "on" : ""}" data-conf="${c}">${esc(CONF_NAME[c] || "Conference")}<span class="n">${cfb.filter(g => inConf(g, c)).length}</span></button>`).join("");
+    el.querySelectorAll("button").forEach(b => b.onclick = () => { state.conf = b.dataset.conf; store.set("cfbConf", state.conf); render(); });
+  }
   function poolFor(tab, games) {
+    const pool = poolForTab(tab, games);
+    return CFB_TABS.includes(tab) && state.conf ? pool.filter(g => g.lg.id !== "ncaaf" || inConf(g, state.conf)) : pool;
+  }
+  function poolForTab(tab, games) {
     switch (tab) {
       case "live": return games.filter(g => g.state === "in");
       case "all": case "mine": return games;
@@ -2059,6 +2087,7 @@ button.brand, button.brand span { color: var(--accent); }
     renderDates();
     const games = allGames();
     renderTabs(games);
+    renderConfs(games);
     const main = document.getElementById("main");
     const liveN = games.filter(g => g.state === "in").length;
     document.getElementById("livebug").hidden = liveN === 0;
