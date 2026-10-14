@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014184647">
+<meta name="build" content="20261014184840">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1010,6 +1010,12 @@ button.brand, button.brand span { color: var(--accent); }
     NBCSB: "NBCS-BOS", NBCSBOS: "NBCS-BOS", NBCC: "CHSN", NBCSC: "CHSN", NBCW: "Monumental", NBCSW: "Monumental", NBCS: "NBC",
     MNMT: "Monumental", MARQ: "Marquee", SPECSN: "Spectrum SportsNet", SNLA: "Spectrum SportsNet LA", FDSW: "FDSN West", NFLREDZONE: "NFL RedZone", REDZONE: "NFL RedZone", GOLF: "Golf Channel" };
   const netName = n => NET_ALIAS[String(n).trim().toUpperCase().replace(/\s+/g, "")] || String(n).trim();
+  // "MIL leads series 2-0" → "MIL Leads 2-0", "Series tied 1-1" → "Tied 1-1", "NYY win series 4-2" → "NYY Win 4-2"
+  function seriesText(s) {
+    if (!s) return "";
+    return String(s).replace(/\bseries\s+/i, "").replace(/^\s*series\b\s*/i, "")
+      .replace(/\b(leads|lead|tied|tie|wins|win|won)\b/gi, w => w[0].toUpperCase() + w.slice(1).toLowerCase()).trim();
+  }
   // No radio anywhere: some feeds list radio by name only
   var RADIO_NAME = /radio|^ERAD|SiriusXM|Sirius XM|Westwood One|TuneIn|Audacy|iHeart/i;
   function normalize(ev, lg) {
@@ -1072,7 +1078,7 @@ button.brand, button.brand span { color: var(--accent); }
               h: mlNum(odds.moneyline?.home?.close?.odds ?? odds.moneyline?.home?.open?.odds ?? odds.homeTeamOdds?.moneyLine) } } : null,
       seasonYear: ev.season?.year || null,
       sit: comp.situation || {}, period: st.period || 0, clock: st.displayClock || "",
-      series: comp.series?.summary || "",
+      series: seriesText(comp.series?.summary),
     };
     // Playoff game: postseason per ESPN, a series attached, or a playoff round in the game note
     g.playoff = ev.season?.type === 3 || !!comp.series ||
@@ -2616,7 +2622,7 @@ button.brand, button.brand span { color: var(--accent); }
     const lose = (x, o) => gs !== "pre" && (+x.score) < (+o.score);
     const fmtTeam = (x, o, t) => `<div class="gc-team">${gs === "pre" ? "" : `<div class="big ${lose(x, o) ? "lose" : ""}">${esc(x.score)}</div>`}
       ${x.logo ? `<img src="${esc(x.logo)}" alt="">` : ""}<b>${x.rank ? `<i>${x.rank}</i> ` : ""}${esc(x.name || x.abbr)}</b><small>${esc(x.record)}</small>${g && t?.abbr ? starBtn(g.lg, t) : ""}</div>`;
-    const sub = [g?.series || comp.series?.summary].filter(Boolean)[0] || "";
+    const sub = g?.series || seriesText(comp.series?.summary);
     const vn = j?.gameInfo?.venue || comp.venue;
     const venue = vn ? [vn.fullName, placeName(vn)].filter(Boolean).join(" · ") : "";
     const label = [lg.short || lg.name, g?.note].filter(Boolean).join(" · ");
