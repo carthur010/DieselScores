@@ -283,6 +283,7 @@ section.closed .bhead { border-bottom: 0; }
 .ms.next { grid-template-columns: auto auto; }
 .ms.next .ms-t.nx b { font-size: 14px; color: var(--muted); }
 .ms.next .ms-s { display: grid; gap: 1px; align-content: center; font-size: 12px; color: var(--fg); }
+.ms.next .ms-s em { font-style: normal; font-weight: 500; font-size: 11px; color: var(--muted); }
 .ms.next .ms-s small { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
 .ms.add { display: flex; align-items: center; padding: 0 14px; color: var(--muted); font-weight: 600; font-size: 13px; border-style: dashed; }
 .ms.add:hover { color: var(--fg); }
@@ -1091,6 +1092,13 @@ button.brand, button.brand span { color: var(--accent); }
     store.set("favMeta", state.favMeta);
   }
 
+  const REGIONS = { AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California", CO: "Colorado", CT: "Connecticut", DE: "Delaware", DC: "D.C.", FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa", KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland", MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi", MO: "Missouri", MT: "Montana", NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey", NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota", OH: "Ohio", OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina", SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont", VA: "Virginia", WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming",
+    AB: "Alberta", BC: "British Columbia", MB: "Manitoba", ON: "Ontario", QC: "Quebec", SK: "Saskatchewan", NS: "Nova Scotia" };
+  function placeName(v) {
+    const a = v?.address || {};
+    const city = a.city || "", region = a.state ? (REGIONS[a.state] || a.state) : (a.country && !/^(USA|United States)$/i.test(a.country) ? a.country : "");
+    return [city, region].filter(Boolean).join(", ");
+  }
   async function fetchNext(k) {
     const m = state.favMeta[k];
     if (!m) return;
@@ -1105,7 +1113,8 @@ button.brand, button.brand span { color: var(--accent); }
       const me = cs.find(c => String(c.team?.id || c.id) === String(m.id));
       const opp = cs.find(c => c !== me);
       return { date: ev.date, opp: opp?.team?.abbreviation || opp?.team?.shortDisplayName || "TBD",
-        oppLogo: opp?.team?.logos?.[0]?.href || opp?.team?.logo || "", at: me?.homeAway === "away" ? "@" : "vs" };
+        oppLogo: opp?.team?.logos?.[0]?.href || opp?.team?.logo || "", at: me?.homeAway === "away" ? "@" : "vs",
+        place: placeName(ev.competitions?.[0]?.venue) };
     };
     let found = null;
     try {
@@ -1119,7 +1128,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (!isToday()) return;
     const playing = new Set(allGames().flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
     const todo = [...state.favs].filter(k => !playing.has(k))
-      .filter(k => { const c = state.next[k]; return !c || Date.now() - c.t > 3 * 3600e3 || (c.date && new Date(c.date) < Date.now() - 4 * 3600e3); });
+      .filter(k => { const c = state.next[k]; return !c || (c.date && c.place === undefined) || Date.now() - c.t > 3 * 3600e3 || (c.date && new Date(c.date) < Date.now() - 4 * 3600e3); });
     if (!todo.length) return;
     await ensureMeta(todo);
     await Promise.allSettled(todo.map(fetchNext));
@@ -1397,8 +1406,8 @@ button.brand, button.brand span { color: var(--accent); }
     if (!m || !n || n.none || !n.date) return "";
     return `<div class="ms next" title="${esc(m.name)}: next game">
       <span class="ms-t">${m.logo ? `<img src="${esc(m.logo)}" alt="">` : ""}<b>${esc(m.abbr || k.split(":")[1])}</b></span>
-      <span class="ms-t nx">${n.oppLogo ? `<img src="${esc(n.oppLogo)}" alt="">` : ""}<b>${esc(n.at)} ${esc(n.opp)}</b></span>
-      <span class="ms-s"><small>Next</small>${esc(whenLabel(n.date))}</span></div>`;
+      <span class="ms-t nx">${n.oppLogo ? `<img src="${esc(n.oppLogo)}" alt="">` : ""}<b>${esc(n.opp)}</b></span>
+      <span class="ms-s"><small>Next</small>${esc(whenLabel(n.date))}${n.place ? `<em>${esc(n.place)}</em>` : ""}</span></div>`;
   }
 
   // Golf leaderboard
@@ -1620,7 +1629,7 @@ button.brand, button.brand span { color: var(--accent); }
         html += block("upnextteams", "Up Next", "", `<div class="nxt">${ups.map(({ k, m, n }) => `<div class="nxt-row">
             ${m.logo ? `<img src="${esc(m.logo)}" alt="">` : "<span></span>"}
             <span class="nm">${esc(m.name || m.abbr)}<small>${esc(LG[m.lg]?.short || LG[m.lg]?.name || "")}</small></span>
-            <span class="when">${n?.date ? `${esc(n.at)} ${esc(n.opp)}<small>${esc(whenLabel(n.date))}</small>` : n?.none ? "<small>No games scheduled</small>" : "<small>Checking…</small>"}</span>
+            <span class="when">${n?.date ? `${esc(n.opp)}<small>${esc(whenLabel(n.date))}${n.place ? " · " + esc(n.place) : ""}</small>` : n?.none ? "<small>No games scheduled</small>" : "<small>Checking…</small>"}</span>
           </div>`).join("")}</div>`);
       }
       if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}${isToday() ? " · refreshes automatically" : ""}</p>`;
