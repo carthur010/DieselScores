@@ -385,6 +385,14 @@ button.t-go { background: var(--surface); cursor: pointer; }
 .g-actions { display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap; }
 .g-actions a.ext { font-size: 13px; color: var(--muted); }
 @media (max-width: 480px) { .ldr { grid-template-columns: 1fr; } .gh-sc { font-size: 36px; gap: 10px; } .gh-t img { width: 44px; height: 44px; } }
+.set-h { margin: 14px 0 0; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.set-col { flex-direction: column; align-items: stretch; }
+.toggles { display: flex; flex-wrap: wrap; gap: 6px; }
+.toggles .chip { cursor: pointer; }
+.bellbtn { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; flex: 0 0 auto; }
+.bellbtn.on { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+.g-foot .bellbtn { margin-left: auto; }
+.g-foot .bellbtn + .linkbtn { margin-left: 0; }
 @keyframes slide { from { transform: translateY(-10px); opacity: 0; } }
 header.top { top: 0; padding-top: env(safe-area-inset-top, 0px); }
 button.brand { background: none; border: 0; padding: 0; cursor: pointer; color: var(--fg); }
@@ -578,7 +586,16 @@ button.brand span { color: var(--accent); }
     next: store.get("next", {}),         // key -> { t, date, opp, oppLogo, at, none }
     closed: new Set(),
     alerts: store.get("alerts", false),
-    teamAlerts: store.get("teamAlerts", true),
+    alertPrefs: (() => {
+      const d = {
+        team:    { start: true, half: true, close: true, ot: true, lead: false, final: true },
+        watched: { start: true, half: true, close: true, ot: true, lead: true, final: true },
+        all:     { close: !!store.get("alerts", false), ot: !!store.get("alerts", false), upset: !!store.get("alerts", false), playoff: false },
+      };
+      const saved = store.get("alertPrefs", null);
+      return saved ? { team: { ...d.team, ...saved.team }, watched: { ...d.watched, ...saved.watched }, all: { ...d.all, ...saved.all } } : d;
+    })(),
+    watched: (() => { const w = store.get("watched", {}); const now = Date.now(); Object.keys(w).forEach(k => { if (now - w[k] > 2 * 864e5) delete w[k]; }); return w; })(),
     favLeagues: store.get("favLeagues", DEFAULT_FAV_LEAGUES),
     data: {},
     loading: false,
@@ -1002,58 +1019,93 @@ button.brand span { color: var(--accent); }
   // =====================================================================
   // Alerts
   // =====================================================================
+  // Alert events: start, half (halftime/intermission), close, ot, lead (lead change), upset, playoff (playoff game starts), final
+  const ALERT_EVENTS = {
+    team:    [["start", "Game start"], ["half", "Halftime"], ["close", "Close game"], ["ot", "Overtime"], ["lead", "Lead changes"], ["final", "Final score"]],
+    watched: [["start", "Game start"], ["half", "Halftime"], ["close", "Close game"], ["ot", "Overtime"], ["lead", "Lead changes"], ["final", "Final score"]],
+    all:     [["close", "Close games"], ["ot", "Overtime"], ["upset", "Upset alerts"], ["playoff", "Playoff games starting"]],
+  };
   const seen = new Set();
-  const lastState = {};
+  const snap = {};
   let primed = false;
+  function gameKey(g) { return g.lg.id + ":" + g.id; }
+  function isWatched(g) { return !!state.watched[gameKey(g)]; }
+  function wants(g, ev) {
+    const p = state.alertPrefs;
+    return (g.fav && p.team[ev]) || (isWatched(g) && p.watched[ev]) || (!!p.all[ev]);
+  }
+  function leaderOf(g) {
+    const [a, h] = g.teams; const as = +a?.score || 0, hs = +h?.score || 0;
+    return as > hs ? a?.abbr : hs > as ? h?.abbr : null;
+  }
+  function checkAlerts() {
+    allGames().forEach(g => {
+      const prev = snap[g.id];
+      const now = { state: g.state, leader: leaderOf(g), half: /halftime|^ht$|end of (the )?(1st|2nd)( period)?$/i.test(g.status) };
+      snap[g.id] = now;
+      if (!primed || !prev) {
+        // first look: remember what's already happened so nothing old fires
+        triggers(g).forEach(tr => seen.add(g.id + ":" + tr));
+        return;
+      }
+      const events = [];
+      if (prev.state === "pre" && g.state === "in") events.push(g.playoff ? "playoff" : "start", ...(g.playoff ? ["start"] : []));
+      if (g.state === "in" && now.half && !prev.half) events.push("half");
+      if (g.state === "in" && prev.leader && now.leader && prev.leader !== now.leader) events.push("lead");
+      if (prev.state !== "post" && g.state === "post") events.push("final");
+      if (g.state === "in") triggers(g).forEach(tr => { const k = g.id + ":" + tr; if (!seen.has(k)) { seen.add(k); events.push(tr); } });
+      const fired = new Set();
+      events.forEach(ev => {
+        if (fired.has(ev) || !wants(g, ev)) return;
+        if (ev === "playoff" && fired.has("start")) return;
+        if (ev === "start" && fired.has("playoff")) return;
+        fired.add(ev);
+        fireEvent(g, ev);
+      });
+    });
+    primed = true;
+  }
   function triggers(g) {
     const out = [];
     if (g.close) out.push("close");
-    g.reasons.forEach(r => { if (/Overtime|Extra/.test(r)) out.push("ot"); if (/Upset/.test(r)) out.push("upset"); });
+    (g.reasons || []).forEach(r => { if (/Overtime|Extra/.test(r)) out.push("ot"); if (/Upset/.test(r)) out.push("upset"); });
     return out;
   }
   function favName(g) {
     const t = g.teams.find(t => isFavTeam(g.lg, t.abbr));
     return t ? (t.name || t.abbr) : "";
   }
-  function checkAlerts() {
-    allGames().forEach(g => {
-      // Your teams: game starting, close late, final
-      const prev = lastState[g.id];
-      lastState[g.id] = g.state;
-      if (g.fav && state.teamAlerts && primed && prev && prev !== g.state) {
-        if (prev === "pre" && g.state === "in") fireTeam(g, "start");
-        if (g.state === "post") fireTeam(g, "final");
+  function fireEvent(g, ev) {
+    const [a, h] = g.teams;
+    const who = g.fav ? favName(g) : `${a.abbr} at ${h.abbr}`;
+    const line = `${a.abbr} ${a.score}, ${h.abbr} ${h.score}` + (g.state === "in" ? ` · ${g.status}` : "");
+    const watch = g.watch?.[0] ? `Watch on ${g.watch[0].app}${g.watch[0].nets[0] && g.watch[0].nets[0] !== g.watch[0].app ? " (" + g.watch[0].nets[0] + ")" : ""}` : (g.lg.short || g.lg.name);
+    const k = g.id + ":" + ev;
+    switch (ev) {
+      case "start": return notify(g.fav ? `${who} game is on` : `${who} is on`, `${a.name || a.abbr} at ${h.name || h.abbr}`, watch, g.link, false, k);
+      case "playoff": return notify(`Playoffs: ${a.abbr} at ${h.abbr} is on`, g.note || g.series || `${a.name} at ${h.name}`, watch, g.link, false, k);
+      case "half": return notify(`${who}: ${/end of/i.test(g.status) ? g.status : "Halftime"}`, line, watch, g.link, false, k);
+      case "lead": return notify(`${who}: Lead change`, `${leaderOf(g)} leads · ${line}`, watch, g.link, false, k);
+      case "close": return notify(`${g.fav || isWatched(g) ? who + ": " : ""}Close game`, line, watch, g.link, false, k);
+      case "ot": return notify(`${g.fav || isWatched(g) ? who + ": " : ""}${g.lg.sport === "Baseball" ? "Extra innings" : "Overtime"}`, line, watch, g.link, false, k);
+      case "upset": return notify(g.reasons.find(r => /Upset/.test(r)) || "Upset alert", line, watch, g.link, true, k);
+      case "final": {
+        const me = g.teams.find(t => isFavTeam(g.lg, t.abbr)), opp = g.teams.find(t => t !== me);
+        const res = g.fav && me && opp ? ((+me.score) > (+opp.score) ? "W" : (+me.score) < (+opp.score) ? "L" : "T") : "";
+        return notify(`${who} final${res ? ": " + res : ""}`, `${a.abbr} ${a.score}, ${h.abbr} ${h.score}`, g.lg.short || g.lg.name, g.link, res === "L", k);
       }
-      if (g.state !== "in") return;
-      triggers(g).forEach(tr => {
-        const k = g.id + ":" + tr;
-        if (seen.has(k)) return;
-        seen.add(k);
-        if (!primed) return;
-        if (state.alerts || (g.fav && state.teamAlerts && tr === "close")) fireAlert(g, tr, k);
-      });
-    });
-    primed = true;
-  }
-  function fireTeam(g, kind) {
-    const [a, h] = g.teams, name = favName(g);
-    const line = `${a.abbr} ${a.score}, ${h.abbr} ${h.score}`;
-    if (kind === "start") {
-      const where = g.watch?.[0] ? `Watch on ${g.watch[0].app}${g.watch[0].nets[0] ? " (" + g.watch[0].nets[0] + ")" : ""}` : "";
-      notify(`${name} game is on`, `${a.name || a.abbr} at ${h.name || h.abbr}`, where, g.link, false, g.id + ":start");
-    } else {
-      const me = g.teams.find(t => isFavTeam(g.lg, t.abbr)), opp = g.teams.find(t => t !== me);
-      const res = me && opp ? ((+me.score) > (+opp.score) ? "W" : (+me.score) < (+opp.score) ? "L" : "T") : "";
-      notify(`${name} final${res ? ": " + res : ""}`, line, g.lg.short || g.lg.name, g.link, res === "L", g.id + ":final");
     }
   }
-  function fireAlert(g, tr, tagKey) {
-    const [a, h] = g.teams;
-    const name = g.fav ? favName(g) + ": " : "";
-    const title = name + (tr === "close" ? "Close game" : tr === "ot" ? (g.lg.sport === "Baseball" ? "Extra innings" : "Overtime") : (g.reasons.find(r => /Upset/.test(r)) || "Upset alert"));
-    const line = `${a.abbr} ${a.score}, ${h.abbr} ${h.score} · ${g.status}`;
-    const where = g.watch?.[0] ? `Watch on ${g.watch[0].app}` : (g.lg.short || g.lg.name);
-    notify(title, line, where, g.link, tr === "upset", tagKey);
+  function toggleWatch(key) {
+    if (state.watched[key]) delete state.watched[key]; else state.watched[key] = Date.now();
+    store.set("watched", state.watched);
+    const g = findGame(key);
+    if (state.watched[key]) {
+      askPermission();
+      toast("Alerts on for this game", g ? `${g.teams[0]?.abbr} at ${g.teams[1]?.abbr}` : "", "Change what you get in Settings", "", false);
+    }
+    render();
+    if (openGameKey === key) openGame(key, true);
   }
   function notify(title, line, where, link, hot, tagKey) {
     toast(title, line, where, link, hot);
@@ -1089,6 +1141,12 @@ button.brand span { color: var(--accent); }
     const k = favKey(lg, t.abbr), on = state.favs.has(k);
     const meta = esc(JSON.stringify({ lg: lg.id, id: t.id, name: t.full || t.name, logo: t.logo, color: t.color, abbr: t.abbr }));
     return `<button class="star ${extraClass} ${on ? "on" : ""}" data-fav="${esc(k)}" data-meta="${meta}" title="${on ? "Unfollow" : "Follow"} ${esc(t.name)}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(t.name)}">${on ? STAR : STAR_O}</button>`;
+  }
+  const BELL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>';
+  function bellBtn(g) {
+    if (g.state === "post") return "";
+    const k = g.lg.id + ":" + g.id, on = !!state.watched[k];
+    return `<button class="bellbtn ${on ? "on" : ""}" data-watchgame="${k}" aria-pressed="${on}" title="${on ? "Alerts on for this game" : "Get alerts for this game"}" aria-label="${on ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL}</button>`;
   }
   function statusClass(g) { return g.state === "in" ? "live" : g.state === "post" ? "final" : ""; }
 
@@ -1131,7 +1189,7 @@ button.brand span { color: var(--accent); }
     return `<article class="g">
       <div class="g-top"><span class="st ${statusClass(g)}">${esc(g.status)}</span><span class="wslot">${watchPill(g)}</span></div>
       ${g.teams.map((t, i) => teamRow(g, t, i)).join("")}
-      <div class="g-foot">${footText(g)}<button class="linkbtn" data-game="${g.lg.id}:${g.id}">Game details</button></div>
+      <div class="g-foot">${footText(g)}${bellBtn(g)}<button class="linkbtn" data-game="${g.lg.id}:${g.id}">Game details</button></div>
     </article>`;
   }
 
@@ -1195,7 +1253,7 @@ button.brand span { color: var(--accent); }
         <div class="f-mid"><span class="s ${g.state === "in" ? "live" : ""}">${esc(g.status)}</span>${sub ? `<span class="sub">${sub}</span>` : ""}</div>
         ${score(h, a)}${side(h)}
       </div>
-      <div class="f-act">${pill}<button class="f-link linkbtn" data-game="${g.lg.id}:${g.id}">Game details</button></div>
+      <div class="f-act">${pill}${bellBtn(g)}<button class="f-link linkbtn" data-game="${g.lg.id}:${g.id}">Game details</button></div>
     </div>`;
   }
 
@@ -1639,7 +1697,7 @@ button.brand span { color: var(--accent); }
           <span class="gh-st ${state === "in" ? "live" : ""}">${esc(state === "pre" && g ? whenLabel(g.date) : (st.shortDetail || st.detail || ""))}</span>
           ${sub ? `<span class="gh-sub">${esc(sub)}</span>` : ""}</div>
         ${team(H)}</div>`;
-      const acts = [g && state !== "post" ? watchPill(g) : "", g?.link ? `<a class="ext" href="${esc(g.link)}" target="_blank" rel="noopener">Open on ESPN</a>` : ""].filter(Boolean).join("");
+      const acts = [g && state !== "post" ? watchPill(g) : "", g && state !== "post" ? `<button class="chip ${isWatched(g) ? "on" : ""}" data-watchgame="${gameKey(g)}">${isWatched(g) ? "Alerts on" : "Alert me"}</button>` : "", g?.link ? `<a class="ext" href="${esc(g.link)}" target="_blank" rel="noopener">Open on ESPN</a>` : ""].filter(Boolean).join("");
       if (acts) html += `<div class="g-actions">${acts}</div>`;
       if (g && situation(g)) html += `<div class="g-foot" style="justify-content:center">${situation(g)}</div>`;
     }
@@ -1703,6 +1761,8 @@ button.brand span { color: var(--accent); }
     return html;
   }
   document.addEventListener("click", e => {
+    const w = e.target.closest("[data-watchgame]");
+    if (w) { e.preventDefault(); toggleWatch(w.dataset.watchgame); return; }
     const b = e.target.closest("[data-game]");
     if (!b) return;
     e.preventDefault();
@@ -1732,14 +1792,21 @@ button.brand span { color: var(--accent); }
     return `<div class="set-row"><div class="set-lbl">${esc(label)}${hint ? `<small>${esc(hint)}</small>` : ""}</div>
       <div class="seg set-seg">${options.map(([v, l]) => `<button data-set="${key}" data-val="${v}" class="${String(value) === String(v) ? "on" : ""}">${esc(l)}</button>`).join("")}</div></div>`;
   }
+  function alertGroup(group, label, hint) {
+    const prefs = state.alertPrefs[group];
+    return `<div class="set-row set-col"><div class="set-lbl">${esc(label)}<small>${esc(hint)}</small></div>
+      <div class="toggles">${ALERT_EVENTS[group].map(([ev, name]) => `<button class="chip ${prefs[ev] ? "on" : ""}" data-alert-group="${group}" data-alert-ev="${ev}" aria-pressed="${!!prefs[ev]}">${esc(name)}</button>`).join("")}</div></div>`;
+  }
   function renderSettings() {
     const teams = state.favs.size, leagues = state.favLeagues.length;
     document.getElementById("settings-body").innerHTML =
       segRow("Open to", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["mine", "My Leagues"]], "The tab you see when the app opens") +
       segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
       segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
-      segRow("My team alerts", "teamAlerts", state.teamAlerts ? "on" : "off", [["on", "On"], ["off", "Off"]], "Game starting, close late, final score") +
-      segRow("Close-game alerts", "alerts", state.alerts ? "on" : "off", [["on", "On"], ["off", "Off"]], "Any close game, overtime or upset") +
+      `<h3 class="set-h">Alerts</h3>` +
+      alertGroup("team", "My teams", "Games with teams you follow") +
+      alertGroup("watched", "Games you're watching", "Tap the bell on any game to add it") +
+      alertGroup("all", "All games", "Anything that turns interesting, any team") +
       `<div class="set-row"><div class="set-lbl">Test alerts<small>${esc(notifyStatus())}. Alerts work while Scores is open.</small></div><button class="chip" data-test-alert>Send test</button></div>` +
       `<div class="set-row"><div class="set-lbl">My Teams<small>Following ${teams} team${teams === 1 ? "" : "s"}</small></div><button class="chip" data-set-open="teams">Edit</button></div>` +
       `<div class="set-row"><div class="set-lbl">My Leagues<small>${leagues} league${leagues === 1 ? "" : "s"} in your order</small></div><button class="chip" data-set-open="leagues">Edit order</button></div>` +
@@ -1756,9 +1823,17 @@ button.brand span { color: var(--accent); }
       if (key === "home") { store.set("home", val); state.tab = val; }
       if (key === "view") { state.view = val; store.set("view3", val); }
       if (key === "theme") { store.set("theme", val); applyTheme(); }
-      if (key === "alerts") await setAlerts(val === "on");
-      if (key === "teamAlerts") { state.teamAlerts = val === "on"; store.set("teamAlerts", state.teamAlerts); if (state.teamAlerts) await askPermission(); }
+
       renderSettings(); render();
+      return;
+    }
+    const ab = e.target.closest("[data-alert-group]");
+    if (ab) {
+      const grp = ab.dataset.alertGroup, ev = ab.dataset.alertEv;
+      state.alertPrefs[grp][ev] = !state.alertPrefs[grp][ev];
+      store.set("alertPrefs", state.alertPrefs);
+      if (state.alertPrefs[grp][ev]) askPermission();
+      renderSettings();
       return;
     }
     if (e.target.closest("[data-test-alert]")) {

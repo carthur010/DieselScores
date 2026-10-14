@@ -10,7 +10,7 @@ Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 - [ ] "You Are Looking Live" section in By League view on the Live tab
 - [ ] Settings panel (gear icon): Open to, Layout, Appearance, Close-game alerts, My Teams, My Leagues
 - [ ] In-app game details screen (replaces Gamecast links)
-- [ ] My team alerts + test alert button
+- [ ] Alert options (my teams / watched games / all games), game bell, test alert button
 
 ## Idea backlog (from SportsDudes)
 1. **"This guy is going off" tracker** (Ben): flag big individual games live, like a no-hitter in progress, hat trick, triple-double, big NFL stat lines.

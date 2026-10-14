@@ -3,7 +3,10 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
-- **My team alerts** (on by default): your team's game starting (with where to watch), close late, and the final with W/L. Separate from the all-games close-game alerts.
+- **Alert options** in Settings, in three groups you can mix and match:
+  - **My teams**: game start, halftime, close game, overtime, lead changes, final score (W/L).
+  - **Games you're watching**: tap the bell on any game (card, Worth A Watch row, or game screen) to get alerts for just that game. Same options.
+  - **All games**: close games, overtime, upset alerts, playoff games starting.
 - **Test alerts button** in Settings, with notification permission status.
 - **Game details screen**: tapping a game opens an in-app screen instead of ESPN Gamecast. Score header, where to watch, line score, win probability chart, leaders, latest plays, and a box score. Refreshes every 30 seconds while the game is live. If ESPN's detail feed can't load, it falls back to opening Gamecast.
 - **Settings panel** (gear icon): Open to (Live / All / My Leagues), Layout, Appearance (Auto / Light / Dark), close-game alerts, shortcuts to edit My Teams and My Leagues, link between beta and live. The bell moved in here.
