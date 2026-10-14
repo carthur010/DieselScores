@@ -1,0 +1,13 @@
+{
+  "appId": "com.carthur.scores",
+  "appName": "Scores",
+  "webDir": "www",
+  "server": {
+    "url": "https://carthur010.github.io/DieselScores/",
+    "errorPath": "index.html"
+  },
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#0b0b0f"
+  }
+}

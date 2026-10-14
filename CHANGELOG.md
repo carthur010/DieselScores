@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 14, 2026: iOS App Shell
+- Added `app/`, a Capacitor iOS project that wraps the live site. App name Scores, bundle id com.carthur.scores, Scores icon and dark splash.
+
 ## Beta 2.0 (at /beta2): snapshot of beta, Oct 14, 1:57 PM
 A frozen copy of beta as of this moment: everything in the "In beta" list below plus the live app. Beta keeps moving; Beta 2.0 stays put until you say to refresh it. Its own saved settings (Beta 2.0 label), same shared teams and leagues.
 
