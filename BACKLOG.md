@@ -17,6 +17,10 @@ Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 ## Waiting to ship (in beta now)
 Nothing. Everything shipped to live on Oct 14. Still worth a real-phone check: each watch app opening (YouTube TV, Peacock, Paramount+, HBO Max) and game-day betting odds on the card.
 
+## Future features (Charles)
+- **Any Game That's On**: one tap for "I just want something on." Picks the best game live right now, ranked by closeness, stakes and whether it's on your services, with a Watch button.
+- **Rivalry**: tag rivalry games and boost them in Worth A Watch and alerts. Especially college (Texas vs. OU, Bama vs. Auburn, USC vs. UCLA), plus pro (Giants vs. Dodgers, Yankees vs. Red Sox). Starting list: [Bleacher Report, The 100 Most Heated Rivalries in Sports](https://bleacherreport.com/articles/1128435-the-100-most-heated-rivalries-in-sports).
+
 ## Alert ideas (not built yet)
 - Postponed / delayed / weather delay for your teams
 - Starting lineups or goalie confirmed (needs a lineup feed)
