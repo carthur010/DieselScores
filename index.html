@@ -1199,7 +1199,7 @@ header.top { top: 0; padding-top: env(safe-area-inset-top, 0px); }
       picks = (strong.length >= 2 ? strong : picks).slice(0, tab === "live" ? 4 : 6);
       if (picks.length >= 1 && (tab === "all" || picks.some(g => g.state === "in"))) {
         if (tab === "live") shown = new Set(picks.map(g => g.id));
-        html += block("worth", "Worth Watching", strong.length ? `${strong.length} worth a look` : "best of what's on",
+        html += block("worth", "Worth A Look", `${picks.length} game${picks.length > 1 ? "s" : ""}`,
           `<div class="feat">${picks.map(featured).join("")}</div>`, '<span class="star-ico" style="color:var(--live)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg></span>');
       }
     }
