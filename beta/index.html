@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014133906">
+<meta name="build" content="20261014134019">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -778,7 +778,7 @@ button.brand, button.brand span { color: var(--accent); }
     { id: "eflc",   name: "Carabao Cup", sport: "Soccer", path: "soccer/eng.league_cup", soccer: true, topFlight: "eng.1" },
     { id: "shield", name: "Community Shield", sport: "Soccer", path: "soccer/eng.charity", soccer: true },
     { id: "wfa",    name: "Women's FA Cup", short: "W FA Cup", sport: "Soccer", path: "soccer/eng.w.fa", soccer: true, topFlight: "eng.w.1" },
-    { id: "wlc",    name: "Women's League Cup", short: "W League Cup", sport: "Soccer", path: "soccer/eng.w.league_cup", soccer: true, topFlight: "eng.w.1" },
+    { id: "wlc",    name: "WSL Players Cup", short: "WSL Cup", sport: "Soccer", path: "soccer/eng.w.league_cup", soccer: true, topFlight: "eng.w.1" },
     { id: "laliga", name: "LaLiga", sport: "Soccer", path: "soccer/esp.1", soccer: true },
     { id: "seriea", name: "Serie A", sport: "Soccer", path: "soccer/ita.1", soccer: true },
     { id: "bund",   name: "Bundesliga", sport: "Soccer", path: "soccer/ger.1", soccer: true },
@@ -799,7 +799,7 @@ button.brand, button.brand span { color: var(--accent); }
   const SOCCER_HOME = ["epl", "wsl", "laliga", "seriea", "bund", "ligue1", "mls", "nwsl"];
   const P4_GROUPS = [1, 4, 5, 8];
   // Leagues that get their own tab. Everything else lives under All.
-  const MAIN_TABS = ["nfl", "ncaaf", "mlb", "nba", "nhl", "epl", "pga"]; // ESPN conference ids: ACC, Big 12, Big Ten, SEC
+  const MAIN_TABS = ["nfl", "ncaaf", "mlb", "nba", "nhl", "epl", "wsl", "pga"]; // ESPN conference ids: ACC, Big 12, Big Ten, SEC
 
   // "Close game" rules by sport. lastPeriod comes from the league's regulation length.
   const CLOSE = {
@@ -1831,7 +1831,7 @@ button.brand, button.brand span { color: var(--accent); }
       { id: "close", label: "Close Games", n: closeN, hot: closeN > 0 },
     ];
     const cfb = games.filter(g => g.lg.id === "ncaaf");
-    LEAGUES.filter(lg => (MAIN_TABS.includes(lg.id) && counts[lg.id] > 0) || state.tab === lg.id).forEach(lg => {
+    LEAGUES.filter(lg => ((MAIN_TABS.includes(lg.id) || state.favLeagues.includes(lg.id)) && counts[lg.id] > 0) || state.tab === lg.id).forEach(lg => {
       chips.push({ id: lg.id, label: lg.short || lg.name, n: counts[lg.id] || 0 });
       if (lg.id === "ncaaf") {
         chips.push({ id: "cfb25", label: "CFB Top 25", n: cfb.filter(g => g.teams.some(t => t.rank)).length });
