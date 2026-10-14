@@ -16,6 +16,9 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+- **Pregame heads-ups** (Oct 14): get a reminder 30, 15, 10, 5 or 1 minute before your teams' games (and games you've belled). Pick any mix in Settings → Alerts. If you open the app late, you get the closest one, not a pile.
+- **New alerts** (Oct 14): Every score (not hoops), Red zone (football), End of period, Comebacks (erasing a 15-pt NBA, 14-pt football, 4-run, or 2-goal deficit), and for all games: Big comebacks and No-hitter watch (6th inning on).
+- **Two more colors** (Oct 14): Purple and Orange, next to Red, Navy and Green.
 - **Compact / Expanded button** (Oct 14): next to By Time / By League, one tap flips the scoreboard size.
 - **Ranks on every team stat** (Oct 14): before a game, Team Stats shows each team's league rank next to each number (11th, 24th…). The separate League Rankings card is folded into it.
 - **Compact or Expanded scoreboard** (Oct 14): Settings → Layout & Display → Scoreboard. Compact is a two-up grid of small score cards (CBS style); Expanded is the full cards. Pinch the scores to switch (in for Compact, out for Expanded). **Always expand my teams** keeps your teams' games full size in Compact.
