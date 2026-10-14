@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014093144">
+<meta name="build" content="20261014093542">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2232,19 +2232,23 @@ button.brand, button.brand span { color: var(--accent); }
       const stats = (tA.statistics || []).map(s => {
         const o = (tH.statistics || []).find(x => x.name === s.name || x.label === s.label);
         const av = num(s.displayValue), hv = num(o?.displayValue);
-        return o && !isNaN(av) && !isNaN(hv) && !/-/.test(String(s.displayValue).slice(1)) ? { label: s.label || s.name, a: s.displayValue, h: o.displayValue, av, hv } : null;
-      }).filter(Boolean).slice(0, 9);
+        return o && !isNaN(av) && !isNaN(hv) && !/-/.test(String(s.displayValue).slice(1)) ? { name: s.name, label: s.label || s.name, a: s.displayValue, h: o.displayValue, av, hv } : null;
+      }).filter(Boolean).slice(0, 12);
       if (stats.length) {
         const ca = readable(a.color), ch = readable(h.color);
-        html += `<div class="gc-c"><h3>Team Stats</h3><div class="sbar" style="margin-top:0;font-weight:700"><span style="text-align:left;color:var(--fg)">${esc(a.abbr)}</span><span></span><span style="color:var(--fg)">${esc(h.abbr)}</span></div>${stats.map(s => {
+        // Before a game these are season numbers, so show each team's league rank next to them
+        const pre = (j.header?.competitions?.[0]?.status?.type?.state || "pre") === "pre";
+        const rk = pre ? teamRanks(lg) : null;
+        const rankOf = (x, s) => rk?.[String(x.id)]?.[s.name];
+        const tag = r => r ? ` <small>(${ord(r)})</small>` : "";
+        html += `<div class="gc-c"><h3 class="h3-teams">${logoImg(a)}<span>${pre ? "Team Stats · Season" : "Team Stats"}</span>${logoImg(h)}</h3>${stats.map(s => {
           const tot = Math.abs(s.av) + Math.abs(s.hv) || 1, l = Math.max(.04, Math.abs(s.av) / tot), r = Math.max(.04, Math.abs(s.hv) / tot);
-          return `<div class="sbar"><b>${esc(s.a)}</b><span>${esc(s.label)}</span><b>${esc(s.h)}</b></div>
+          return `<div class="sbar"><b>${esc(s.a)}${tag(rankOf(a, s))}</b><span>${esc(s.label)}</span><b>${rankOf(h, s) ? `<small>(${ord(rankOf(h, s))})</small> ` : ""}${esc(s.h)}</b></div>
             <div class="bar-track" style="--l:${l}fr;--r:${r}fr"><i style="background:${ca}"></i><i style="background:${ch}"></i></div>`;
         }).join("")}</div>`;
       }
     }
     html += leadersCard(j, a, h);
-    html += rankingsCard(j, a, h, lg);
     html += lastFiveCard(j, a, h);
     html += standingsCard(j, a, h, lg);
     if (!state.showOdds) html += `<div class="odds-off"><button class="linkbtn" data-odds="on">Show betting odds</button></div>`;
@@ -2271,6 +2275,42 @@ button.brand, button.brand span { color: var(--accent); }
     };
     const rows = cats.slice(0, 6).map(c => `<div class="ld-row">${person(pick(la, c.name))}<span class="ld-cat">${esc(c.label)}</span>${person(pick(lh, c.name))}</div>`).join("");
     return `<div class="gc-c"><h3>${pre ? "Season Leaders" : "Game Leaders"}</h3><div class="ld-head"><span>${esc(a.abbr)}</span><span>${esc(h.abbr)}</span></div>${rows}</div>`;
+  }
+  // League ranks for every team stat (ESPN's league-wide team stats table). ESPN's own rank when it has one,
+  // otherwise ranked here from every team's value. Lower is better for "against", turnovers, fouls and penalties.
+  const rankCache = {};
+  function teamRanks(lg) {
+    const c = rankCache[lg.id];
+    if (c && Date.now() - c.at < 60 * 60e3) return c.ranks;
+    if (c?.pending) return null;
+    rankCache[lg.id] = { pending: true, at: Date.now(), ranks: c?.ranks || null };
+    (async () => {
+      try {
+        const r = await fetch("https://site.web.api.espn.com/apis/common/v3/sports/" + lg.path + "/statistics/byteam?region=us&lang=en&contentorigin=espn&limit=400" + (lg.extra ? lg.extra.replace(/&?groups=\d+/, "") : ""));
+        const jj = await r.json();
+        const heads = jj.categories || [];
+        const vals = {};   // name -> [{id, v, r}]
+        (jj.teams || []).forEach(tm => (tm.categories || []).forEach((cat, i) => {
+          if (/^Opponent/i.test(cat.displayName || "")) return;
+          const names = heads[i]?.names || [];
+          names.forEach((n, k) => {
+            const v = cat.values?.[k]; if (v == null || isNaN(v)) return;
+            (vals[n] = vals[n] || []).push({ id: String(tm.team?.id), v: +v, r: parseInt(cat.ranks?.[k]) || 0 });
+          });
+        }));
+        const ranks = {};
+        Object.entries(vals).forEach(([n, list]) => {
+          const low = /against|allowed|turnover|giveaway|foul|penalt|lost|losses|interception|sacked/i.test(n) && !/pct|percent/i.test(n);
+          list.forEach(x => {
+            const r = x.r || 1 + list.filter(y => low ? y.v < x.v - 1e-9 : y.v > x.v + 1e-9).length;
+            (ranks[x.id] = ranks[x.id] || {})[n] = r;
+          });
+        });
+        rankCache[lg.id] = { at: Date.now(), ranks };
+      } catch { rankCache[lg.id] = { at: Date.now(), ranks: {} }; }
+      if (openGameKey && openGameKey.startsWith(lg.id + ":")) repaintGame();
+    })();
+    return c?.ranks || null;
   }
   function lastFiveCard(j, a, h) {
     const [fa, fh] = teamPair(j, a, h)(j.lastFiveGames || []);
