@@ -2,7 +2,10 @@
 
 Newest first. Beta changes move to Live when shipped.
 
-## Beta 2.0 (at /beta2, separate app) · PARKED Oct 14
+## Beta 2.0 (at /beta2): snapshot of beta, Oct 14, 1:57 PM
+A frozen copy of beta as of this moment: everything in the "In beta" list below plus the live app. Beta keeps moving; Beta 2.0 stays put until you say to refresh it. Its own saved settings (Beta 2.0 label), same shared teams and leagues.
+
+## Old Apple Sports redesign (moved to /beta2-apple) · PARKED Oct 14
 Link stays up; no further work. All development continues on the classic beta.
 
 - **Apple Sports-style redesign**: dark gradient, big title, menu pill (Home / My Teams / any league), one glass panel with **Yesterday / Today / Upcoming**.

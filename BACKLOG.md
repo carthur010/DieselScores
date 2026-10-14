@@ -4,7 +4,7 @@ Live: https://carthur010.github.io/DieselScores/
 Beta: https://carthur010.github.io/DieselScores/beta/
 Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 
-> Beta 2.0 (Apple Sports look, /beta2) is parked. Its best ideas (game card, Upcoming tab, Stats/Odds, drag-to-reorder) now live in the classic beta.
+> Beta 2.0 (/beta2) is now a snapshot of beta from Oct 14, 1:57 PM. The old Apple Sports redesign moved to /beta2-apple and stays parked. Its best ideas (game card, Upcoming tab, Stats/Odds, drag-to-reorder) now live in the classic beta.
 
 ## In beta: TV Settings (was high priority)
 - [ ] Each user picks the services they have (YouTube TV, Hulu + Live TV, Sling, Fubo, DirecTV Stream, cable login, Peacock, Paramount+, Max, ESPN+, Prime Video, Apple TV, League Pass, MLB.TV, NHL app); watch buttons only show those

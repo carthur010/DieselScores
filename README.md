@@ -4,7 +4,8 @@ Live scores, what to flip to, and where to watch.
 
 - Live: https://carthur010.github.io/DieselScores/
 - Beta: https://carthur010.github.io/DieselScores/beta/
-- Beta 2.0: https://carthur010.github.io/DieselScores/beta2/
+- Beta 2.0 (snapshot of beta, Oct 14 1:57 PM): https://carthur010.github.io/DieselScores/beta2/
+- Old Apple Sports redesign (archived): https://carthur010.github.io/DieselScores/beta2-apple/
 
 ## How releases work
 1. New changes go to `beta/` only.
