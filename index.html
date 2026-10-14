@@ -479,7 +479,7 @@ button.brand span { color: var(--accent); }
     favs: new Set(store.get("favs", DEFAULT_FAVS)),
     favMeta: store.get("favMeta", {}),   // key -> { lg, id, name, logo, color }
     next: store.get("next", {}),         // key -> { t, date, opp, oppLogo, at, none }
-    closed: new Set(store.get("closed", [])),
+    closed: new Set(),
     alerts: store.get("alerts", false),
     data: {},
     loading: false,
@@ -805,18 +805,27 @@ button.brand span { color: var(--accent); }
   // Team index, follow list, next game
   // =====================================================================
   const teamCache = {};
+  // Team lists come from the standings feed (ESPN's /teams feed blocks other websites)
   async function loadTeams(lgId) {
     if (teamCache[lgId]) return teamCache[lgId];
-    const cached = store.get("teams:" + lgId, null);
+    const cached = store.get("teams2:" + lgId, null);
     if (cached && Date.now() - cached.t < 7 * 864e5) return (teamCache[lgId] = cached.list);
     const lg = LG[lgId];
     try {
-      const j = await (await fetch(API + lg.path + "/teams?limit=1000")).json();
-      const list = (j.sports?.[0]?.leagues?.[0]?.teams || []).map(x => x.team).filter(Boolean).map(t => ({
-        lg: lgId, id: t.id, abbr: t.abbreviation || "", name: t.displayName || t.name || "", short: t.shortDisplayName || "",
-        logo: t.logos?.[0]?.href || "", color: hexColor(t.color),
-      })).filter(t => t.abbr && t.name);
-      store.set("teams:" + lgId, { t: Date.now(), list });
+      const j = await (await fetch("https://site.api.espn.com/apis/v2/sports/" + lg.path + "/standings")).json();
+      const list = [], seen = new Set();
+      const walk = n => {
+        (n.standings?.entries || []).forEach(e => {
+          const t = e.team;
+          if (!t || seen.has(t.id)) return;
+          seen.add(t.id);
+          list.push({ lg: lgId, id: t.id, abbr: t.abbreviation || "", name: t.displayName || t.name || "", short: t.shortDisplayName || "",
+            logo: t.logos?.[0]?.href || "", color: hexColor(t.color) });
+        });
+        (n.children || []).forEach(walk);
+      };
+      walk(j);
+      if (list.length && !lg.college) store.set("teams2:" + lgId, { t: Date.now(), list });
       return (teamCache[lgId] = list);
     } catch { return []; }
   }
@@ -1245,38 +1254,47 @@ button.brand span { color: var(--accent); }
   // =====================================================================
   // Team search sheet
   // =====================================================================
-  let index = null, results = [];
-  async function openSheet() {
+  let results = [], searchTimer = null, searchSeq = 0;
+  const LG_BY_SLUG = Object.fromEntries(TEAM_LEAGUES.map(l => [l.path, l.id]));
+  function openSheet() {
     document.getElementById("sheet").hidden = false;
-    const q = document.getElementById("q");
-    setTimeout(() => q.focus(), 50);
+    setTimeout(() => document.getElementById("q").focus(), 50);
     renderSheet();
     ensureMeta([...state.favs]).then(renderSheet);
-    if (!index) {
-      document.getElementById("results").innerHTML = '<p class="hint">Loading teams…</p>';
-      const lists = await Promise.all(SEARCHABLE.map(loadTeams));
-      index = lists.flat();
-      search();
-    }
   }
   function closeSheet() { document.getElementById("sheet").hidden = true; }
   function resRow(t, i, list) {
     const k = keyFor(t), on = state.favs.has(k);
-    return `<div class="res-row"><i class="stripe" style="--tc:${esc(t.color || "")}"></i>${t.logo ? `<img src="${esc(t.logo)}" alt="">` : "<span></span>"}
+    return `<div class="res-row">${t.logo ? `<img src="${esc(t.logo)}" alt="">` : "<span></span>"}
       <span class="nm">${esc(t.name)}<small>${esc(LG[t.lg].short || LG[t.lg].name)}</small></span>
       <button class="follow ${on ? "on" : ""}" data-list="${list}" data-i="${i}">${on ? "Following" : "Follow"}</button></div>`;
   }
-  function search() {
+  function drawResults() {
     const el = document.getElementById("results");
-    const q = document.getElementById("q").value.trim().toLowerCase();
-    if (!index) return;
-    if (!q) { results = []; el.innerHTML = '<p class="hint">Type a team, city or school. Covers the NFL, MLB, NBA, WNBA, NHL, college football and hoops, and the major soccer leagues.</p>'; return; }
-    results = index.map(t => {
-      const hay = [t.name, t.short, t.abbr].join(" ").toLowerCase();
-      const s = t.abbr.toLowerCase() === q ? 0 : t.name.toLowerCase().startsWith(q) || t.short.toLowerCase().startsWith(q) ? 1 : hay.split(/\s+/).some(w => w.startsWith(q)) ? 2 : hay.includes(q) ? 3 : 9;
-      return { t, s };
-    }).filter(x => x.s < 9).sort((a, b) => a.s - b.s || (LG[a.t.lg].college ? 1 : 0) - (LG[b.t.lg].college ? 1 : 0)).slice(0, 25).map(x => x.t);
+    const q = document.getElementById("q").value.trim();
+    if (!q) { el.innerHTML = '<p class="hint">Type a team, city or school. Covers the NFL, MLB, NBA, WNBA, NHL, college football and hoops, and the major soccer leagues.</p>'; return; }
     el.innerHTML = results.length ? results.map((t, i) => resRow(t, i, "r")).join("") : '<p class="hint">No teams match that.</p>';
+  }
+  function search() {
+    clearTimeout(searchTimer);
+    const q = document.getElementById("q").value.trim();
+    if (!q) { results = []; drawResults(); return; }
+    searchTimer = setTimeout(async () => {
+      const seq = ++searchSeq;
+      document.getElementById("results").innerHTML = '<p class="hint">Searching…</p>';
+      try {
+        const j = await (await fetch("https://site.api.espn.com/apis/common/v3/search?type=team&limit=40&query=" + encodeURIComponent(q))).json();
+        if (seq !== searchSeq) return;
+        const seen = new Set();
+        results = (j.items || []).map(i => {
+          const lgId = LG_BY_SLUG[(i.sport || "") + "/" + (i.league || i.defaultLeagueSlug || "")];
+          if (!lgId || !i.abbreviation) return null;
+          return { lg: lgId, id: i.id, abbr: i.abbreviation, name: i.displayName || i.name || "", short: i.name || "",
+            logo: i.logos?.[0]?.href || "", color: hexColor(i.color) };
+        }).filter(t => t && !seen.has(t.lg + t.id) && seen.add(t.lg + t.id)).slice(0, 25);
+      } catch { results = []; }
+      drawResults();
+    }, 250);
   }
   let following = [];
   function renderSheet() {
@@ -1286,7 +1304,7 @@ button.brand span { color: var(--accent); }
         : { lg: DEFAULT_META[k] || k.split(":")[0], id: null, abbr: k.split(":")[1], name: k.split(":")[1], short: "", logo: "", color: "" };
     }).filter(t => LG[t.lg]);
     document.getElementById("following").innerHTML = following.length ? following.map((t, i) => resRow(t, i, "f")).join("") : '<p class="hint">Not following anyone yet.</p>';
-    if (index) search();
+    drawResults();
   }
 
   // =====================================================================
@@ -1316,7 +1334,6 @@ button.brand span { color: var(--accent); }
     if (tog) {
       const id = tog.dataset.tog;
       state.closed.has(id) ? state.closed.delete(id) : state.closed.add(id);
-      store.set("closed", [...state.closed]);
       render();
     }
   });
