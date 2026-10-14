@@ -412,8 +412,8 @@ button.t-go { background: var(--surface); cursor: pointer; }
 .tbl small { color: var(--muted); font-weight: 500; font-size: 11px; }
 .odds-off { text-align: center; margin: 4px 0 12px; }
 .wp svg { width: 100%; height: 84px; display: block; }
-.bar { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; font-size: 13px; margin-top: 10px; }
-.bar span { text-align: center; color: var(--muted); }
+.sbar { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; font-size: 13px; margin-top: 10px; }
+.sbar span { text-align: center; color: var(--muted); }
 .bar-track { display: grid; grid-template-columns: var(--l) var(--r); gap: 4px; margin-top: 5px; }
 .bar-track i { height: 6px; border-radius: 3px; }
 .ldr { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -465,9 +465,15 @@ button.brand span { color: var(--accent); }
 .bhead h2 { min-width: 0; white-space: normal !important; line-height: 1.1; flex: 0 1 auto; }
 .bhead .meta { flex: 1 1 0; }
 @media (max-width: 480px) {
-  .bar { gap: 6px 4px; }
+  .bar { gap: 6px 2px; flex-wrap: wrap; }
   .brand { font-size: 28px; }
-  .bar .iconbtn { width: 34px; }
+  .bar .iconbtn { width: 32px; }
+  .bar .livecount { margin-left: 6px; }
+  .bar .spacer { flex: 1 1 0; min-width: 0; }
+}
+@media (max-width: 420px) {
+  .lv-w { display: none; }
+  .bar .iconbtn { width: 30px; }
   .lb td, .lb th { padding-inline: 7px; }
   .lb .pos { width: 32px; }
   .sheet { place-items: end center; padding: 0; }
@@ -527,7 +533,7 @@ button.brand, button.brand span { color: var(--accent); }
   <div class="wrap">
     <div class="bar">
       <button class="brand" id="brandbtn" aria-label="Home">Score<span>s</span><em class="betatag">Beta</em></button>
-      <span class="livecount" id="livebug" hidden><span class="dot"></span><span id="liven">0</span> live</span>
+      <span class="livecount" id="livebug" hidden><span class="dot"></span><span id="liven">0</span><span class="lv-w"> live</span></span>
       <div class="spacer"></div>
       <div class="seg" role="group" aria-label="Layout">
         <button data-view="time">By Time</button>
@@ -2028,9 +2034,9 @@ button.brand, button.brand span { color: var(--accent); }
       }).filter(Boolean).slice(0, 9);
       if (stats.length) {
         const ca = readable(a.color), ch = readable(h.color);
-        html += `<div class="gc-c"><h3>Team Stats</h3><div class="bar" style="margin-top:0;font-weight:700"><span style="text-align:left;color:var(--fg)">${esc(a.abbr)}</span><span></span><span style="color:var(--fg)">${esc(h.abbr)}</span></div>${stats.map(s => {
+        html += `<div class="gc-c"><h3>Team Stats</h3><div class="sbar" style="margin-top:0;font-weight:700"><span style="text-align:left;color:var(--fg)">${esc(a.abbr)}</span><span></span><span style="color:var(--fg)">${esc(h.abbr)}</span></div>${stats.map(s => {
           const tot = Math.abs(s.av) + Math.abs(s.hv) || 1, l = Math.max(.04, Math.abs(s.av) / tot), r = Math.max(.04, Math.abs(s.hv) / tot);
-          return `<div class="bar"><b>${esc(s.a)}</b><span>${esc(s.label)}</span><b>${esc(s.h)}</b></div>
+          return `<div class="sbar"><b>${esc(s.a)}</b><span>${esc(s.label)}</span><b>${esc(s.h)}</b></div>
             <div class="bar-track" style="--l:${l}fr;--r:${r}fr"><i style="background:${ca}"></i><i style="background:${ch}"></i></div>`;
         }).join("")}</div>`;
       }
