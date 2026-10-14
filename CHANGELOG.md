@@ -16,6 +16,10 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+- **Game card, Apple Sports style additions** (Oct 14):
+  - **Team Stats in a set order** for each sport. Soccer: Possession %, Shots, Shots on Goal, Corner Kicks, Total Passes, Passing Accuracy %, Offsides, Fouls, Yellow Cards, Red Cards. Percentages show as 90, not 0.9.
+  - **Starting Lineup** (soccer): toggle each team's formation (4-3-3, 4-2-3-1), players on a pitch with photos and numbers, attackers on top, then the Bench with who came on.
+  - **Tournament tab** (Standings for other sports): Previous Matches with a team toggle, and the league Table (GP, W, D, L, GD, PTS for soccer) with both teams highlighted and your teams starred.
 - **Series records in the playoffs** (Oct 14): playoff games show each team's series record ("2-0 Series") instead of the regular-season record, on cards, Compact, the top strip and the game card. The season record is still in the tooltip and the Standings Overview.
 - **Simple view detail** (Oct 14): the line under the start time now shows where to watch (YouTube TV, Paramount+) before a game, "Live" during it, and the playoff game ("Game 3") after.
 - **Scoreboard button shows the view you're on** (Oct 14): it now reads Simple, Compact or Expanded for the current view; tap to step to the next.
