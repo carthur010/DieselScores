@@ -16,6 +16,7 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+- **Card layout swap** (Oct 14): bell and Gamecast moved to the top right of each game card; the where-to-watch button moved down next to the odds line.
 - **By Time matches By League** (Oct 14): By Time now uses the same game cards (abbreviations, records, odds line, bell, Gamecast), in start-time order with a small league tag on each card.
 - **Title case counts** (Oct 14): "2 Games", "3 Live · 8 Total".
 

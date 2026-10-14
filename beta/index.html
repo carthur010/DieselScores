@@ -215,6 +215,8 @@ section.closed .bhead { border-bottom: 0; }
 
 /* Where to watch */
 .wslot { margin-left: auto; min-width: 0; display: flex; justify-content: flex-end; }
+.gslot { margin-left: auto; display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.g-foot .txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .watch {
   display: inline-flex; align-items: center; gap: 5px; max-width: 100%; min-width: 0;
   font-size: 12px; font-weight: 500; padding: 3px 9px; border-radius: 99px;
@@ -1351,9 +1353,9 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function card(g, showLg) {
     return `<article class="g">
-      <div class="g-top">${showLg === true ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span><span class="wslot">${watchPill(g)}</span></div>
+      <div class="g-top">${showLg === true ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span><span class="gslot">${bellBtn(g)}<button class="gc-pill" data-game="${g.lg.id}:${g.id}">Gamecast</button></span></div>
       ${g.teams.map((t, i) => teamRow(g, t, i)).join("")}
-      <div class="g-foot">${footText(g)}${bellBtn(g)}<button class="gc-pill" data-game="${g.lg.id}:${g.id}">Gamecast</button></div>
+      <div class="g-foot">${footText(g)}<span class="wslot">${watchPill(g)}</span></div>
     </article>`;
   }
 
