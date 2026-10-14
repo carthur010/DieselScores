@@ -16,6 +16,7 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+- **Fix** (Oct 14): tapping a watch button (Paramount+ and others) on iPhone no longer pops up "Safari cannot open the page because the address is invalid." Buttons now use the service's normal web link, which iPhone opens in the app when it's installed and in the browser when it isn't.
 - **TV Settings** (Oct 14): Settings → TV & Streaming. Pick your home market (New York, Bay Area, Sacramento, Los Angeles, Boston, Chicago, Philadelphia, Other) and the services you have: live TV (YouTube TV, Hulu + Live TV, Sling, Fubo, DirecTV Stream, Cable / Satellite), streaming (ESPN+, Peacock, Paramount+, HBO Max, Prime Video, Apple TV, Netflix, Fox One, DAZN, Victory+, YouTube), league packages (NBA League Pass, MLB.TV, NHL on ESPN+, NFL Sunday Ticket) and Gotham Sports. Watch buttons only show your services; in-market regional games skip blacked-out league packages; anything else says "Not on your services." Known gaps built in (Fubo has no TNT/TBS, Sling has no CBS).
 - **Simple view** (Oct 14): a third scoreboard size beside Compact and Expanded. Just a list: time, both teams with logos and full names, score, bell. Tap a row to open the game. The scoreboard button and pinch now step through Expanded → Compact → Simple.
 

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014102935">
+<meta name="build" content="20261014103314">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2173,21 +2173,9 @@ button.brand, button.brand span { color: var(--accent); }
   };
   folEl.addEventListener("pointerup", endTDrag);
   folEl.addEventListener("pointercancel", endTDrag);
-  // ---- Watch buttons: on phones try the app first, fall back to the website
-  const IS_MOBILE = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  document.addEventListener("click", e => {
-    const a = e.target.closest("a[data-app]");
-    if (!a || !IS_MOBILE) return;
-    e.preventDefault();
-    const web = a.href, appUrl = a.dataset.app;
-    let left = false;
-    const gone = () => { left = true; };
-    document.addEventListener("visibilitychange", () => { if (document.hidden) gone(); }, { once: true });
-    window.addEventListener("pagehide", gone, { once: true });
-    window.addEventListener("blur", gone, { once: true });
-    setTimeout(() => { if (!left && !document.hidden) window.location.href = web; }, 1400);
-    window.location.href = appUrl;
-  });
+  // ---- Watch buttons: plain https links. On iPhone and Android these are "universal links": if the app is
+  // installed the phone opens it, otherwise the website loads. Firing a custom app scheme (paramountplus://)
+  // makes Safari show "cannot open the page because the address is invalid" when the app isn't there.
   // ---- League order editor (drag the handle to reorder)
   const HANDLE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 8h14M5 12h14M5 16h14"/></svg>';
   function renderLeagueSheet() {
