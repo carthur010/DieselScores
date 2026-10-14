@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores</title>
+<meta name="build" content="20261014092018">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores">
@@ -165,6 +166,7 @@ section.closed .bhead { border-bottom: 0; }
 .g { padding: 14px 16px 12px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); display: grid; gap: 6px; min-width: 0; }
 .g-top { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
 .g-top .st { color: var(--muted); }
+.lgtag { font-size: 11px; font-weight: 800; letter-spacing: .04em; color: var(--accent); background: var(--accent-soft); padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
 .g-top .st.live { color: var(--live); }
 .g-top .st.final { color: var(--fg); }
 .g-top .net { margin-left: auto; color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; }
@@ -214,6 +216,9 @@ section.closed .bhead { border-bottom: 0; }
 
 /* Where to watch */
 .wslot { margin-left: auto; min-width: 0; display: flex; justify-content: flex-end; }
+.tap { cursor: pointer; }
+.g.tap:hover, .f.tap:hover { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+.g-foot .txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .watch {
   display: inline-flex; align-items: center; gap: 5px; max-width: 100%; min-width: 0;
   font-size: 12px; font-weight: 500; padding: 3px 9px; border-radius: 99px;
@@ -293,6 +298,21 @@ section.closed .bhead { border-bottom: 0; }
 .ms.next .ms-s { display: grid; gap: 1px; align-content: center; font-size: 12px; color: var(--fg); }
 .ms.next .ms-s em { font-style: normal; font-weight: 500; font-size: 11px; color: var(--muted); }
 .ms.next .ms-s small { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.ms.mc { display: grid; grid-template-columns: none; gap: 5px; min-width: 190px; padding: 10px 12px; text-align: left; align-content: start; }
+.mc-top { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.mc-top .st { color: var(--muted); }
+.mc-top .st.live { color: var(--live); }
+.mc-top .st.final { color: var(--fg); }
+.mc-top small { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--gold, var(--accent)); }
+.mc-row { display: flex; align-items: center; gap: 7px; }
+.mc-row img, .mc-row > i { width: 20px; height: 20px; object-fit: contain; flex: 0 0 auto; }
+.mc-row b { font-family: var(--display); font-stretch: condensed; font-size: 18px; font-weight: 700; }
+.mc-row small { font-size: 12px; color: var(--muted); }
+.mc-row em { font-style: normal; font-family: var(--display); font-stretch: condensed; font-size: 19px; font-weight: 700; margin-left: auto; padding-left: 12px; }
+.mc-row.lose b, .mc-row.lose em { color: var(--muted); }
+.mc-fav { color: var(--star); font-size: 11px; }
+.mc-foot { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+.ms.mc.live .mc-foot { color: var(--fg); }
 .ms.add { display: flex; align-items: center; padding: 0 14px; color: var(--muted); font-weight: 600; font-size: 13px; border-style: dashed; }
 .ms.add:hover { color: var(--fg); }
 .lb-wrap { overflow-x: auto; }
@@ -1327,6 +1347,8 @@ button.brand, button.brand span { color: var(--accent); }
     if (g.lg.sport === "Football" && s.downDistanceText) {
       return `<span class="txt">${s.isRedZone ? '<b style="color:var(--live)">Red zone</b> · ' : ""}${esc(s.downDistanceText)}</span>`;
     }
+    // Basketball, hockey, soccer: the latest play when ESPN sends one
+    if (s.lastPlay?.text) return `<span class="txt" title="${esc(s.lastPlay.text)}">${esc(s.lastPlay.text)}</span>`;
     return "";
   }
   function footText(g) {
@@ -1348,11 +1370,11 @@ button.brand, button.brand span { color: var(--accent); }
       ${g.state === "pre" ? "" : `<span class="sc">${esc(t.score)}</span>`}
     </div>`;
   }
-  function card(g) {
-    return `<article class="g">
-      <div class="g-top"><span class="st ${statusClass(g)}">${esc(g.status)}</span><span class="wslot">${watchPill(g)}</span></div>
+  function card(g, showLg) {
+    return `<article class="g tap" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(g.teams.map(x => x.name).join(" vs "))}: game details">
+      <div class="g-top">${showLg === true ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span><span class="wslot">${watchPill(g)}</span></div>
       ${g.teams.map((t, i) => teamRow(g, t, i)).join("")}
-      <div class="g-foot">${footText(g)}${bellBtn(g)}<button class="gc-pill" data-game="${g.lg.id}:${g.id}">Gamecast</button></div>
+      <div class="g-foot">${footText(g)}${bellBtn(g)}</div>
     </article>`;
   }
 
@@ -1377,19 +1399,12 @@ button.brand, button.brand span { color: var(--accent); }
       <button class="t-go" data-game="${g.lg.id}:${g.id}" aria-label="Game details">${ARROW}</button>
     </div>`;
   }
+  // By Time: the same cards as By League, in start-time order with a league tag
   function timeline(list) {
     const sorted = list.slice().sort((x, y) => (new Date(x.date) - new Date(y.date)) || x.lg.id.localeCompare(y.lg.id));
-    const groups = [];
-    sorted.forEach(g => {
-      const last = groups[groups.length - 1];
-      if (last && last.lg.id === g.lg.id) last.games.push(g); else groups.push({ lg: g.lg, games: [g] });
-    });
-    return groups.map(gr => `<div class="tl-group">
-      <div class="tl-head"><span class="tl-badge">${esc(gr.lg.short || gr.lg.name)}</span>
-        <span class="crumb">${esc(gr.lg.sport)} <span>› ${esc(gr.lg.name)}${gr.games[0].note && gr.games.every(x => x.note === gr.games[0].note) ? " · " + esc(gr.games[0].note) : ""}</span></span></div>
-      ${gr.games.map(tlRow).join("")}
-    </div>`).join("");
+    return `<div class="grid">${sorted.map(g => card(g, true)).join("")}</div>`;
   }
+
 
   // Worth Watching: Apple Sports-style rows
   function featured(g) {
@@ -1409,36 +1424,42 @@ button.brand, button.brand span { color: var(--accent); }
     const pill = g.state !== "post" && g.watch?.length ? `<span>${watchPill(g)}</span>` : "";
     const lgLabel = (g.lg.short || g.lg.name) + (g.note ? " · " + g.note : "");
     const why = g.reasons || [];
-    return `<div class="f">
+    return `<div class="f tap" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0">
       <div class="f-lg">${esc(lgLabel)}</div>${why.length ? `<div class="f-why">${why.map(r => `<span class="${/Upset/.test(r) ? "why hot" : /Playoff/.test(r) ? "why gold" : "why"}">${esc(r)}</span>`).join("")}</div>` : ""}
       <div class="f-grid">
         ${side(a)}${score(a, h)}
         <div class="f-mid"><span class="s ${g.state === "in" ? "live" : ""}">${esc(g.status)}</span>${sub ? `<span class="sub">${sub}</span>` : ""}</div>
         ${score(h, a)}${side(h)}
       </div>
-      <div class="f-act">${pill}${bellBtn(g)}<button class="gc-pill" data-game="${g.lg.id}:${g.id}">Gamecast</button></div>
+      <div class="f-act">${pill}${bellBtn(g)}</div>
     </div>`;
   }
 
   // Your teams strip
+  // Top strip: mini versions of the game cards
+  function miniRow(logo, abbr, rec, score, lose, fav) {
+    return `<span class="mc-row ${lose ? "lose" : ""}">${logo ? `<img src="${esc(logo)}" alt="">` : "<i></i>"}<b>${esc(abbr)}</b>${rec ? `<small>${esc(rec)}</small>` : ""}${fav ? '<span class="mc-fav" aria-label="Your team">★</span>' : ""}${score != null ? `<em>${esc(score)}</em>` : ""}</span>`;
+  }
   function stripChip(g) {
     const [a, h] = g.teams;
     if (!a || !h) return "";
-    const side = (t, o) => {
-      const lose = g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
-      return `<span class="ms-t ${lose ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="">` : ""}<b>${esc(t.abbr)}</b>${g.state === "pre" ? "" : `<em>${esc(t.score)}</em>`}</span>`;
-    };
-    return `<button class="ms ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" title="${esc(a.full + " at " + h.full)}">
-      ${side(a, h)}${side(h, a)}<span class="ms-s">${esc(g.status)}</span></button>`;
+    const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
+    const row = (t, o) => miniRow(t.logo, t.abbr, g.state === "pre" ? t.record : "", g.state === "pre" ? null : t.score, lose(t, o), isFavTeam(g.lg, t.abbr));
+    const sit = g.state === "in" ? (g.sit?.downDistanceText || (g.lg.sport === "Baseball" && g.sit?.outs != null ? `${g.sit.outs} out${g.sit.outs === 1 ? "" : "s"}` : "")) : "";
+    const foot = sit || (g.state !== "post" ? (g.watch?.[0]?.app || g.broadcast || "") : (g.series || g.lg.short || g.lg.name));
+    return `<button class="ms mc ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" title="${esc(a.full + " at " + h.full)}">
+      <span class="mc-top"><span class="lgtag">${esc(g.lg.short || g.lg.name)}</span><span class="st ${statusClass(g)}">${esc(g.status)}</span></span>
+      ${row(a, h)}${row(h, a)}${foot ? `<span class="mc-foot">${esc(foot)}</span>` : ""}</button>`;
   }
   function nextChip(k) {
     const m = state.favMeta[k], n = state.next[k];
     if (!m || !n || n.none || !n.date) return "";
     const tag = n.id ? "button" : "div";
-    return `<${tag} class="ms next" ${n.id ? `data-game="${esc(m.lg)}:${esc(n.id)}"` : ""} title="${esc(m.name)}: next game">
-      <span class="ms-t">${m.logo ? `<img src="${esc(m.logo)}" alt="">` : ""}<b>${esc(m.abbr || k.split(":")[1])}</b></span>
-      <span class="ms-t nx">${n.oppLogo ? `<img src="${esc(n.oppLogo)}" alt="">` : ""}<b>${esc(n.opp)}</b></span>
-      <span class="ms-s"><small>Next</small>${esc(whenLabel(n.date))}${n.place ? `<em>${esc(n.place)}</em>` : ""}</span></${tag}>`;
+    const me = miniRow(m.logo, m.abbr || k.split(":")[1], "", null, false, true), opp = miniRow(n.oppLogo, n.opp, "", null, false, false);
+    const lg = LG[m.lg];
+    return `<${tag} class="ms mc next" ${n.id ? `data-game="${esc(m.lg)}:${esc(n.id)}"` : ""} title="${esc(m.name)}: next game">
+      <span class="mc-top">${lg ? `<span class="lgtag">${esc(lg.short || lg.name)}</span>` : ""}<span class="st"><small>Next</small> ${esc(whenLabel(n.date))}</span></span>
+      ${n.at === "@" ? me + opp : opp + me}${n.place ? `<span class="mc-foot">${esc(n.place)}</span>` : ""}</${tag}>`;
   }
 
   // Golf leaderboard
@@ -1467,6 +1488,7 @@ button.brand, button.brand span { color: var(--accent); }
   }
   const BLOCK = { golf: golfBlock };
 
+  function countLabel(n) { return `${n} Game${n === 1 ? "" : "s"}`; }
   function block(id, title, meta, body, icon) {
     const closed = state.closed.has(id);
     return `<section class="block ${closed ? "closed" : ""}" data-block="${esc(id)}">
@@ -1577,13 +1599,13 @@ button.brand, button.brand span { color: var(--accent); }
       const mine = games.filter(g => g.fav).sort((x, y) => gameRank(x) - gameRank(y) || byTime(x, y));
       let body = "";
       if (mine.length) body += state.view === "league" ? `<h3 class="up-lg">My Teams</h3><div class="grid">${mine.map(card).join("")}</div>`
-        : `<div class="tl-group"><div class="tl-head"><span class="tl-badge">My Teams</span><span class="crumb">${mine.length} game${mine.length > 1 ? "s" : ""}</span></div>${mine.map(tlRow).join("")}</div>`;
+        : `<h3 class="up-lg">My Teams</h3>${timeline(mine)}`;
       order.forEach(id => {
         const list = games.filter(g => g.lg.id === id && !g.fav).sort(byTime);
         if (!list.length) return;
         body += state.view === "league" ? `<h3 class="up-lg">${esc(LG[id].name)}</h3><div class="grid">${list.map(card).join("")}</div>` : timeline(list);
       });
-      html += block("up-" + ymd(date), date.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" }), `${games.length} game${games.length > 1 ? "s" : ""}`, body);
+      html += block("up-" + ymd(date), date.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" }), countLabel(games.length), body);
     });
     if (!up.days.some(d => d.games.length)) html += `<div class="block empty">Nothing scheduled in the next three days for your leagues.</div>`;
     return html;
@@ -1628,7 +1650,7 @@ button.brand, button.brand span { color: var(--accent); }
       const picks = must.concat(other.slice(0, Math.max(0, 6 - must.length)));
       if (picks.length) {
         if (tab === "live") shown = new Set(picks.map(g => g.id));
-        html += block("worth", "Worth A Watch", `${picks.length} game${picks.length > 1 ? "s" : ""}`,
+        html += block("worth", "Worth A Watch", countLabel(picks.length),
           `<div class="feat">${picks.map(featured).join("")}</div>`);
       }
     }
@@ -1647,8 +1669,8 @@ button.brand, button.brand span { color: var(--accent); }
       html += `<div class="mine-bar"><span>Following ${state.favs.size} team${state.favs.size === 1 ? "" : "s"}</span><button class="chip" data-open-sheet>Edit teams</button></div>`;
       if (mine.length) {
         const liveN = mine.filter(g => g.state === "in").length;
-        html += block("myteams", isToday() ? "Today" : dayLabel(state.date), liveN ? `${liveN} live · ${mine.length} total` : `${mine.length} game${mine.length > 1 ? "s" : ""}`,
-          state.view === "league" ? `<div class="grid">${mine.map(card).join("")}</div>` : `<div class="tl-group">${mine.map(tlRow).join("")}</div>`);
+        html += block("myteams", isToday() ? "Today" : dayLabel(state.date), liveN ? `${liveN} Live · ${mine.length} Total` : countLabel(mine.length),
+          state.view === "league" ? `<div class="grid">${mine.map(card).join("")}</div>` : timeline(mine));
       } else {
         html += `<div class="block empty">None of your teams play ${isToday() ? "today" : "on " + esc(dayLabel(state.date))}.</div>`;
       }
@@ -1682,7 +1704,7 @@ button.brand, button.brand span { color: var(--accent); }
           const list = games.filter(g => g.lg.id === id).sort((x, y) => ({ in: 0, pre: 1, post: 2 }[x.state] - { in: 0, pre: 1, post: 2 }[y.state]) || new Date(x.date) - new Date(y.date));
           if (list.length) {
             const liveN = list.filter(g => g.state === "in").length;
-            section = block("m-" + id, lg.name, liveN ? `${liveN} live · ${list.length} total` : `${list.length} game${list.length > 1 ? "s" : ""}`,
+            section = block("m-" + id, lg.name, liveN ? `${liveN} Live · ${list.length} Total` : countLabel(list.length),
               state.view === "league" ? `<div class="grid">${list.map(card).join("")}</div>` : timeline(list));
           }
         }
@@ -1713,22 +1735,22 @@ button.brand, button.brand span { color: var(--accent); }
           <span class="crumb">${esc(lg.sport)} <span>› ${esc(lg.name)}</span></span></div>
           <div class="grid">${list.map(card).join("")}</div></div>`;
       }).join("");
-      html += block("feed", "You Are Looking Live", `${feed.length} game${feed.length > 1 ? "s" : ""}`, parts);
+      html += block("feed", "You Are Looking Live", countLabel(feed.length), parts);
     } else if (feed.length && state.view === "league") {
       TEAM_LEAGUES.forEach(lg => {
         const list = feed.filter(g => g.lg.id === lg.id).sort((x, y) => ({ in: 0, pre: 1, post: 2 }[x.state] - { in: 0, pre: 1, post: 2 }[y.state]) || new Date(x.date) - new Date(y.date));
         if (!list.length) return;
         const liveN = list.filter(g => g.state === "in").length;
-        html += block(lg.id, lg.name, liveN ? `${liveN} live · ${list.length} total` : `${list.length} game${list.length > 1 ? "s" : ""}`, `<div class="grid">${list.map(card).join("")}</div>`);
+        html += block(lg.id, lg.name, liveN ? `${liveN} Live · ${list.length} Total` : countLabel(list.length), `<div class="grid">${list.map(card).join("")}</div>`);
       });
     } else if (feed.length) {
       const live = feed.filter(g => g.state === "in").length;
       const title = tab === "live" ? "You Are Looking Live" : tab === "close" ? "Close Games" : dayLabel(state.date);
-      html += block("feed", title, live && tab !== "live" ? `${live} live · ${feed.length} total` : `${feed.length} game${feed.length > 1 ? "s" : ""}`, timeline(feed));
+      html += block("feed", title, live && tab !== "live" ? `${live} Live · ${feed.length} Total` : countLabel(feed.length), timeline(feed));
     } else if (tab === "live" && !shown.size) {
       const upcoming = games.filter(g => g.state === "pre").sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
       html += `<div class="block empty">Nothing live right now.${upcoming.length ? " Here's what's up next." : ""}</div>`;
-      if (upcoming.length) html += block("upnext", "Up Next", `${upcoming.length} games`, state.view === "league" ? `<div class="grid">${upcoming.map(card).join("")}</div>` : timeline(upcoming));
+      if (upcoming.length) html += block("upnext", "Up Next", countLabel(upcoming.length), state.view === "league" ? `<div class="grid">${upcoming.map(card).join("")}</div>` : timeline(upcoming));
     } else if (tab === "close") {
       html += `<div class="block empty">No close games right now. Games show up here late with a tight score: under 5:00 in the 4th or 3rd, the 7th inning or later in baseball, or the 85th minute in soccer.</div>`;
     } else if (!specialsFor(tab).length) {
@@ -1980,6 +2002,7 @@ button.brand, button.brand span { color: var(--accent); }
   document.getElementById("main").addEventListener("click", e => {
     if (e.target.closest("[data-edit-leagues]")) { renderLeagueSheet(); document.getElementById("lsheet").hidden = false; }
   });
+  document.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.classList?.contains("tap")) { e.preventDefault(); e.target.click(); } });
   document.addEventListener("keydown", e => { if (e.key === "Escape") { fromSettings = false; closeSheet(); document.getElementById("lsheet").hidden = true; document.getElementById("ssheet").hidden = true; closeGame(); } });
   document.getElementById("q").addEventListener("input", search);
   document.getElementById("teamsbtn").onclick = openSheet;
@@ -2206,6 +2229,9 @@ button.brand, button.brand span { color: var(--accent); }
     if (w) { e.preventDefault(); toggleWatch(w.dataset.watchgame); return; }
     const b = e.target.closest("[data-game]");
     if (!b) return;
+    // Tapping a link, star or other button inside a card does its own thing
+    const inner = e.target.closest("a, button, input, label");
+    if (inner && inner !== b && b.contains(inner) && !inner.hasAttribute("data-game")) return;
     e.preventDefault();
     openGame(b.dataset.game);
   });
@@ -2350,6 +2376,18 @@ button.brand, button.brand span { color: var(--accent); }
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && isToday() && state.updatedAt && Date.now() - state.updatedAt > 25000) loadAll();
   });
+  // GitHub Pages lets browsers keep the page for ~10 minutes. Check for a newer build and jump to it.
+  async function checkForUpdate() {
+    if (!location.protocol.startsWith("http")) return;
+    try {
+      const mine = document.querySelector('meta[name="build"]')?.content;
+      const html = await (await fetch(location.pathname + "?check=" + Date.now(), { cache: "no-store" })).text();
+      const latest = (html.match(/<meta name="build" content="(\d+)">/) || [])[1];
+      if (mine && latest && latest !== mine) location.replace(location.pathname + "?v=" + latest + location.hash);
+    } catch {}
+  }
+  checkForUpdate();
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) checkForUpdate(); });
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   }
