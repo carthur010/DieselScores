@@ -21,6 +21,16 @@ Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 6. **Team records** (Charles): on By League cards already; not in By Time. Keep it simple.
 7. ~~Close games at the top of Worth A Watch~~ (Faiz). Done, plus every playoff game.
 
+### Layout options (from CBS Sports)
+- **Compact vs. Expanded scoreboard picker** in Settings with little phone previews: Compact = two games per row, Expanded = one full-width game per row.
+- **Pinch to switch layout** on the scores screen.
+- **Always expand favorite games** toggle: your teams' games stay full-size even in Compact.
+- **Favorites section** at the top as a grid of your teams' games across leagues (today's strip, but full cards).
+- **Game odds toggle**: show or hide betting lines everywhere.
+- **Betting results on finals**: "Raptors covered (-11.5), Over 220.5" under final scores (pairs with Faiz's Upset Alert idea).
+- **Playoff seeds** next to team names, e.g. (1) TB, (2) CLE.
+- **Highlights link** on final games.
+
 ### Low priority
 - **Soccer depth via API-Football** (part of API-Sports): player ratings, detailed match stats, closer to SofaScore. Free tier to start. (SofaScore's own feed is off-limits: blocked and against their terms.)
 - **YouTube TV deep links to the channel**: test whether a channel's share link (ESPN, TNT, etc.) stays the same day to day. If yes, map every channel so the button lands on the live feed.
