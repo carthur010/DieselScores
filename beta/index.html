@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014165401">
+<meta name="build" content="20261014165658">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -921,7 +921,7 @@ button.brand, button.brand span { color: var(--accent); }
   const state = {
     date: startOfDay(new Date()),
     tab: store.get("home", "live"),
-    conf: store.get("cfbConf", ""),
+    conf: (() => { const c = store.get("conf", null); return c && typeof c === "object" ? c : {}; })(),
     view: store.get("view3", "league"),
     favs: new Set(store.get("favs", DEFAULT_FAVS)),
     favMeta: { ...MY_SETUP.favMeta, ...store.get("favMeta", {}) },   // key -> { lg, id, name, logo, color }
@@ -1010,7 +1010,7 @@ button.brand, button.brand span { color: var(--accent); }
       rank: c.curatedRank?.current && c.curatedRank.current <= 25 ? c.curatedRank.current : null,
       conf: c.team?.conferenceId || "",
     }));
-    if (ev.groups?.isConference && ev.groups.id && ev.groups.shortName) CONF_NAME[ev.groups.id] = ev.groups.shortName;
+    if (ev.groups?.isConference && ev.groups.id && ev.groups.shortName && CONFS?.[lg.id]) CONFS[lg.id].name[ev.groups.id] = ev.groups.shortName;
     teams.sort((a, b) => (a.homeAway === "away" ? -1 : 1) - (b.homeAway === "away" ? -1 : 1));
     // Playoff series: show each team's series wins ("2-0") instead of the regular-season record
     const sc = comp.series?.type === "playoff" ? comp.series.competitors || [] : [];
@@ -1963,27 +1963,33 @@ button.brand, button.brand span { color: var(--accent); }
     if (on) on.scrollIntoView({ inline: "center", block: "nearest" });
   }
 
-  // College football conferences, in ESPN's order (FBS first); names fill in from the feed too
-  const CONF_ORDER = ["1", "151", "4", "5", "12", "18", "15", "17", "9", "8", "37"];
-  var CONF_NAME = { 1: "ACC", 151: "American", 4: "Big 12", 5: "Big Ten", 12: "Conference USA", 18: "Independents", 15: "Mid-American", 17: "Mountain West", 9: "Pac-12", 8: "SEC", 37: "Sun Belt" };
-  const CFB_TABS = ["ncaaf", "cfb25", "p4"];
+  // College conferences by league, in ESPN's order; names also fill in from the feed (ids differ per sport)
+  const CBB_CONF = { 2: "ACC", 1: "America East", 62: "American", 3: "Atlantic 10", 46: "ASUN", 8: "Big 12", 4: "Big East", 5: "Big Sky", 6: "Big South", 7: "Big Ten", 9: "Big West", 10: "CAA", 11: "Conference USA", 45: "Horizon", 12: "Ivy", 13: "Metro Atlantic", 16: "MEAC", 14: "Mid-American", 18: "Missouri Valley", 44: "Mountain West", 19: "Northeast", 20: "Ohio Valley", 22: "Patriot League", 23: "SEC", 24: "Southern", 25: "Southland", 26: "SWAC", 49: "Summit League", 27: "Sun Belt", 30: "WAC", 29: "West Coast" };
+  var CONFS = {
+    ncaaf: { order: ["1", "151", "4", "5", "12", "18", "15", "17", "9", "8", "37"], name: { 1: "ACC", 151: "American", 4: "Big 12", 5: "Big Ten", 12: "Conference USA", 18: "Independents", 15: "Mid-American", 17: "Mountain West", 9: "Pac-12", 8: "SEC", 37: "Sun Belt" } },
+    ncaam: { order: [], name: { ...CBB_CONF } },   // empty order = alphabetical, like ESPN's list
+    ncaaw: { order: [], name: { ...CBB_CONF } },
+  };
+  const confLg = tab => ["ncaaf", "cfb25", "p4"].includes(tab) ? "ncaaf" : CONFS[tab] ? tab : null;
   const inConf = (g, c) => g.teams.some(t => t.conf === c);
   function renderConfs(games) {
     const el = document.getElementById("confs");
-    const cfb = games.filter(g => g.lg.id === "ncaaf");
-    const show = CFB_TABS.includes(state.tab) && cfb.length > 0;
-    el.hidden = !show;
-    if (!show) return;
-    const ids = [...new Set(cfb.flatMap(g => g.teams.map(t => t.conf)).filter(c => c && CONF_NAME[c]))]
-      .sort((x, y) => (CONF_ORDER.indexOf(x) + 1 || 99) - (CONF_ORDER.indexOf(y) + 1 || 99) || CONF_NAME[x].localeCompare(CONF_NAME[y]));
-    if (state.conf && !ids.includes(state.conf)) ids.push(state.conf);
-    el.innerHTML = `<button class="chip ${!state.conf ? "on" : ""}" data-conf="">All Conferences</button>` + ids.map(c =>
-      `<button class="chip ${state.conf === c ? "on" : ""}" data-conf="${c}">${esc(CONF_NAME[c] || "Conference")}<span class="n">${cfb.filter(g => inConf(g, c)).length}</span></button>`).join("");
-    el.querySelectorAll("button").forEach(b => b.onclick = () => { state.conf = b.dataset.conf; store.set("cfbConf", state.conf); render(); });
+    const lg = confLg(state.tab), C = CONFS[lg];
+    const pool = lg ? games.filter(g => g.lg.id === lg) : [];
+    el.hidden = !pool.length;
+    if (!pool.length) return;
+    const cur = state.conf[lg] || "";
+    const rank = c => (C.order.indexOf(c) + 1) || 999;
+    const ids = [...new Set(pool.flatMap(g => g.teams.map(t => t.conf)).filter(c => c && C.name[c]))]
+      .sort((x, y) => rank(x) - rank(y) || C.name[x].localeCompare(C.name[y]));
+    if (cur && !ids.includes(cur)) ids.push(cur);
+    el.innerHTML = `<button class="chip ${!cur ? "on" : ""}" data-conf="">All Conferences</button>` + ids.map(c =>
+      `<button class="chip ${cur === c ? "on" : ""}" data-conf="${c}">${esc(C.name[c] || "Conference")}<span class="n">${pool.filter(g => inConf(g, c)).length}</span></button>`).join("");
+    el.querySelectorAll("button").forEach(b => b.onclick = () => { state.conf[lg] = b.dataset.conf; store.set("conf", state.conf); render(); });
   }
   function poolFor(tab, games) {
-    const pool = poolForTab(tab, games);
-    return CFB_TABS.includes(tab) && state.conf ? pool.filter(g => g.lg.id !== "ncaaf" || inConf(g, state.conf)) : pool;
+    const pool = poolForTab(tab, games), lg = confLg(tab), c = lg && state.conf[lg];
+    return c ? pool.filter(g => g.lg.id !== lg || inConf(g, c)) : pool;
   }
   function poolForTab(tab, games) {
     switch (tab) {
