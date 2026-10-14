@@ -317,7 +317,10 @@ section.closed .bhead { border-bottom: 0; }
 .toast small { font-size: 12px; opacity: .75; }
 @keyframes slide { from { transform: translateY(-10px); opacity: 0; } }
 header.top { top: 0; padding-top: env(safe-area-inset-top, 0px); }
-.bhead h2 { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+button.brand { background: none; border: 0; padding: 0; cursor: pointer; color: var(--fg); }
+button.brand span { color: var(--accent); }
+.bhead h2 { min-width: 0; white-space: normal !important; line-height: 1.1; flex: 0 1 auto; }
+.bhead .meta { flex: 1 1 0; }
 @media (max-width: 480px) {
   .bar { gap: 6px 4px; }
   .brand { font-size: 28px; }
@@ -333,13 +336,16 @@ header.top { top: 0; padding-top: env(safe-area-inset-top, 0px); }
 <header class="top">
   <div class="wrap">
     <div class="bar">
-      <div class="brand">Score<span>s</span></div>
+      <button class="brand" id="brandbtn" aria-label="Home">Score<span>s</span></button>
       <span class="livecount" id="livebug" hidden><span class="dot"></span><span id="liven">0</span> live</span>
       <div class="spacer"></div>
       <div class="seg" role="group" aria-label="Layout">
         <button data-view="time">By Time</button>
         <button data-view="league">By League</button>
       </div>
+      <button class="iconbtn" id="homebtn" title="Home: today's live games" aria-label="Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
+      </button>
       <button class="iconbtn" id="teamsbtn" title="Your teams" aria-label="Search and follow teams">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       </button>
@@ -1326,6 +1332,14 @@ header.top { top: 0; padding-top: env(safe-area-inset-top, 0px); }
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
   document.getElementById("q").addEventListener("input", search);
   document.getElementById("teamsbtn").onclick = openSheet;
+  function goHome() {
+    closeSheet();
+    state.tab = "live"; store.set("tab2", "live");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (!isToday()) setDate(new Date()); else render();
+  }
+  document.getElementById("homebtn").onclick = goHome;
+  document.getElementById("brandbtn").onclick = goHome;
   document.getElementById("refresh").onclick = () => loadAll();
   document.querySelectorAll("[data-view]").forEach(b => b.onclick = () => { state.view = b.dataset.view; store.set("view3", state.view); render(); });
   document.getElementById("alertbtn").onclick = async () => {
