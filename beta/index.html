@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014090716">
+<meta name="build" content="20261014090920">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1332,6 +1332,8 @@ button.brand, button.brand span { color: var(--accent); }
     if (g.lg.sport === "Football" && s.downDistanceText) {
       return `<span class="txt">${s.isRedZone ? '<b style="color:var(--live)">Red zone</b> · ' : ""}${esc(s.downDistanceText)}</span>`;
     }
+    // Basketball, hockey, soccer: the latest play when ESPN sends one
+    if (s.lastPlay?.text) return `<span class="txt" title="${esc(s.lastPlay.text)}">${esc(s.lastPlay.text)}</span>`;
     return "";
   }
   function footText(g) {
