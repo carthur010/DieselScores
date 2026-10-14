@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014133200">
+<meta name="build" content="20261014133346">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2584,7 +2584,7 @@ button.brand, button.brand span { color: var(--accent); }
     const lines = [];
     if (sizes.reduce((s, n) => s + n, 0) === out.length) { let k = 0; sizes.forEach(n => { lines.push(out.slice(k, k + n)); k += n; }); }
     else { const by = {}; out.forEach(p => (by[depth(p)] = by[depth(p)] || []).push(p)); Object.keys(by).sort().forEach(d => lines.push(by[d])); }
-    const person = p => { const ph = p.athlete?.headshot?.href || ""; const pos = (p.position?.abbreviation || "").toUpperCase(); return `<div class="lu-p">${ph ? `<img class="ld-ph" src="${esc(ph)}" alt="" loading="lazy">` : `<span class="ld-ph lu-num">${esc(p.jersey || "")}</span>`}${p.subbedOut ? '<i class="lu-sub" title="Subbed off">⇄</i>' : ""}<b>${esc(p.athlete?.shortName || p.athlete?.displayName || "")}</b><small>${pos === "G" || pos === "GK" ? "GK · " : ""}${esc(p.jersey || "")}</small></div>`; };
+    const person = p => { const ph = p.athlete?.headshot?.href || ""; const pos = (p.position?.abbreviation || "").toUpperCase(); return `<div class="lu-p">${ph ? `<img class="ld-ph" src="${esc(ph)}" alt="" loading="lazy">` : `<span class="ld-ph lu-num">${esc(p.jersey || "")}</span>`}${p.subbedOut ? '<i class="lu-sub" title="Subbed off">⇄</i>' : ""}<b>${esc(p.athlete?.shortName || p.athlete?.displayName || "")}</b><small>${pos === "G" || pos === "GK" ? "GK" + (ph ? " · " : "") : ""}${ph ? esc(p.jersey || "") : ""}</small></div>`; };
     const rows = lines.slice().reverse().map(l => `<div class="lu-row">${l.slice().sort((x, y) => lr(x) - lr(y)).map(person).join("")}</div>`).join("") + (gk.length ? `<div class="lu-row">${gk.map(person).join("")}</div>` : "");
     const bench = side.roster.filter(p => !p.starter);
     const benchHtml = bench.length ? `<div class="lu-bench"><div class="lu-bh"><span>Bench</span><span>Subs</span></div>${bench.map(p => `<div class="lu-b ${p.subbedIn ? "in" : ""}"><span class="j">${esc(p.jersey || "")}</span><span>${esc(p.athlete?.shortName || p.athlete?.displayName || "")}</span>${p.subbedIn ? '<i title="Came on">⇄</i>' : ""}</div>`).join("")}</div>` : "";
