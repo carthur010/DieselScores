@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014101813">
+<meta name="build" content="20261014102935">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -121,6 +121,7 @@ section.block { background: var(--surface); border: 1px solid var(--line); borde
 .set-sec.open .set-sec-h svg { transform: none; }
 .set-sec-b { padding: 0 14px 10px; display: grid; gap: 12px; }
 .set-sec-b .set-row:last-child { border-bottom: 0; }
+.net.none { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: none; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rem-row { flex-wrap: nowrap; gap: 6px; }
 .rem-row .chip { flex: 1 1 0; justify-content: center; padding-inline: 4px; white-space: nowrap; min-width: 0; text-align: center; }
 .rem-lbl { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 4px; }
@@ -171,6 +172,24 @@ section.closed .bhead { border-bottom: 0; }
 .g-top .st { color: var(--muted); }
 [data-density="compact"] .grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); }
 [data-density="compact"] .grid > .g:not(.mini) { grid-column: 1 / -1; }
+[data-density="simple"] .grid { grid-template-columns: 1fr; }
+.srow { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.srow:last-child { border-bottom: 0; }
+.srow:hover { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+.sr-time { display: grid; gap: 2px; font-size: 13px; }
+.sr-time .st { color: var(--muted); font-weight: 600; white-space: nowrap; }
+.sr-time .st.live { color: var(--live); }
+.sr-time .st.final { color: var(--fg); }
+.sr-time small { color: var(--muted); font-size: 11px; }
+.sr-teams { display: grid; gap: 6px; min-width: 0; }
+.sr-t { display: flex; align-items: center; gap: 10px; font-size: 16px; min-width: 0; }
+.sr-t img, .sr-t > i { width: 22px; height: 22px; object-fit: contain; flex: 0 0 auto; }
+.sr-t .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sr-t .nm small { color: var(--muted); font-size: 11px; }
+.sr-t b { margin-left: auto; font-family: var(--display); font-stretch: condensed; font-size: 18px; padding-left: 10px; }
+.sr-t.lose .nm, .sr-t.lose b { color: var(--muted); }
+.sr-act { display: flex; align-items: center; gap: 8px; }
+.sr-act .bellbtn { width: 34px; height: 34px; }
 .g.mini { padding: 10px 12px; gap: 4px; align-content: start; }
 .g.mini.live { box-shadow: inset 3px 0 0 var(--live); }
 .mcg-top { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; min-height: 18px; }
@@ -771,29 +790,48 @@ button.brand, button.brand span { color: var(--accent); }
   };
 
   // Where to watch. Your setup: YouTube TV + every streaming app. First match wins.
-  const WATCH = [
-    { re: /^(MSG|MSG ?2|MSGSN|MSG Sportsnet|MSG\+|YES|YES Network)$/i, app: "Gotham Sports", url: "https://gothamsports.com/" },
-    { re: /^(ABC|CBS|NBC|FOX|CW|The CW|ESPN|ESPN2|ESPNU|ESPNEWS|SECN|SEC Network|SECN\+?|ACCN|ACC Network|BTN|Big Ten Network|FS1|FS2|TNT|TBS|truTV|NFL ?Net(work)?|NFLN|MLB ?Net(work)?|MLBN|NBA ?TV|NHL ?Net(work)?|CBSSN|CBS Sports Network|USA|USA Net(work)?|Golf|Golf Channel|Telemundo|Universo|Univision|UniMás|TUDN|Galavisión|ION|SNY|SportsNet NY)$/i, app: "YouTube TV", url: "https://tv.youtube.com/", scheme: "youtubetv://" },
-    { re: /ESPN\+|ESPN Unlimited|ESPN App|ESPN Deportes\+/i, app: "ESPN app", url: "https://www.espn.com/watch/", scheme: "sportscenter://" },
-    { re: /Peacock/i, app: "Peacock", url: "https://www.peacocktv.com/sports", scheme: "peacock://" },
-    { re: /Paramount\+|Paramount Plus|CBS Sports Golazo/i, app: "Paramount+", url: "https://www.paramountplus.com/live-tv/", scheme: "paramountplus://" },
-    { re: /Prime Video|Amazon|Prime/i, app: "Prime Video", url: "https://www.primevideo.com/", scheme: "aiv://" },
-    { re: /Apple TV|MLS Season Pass|MLS Pass/i, app: "Apple TV", url: "https://tv.apple.com/", scheme: "videos://" },
-    { re: /Netflix/i, app: "Netflix", url: "https://www.netflix.com/", scheme: "nflx://" },
-    { re: /^(Max|HBO Max|truTV Max)$/i, app: "HBO Max", url: "https://play.hbomax.com/", scheme: "hbomax://" },
-    { re: /Fox One|FOX One|Fox Nation/i, app: "Fox One", url: "https://www.foxone.com/" },
-    { re: /DAZN/i, app: "DAZN", url: "https://www.dazn.com/" },
-    { re: /NBA League Pass/i, app: "NBA League Pass", url: "https://www.nba.com/watch/league-pass-stream" },
-    { re: /MLB\.?TV/i, app: "MLB.TV", url: "https://www.mlb.com/tv", scheme: "mlbatbat://" },
-    { re: /Victory\+/i, app: "Victory+", url: "https://www.victoryplus.com/" },
-    { re: /YouTube/i, app: "YouTube", url: "https://www.youtube.com/", scheme: "youtube://" },
-  ];
-  // Out-of-market regional games (you're in NYC) go to the league package
-  const OUT_OF_MARKET = {
-    nba: { app: "NBA League Pass", url: "https://www.nba.com/watch/league-pass-stream" },
-    mlb: { app: "MLB.TV", url: "https://www.mlb.com/tv", scheme: "mlbatbat://" },
-    nhl: { app: "ESPN app", url: "https://www.espn.com/watch/", scheme: "sportscenter://" },
+  // ---- Where to watch: what each service carries, filtered by the services you pick in TV Settings
+  const NATIONAL = /^(ABC|CBS|NBC|FOX|CW|The CW|ESPN|ESPN2|ESPNU|ESPNEWS|SECN|SEC Network|SECN\+?|ACCN|ACC Network|BTN|Big Ten Network|FS1|FS2|TNT|TBS|truTV|NFL ?Net(work)?|NFLN|MLB ?Net(work)?|MLBN|NBA ?TV|NHL ?Net(work)?|CBSSN|CBS Sports Network|USA|USA Net(work)?|Golf|Golf Channel|Telemundo|Universo|Univision|UniMás|TUDN|Galavisión|ION)$/i;
+  // Home markets and their regional sports networks
+  const MARKETS = {
+    nyc: { name: "New York", rsn: /^(MSG|MSG ?2|MSGSN|MSG Sportsnet|MSG\+|YES|YES Network|SNY|SportsNet NY)$/i },
+    bay: { name: "Bay Area", rsn: /NBC ?Sports ?(Bay Area|California)|NBCS-?(BA|CA)/i },
+    sac: { name: "Sacramento", rsn: /NBC ?Sports ?California|NBCS-?CA/i },
+    la:  { name: "Los Angeles", rsn: /Spectrum ?SportsNet|SportsNet ?LA|FanDuel Sports Network West|FDSN ?West|KCAL/i },
+    bos: { name: "Boston", rsn: /NESN|NBC ?Sports ?Boston|NBCS-?BOS/i },
+    chi: { name: "Chicago", rsn: /Chicago Sports Network|CHSN|Marquee/i },
+    phl: { name: "Philadelphia", rsn: /NBC ?Sports ?Philadelphia|NBCS-?PHI/i },
+    other: { name: "Other", rsn: /$^/ },
   };
+  const ANY_RSN = /^(MSG|MSG ?2|MSGSN|MSG\+|YES|SNY)$|NBC ?Sports|NBCS-|Spectrum ?SportsNet|SportsNet|FanDuel Sports|FDSN|NESN|CHSN|Marquee|Bally|Root Sports|Altitude|Monumental|KJZZ|Space City|Victory\+/i;
+  // kind: bundle = live TV (carries the national channels and in-market regionals), stream, package, regional
+  const SERVICES = [
+    { id: "youtubetv", name: "YouTube TV", kind: "bundle", url: "https://tv.youtube.com/", scheme: "youtubetv://", rsn: /SNY|SportsNet NY|NBC ?Sports|NBCS-/i },
+    { id: "hulu", name: "Hulu + Live TV", kind: "bundle", url: "https://www.hulu.com/live-tv", scheme: "hulu://", rsn: /SNY|SportsNet NY|NBC ?Sports|NBCS-/i, also: /ESPN\+|ESPN Unlimited/i },
+    { id: "sling", name: "Sling TV", kind: "bundle", url: "https://watch.sling.com/", scheme: "sling://", rsn: /$^/, lacks: /^(CBS|CBSSN|CBS Sports Network)$/i },
+    { id: "fubo", name: "Fubo", kind: "bundle", url: "https://www.fubo.tv/", scheme: "fubotv://", rsn: /MSG|YES|SNY|NBC ?Sports|NBCS-|NESN|Marquee|Spectrum/i, lacks: /^(TNT|TBS|truTV)$/i },
+    { id: "directv", name: "DirecTV Stream", kind: "bundle", url: "https://stream.directv.com/", scheme: "dtvnow://", rsn: /./ },
+    { id: "cable", name: "Cable / Satellite", kind: "bundle", url: "", scheme: "", rsn: /./ },
+    { id: "gotham", name: "Gotham Sports", kind: "regional", url: "https://gothamsports.com/", re: /^(MSG|MSG ?2|MSGSN|MSG Sportsnet|MSG\+|YES|YES Network)$/i },
+    { id: "espnplus", name: "ESPN app", label: "ESPN+ / ESPN app", kind: "stream", url: "https://www.espn.com/watch/", scheme: "sportscenter://", re: /ESPN\+|ESPN Unlimited|ESPN App|ESPN Deportes\+/i },
+    { id: "peacock", name: "Peacock", kind: "stream", url: "https://www.peacocktv.com/sports", scheme: "peacock://", re: /Peacock/i },
+    { id: "paramount", name: "Paramount+", kind: "stream", url: "https://www.paramountplus.com/live-tv/", scheme: "paramountplus://", re: /Paramount\+|Paramount Plus|CBS Sports Golazo/i },
+    { id: "max", name: "HBO Max", kind: "stream", url: "https://play.hbomax.com/", scheme: "hbomax://", re: /^(Max|HBO Max|truTV Max)$/i },
+    { id: "prime", name: "Prime Video", kind: "stream", url: "https://www.primevideo.com/", scheme: "aiv://", re: /Prime Video|Amazon|Prime/i },
+    { id: "apple", name: "Apple TV", kind: "stream", url: "https://tv.apple.com/", scheme: "videos://", re: /Apple TV|MLS Season Pass|MLS Pass/i },
+    { id: "netflix", name: "Netflix", kind: "stream", url: "https://www.netflix.com/", scheme: "nflx://", re: /Netflix/i },
+    { id: "foxone", name: "Fox One", kind: "stream", url: "https://www.foxone.com/", re: /Fox One|FOX One|Fox Nation/i },
+    { id: "dazn", name: "DAZN", kind: "stream", url: "https://www.dazn.com/", re: /DAZN/i },
+    { id: "victory", name: "Victory+", kind: "stream", url: "https://www.victoryplus.com/", re: /Victory\+/i },
+    { id: "youtube", name: "YouTube", kind: "stream", url: "https://www.youtube.com/", scheme: "youtube://", re: /^YouTube$/i },
+    { id: "leaguepass", name: "NBA League Pass", kind: "package", league: "nba", url: "https://www.nba.com/watch/league-pass-stream", re: /NBA League Pass/i },
+    { id: "mlbtv", name: "MLB.TV", kind: "package", league: "mlb", url: "https://www.mlb.com/tv", scheme: "mlbatbat://", re: /MLB\.?TV/i },
+    { id: "nhlespn", name: "ESPN app", label: "NHL on ESPN+", kind: "package", league: "nhl", url: "https://www.espn.com/watch/", scheme: "sportscenter://", re: /$^/ },
+    { id: "sundayticket", name: "NFL Sunday Ticket", kind: "package", league: "nfl", url: "https://tv.youtube.com/nfl/", scheme: "youtubetv://", re: /Sunday Ticket/i },
+  ];
+  const SVC = Object.fromEntries(SERVICES.map(s => [s.id, s]));
+  const SERVICE_GROUPS = [["Live TV", "bundle"], ["Streaming", "stream"], ["League Packages", "package"], ["Regional", "regional"]];
+  const DEFAULT_TV = { services: ["youtubetv", "gotham", "espnplus", "peacock", "paramount", "max", "prime", "apple", "netflix", "leaguepass", "mlbtv", "nhlespn"], market: "nyc" };
   // Soccer favorites are keyed "soccer:ABBR" so a club follows you across competitions
   const DEFAULT_FAVS = ["nba:NY", "nba:SAC", "nhl:NYR", "nhl:SJ", "mlb:NYM", "nfl:NYG", "soccer:ARS"];
   const DEFAULT_FAV_LEAGUES = ["nba", "nhl", "nfl", "ncaaf", "mlb", "epl", "ucl", "pga"];
@@ -831,6 +869,7 @@ button.brand, button.brand span { color: var(--accent); }
     // Favorite games (just that game, not the team). key "lg:id" -> { at, date }. Dropped 2 days after the game.
     favGames: (() => { const f = store.get("favGames", {}); const now = Date.now(); Object.keys(f).forEach(k => { if (now - new Date(f[k].date || f[k].at).getTime() > 2 * 864e5) delete f[k]; }); return f; })(),
     showOdds: store.get("showOdds", true),
+    tv: (() => { const s = store.get("tv", null); return s && Array.isArray(s.services) ? { ...DEFAULT_TV, ...s } : { ...DEFAULT_TV, services: [...DEFAULT_TV.services] }; })(),
     density: store.get("density", "expanded"),       // "compact" | "expanded"
     expandFavs: store.get("expandFavs", true),       // in Compact, keep your teams' games full size
     upcoming: { key: "", at: 0, days: [], loading: false },
@@ -922,7 +961,7 @@ button.brand, button.brand span { color: var(--accent); }
     const g = {
       id: ev.id, lg, date: ev.date, state: gstate, status, teams, broadcast,
       link: ev.links?.find(l => (l.rel || []).includes("summary"))?.href || ev.links?.[0]?.href || "",
-      watch: watchOptions(nets, lg),
+      nets, watch: watchOptions(nets, lg),
       rankedClash: teams.length === 2 && teams.every(t => t.rank),
       note: comp.notes?.[0]?.headline || "",
       odds: odds ? { details: odds.details || "", ou: odds.overUnder } : null,
@@ -982,28 +1021,50 @@ button.brand, button.brand span { color: var(--accent); }
     return { hype: score, reasons };
   }
 
+  // Which of YOUR services can show this channel? Order: your live TV bundle first, then streaming, then packages.
   function watchOptions(nets, lg) {
+    const tv = state.tv || DEFAULT_TV;
+    const mine = SERVICES.filter(s => tv.services.includes(s.id));   // catalog order, so YouTube TV leads
+    const market = MARKETS[tv.market] || MARKETS.other;
     const out = [];
-    const add = (o, net) => {
-      const x = out.find(x => x.app === o.app);
+    const add = (s, net) => {
+      const x = out.find(x => x.app === s.name);
       if (x) { if (!x.nets.includes(net)) x.nets.push(net); }
-      else out.push({ app: o.app, url: o.url, scheme: o.scheme || "", nets: [net] });
+      else out.push({ app: s.name, url: s.url, scheme: s.scheme || "", nets: [net], kind: s.kind });
     };
-    nets.forEach(n => {
+    (nets || []).forEach(n => {
       const name = n.name.trim();
-      const hit = WATCH.find(w => w.re.test(name));
-      if (hit) return add(hit, name);
-      if ((n.market === "home" || n.market === "away") && OUT_OF_MARKET[lg.id]) add(OUT_OF_MARKET[lg.id], name);
+      const regional = ANY_RSN.test(name) && !NATIONAL.test(name);
+      const inMarket = regional && market.rsn.test(name);
+      let found = false;
+      mine.forEach(s => {
+        let ok = false;
+        if (s.kind === "bundle") ok = (NATIONAL.test(name) && !(s.lacks && s.lacks.test(name))) || (inMarket && s.rsn.test(name)) || (s.also && s.also.test(name));
+        else if (s.kind === "regional") ok = inMarket && s.re.test(name);
+        else if (s.kind === "package") ok = s.re.test(name) || (s.league === lg.id && regional && !inMarket);
+        else ok = s.re.test(name);
+        if (ok) { add(s, name); found = true; }
+      });
+      // Sunday Ticket: out-of-market Sunday CBS/FOX games, only if you have no live TV bundle
+      if (!found && lg.id === "nfl" && /^(CBS|FOX)$/i.test(name) && tv.services.includes("sundayticket") && !mine.some(s => s.kind === "bundle")) add(SVC.sundayticket, name);
     });
-    out.sort((a, b) => (b.app === "YouTube TV") - (a.app === "YouTube TV"));
+    const rank = { bundle: 0, regional: 1, stream: 2, package: 3 };
+    out.sort((a, b) => rank[a.kind] - rank[b.kind]);
     return out;
+  }
+  function refreshWatch() {
+    Object.values(state.data).forEach(d => (d.events || []).forEach(g => { g.watch = watchOptions(g.nets, g.lg); }));
+    (state.upcoming.days || []).forEach(d => d.games.forEach(g => { g.watch = watchOptions(g.nets, g.lg); }));
   }
 
   function watchPill(g) {
-    if (g.state === "post" || !g.watch?.length) return g.broadcast && g.state !== "post" ? `<span class="net">${esc(g.broadcast)}</span>` : "";
+    if (g.state === "post") return "";
+    if (!g.watch?.length) return g.broadcast ? `<span class="net none" title="None of your TV Settings services carry ${esc(g.broadcast)}">Not on your services · ${esc(g.broadcast)}</span>` : "";
     const [w, ...rest] = g.watch;
     const title = `${w.app}: ${w.nets.join(", ")}` + (rest.length ? ` · Also on ${rest.map(x => `${x.app} (${x.nets.join(", ")})`).join(", ")}` : "");
-    return `<a class="watch" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener" title="${esc(title)}">${PLAY}<b>${esc(w.app)}</b>${w.nets[0].toLowerCase() === w.app.toLowerCase() ? "" : `<span>${esc(w.nets[0])}</span>`}${rest.length ? `<i>+${rest.length}</i>` : ""}</a>`;
+    const inner = `${PLAY}<b>${esc(w.app)}</b>${w.nets[0].toLowerCase() === w.app.toLowerCase() ? "" : `<span>${esc(w.nets[0])}</span>`}${rest.length ? `<i>+${rest.length}</i>` : ""}`;
+    if (!w.url) return `<span class="watch" title="${esc(title)}">${inner}</span>`;   // cable: no single app to open
+    return `<a class="watch" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener" title="${esc(title)}">${inner}</a>`;
   }
 
   // =====================================================================
@@ -1523,6 +1584,7 @@ button.brand, button.brand span { color: var(--accent); }
     </div>`;
   }
   function card(g, showLg) {
+    if (state.density === "simple" && !(state.expandFavs && g.fav)) return simpleRow(g, showLg === true);
     if (state.density === "compact" && !(state.expandFavs && g.fav)) return miniCard(g, showLg === true);
     return `<article class="g tap" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(g.teams.map(x => x.name).join(" vs "))}: game details">
       <div class="g-top">${showLg === true ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span><span class="wslot">${watchPill(g)}</span></div>
@@ -1589,6 +1651,19 @@ button.brand, button.brand span { color: var(--accent); }
   }
 
   // Your teams strip
+  // Simple: just a list of games. Time, two teams, score, bell.
+  function simpleRow(g, showLg) {
+    const [a, h] = g.teams;
+    if (!a || !h) return "";
+    const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
+    const team = (t, o) => `<span class="sr-t ${lose(t, o) ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<i></i>"}<span class="nm">${t.rank ? `<small>${t.rank}</small> ` : ""}${esc(t.name || t.abbr)}</span>${isFavTeam(g.lg, t.abbr) ? '<span class="mc-fav">★</span>' : ""}${g.state === "pre" ? "" : `<b>${esc(t.score)}</b>`}</span>`;
+    const top = g.state === "pre" ? timeLabel(g.date) : g.status;
+    const sub = g.state === "pre" ? (g.status !== timeLabel(g.date) ? g.status : "–") : (g.state === "in" ? "Live" : "");
+    return `<div class="srow tap ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name)}: game details">
+      <span class="sr-time"><span class="st ${statusClass(g)}">${esc(top)}</span><small>${showLg ? esc(g.lg.short || g.lg.name) : esc(sub)}</small></span>
+      <span class="sr-teams">${team(a, h)}${team(h, a)}</span>
+      <span class="sr-act">${g.pin ? '<span class="pin-mark">♥</span>' : ""}${bellBtn(g)}</span></div>`;
+  }
   // Compact scoreboard card (CBS-style two-up grid)
   function miniCard(g, showLg) {
     const [a, h] = g.teams;
@@ -2276,7 +2351,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (g && gs === "in" && situation(g)) html += `<div class="gc-sit">${situation(g)}</div>`;
     html += `</div>`;
     if (g) {
-      const w = gs !== "post" && g.watch?.[0];
+      const w = gs !== "post" && g.watch?.find(x => x.url);
       html += `<div class="gc-actions">${w ? `<a class="watchbig" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">${PLAY_BIG} Watch On ${esc(w.app)}</a>` : g.link ? `<a class="watchbig" href="${esc(g.link)}" target="_blank" rel="noopener">Open On ESPN</a>` : ""}
         <button class="belbig ${state.favGames[g.lg.id + ":" + g.id] ? "on" : ""}" data-favgame="${g.lg.id}:${g.id}" aria-label="${state.favGames[g.lg.id + ":" + g.id] ? "Remove this game from favorites" : "Favorite this game"}">${(state.favGames[g.lg.id + ":" + g.id] ? HEART_ON : HEART).replace(' width="15" height="15"', "")}</button>
         ${gs !== "post" ? `<button class="belbig ${state.watched[g.lg.id + ":" + g.id] ? "on" : ""}" data-watchgame="${g.lg.id}:${g.id}" aria-label="${state.watched[g.lg.id + ":" + g.id] ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL_BIG}</button>` : ""}</div>
@@ -2597,21 +2672,25 @@ button.brand, button.brand span { color: var(--accent); }
   // ---- Settings
   const DENS_IC = {
     compact: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>',
+    simple: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
     expanded: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3.5" width="18" height="7" rx="1.5"/><rect x="3" y="13.5" width="18" height="7" rx="1.5"/></svg>',
   };
+  const DENS_ORDER = ["expanded", "compact", "simple"];
+  const DENS_NAME = { expanded: "Expanded", compact: "Compact", simple: "Simple" };
+  const nextDensity = () => DENS_ORDER.at((DENS_ORDER.indexOf(state.density) + 1) % 3);
   function paintDensBtn() {
     const b = document.getElementById("densbtn");
-    const next = state.density === "compact" ? "expanded" : "compact";
-    b.innerHTML = DENS_IC[next] + `<span>${next === "compact" ? "Compact" : "Expanded"}</span>`;
-    b.setAttribute("aria-label", `Switch to ${next} scoreboard`);
+    const next = nextDensity();
+    b.innerHTML = DENS_IC[next] + `<span>${DENS_NAME[next]}</span>`;
+    b.setAttribute("aria-label", `Switch to ${DENS_NAME[next]} scoreboard`);
   }
   function setDensity(v) {
-    state.density = v === "compact" ? "compact" : "expanded";
+    state.density = DENS_ORDER.includes(v) ? v : "expanded";
     store.set("density", state.density);
     document.documentElement.dataset.density = state.density;
     paintDensBtn();
   }
-  document.getElementById("densbtn").onclick = () => { setDensity(state.density === "compact" ? "expanded" : "compact"); render(); };
+  document.getElementById("densbtn").onclick = () => { setDensity(nextDensity()); render(); };
   document.documentElement.dataset.density = state.density;
   paintDensBtn();
   // Pinch the scoreboard to switch: pinch in for Compact, out for Expanded (iOS Safari gesture events)
@@ -2623,8 +2702,9 @@ button.brand, button.brand span { color: var(--accent); }
       e.preventDefault();
       if (done) return;
       const r = (e.scale || 1) / s0;
-      if (r < 0.8 && state.density !== "compact") { done = true; setDensity("compact"); render(); toast("Compact Scoreboard", "", "", "", false); }
-      else if (r > 1.25 && state.density !== "expanded") { done = true; setDensity("expanded"); render(); toast("Expanded Scoreboard", "", "", "", false); }
+      const i = DENS_ORDER.indexOf(state.density);
+      if (r < 0.8 && i < 2) { done = true; setDensity(DENS_ORDER.at(i + 1)); render(); toast(`${DENS_NAME[state.density]} Scoreboard`, "", "", "", false); }
+      else if (r > 1.25 && i > 0) { done = true; setDensity(DENS_ORDER.at(i - 1)); render(); toast(`${DENS_NAME[state.density]} Scoreboard`, "", "", "", false); }
     }, { passive: false });
     // Two-finger touch pinch for other browsers
     let d0 = 0;
@@ -2633,8 +2713,9 @@ button.brand, button.brand span { color: var(--accent); }
     main.addEventListener("touchmove", e => {
       if (e.touches.length !== 2 || !d0 || done || "ongesturechange" in window) return;
       const r = dist(e.touches) / d0;
-      if (r < 0.75 && state.density !== "compact") { done = true; setDensity("compact"); render(); }
-      else if (r > 1.3 && state.density !== "expanded") { done = true; setDensity("expanded"); render(); }
+      const i = DENS_ORDER.indexOf(state.density);
+      if (r < 0.75 && i < 2) { done = true; setDensity(DENS_ORDER.at(i + 1)); render(); }
+      else if (r > 1.3 && i > 0) { done = true; setDensity(DENS_ORDER.at(i - 1)); render(); }
     }, { passive: true });
   })();
   function applyTheme() {
@@ -2679,11 +2760,17 @@ button.brand, button.brand span { color: var(--accent); }
       setSection("display", "Layout & Display", "Open to, layout, color, appearance, odds",
         segRow("Open To", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens") +
         segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
-        segRow("Scoreboard", "density", state.density, [["compact", "Compact"], ["expanded", "Expanded"]], "Or pinch the scores: in for Compact, out for Expanded") +
-        segRow("Always Expand My Teams", "expandFavs", state.expandFavs ? "on" : "off", [["on", "On"], ["off", "Off"]], "In Compact, your teams' games stay full size") +
+        segRow("Scoreboard", "density", state.density, [["simple", "Simple"], ["compact", "Compact"], ["expanded", "Expanded"]], "Or pinch the scores: in for smaller, out for bigger") +
+        segRow("Always Expand My Teams", "expandFavs", state.expandFavs ? "on" : "off", [["on", "On"], ["off", "Off"]], "In Compact and Simple, your teams' games stay full size") +
         segRow("Color", "palette", store.get("palette", "red"), [["red", "Red"], ["navy", "Navy"], ["green", "Green"], ["purple", "Purple"], ["orange", "Orange"]]) +
         segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
         segRow("Betting Odds", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "Lines on game cards and in Gamecast")) +
+      setSection("tv", "TV & Streaming", `${state.tv.services.length} service${state.tv.services.length === 1 ? "" : "s"} · ${(MARKETS[state.tv.market] || MARKETS.other).name}`,
+        `<div class="set-row set-col"><div class="set-lbl">Home Market<small>Sets which regional channels you get and when local games are blacked out on league packages</small></div>
+          <div class="toggles">${Object.entries(MARKETS).map(([k, m]) => `<button class="chip ${state.tv.market === k ? "on" : ""}" data-tv-market="${k}" aria-pressed="${state.tv.market === k}">${esc(m.name)}</button>`).join("")}</div></div>` +
+        SERVICE_GROUPS.map(([label, kind]) => `<div class="set-row set-col"><div class="set-lbl">${esc(label)}${kind === "bundle" ? "<small>Channel lineups vary by plan</small>" : ""}</div>
+          <div class="toggles">${SERVICES.filter(s => s.kind === kind).map(s => { const on = state.tv.services.includes(s.id); return `<button class="chip ${on ? "on" : ""}" data-tv-svc="${s.id}" aria-pressed="${on}">${esc(s.label || s.name)}</button>`; }).join("")}</div></div>`).join("") +
+        `<p class="hint">Watch buttons only show services you pick. Anything else shows "Not on your services."</p>`) +
       setSection("alerts", "Alerts", `${on} alert${on === 1 ? "" : "s"} on`,
         alertGroup("team", "My Teams", "Games with teams you follow") +
         alertGroup("watched", "Games You're Watching", "Tap the bell on any game to add it") +
@@ -2709,6 +2796,14 @@ button.brand, button.brand span { color: var(--accent); }
       if (key === "odds") { state.showOdds = val === "on"; store.set("showOdds", state.showOdds); }
 
       renderSettings(); render();
+      return;
+    }
+    const tvs = e.target.closest("[data-tv-svc]"), tvm = e.target.closest("[data-tv-market]");
+    if (tvs || tvm) {
+      if (tvs) { const id = tvs.dataset.tvSvc; state.tv.services = state.tv.services.includes(id) ? state.tv.services.filter(x => x !== id) : [...state.tv.services, id]; }
+      if (tvm) state.tv.market = tvm.dataset.tvMarket;
+      store.set("tv", state.tv);
+      refreshWatch(); renderSettings(); render();
       return;
     }
     const rb = e.target.closest("[data-remind-group]");

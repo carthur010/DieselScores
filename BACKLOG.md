@@ -6,12 +6,12 @@ Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 
 > Beta 2.0 (Apple Sports look, /beta2) is parked. Its best ideas (game card, Upcoming tab, Stats/Odds, drag-to-reorder) now live in the classic beta.
 
-## HIGH PRIORITY: TV Settings
+## In beta: TV Settings (was high priority)
 - [ ] Each user picks the services they have (YouTube TV, Hulu + Live TV, Sling, Fubo, DirecTV Stream, cable login, Peacock, Paramount+, Max, ESPN+, Prime Video, Apple TV, League Pass, MLB.TV, NHL app); watch buttons only show those
 - [ ] Home market or ZIP code so regional networks (MSG, YES, SNY, NBC Sports) and blackouts show correctly
 - [ ] "Not on your services" note when nothing matches
 
-## Next up: Simple view
+## In beta: Simple view
 - [ ] A **Simple** scoreboard option beside Compact and Expanded: just a list of games grouped by league (league logo and name, then time, two team logos and names, score, bell). No cards, odds or extras. Reference: a Bundesliga list with five 9:30 AM games stacked.
 
 ## Waiting to ship (in beta now)

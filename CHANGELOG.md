@@ -16,7 +16,8 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
-_Nothing new. Beta matches live as of Oct 14, 10:20 AM._
+- **TV Settings** (Oct 14): Settings → TV & Streaming. Pick your home market (New York, Bay Area, Sacramento, Los Angeles, Boston, Chicago, Philadelphia, Other) and the services you have: live TV (YouTube TV, Hulu + Live TV, Sling, Fubo, DirecTV Stream, Cable / Satellite), streaming (ESPN+, Peacock, Paramount+, HBO Max, Prime Video, Apple TV, Netflix, Fox One, DAZN, Victory+, YouTube), league packages (NBA League Pass, MLB.TV, NHL on ESPN+, NFL Sunday Ticket) and Gotham Sports. Watch buttons only show your services; in-market regional games skip blacked-out league packages; anything else says "Not on your services." Known gaps built in (Fubo has no TNT/TBS, Sling has no CBS).
+- **Simple view** (Oct 14): a third scoreboard size beside Compact and Expanded. Just a list: time, both teams with logos and full names, score, bell. Tap a row to open the game. The scoreboard button and pinch now step through Expanded → Compact → Simple.
 
 ## Oct 14, 2026: Live (10:20 AM)
 - **Favorite Games** (Oct 14): tap the heart on any game (cards, Worth A Watch, or the game card) to favorite just that game, not the team. It pins to the top strip, shows on My Teams and Upcoming with your teams, and gets a heart on Compact cards. Favorites clear themselves two days after the game.
