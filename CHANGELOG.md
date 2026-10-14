@@ -16,6 +16,8 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
+- **Series records in the playoffs** (Oct 14): playoff games show each team's series record ("2-0 Series") instead of the regular-season record, on cards, Compact, the top strip and the game card. The season record is still in the tooltip and the Standings Overview.
+- **Simple view detail** (Oct 14): the line under the start time now shows where to watch (YouTube TV, Paramount+) before a game, "Live" during it, and the playoff game ("Game 3") after.
 - **Scoreboard button shows the view you're on** (Oct 14): it now reads Simple, Compact or Expanded for the current view; tap to step to the next.
 - **Fix** (Oct 14): tapping a watch button (Paramount+ and others) on iPhone no longer pops up "Safari cannot open the page because the address is invalid." Buttons now use the service's normal web link, which iPhone opens in the app when it's installed and in the browser when it isn't.
 - **TV Settings** (Oct 14): Settings → TV & Streaming. Pick your home market (New York, Bay Area, Sacramento, Los Angeles, Boston, Chicago, Philadelphia, Other) and the services you have: live TV (YouTube TV, Hulu + Live TV, Sling, Fubo, DirecTV Stream, Cable / Satellite), streaming (ESPN+, Peacock, Paramount+, HBO Max, Prime Video, Apple TV, Netflix, Fox One, DAZN, Victory+, YouTube), league packages (NBA League Pass, MLB.TV, NHL on ESPN+, NFL Sunday Ticket) and Gotham Sports. Watch buttons only show your services; in-market regional games skip blacked-out league packages; anything else says "Not on your services." Known gaps built in (Fubo has no TNT/TBS, Sling has no CBS).
