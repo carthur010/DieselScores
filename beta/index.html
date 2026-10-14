@@ -338,6 +338,10 @@ section.closed .bhead { border-bottom: 0; }
 .set-seg button { font-size: 13px; padding: 6px 10px; }
 .set-foot { padding-top: 6px; }
 .set-foot a { color: var(--accent); font-weight: 600; }
+.gc-pill { display: inline-flex; align-items: center; gap: 5px; font: inherit; font-size: 12px; font-weight: 700; padding: 3px 11px; border-radius: 99px; border: 0;
+  background: var(--accent-soft); color: var(--accent); white-space: nowrap; cursor: pointer; }
+.gc-pill:hover { background: var(--accent); color: var(--bg); }
+.g-foot .gc-pill { flex: 0 0 auto; }
 .linkbtn { font: inherit; font-size: 12px; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; white-space: nowrap; }
 .linkbtn:hover { text-decoration: underline; }
 button.ms { font: inherit; color: inherit; text-align: left; cursor: pointer; }
@@ -1235,7 +1239,7 @@ button.brand, button.brand span { color: var(--accent); }
     return `<article class="g">
       <div class="g-top"><span class="st ${statusClass(g)}">${esc(g.status)}</span><span class="wslot">${watchPill(g)}</span></div>
       ${g.teams.map((t, i) => teamRow(g, t, i)).join("")}
-      <div class="g-foot">${footText(g)}${bellBtn(g)}<button class="linkbtn" data-game="${g.lg.id}:${g.id}">Game details</button></div>
+      <div class="g-foot">${footText(g)}${bellBtn(g)}<button class="gc-pill" data-game="${g.lg.id}:${g.id}">Gamecast</button></div>
     </article>`;
   }
 
@@ -1299,7 +1303,7 @@ button.brand, button.brand span { color: var(--accent); }
         <div class="f-mid"><span class="s ${g.state === "in" ? "live" : ""}">${esc(g.status)}</span>${sub ? `<span class="sub">${sub}</span>` : ""}</div>
         ${score(h, a)}${side(h)}
       </div>
-      <div class="f-act">${pill}${bellBtn(g)}<button class="f-link linkbtn" data-game="${g.lg.id}:${g.id}">Game details</button></div>
+      <div class="f-act">${pill}${bellBtn(g)}<button class="gc-pill" data-game="${g.lg.id}:${g.id}">Gamecast</button></div>
     </div>`;
   }
 
