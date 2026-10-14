@@ -1,6 +1,6 @@
 {
-  "name": "Scoreline",
-  "short_name": "Scoreline",
+  "name": "Scores",
+  "short_name": "Scores",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0b110f",

@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Scoreline</title>
+<title>Scores</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Scoreline">
+<meta name="apple-mobile-web-app-title" content="Scores">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#f3f5f4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0b110f" media="(prefers-color-scheme: dark)">
@@ -333,7 +333,7 @@ header.top { top: 0; padding-top: env(safe-area-inset-top, 0px); }
 <header class="top">
   <div class="wrap">
     <div class="bar">
-      <div class="brand">Score<span>line</span></div>
+      <div class="brand">Score<span>s</span></div>
       <span class="livecount" id="livebug" hidden><span class="dot"></span><span id="liven">0</span> live</span>
       <div class="spacer"></div>
       <div class="seg" role="group" aria-label="Layout">
@@ -1334,7 +1334,7 @@ header.top { top: 0; padding-top: env(safe-area-inset-top, 0px); }
     render();
     if (state.alerts) {
       try { if ("Notification" in window && Notification.permission === "default") await Notification.requestPermission(); } catch {}
-      toast("Alerts on", "You'll get a heads-up when a game turns close, goes to overtime, or an upset starts brewing.", "Works while Scoreline is open");
+      toast("Alerts on", "You'll get a heads-up when a game turns close, goes to overtime, or an upset starts brewing.", "Works while Scores is open");
     } else {
       toast("Alerts off", "No more heads-ups for close games.", "");
     }
