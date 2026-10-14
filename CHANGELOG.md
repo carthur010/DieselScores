@@ -16,7 +16,7 @@ Link stays up; no further work. All development continues on the classic beta.
 - **Fix**: next-game chips no longer show a game that already started.
 
 ## In beta (not on live yet)
-_Nothing new. Beta matches live as of Oct 14, 10:00 AM._
+- **Favorite Games** (Oct 14): tap the heart on any game (cards, Worth A Watch, or the game card) to favorite just that game, not the team. It pins to the top strip, shows on My Teams and Upcoming with your teams, and gets a heart on Compact cards. Favorites clear themselves two days after the game.
 
 ## Oct 14, 2026: Live (10:00 AM)
 - **Title Case everywhere** (Oct 14): every label, button, tab, heading and alert name now capitalizes each word (My Teams, All Games, Test Alerts, Send Test, Game Start, Red Zone, Edit Order, Full Leaderboard, Watch On YouTube TV…). Hints and descriptions stay as normal sentences.
