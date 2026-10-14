@@ -2,7 +2,7 @@
 
 Newest first. Beta changes move to Live when shipped.
 
-## In beta: iPhone App Notifications
+## Oct 14, 2026: Live (2:40 PM): iPhone App Notifications
 - In the iOS app, alerts now come through as real iPhone notifications.
 - Start reminders (30, 15, 10, 5, 1 Min) are booked on the phone ahead of time, so they arrive even when Scores is closed. Live score alerts still need the app open.
 
@@ -25,7 +25,7 @@ Link stays up; no further work. All development continues on the classic beta.
 - **All classic features ported in**: Live Now view (Worth A Watch + **You Are Looking Live** by league), Close Games view, CFB Top 25 and Power 4 views, live counts in the menu, a "live now" shortcut on Home, **Compact layout** option (Sofascore-style rows) in Settings, **calendar date picker** in the menu, collapsible sections, **Follow** buttons on the game card, where-to-watch under live games, tap the title for Home, and the after-midnight live games fix.
 - **Fix**: next-game chips no longer show a game that already started.
 
-## In beta (not on live yet)
+## Oct 14, 2026: Live (2:40 PM)
 - **Betting results on finals** (Oct 14): final games show how the closing line played out, like "BOS covered (+3.5) · Under 228.5". The app remembers each game's line before and during the game, and looks it up from ESPN for finals it didn't see. Soccer shows the total only. Hidden when betting odds are off.
 - **Playoff seeds** (Oct 14): playoff games show each team's seed next to its name, like (1) TB and (2) CLE, on cards, Compact, Simple, the top strip and the game card. Seeds come from the league standings.
 - **Dismiss alerts** (Oct 14): in-app alerts now have an X, can be swiped away, and close when tapped. They leave on their own sooner (about 4 seconds, 7 for upsets and comebacks) and never stack more than three.
