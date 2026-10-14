@@ -3,6 +3,8 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Tennis matches are tappable: a match view with player photos and flags, seeds, status, round and court, a set-by-set score with tiebreaks, a Full Draw button and Match Stats bars (aces, double faults, serve %, break points) when ESPN has them.
+- Tennis tournaments with no singles matches that day are hidden (the WTA feed lists every small event that week, so empty ones were piling up).
 - Search finds leagues too: typing NFL, Tennis, Premier, CFB and so on shows a Leagues section with Follow buttons above the team results. Following a league adds it to My Leagues.
 - Tennis: Men's Tennis (ATP) and Women's Tennis (WTA) tabs. Each tournament shows the day's singles matches (live first, then results, then upcoming) with round, flags, set scores, winners in bold and tiebreak scores, plus a Full Draw link.
 - Game vs. Match wording by sport: "Previous Games" and "Game Leaders" for NFL, NBA, MLB, NHL and college; "Previous Matches" and "Match Leaders" for soccer. Soccer-only lists count "Matches", mixed lists count "Games".

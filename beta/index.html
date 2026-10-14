@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014191244">
+<meta name="build" content="20261014191612">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -365,6 +365,12 @@ section.closed .bhead { border-bottom: 0; }
 .tn { display: grid; }
 .tn-m { padding: 10px 16px; border-top: 1px solid var(--line); }
 .tn-m:first-child { border-top: 0; }
+.tn-m.tap { cursor: pointer; }
+.tn-m.tap:hover { background: var(--accent-soft); }
+.tn-face { position: relative; width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,.14); display: block; }
+.tn-face .hs { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; filter: none; }
+.tn-face .fl { position: absolute; right: -6px; bottom: -2px; width: 26px; height: 18px; object-fit: cover; border-radius: 4px; border: 2px solid rgba(255,255,255,.9); filter: none; }
+.gc-ls sup { font-size: 9px; margin-left: 1px; }
 .tn-h { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
 .tn-live { color: var(--live, #d33); font-weight: 700; }
 .tn-p { display: grid; grid-template-columns: 20px 1fr auto; align-items: center; gap: 8px; padding: 3px 0; color: var(--muted); }
@@ -1259,6 +1265,10 @@ button.brand, button.brand span { color: var(--accent); }
   function athleteRow(x) {
     return { name: x?.athlete?.displayName || x?.athlete?.shortName || x?.roster?.shortDisplayName || x?.team?.displayName || "",
       flag: x?.athlete?.flag?.href || "", winner: !!x?.winner,
+      id: x?.athlete?.id || x?.id || "", short: x?.athlete?.shortName || "",
+      seed: x?.seed || x?.tournamentSeed || x?.curatedRank?.current || "",
+      headshot: x?.athlete?.headshot?.href || (x?.athlete?.id ? `https://a.espncdn.com/i/headshots/tennis/players/full/${x.athlete.id}.png` : ""),
+      stats: (x?.statistics || []).filter(s => s && (s.displayValue != null || s.value != null)),
       sets: (x?.linescores || []).map(l => l?.value).filter(v => v != null),
       tb: (x?.linescores || []).filter(l => l?.value != null).map(l => l?.tiebreak ?? null) };
   }
@@ -1281,7 +1291,8 @@ button.brand, button.brand span { color: var(--accent); }
     const matches = comps.map(({ c, group }) => ({
       a: athleteRow(c.competitors?.[0]), b: athleteRow(c.competitors?.[1]),
       state: c.status?.type?.state || "pre", detail: c.status?.type?.shortDetail || "",
-      round: (typeof c.round === "string" ? c.round : c.round?.displayName) || c.type?.text || "", group, date: c.date, id: c.id,
+      round: (typeof c.round === "string" ? c.round : c.round?.displayName) || c.type?.text || "", group, date: c.date, id: String(c.id || ""),
+      court: c.venue?.court || c.venue?.fullName || "", note: c.notes?.[0]?.text || "",
     })).filter(m => m.a.name && m.b.name);
     const ord = { in: 0, post: 1, pre: 2 };
     matches.sort((x, y) => (ord[x.state] - ord[y.state]) || (x.state === "post" ? new Date(y.date) - new Date(x.date) : new Date(x.date) - new Date(y.date)));
@@ -2004,20 +2015,67 @@ button.brand, button.brand span { color: var(--accent); }
   function tennisBlock(e) {
     const day = ymd(state.date);
     const list = e.matches.filter(m => !/doubles/i.test(m.group) && (m.state === "in" || (m.date && ymd(new Date(m.date)) === day)));
+    if (!list.length) return "";
     const rows = list.slice(0, 12).map(m => {
       const status = m.state === "in" ? `<span class="tn-live">${esc(m.detail || "Live")}</span>` : m.state === "pre" ? esc(timeLabel(m.date)) : esc(m.detail || "Final");
       const pl = (x, o) => {
         const sets = x.sets.map((v, i) => { const won = v > (o.sets[i] ?? -1); const tb = x.tb?.[i] != null && !won ? `<sup>${x.tb[i]}</sup>` : ""; return `<span class="${won ? "won" : ""}">${v}${tb}</span>`; }).join("");
         return `<div class="tn-p ${x.winner ? "w" : ""}">${x.flag ? `<img src="${esc(x.flag)}" alt="">` : "<i></i>"}<span class="nm">${esc(x.name)}</span><span class="tn-s">${sets}</span></div>`;
       };
-      return `<div class="tn-m"><div class="tn-h"><span>${esc(m.round || m.group || "")}</span><span>${status}</span></div>${pl(m.a, m.b)}${pl(m.b, m.a)}</div>`;
+      return `<div class="tn-m tap" role="button" tabindex="0" data-tmatch="${e.lg.id}|${esc(e.id)}|${esc(m.id)}"><div class="tn-h"><span>${esc(m.round || m.group || "")}</span><span>${status}</span></div>${pl(m.a, m.b)}${pl(m.b, m.a)}</div>`;
     }).join("");
-    const body = rows ? `<div class="tn">${rows}</div>` : `<div class="empty">No singles matches ${isToday() ? "today" : "this day"}.</div>`;
+    const body = `<div class="tn">${rows}</div>`;
     const more = e.link ? `<div class="f-act" style="padding-bottom:12px"><a class="f-link" href="${esc(e.link)}" target="_blank" rel="noopener">Full Draw</a></div>` : "";
     const meta = list.some(m => m.state === "in") ? `${list.filter(m => m.state === "in").length} Live · ${list.length} Total` : `${list.length} Match${list.length === 1 ? "" : "es"}`;
     return block("ev-" + e.lg.id + e.id, `${e.lg.short || e.lg.name} · ${e.name}`, meta, body + more);
   }
   const BLOCK = { golf: golfBlock, tennis: tennisBlock };
+  // ---- Tennis match view: players, set-by-set score, the draw, match stats
+  let tennisKey = null;
+  function findMatch(key) {
+    const [lgId, evId, mId] = key.split("|");
+    const e = allSpecial().find(x => x.lg.id === lgId && String(x.id) === evId);
+    return e ? { e, m: e.matches.find(x => x.id === mId) } : {};
+  }
+  function tennisShell(e, m) {
+    const face = x => `<div class="gc-team"><span class="tn-face">${x.headshot ? `<img class="hs" src="${esc(x.headshot)}" alt="" onerror="this.remove()">` : ""}${x.flag ? `<img class="fl" src="${esc(x.flag)}" alt="">` : ""}</span>
+      <b class="${(x.short || x.name).length > 12 ? "long" : ""}">${x.seed ? `<i>${esc(x.seed)}</i> ` : ""}${esc(x.short || x.name)}</b>${x.winner ? "<small>Winner</small>" : ""}</div>`;
+    const status = m.state === "pre" ? whenLabel(m.date) : (m.detail || (m.state === "in" ? "Live" : "Final"));
+    const n = Math.max(m.a.sets.length, m.b.sets.length);
+    const cell = (x, o, i) => { const v = x.sets[i]; if (v == null) return "<td>-</td>"; const won = v > (o.sets[i] ?? -1); return `<td class="${won ? "tot" : ""}">${v}${x.tb?.[i] != null && !won ? `<sup>${x.tb[i]}</sup>` : ""}</td>`; };
+    let html = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:#1f4e79;--ch:#163a5c"></div>
+      <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span></div>
+      <div class="gc-grid">${face(m.a)}<div class="gc-mid"><div class="gc-lbl">${esc(e.name)}</div>
+        <div class="gc-when"><b>${m.state === "in" ? '<i class="livedot"></i>' : ""}${esc(status)}</b>${m.round ? `<small>${esc(m.round)}</small>` : ""}</div>
+        ${m.court ? `<div class="gc-info"><span>${esc(m.court)}</span></div>` : ""}</div>${face(m.b)}</div>`;
+    if (n) html += `<div class="gc-ls"><table><thead><tr><th></th>${Array.from({ length: n }, (_, i) => `<th>${i + 1}</th>`).join("")}</tr></thead><tbody>
+      ${[[m.a, m.b], [m.b, m.a]].map(([x, o]) => `<tr><td>${esc(x.short || x.name)}</td>${Array.from({ length: n }, (_, i) => cell(x, o, i)).join("")}</tr>`).join("")}</tbody></table></div>`;
+    html += `</div>`;
+    if (e.link) html += `<div class="gc-actions"><a class="watchbig" href="${esc(e.link)}" target="_blank" rel="noopener">Full Draw</a></div>`;
+    if (m.note) html += `<div class="gc-net">${esc(m.note)}</div>`;
+    // Match stats, when ESPN has them (main-draw matches)
+    const names = [...new Set(m.a.stats.map(s => s.name || s.label))].filter(nm => m.b.stats.some(s => (s.name || s.label) === nm));
+    if (names.length) {
+      const get = (x, nm) => x.stats.find(s => (s.name || s.label) === nm) || {};
+      html += `<div class="gc-c" style="margin-top:16px"><h3>Match Stats</h3>${names.map(nm => {
+        const sa = get(m.a, nm), sb = get(m.b, nm);
+        const va = parseFloat(sa.value ?? sa.displayValue) || 0, vb = parseFloat(sb.value ?? sb.displayValue) || 0, tot = Math.abs(va) + Math.abs(vb) || 1;
+        const label = sa.displayName || sa.label || sa.shortDisplayName || nm.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, c => c.toUpperCase());
+        return `<div class="sbar"><b>${esc(sa.displayValue ?? sa.value ?? "")}</b><span>${esc(label)}</span><b>${esc(sb.displayValue ?? sb.value ?? "")}</b></div>
+          <div class="bar-track" style="--l:${Math.max(.04, Math.abs(va) / tot)}fr;--r:${Math.max(.04, Math.abs(vb) / tot)}fr"><i style="background:#1f4e79"></i><i style="background:var(--accent)"></i></div>`;
+      }).join("")}</div>`;
+    } else if (m.state !== "pre") html += `<p class="hint" style="text-align:center;margin-top:14px">ESPN doesn't have detailed stats for this match.</p>`;
+    return html + `</div>`;
+  }
+  function openTennis(key, quiet) {
+    const { e, m } = findMatch(key);
+    if (!e || !m) return;
+    closeGame(); tennisKey = key;
+    const el = document.getElementById("gsheet"), y = el.scrollTop;
+    el.innerHTML = tennisShell(e, m);
+    el.hidden = false; el.scrollTop = quiet ? y : 0;
+    if (m.state === "in") gameTimer = setTimeout(() => { if (tennisKey === key && !document.hidden) openTennis(key, true); }, 30000);
+  }
 
   // "8 Games", or "8 Matches" when every game in the list is soccer
   function countLabel(n, games) { const m = games?.length && games.every(g => g.lg?.soccer); return `${n} ${m ? (n === 1 ? "Match" : "Matches") : (n === 1 ? "Game" : "Games")}`; }
@@ -2638,7 +2696,7 @@ button.brand, button.brand span { color: var(--accent); }
   function ord(n) { const s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
   function closeGame() {
     document.getElementById("gsheet").hidden = true;
-    clearTimeout(gameTimer); openGameKey = null; lastSummary = null;
+    clearTimeout(gameTimer); openGameKey = null; lastSummary = null; tennisKey = null;
   }
   function repaintGame() {
     if (!openGameKey) return;
@@ -3066,6 +3124,8 @@ button.brand, button.brand span { color: var(--accent); }
     if (fg) { e.preventDefault(); toggleFavGame(fg.dataset.favgame); return; }
     const w = e.target.closest("[data-watchgame]");
     if (w) { e.preventDefault(); toggleWatch(w.dataset.watchgame); return; }
+    const tm = e.target.closest("[data-tmatch]");
+    if (tm) { e.preventDefault(); openTennis(tm.dataset.tmatch); return; }
     const b = e.target.closest("[data-game]");
     if (!b) return;
     // Tapping a link, star or other button inside a card does its own thing
