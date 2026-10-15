@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015112716">
+<meta name="build" content="20261015113653">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1097,7 +1097,8 @@ button.brand, button.brand span { color: var(--accent); }
   try { if (location.pathname.includes("/beta") && !localStorage.getItem("scoreline-shared:favs")) ["favs", "favMeta", "favLeagues"].forEach(k => { const v = localStorage.getItem("scoreline-beta:" + k); if (v) localStorage.setItem("scoreline-shared:" + k, v); }); } catch {}
   const state = {
     date: startOfDay(new Date()),
-    tab: store.get("home", "live"),
+    tab: store.get("home", "live") === "auto" ? "teams" : store.get("home", "live"),
+    autoPending: store.get("home", "live") === "auto",
     conf: (() => { const c = store.get("conf", null); return c && typeof c === "object" ? c : {}; })(),
     blkF: (() => { const c = store.get("blkF", null); return c && typeof c === "object" ? c : {}; })(),
     view: store.get("view3", "league"),
@@ -1518,6 +1519,7 @@ button.brand, button.brand span { color: var(--accent); }
     });
     state.loading = false;
     state.updatedAt = new Date();
+    if (state.autoPending) { state.autoPending = false; state.tab = homeTab(); }
     document.getElementById("refresh").classList.remove("spin");
     if (isToday()) { checkAlerts(); checkReminders(); }
     syncScheduled();
@@ -2788,6 +2790,13 @@ button.brand, button.brand span { color: var(--accent); }
       default: return games.filter(g => g.lg.id === tab);
     }
   }
+  // "Smart" Open To: Live when any of your games or leagues are on right now, otherwise My Teams
+  function homeTab() {
+    const h = store.get("home", "live");
+    if (h !== "auto") return h;
+    const live = allGames().some(g => g.state === "in" && inMyWorld(g)) || specialsFor("live").some(e => e.state === "in");
+    return live ? "live" : "teams";
+  }
   function specialsFor(tab) {
     const all = allSpecial();
     if (tab === "all" || tab === "live") return all.filter(e => e.state === "in" && state.favLeagues.includes(e.lg.id));
@@ -3341,7 +3350,7 @@ button.brand, button.brand span { color: var(--accent); }
     ["lsheet", "ssheet"].forEach(id => document.getElementById(id).hidden = true);
     syncLock();
     state.closed.clear(); state.closed.add("other-live");
-    state.tab = store.get("home", "live");
+    state.tab = homeTab();
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (!isToday()) setDate(new Date()); else render();
   }
@@ -4012,7 +4021,7 @@ button.brand, button.brand span { color: var(--accent); }
       (store.get("owner", "") ? `<div class="set-row"><div class="set-lbl">Reset To My Setup<small>Puts back your saved teams and leagues, in order</small></div><button class="chip" data-reset-setup>Reset</button></div>` : "") +
       `<div class="set-row"><div class="set-lbl">Load A Setup<small>Have a setup code? Enter it to load those teams and leagues</small></div><button class="chip" data-load-setup>Enter Code</button></div>` +
       setSection("display", "Layout & Display", "Open to, layout, color, appearance, odds",
-        segRow("Open To", "home", store.get("home", "live"), [["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens") +
+        segRow("Open To", "home", store.get("home", "live"), [["auto", "Smart"], ["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens. Smart picks Live when your games are on, and My Teams when nothing is.") +
         segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
         segRow("Scoreboard", "density", state.density, [["simple", "Simple"], ["compact", "Compact"], ["expanded", "Expanded"]], "Or pinch the scores: in for smaller, out for bigger") +
         segRow("Always Expand My Teams", "expandFavs", state.expandFavs ? "on" : "off", [["on", "On"], ["off", "Off"]], "In Compact and Simple, your teams' games stay full size") +
@@ -4042,14 +4051,14 @@ button.brand, button.brand span { color: var(--accent); }
     const b = e.target.closest("[data-set]");
     if (b) {
       const key = b.dataset.set, val = b.dataset.val;
-      if (key === "home") { store.set("home", val); state.tab = val; }
+      if (key === "home") { store.set("home", val); state.tab = homeTab(); }
       if (key === "view") { state.view = val; store.set("view3", val); }
       if (key === "theme") { store.set("theme", val); applyTheme(); }
       if (key === "palette") { store.set("palette", val); applyTheme(); }
       if (key === "density") setDensity(val);
       if (key === "expandFavs") { state.expandFavs = val === "on"; store.set("expandFavs", state.expandFavs); }
       if (key === "odds") { state.showOdds = val === "on"; store.set("showOdds", state.showOdds); }
-      if (key === "svcTab") { store.set("svcTab", val === "on"); if (val === "off" && state.tab === "onmine") { state.tab = store.get("home", "live"); store.set("tab2", state.tab); } }
+      if (key === "svcTab") { store.set("svcTab", val === "on"); if (val === "off" && state.tab === "onmine") { state.tab = homeTab(); store.set("tab2", state.tab); } }
 
       renderSettings(); render();
       return;
@@ -4136,6 +4145,8 @@ button.brand, button.brand span { color: var(--accent); }
   const lockObs = new MutationObserver(syncLock);
   LOCKERS.forEach(el => lockObs.observe(el, { attributes: true, attributeFilter: ["hidden"] }));
   document.addEventListener("visibilitychange", () => {
+    if (document.hidden) state.hiddenAt = Date.now();
+    else if (state.hiddenAt && Date.now() - state.hiddenAt > 10 * 60e3 && store.get("home", "live") === "auto" && document.getElementById("gsheet").hidden) state.autoPending = true;
     if (!document.hidden && isToday() && state.updatedAt && Date.now() - state.updatedAt > 25000) loadAll();
   });
   // GitHub Pages lets browsers keep the page for ~10 minutes. Check for a newer build and jump to it.

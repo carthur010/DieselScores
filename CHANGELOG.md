@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## In beta (not on live yet)
+- Settings > Open To has a Smart option: opens to Live when any of your teams, leagues or saved games are on, and My Teams when nothing is. It checks again when you come back to the app after 10+ minutes.
+
 ## Oct 15, 2026: Live (11:28 AM)
 - Game header: stadium names no longer repeat the city ("Memorial Stadium (Bloomington, IN)" is now "Memorial Stadium", with Bloomington, IN on the line below). Network codes show in caps (FOX, not Fox).
 - College sections on the scoreboard (Football, Men's and Women's Hoops) have their own filter right under the header: All Games, Top 25, Ranked vs Ranked, Power 4 (football) and each conference. It remembers your pick.
