@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta 3.0</title>
-<meta name="build" content="20261015191005">
+<meta name="build" content="20261015193219">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -926,6 +926,9 @@ button.brand span { color: var(--accent); }
 .botbar button { display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 44px; font-size: 11px; font-weight: 700; color: var(--muted); }
 .botbar button.on { color: var(--accent); }
 .botbar svg { width: 22px; height: 22px; }
+:root[data-home="bar"] .botbar { z-index: 62; }
+:root[data-home="bar"] .gcard { padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+.circ.gc-home svg { width: 20px; height: 20px; }
 :root[data-home="bar"] main { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
 /* B: Your Day */
 .h3day { display: flex; align-items: center; gap: 6px; padding-block: 12px 0; }
@@ -2456,7 +2459,7 @@ button.brand, button.brand span { color: var(--accent); }
       }
     }
     el.innerHTML = `<div class="gc-wrap"><div class="gc-hero lp-hero"><div class="gc-bg" style="--ca:var(--accent);--ch:var(--accent)"></div>
-      <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span><button class="circ" data-share-lg="${lg.id}" aria-label="Share">${SHAREIC}</button><button class="circ tm-star ${on ? "on" : ""}" data-lp-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(lg.name)}">${on ? STAR : STAR_O}</button></div>
+      <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button>${gcHomeBtn()}<span class="sp"></span><button class="circ" data-share-lg="${lg.id}" aria-label="Share">${SHAREIC}</button><button class="circ tm-star ${on ? "on" : ""}" data-lp-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(lg.name)}">${on ? STAR : STAR_O}</button></div>
       <div class="tm-hero">${lv.logo ? `<img src="${esc(lv.logo)}" alt="" class="lp-logo-big">` : ""}<b>${esc(lg.name)}</b><small>${esc(lv.season || lg.sport)}</small></div></div>
       <div class="tm-tabs" role="tablist">${LP_TABS(lg).map(([id, label]) => `<button role="tab" class="${lv.tab === id ? "on" : ""}" data-lp-tab="${id}" aria-selected="${lv.tab === id}">${label}</button>`).join("")}</div>
       ${body}</div>`;
@@ -2721,7 +2724,7 @@ button.brand, button.brand span { color: var(--accent); }
         <span class="l5-r">${g.state === "post" ? `<small>Final</small><span><b class="${g.res === "W" ? "w" : g.res === "L" ? "l" : ""}">${esc(g.res || "")}</b> ${esc(g.score)}</span>` : `<small>${esc(g.state === "in" ? "Live" : g.tv || "")}</small><span>${esc(g.state === "in" ? g.score : timeLabel(g.date))}</span>`}</span></div>`;
       const keepLeft = el.querySelector(".tm-tabs")?.scrollLeft || 0;
       el.innerHTML = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:${readable(tm.color)};--ch:${readable(tm.color)}"></div>
-        <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span><button class="circ" data-share-tm aria-label="Share">${SHAREIC}</button><button class="circ tm-star ${on ? "on" : ""}" data-team-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(tm.name)}" title="${on ? "Following" : "Follow"}">${on ? STAR : STAR_O}</button></div>
+        <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button>${gcHomeBtn()}<span class="sp"></span><button class="circ" data-share-tm aria-label="Share">${SHAREIC}</button><button class="circ tm-star ${on ? "on" : ""}" data-team-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(tm.name)}" title="${on ? "Following" : "Follow"}">${on ? STAR : STAR_O}</button></div>
         <div class="tm-hero">${tm.logo ? `<img src="${esc(tm.logo)}" alt="">` : ""}<b>${esc(tm.name)}</b><small>${esc([lg.name, sched?.record, sched?.standing].filter(Boolean).join(" · "))}</small></div></div>
         <div class="tm-tabs" role="tablist">${tmTabsFor(lg).map(([id, label]) => `<button role="tab" class="${tab === id ? "on" : ""}" data-tm-tab="${id}" aria-selected="${tab === id}">${label}</button>`).join("")}</div>
         ${tab !== "schedule" ? teamTabBody(tm, lg, tab) : `
@@ -2775,7 +2778,7 @@ button.brand, button.brand span { color: var(--accent); }
     const n = Math.max(m.a.sets.length, m.b.sets.length);
     const cell = (x, o, i) => { const v = x.sets[i]; if (v == null) return "<td>-</td>"; const won = v > (o.sets[i] ?? -1); return `<td class="${won ? "tot" : ""}">${v}${x.tb?.[i] != null && !won ? `<sup>${x.tb[i]}</sup>` : ""}</td>`; };
     let html = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:#1f4e79;--ch:#163a5c"></div>
-      <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span></div>
+      <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button>${gcHomeBtn()}<span class="sp"></span></div>
       <div class="gc-grid">${face(m.a)}<div class="gc-mid"><div class="gc-lbl">${esc(e.name)}</div>
         <div class="gc-when"><b>${m.state === "in" ? '<i class="livedot"></i>' : ""}${esc(status)}</b>${m.round ? `<small>${esc(m.round)}</small>` : ""}</div>
         ${m.court ? `<div class="gc-info"><span>${esc(m.court)}</span></div>` : ""}</div>${face(m.b)}</div>`;
@@ -3210,11 +3213,15 @@ button.brand, button.brand span { color: var(--accent); }
     }
     el.querySelectorAll("[data-id]").forEach(b => b.onclick = () => { state.tab = b.dataset.id; store.set("tab2", state.tab); render(); window.scrollTo({ top: 0, behavior: "smooth" }); });
   }
+  // Home button on game, team and league pages (Bottom Bar has the bar instead)
+  function gcHomeBtn() { return ["day", "rail"].includes(state.homeLayout) ? `<button class="circ gc-home" data-h3="home" aria-label="Home" title="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg></button>` : ""; }
   document.addEventListener("click", e => {
     const h = e.target.closest("[data-h3]"), bb = e.target.closest("[data-bb]");
     const act = h?.dataset.h3 || bb?.dataset.bb;
     if (!act) return;
-    if (act === "home") goHome();
+    // Search and Settings sit under game pages, so leave the page first
+    if (act === "search" || act === "settings") { navStack = []; closeGame(); syncLock(); }
+    if (act === "home") { navStack = []; goHome(); }
     if (act === "dens") { setDensity(nextDensity()); render(); }
     if (act === "cal") { state.showCal = !state.showCal; render(); }
     if (act === "search") openSheet();
@@ -3781,7 +3788,7 @@ button.brand, button.brand span { color: var(--accent); }
     } catch {}
     if (openGameKey !== key) return;
     if (!j && !quiet && g?.link) { window.open(g.link, "_blank", "noopener"); closeGame(); return; }
-    if (!j && !lastSummary) { el.innerHTML = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:var(--accent);--ch:var(--accent)"></div><div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button></div><div class="gc-lbl">Couldn't load this game. Try again in a bit.</div></div></div>`; return; }
+    if (!j && !lastSummary) { el.innerHTML = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:var(--accent);--ch:var(--accent)"></div><div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button>${gcHomeBtn()}</div><div class="gc-lbl">Couldn't load this game. Try again in a bit.</div></div></div>`; return; }
     if (j) lastSummary = j;
     repaintGame();
     const st = lastSummary?.header?.competitions?.[0]?.status?.type?.state || g?.state;
@@ -3811,7 +3818,7 @@ button.brand, button.brand span { color: var(--accent); }
     // ESPN sometimes tacks the city onto the stadium: "Memorial Stadium (Bloomington, IN)". The city already has its own line.
     const lines = [g?.broadcast?.replace(" / ", ", "), (vn?.fullName || "").replace(/\s*\([^)]*\)\s*$/, ""), placeName(vn)].filter(Boolean);
     let html = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:${readable(a.color)};--ch:${readable(h.color)}"></div>
-      <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span>${g ? `<button class="circ" data-share="${g.lg.id}:${g.id}" aria-label="Share">${SHAREIC}</button>` : ""}</div>
+      <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button>${gcHomeBtn()}<span class="sp"></span>${g ? `<button class="circ" data-share="${g.lg.id}:${g.id}" aria-label="Share">${SHAREIC}</button>` : ""}</div>
       <div class="gc-grid">${fmtTeam(a, h, ta)}<div class="gc-mid">
         <div class="gc-lbl">${esc(label)}</div>
         <div class="gc-when"><b>${gs === "in" ? '<i class="livedot"></i>' : ""}${esc(gs === "pre" && (g || comp.date) ? whenLabel(g?.date || comp.date) : status)}</b>${sub ? `<small>${esc(sub)}</small>` : ""}</div>
