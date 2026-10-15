@@ -3,6 +3,10 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Every sport now follows the same game view. Before: Matchup (Preview for soccer) with odds, season team stats and ranks, leaders, last 5 and a new Injuries card. Live: opens on Play-By-Play, then Box Score (Stats for soccer) and Standings. Final: opens on Recap.
+- Recap for every sport: hockey Three Stars and goal-by-goal Scoring Summary; football Scoring Summary by quarter; soccer Goals; then game leaders, win probability and team stats (no odds). Baseball keeps its W/L/S recap.
+- Play-By-Play filters for every sport: basketball and football All Plays / Scoring / Key Moments (threes, dunks, technicals; turnovers, sacks, 4th downs, 20+ yard plays), hockey All Plays / Goals / Penalties.
+- Soccer standings tab in a match is now called Table.
 - Finished baseball games open on a Recap tab in place of Stats: Win / Loss / Save with headshots and pitching lines, Scoring Summary by inning with the score after each run, Team Stats bars (hits, homers, total bases, walks, strikeouts, left on base), and the playoff series game by game (tap a game to open it).
 - Baseball line score shows x when the home team didn't need to bat in the last inning.
 - Top strip of your games: live first, then upcoming by start time (7:00 PM before 7:30 PM before 8:00 PM), then finals. Your team order only breaks ties.

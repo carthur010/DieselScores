@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015155229">
+<meta name="build" content="20261015160727">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -448,6 +448,10 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .lm-go { font-style: normal; color: var(--muted); text-align: right; }
 .lm-list .mc-fav { font-style: normal; }
 .sp-seg { margin-bottom: 10px; }
+.inj-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
+.inj-tm { display: flex; align-items: center; gap: 6px; font-size: 13px; margin-bottom: 4px; } .inj-tm img { width: 18px; height: 18px; object-fit: contain; }
+.inj-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+.inj-row small { color: var(--muted); margin-left: 5px; font-size: 11.5px; }
 .rc-dec { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; text-align: center; }
 .rc-p { display: grid; justify-items: center; gap: 2px; }
 .rc-p img, .rc-p > i { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; background: var(--line); margin-bottom: 4px; }
@@ -3538,7 +3542,7 @@ button.brand, button.brand span { color: var(--accent); }
     clearTimeout(gameTimer);
     const el = document.getElementById("gsheet");
     if (!quiet) {
-      gameTab = "stats"; lastSummary = null; lfSide = 0; lineupSide = 0;
+      gameTab = "stats"; lastSummary = null; lfSide = 0; lineupSide = 0; bbSeg = genSeg = socSeg = "all";
       el.innerHTML = gameShell(g, null, lg);
       el.hidden = false; el.scrollTop = 0;
     }
@@ -3609,11 +3613,15 @@ button.brand, button.brand span { color: var(--accent); }
     const hasTable = !!(j.standings?.groups?.length || j.lastFiveGames?.length);
     // Live baseball: Box Score already covers the numbers, so the game opens on Play-By-Play
     const liveBall = lg.sport === "Baseball" && gs === "in";
-    const finalBall = lg.sport === "Baseball" && gs === "post";
-    const tabs = [finalBall ? ["recap", "Recap"] : liveBall ? null : ["stats", "Stats"], ["plays", "Play-By-Play"], lg.soccer ? null : ["box", "Box Score"], hasTable ? ["table", lg.soccer ? "Tournament" : "Standings"] : null].filter(Boolean);
+    // Same shape for every sport: Before opens on Matchup, Live on Play-By-Play, Final on Recap.
+    // Soccer keeps a live Stats tab (no box score) and says Preview / Table.
+    const tbl = hasTable ? ["table", lg.soccer ? "Table" : "Standings"] : null;
+    const tabs = (gs === "pre" ? [["matchup", lg.soccer ? "Preview" : "Matchup"], tbl]
+      : gs === "post" ? [["recap", "Recap"], ["plays", "Play-By-Play"], lg.soccer ? ["stats", "Stats"] : ["box", "Box Score"], tbl]
+      : [["plays", "Play-By-Play"], lg.soccer ? ["stats", "Stats"] : ["box", "Box Score"], tbl]).filter(Boolean);
     if (!tabs.some(([k]) => k === gameTab)) gameTab = tabs[0][0];
     html += `<div class="gtabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${gameTab === k}" class="${gameTab === k ? "on" : ""}" data-gtab="${k}">${l}</button>`).join("")}</div>`;
-    html += gameTab === "recap" ? recapTab(j, a, h, lg) : gameTab === "stats" ? statsTab(j, a, h, lg) : gameTab === "plays" ? playsTab(j, lg) : gameTab === "table" ? tableTab(j, a, h, lg) : boxTab(j);
+    html += gameTab === "recap" ? (lg.sport === "Baseball" ? recapTab(j, a, h, lg) : recapAll(j, a, h, lg)) : gameTab === "matchup" ? matchupTab(j, a, h, lg) : gameTab === "stats" ? statsTab(j, a, h, lg) : gameTab === "plays" ? playsTab(j, lg) : gameTab === "table" ? tableTab(j, a, h, lg) : boxTab(j);
     if (g?.link) html += `<a class="ext" href="${esc(g.link)}" target="_blank" rel="noopener">Open Full Gamecast On ESPN</a>`;
     return html + `</div>`;
   }
@@ -3647,6 +3655,36 @@ button.brand, button.brand span { color: var(--accent); }
     }
     return pc.details ? `<div class="gc-c">${head}<div style="text-align:center;font-weight:600">${esc(pc.details)}</div>${foot}</div>` : "";
   }
+  // ---- Matchup (before the game): odds, season team stats, leaders, last 5, injuries
+  function injuriesCard(j, a, h) {
+    const teams = [a, h].map(x => ({ x, list: ((j.injuries || []).find(t => String(t.team?.id) === String(x.id) || t.team?.abbreviation === x.abbr)?.injuries || []).slice(0, 6) })).filter(t => t.list.length);
+    if (!teams.length) return "";
+    return `<div class="gc-c"><h3>Injuries</h3><div class="inj-cols">${teams.map(t => `<div><b class="inj-tm">${t.x.logo ? `<img src="${esc(t.x.logo)}" alt="">` : ""}${esc(t.x.abbr)}</b>${t.list.map(i => `<div class="inj-row"><span>${esc(i.athlete?.shortName || i.athlete?.displayName || "")}<small>${esc(i.athlete?.position?.abbreviation || "")}</small></span><em class="inj-tag">${esc(injAbbr(i.status || i.type?.description))}</em></div>`).join("")}</div>`).join("")}</div></div>`;
+  }
+  function matchupTab(j, a, h, lg) {
+    const more = lastFiveCard(j, a, h, lg) + injuriesCard(j, a, h), base = statsTab(j, a, h, lg);
+    return more && /class="empty"/.test(base) && base.length < 120 ? more : base + more;
+  }
+  // ---- Recap (final) for football, basketball, hockey and soccer
+  function recapAll(j, a, h, lg) {
+    const comp = j.header?.competitions?.[0] || {};
+    const logoOf = id => String(id) === String(a.id) ? a.logo : String(id) === String(h.id) ? h.logo : "";
+    let html = "";
+    const fa = comp.status?.featuredAthletes || [];
+    // Hockey: three stars
+    const stars = fa.filter(f => /Star$/.test(f.name));
+    if (stars.length) html += `<div class="gc-c"><h3>Three Stars</h3><div class="rc-dec">${stars.map((f, i) => { const at = f.athlete || {}; const ph = at.headshot?.href || (typeof at.headshot === "string" ? at.headshot : "");
+      return `<div class="rc-p">${ph ? `<img src="${esc(ph)}" alt="" loading="lazy">` : `<i></i>`}<small>${["First", "Second", "Third"][i] || ""} Star</small><b>${esc(at.shortName || at.displayName || "")}</b><span>${esc(f.team?.abbreviation || "")}</span></div>`; }).join("")}</div></div>`;
+    // Scoring summary
+    let sp = [];
+    if (lg.soccer) sp = (j.keyEvents || []).filter(k => k.scoringPlay).map(k => ({ per: k.clock?.displayValue || "", team: k.team?.id, text: k.text || k.shortText || "", score: "" }));
+    else if ((j.scoringPlays || []).length) sp = j.scoringPlays.map(p => ({ per: perName(lg, p.period?.number || 0, j.header?.season?.type === 3) + (p.clock?.displayValue ? " " + p.clock.displayValue : ""), team: p.team?.id, text: p.text || "", score: `${p.awayScore}-${p.homeScore}` }));
+    else if (lg.sport === "Hockey") sp = (j.plays || []).filter(p => p.scoringPlay).map(p => ({ per: perName(lg, p.period?.number || 0, j.header?.season?.type === 3) + (p.clock?.displayValue ? " " + p.clock.displayValue : ""), team: p.team?.id, text: p.text || "", score: p.awayScore != null ? `${p.awayScore}-${p.homeScore}` : "" }));
+    if (sp.length) html += `<div class="gc-c"><h3>${lg.soccer ? "Goals" : "Scoring Summary"}</h3>${sp.map(p => `<div class="rc-sp"><span class="rc-inn">${esc(p.per)}</span>${logoOf(p.team) ? `<img src="${esc(logoOf(p.team))}" alt="">` : "<i></i>"}<span class="rc-t">${esc(p.text)}</span><b>${esc(p.score)}</b></div>`).join("")}</div>`;
+    // Leaders, game flow, team stats (no odds after the game)
+    const rest = statsTab(j, a, h, lg, true);
+    return html && /class="empty"/.test(rest) && rest.length < 120 ? html : html + rest;
+  }
   // ---- Baseball final: W/L/S, scoring summary, team stats, the series
   function recapTab(j, a, h, lg) {
     const comp = j.header?.competitions?.[0] || {};
@@ -3676,9 +3714,9 @@ button.brand, button.brand span { color: var(--accent); }
       return `<div class="rc-g ${String(e.id) === String(comp.id || "") ? "on" : ""}" ${fin ? `data-game="${lg.id}:${esc(e.id)}"` : ""}><span class="rc-gn">Game ${i + 1}<small>${esc(new Date(e.date).toLocaleDateString(undefined, { month: "numeric", day: "numeric" }))}</small></span><span class="rc-gt">${cs.map(c => `<span class="${fin && !c.winner ? "lose" : ""}">${esc(c.team?.abbreviation || "")} ${fin ? `<b>${esc(c.score ?? "")}</b>` : ""}</span>`).join("")}</span><span class="rc-gs">${esc(fin ? "Final" : e.statusType?.state === "in" ? "Live" : (e.statusType?.shortDetail && !/TBD/.test(e.statusType.shortDetail) ? e.statusType.shortDetail : ""))}</span></div>`; }).join("")}</div>`;
     return html || statsTab(j, a, h, lg);
   }
-  function statsTab(j, a, h, lg) {
+  function statsTab(j, a, h, lg, noOdds) {
     let html = "";
-    const odds = oddsCard(j, a, h, lg);
+    const odds = noOdds ? "" : oddsCard(j, a, h, lg);
     if (odds && state.showOdds) html += odds;
     else if (!odds && state.showOdds && (j.header?.competitions?.[0]?.status?.type?.state || findGame(openGameKey)?.state || "pre") === "pre")
       html += `<div class="gc-c"><h3>Betting Odds<button class="linkbtn" data-odds="off">Hide</button></h3><div class="foot" style="margin:0">Not posted yet. Lines usually show up the day of the game.</div></div>`;
@@ -3724,7 +3762,7 @@ button.brand, button.brand span { color: var(--accent); }
     html += leadersCard(j, a, h, lg);
     html += lineupCard(j, a, h, lg);
     html += standingsCard(j, a, h, lg);
-    if (!state.showOdds) html += `<div class="odds-off"><button class="linkbtn" data-odds="on">Show Betting Odds</button></div>`;
+    if (!state.showOdds && !noOdds) html += `<div class="odds-off"><button class="linkbtn" data-odds="on">Show Betting Odds</button></div>`;
     return html || `<div class="empty">No stats yet.</div>`;
   }
   // ---- Pregame and season context (CBS-style)
@@ -4003,7 +4041,7 @@ button.brand, button.brand span { color: var(--accent); }
     const segs = `<div class="seg gc-seg sp-seg">${[["all", "All Plays"], ["scoring", "Scoring"], ["key", "Key Moments"]].map(([k, l]) => `<button class="${bbSeg === k ? "on" : ""}" data-bb-seg="${k}">${l}</button>`).join("")}</div>`;
     return segs + (list.length ? `<div class="gc-c"><div class="plays">${html}</div></div>` : `<div class="empty">${bbSeg === "scoring" ? "No runs yet." : "Nothing big yet."}</div>`);
   }
-  let bbSeg = "all";
+  let bbSeg = "all", genSeg = "all";
   // ---- Soccer: All Plays (full commentary) and Key Events (goals, cards, subs), newest first
   let socSeg = "all";
   const SOC_IC = t => /own goal/i.test(t) ? "⚽" : /goal|penalty - scored/i.test(t) ? "⚽" : /red card/i.test(t) ? "🟥" : /yellow/i.test(t) ? "🟨" : /substitut/i.test(t) ? "⇄" : /var|review/i.test(t) ? "📺" : /penalty/i.test(t) ? "◎" : /half|kickoff|end|start/i.test(t) ? "⏱" : "";
@@ -4029,8 +4067,20 @@ button.brand, button.brand span { color: var(--accent); }
     else if (Array.isArray(j.keyEvents) && j.keyEvents.length) plays = j.keyEvents.slice().reverse();
     else if (Array.isArray(j.commentary)) plays = j.commentary.slice(-40).reverse().map(c => ({ text: c.text, clock: c.time }));
     plays = plays.filter(p => p && (p.text || p.type?.text));
-    if (!plays.length) return `<div class="empty">No plays yet.</div>`;
-    return `<div class="gc-c"><div class="plays">${plays.map(p => {
+    // Filters: All, Scoring (Goals in hockey), Key Moments (Penalties in hockey)
+    const segs = lg.sport === "Hockey" ? [["all", "All Plays"], ["scoring", "Goals"], ["key", "Penalties"]] : [["all", lg.sport === "Football" ? "All Plays" : "All Plays"], ["scoring", "Scoring"], ["key", "Key Moments"]];
+    const PEN = /tripping|hooking|slashing|holding|interference|roughing|high-stick|cross-check|boarding|fighting|delay|too many|unsportsmanlike|elbowing|charging|misconduct|penalty|kneeing|embellish|instigat/i;
+    const KEYB = /three point|3-pt|dunk|technical|flagrant|eject|alley oop/i, KEYF = /intercept|fumble|sack|4th|fourth|touchdown|field goal|safety|blocked|onside/i;
+    const isKey = p => lg.sport === "Hockey" ? PEN.test(p.type?.text || "") : lg.sport === "Basketball" ? (KEYB.test((p.type?.text || "") + " " + (p.text || "")) && (p.scoringPlay || /technical|flagrant|eject/i.test(p.text || ""))) : (p.scoringPlay || KEYF.test(p.text || "") || (p.statYardage || 0) >= 20);
+    const seg = segs.some(x => x[0] === genSeg) ? genSeg : "all";
+    if (seg !== "all") {
+      let pool = Array.isArray(j.plays) && j.plays.length ? j.plays.slice().reverse() : plays;
+      if (j.drives && !(j.plays || []).length) pool = [...(j.drives.current?.plays || [])].reverse().concat([...(j.drives.previous || [])].reverse().flatMap(d => (d.plays || []).slice().reverse()));
+      plays = pool.filter(p => p && (p.text || p.type?.text) && (seg === "scoring" ? p.scoringPlay : isKey(p))).slice(0, 80);
+    }
+    const bar = segs ? `<div class="seg gc-seg sp-seg">${segs.map(([k, l]) => `<button class="${seg === k ? "on" : ""}" data-gen-seg="${k}">${l}</button>`).join("")}</div>` : "";
+    if (!plays.length) return bar + `<div class="empty">${seg === "all" ? "No plays yet." : "Nothing here yet."}</div>`;
+    return bar + `<div class="gc-c"><div class="plays">${plays.map(p => {
       const per = p.period?.number ? (lg.sport === "Baseball" ? (p.period.displayValue || "Inn " + p.period.number) : perName(lg, p.period.number, j.header?.season?.type === 3)) : "";
       const clk = p.clock?.displayValue || (typeof p.clock === "string" ? p.clock : "") || "";
       return `<div class="play ${p.scoringPlay ? "score" : ""}"><span class="pc">${esc([per, clk].filter(Boolean).join(" "))}</span><span>${esc(p.text || p.type?.text || "")}</span></div>`;
@@ -4101,6 +4151,8 @@ button.brand, button.brand span { color: var(--accent); }
     if (tt && teamView) { teamView.tab = tt.dataset.tmTab; teamView.paint(); return; }
     const tg = e.target.closest("[data-game]");
     if (tg && teamView) { e.stopPropagation(); pushView(); teamView = null; openGame(tg.dataset.game); return; }
+    const gsg = e.target.closest("[data-gen-seg]");
+    if (gsg) { genSeg = gsg.dataset.genSeg; repaintGame(); return; }
     const bs = e.target.closest("[data-bb-seg]");
     if (bs) { bbSeg = bs.dataset.bbSeg; repaintGame(); return; }
     const ss = e.target.closest("[data-sp-seg]");
