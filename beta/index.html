@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015143157">
+<meta name="build" content="20261015143435">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2998,7 +2998,8 @@ button.brand, button.brand span { color: var(--accent); }
       if (picks.length) {
         if (tab === "live") shown = new Set(picks.map(g => g.id));
         html += block("worth", "Worth A Watch", countLabel(picks.length, picks),
-          `<div class="feat">${picks.map(featured).join("")}</div>`);
+          // More than 4 picks: switch to the two-up compact cards so the section doesn't take over the page
+          picks.length > 4 ? `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>` : `<div class="feat">${picks.map(featured).join("")}</div>`);
       }
     }
 
