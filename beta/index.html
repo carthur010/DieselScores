@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015105110">
+<meta name="build" content="20261015105803">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -486,6 +486,10 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .nhl-st td.nm i { font-style: normal; color: var(--muted); font-size: 12px; width: 14px; display: inline-block; text-align: right; }
 .nhl-st .pts { color: var(--accent); font-weight: 800; }
 .nhl-st tr.cut td { border-top: 2px solid var(--fg); }
+.nhl-st sup { font-size: 9px; color: var(--muted); margin-left: 2px; font-weight: 700; }
+.st-hint { margin: 8px 0 0; font-size: 12px; }
+.st-key { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+.st-key i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
 .nhl-st tr.me td, .nhl-st tr.me td.nm { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
 .tm-move { padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.4; }
 .gc-c h3 + .tm-move { border-top: 0; }
@@ -2168,7 +2172,7 @@ button.brand, button.brand span { color: var(--accent); }
   const TM_URL = {
     stats: (lg, tm) => API + lg.path + "/teams/" + tm.id + "/statistics",
     roster: (lg, tm) => API + lg.path + "/teams/" + tm.id + "/roster",
-    standings: (lg) => API.replace("/apis/site/v2/", "/apis/v2/") + lg.path + "/standings" + (lg.id === "nhl" ? "?level=3" : ""),
+    standings: (lg) => API.replace("/apis/site/v2/", "/apis/v2/") + lg.path + "/standings" + (["nhl", "nfl", "mlb"].includes(lg.id) ? "?level=3" : ""),
     injuries: (lg) => API + lg.path + "/injuries",
     moves: (lg) => API + lg.path + "/transactions",
   };
@@ -2257,8 +2261,72 @@ button.brand, button.brand span { color: var(--accent); }
     }).join("");
     return html;
   }
+  // ---- Full standings for every league: same look as the NHL table (team column pinned, swipe for more)
+  const sget = (e, k) => (e.stats || []).find(x => x.name === k || String(x.type).toLowerCase() === k.toLowerCase());
+  const sval = (e, k) => sget(e, k)?.displayValue ?? sget(e, k)?.summary ?? "";
+  const snum = (e, k) => +(sget(e, k)?.value ?? parseFloat(sval(e, k)) ?? 0) || 0;
+  function standTable(groups, cols, lgId, id, opts = {}) {
+    cols = cols.filter(([, f]) => groups.some(g => g.ents.some(e => { const v = f(e); return v && v !== "-"; })));
+    const row = (e, i, g) => {
+      const note = opts.notes && e.note?.color ? ` style="box-shadow: inset 3px 0 0 ${esc(e.note.color)}"` : "";
+      const clinch = sval(e, "clincher");
+      return `<tr class="${String(e.team?.id) === id ? "me" : ""} ${(g.cuts || []).includes(i) ? "cut" : ""}"><td class="nm"${note}><span class="tmn tap"${tmLink(lgId, { id: e.team?.id, name: e.team?.displayName, abbr: e.team?.abbreviation, logo: e.team?.logos?.[0]?.href, color: hexColor(e.team?.color) })}><i>${g.rank ? esc(g.rank(e, i)) : i + 1}</i>${e.team?.logos?.[0]?.href ? `<img src="${esc(e.team.logos[0].href)}" alt="">` : ""}${esc(opts.long ? (e.team?.shortDisplayName || e.team?.abbreviation || "") : (e.team?.abbreviation || ""))}${clinch && clinch !== "-" ? `<sup>${esc(clinch)}</sup>` : ""}</span></td>${cols.map(([, f, c]) => `<td class="${c || ""}">${esc(f(e) || "-")}</td>`).join("")}</tr>`;
+    };
+    return `<div class="nhl-wrap"><table class="tm-stand nhl-st" style="min-width:${Math.max(360, 130 + cols.length * 46)}px"><tbody>${groups.map(g => `<tr class="grp"><th class="nm">${esc(g.title)}</th>${cols.map(([h, , c]) => `<th class="${c || ""}">${h}</th>`).join("")}</tr>${g.ents.map((e, i) => row(e, i, g)).join("")}`).join("")}</tbody></table></div>`;
+  }
+  const viewSeg = (tm, views, cur) => views.length > 1 ? `<div class="seg gc-seg st-seg">${views.map(v => `<button class="${v === cur ? "on" : ""}" data-stand-view="${esc(v)}">${esc(v)}</button>`).join("")}</div>` : "";
+  function fullStandings(j, id, lg, tm) {
+    const has = (n) => n?.standings?.entries?.some(e => String(e.team?.id) === id) || (n?.children || []).some(has);
+    const pctFmt = e => { const v = sval(e, "winpercent"); return v ? v.replace(/^0\./, ".") : ""; };
+    const bySeed = (a, b) => (snum(a, "playoffseed") || 99) - (snum(b, "playoffseed") || 99);
+    const byPct = (a, b) => snum(b, "winpercent") - snum(a, "winpercent") || snum(b, "wins") - snum(a, "wins");
+    const shortName = n => String(n || "").replace(/^(American|National) (Football )?(League|Conference) /, "").replace(/ Division$/, "");
+    // Soccer: one league table, colored edge for Champions League / relegation spots
+    if (lg.soccer) {
+      let grp = null; const walk = n => { if (!grp && n?.standings?.entries?.some(e => String(e.team?.id) === id)) grp = n; (n?.children || []).forEach(walk); }; walk(j);
+      if (!grp) return "";
+      const ents = grp.standings.entries.slice().sort((a, b) => (snum(a, "rank") || 99) - (snum(b, "rank") || 99) || snum(b, "points") - snum(a, "points"));
+      const cols = [["GP", e => sval(e, "gamesplayed")], ["W", e => sval(e, "wins")], ["D", e => sval(e, "ties")], ["L", e => sval(e, "losses")], ["GD", e => sval(e, "pointdifferential")], ["PTS", e => sval(e, "points"), "pts"], ["GF", e => sval(e, "pointsfor")], ["GA", e => sval(e, "pointsagainst")]];
+      const notes = [...new Map(ents.filter(e => e.note?.color && e.note?.description).map(e => [e.note.description, e.note.color])).entries()];
+      return `<div class="gc-c"><h3>${esc(grp.name || lg.name)}</h3>${standTable([{ title: "Table", ents, rank: e => sval(e, "rank") || "" }], cols, tm.lg, id, { notes: true, long: true })}
+        ${notes.length ? `<div class="st-key">${notes.map(([d, c]) => `<span><i style="background:${esc(c)}"></i>${esc(d)}</span>`).join("")}</div>` : ""}</div>`;
+    }
+    const conf = (j.children || []).find(has);
+    if (!conf) return "";
+    const divs = conf.children?.length ? conf.children.filter(d => d.standings?.entries?.length) : null;
+    const all = divs ? divs.flatMap(d => d.standings.entries) : (conf.standings?.entries || []);
+    let cols, views = [], groups;
+    if (lg.id === "nfl" || lg.id === "mlb") {
+      cols = lg.id === "nfl"
+        ? [["W", e => sval(e, "wins")], ["L", e => sval(e, "losses")], ["T", e => sval(e, "ties")], ["PCT", pctFmt, "pts"], ["PF", e => sval(e, "pointsfor")], ["PA", e => sval(e, "pointsagainst")], ["DIFF", e => sval(e, "pointdifferential")], ["HOME", e => sval(e, "home")], ["AWAY", e => sval(e, "road")], ["DIV", e => sval(e, "vsdiv")], ["CONF", e => sval(e, "vsconf")], ["STRK", e => sval(e, "streak")]]
+        : [["W", e => sval(e, "wins")], ["L", e => sval(e, "losses")], ["PCT", pctFmt, "pts"], ["GB", e => sval(e, "gamesbehind")], ["RS", e => sval(e, "pointsfor")], ["RA", e => sval(e, "pointsagainst")], ["DIFF", e => sval(e, "pointdifferential")], ["HOME", e => sval(e, "home")], ["AWAY", e => sval(e, "road")], ["L10", e => sval(e, "lasttengames")], ["STRK", e => sval(e, "streak")]];
+      views = ["Division", "Wild Card"];
+      const v = views.includes(tm.standView) ? tm.standView : "Division";
+      if (v === "Division" && divs) groups = divs.map(d => ({ title: shortName(d.name || d.abbreviation), ents: d.standings.entries.slice().sort(byPct) }));
+      else {
+        const leaders = new Set((divs || []).map(d => d.standings.entries.slice().sort(byPct)[0]));
+        const seeded = all.slice().sort((a, b) => bySeed(a, b) || byPct(a, b));
+        const lead = seeded.filter(e => leaders.has(e)), rest = seeded.filter(e => !leaders.has(e));
+        const wcN = lg.id === "nfl" ? 3 : 3;
+        groups = [{ title: "Division Leaders", ents: lead }, { title: "Wild Card", ents: rest, cuts: [wcN], rank: (e, i) => i + 1 + lead.length }];
+      }
+      return `${viewSeg(tm, views, v)}<div class="gc-c"><h3>${esc(conf.name || "")}</h3>${standTable(groups, cols, tm.lg, id)}${v === "Wild Card" ? `<p class="hint st-hint">${lg.id === "nfl" ? "4 division winners plus 3 wild cards" : "3 division winners plus 3 wild cards"} make the playoffs.</p>` : ""}</div>`;
+    }
+    if (lg.sport === "Basketball" && !CONFS[lg.id]) {
+      cols = [["W", e => sval(e, "wins")], ["L", e => sval(e, "losses")], ["PCT", pctFmt, "pts"], ["GB", e => sval(e, "gamesbehind")], ["HOME", e => sval(e, "home")], ["AWAY", e => sval(e, "road")], ["CONF", e => sval(e, "vsconf")], ["L10", e => sval(e, "lasttengames")], ["STRK", e => sval(e, "streak")], ["PF", e => sval(e, "avgpointsfor")], ["PA", e => sval(e, "avgpointsagainst")]];
+      const ents = all.slice().sort((a, b) => bySeed(a, b) || byPct(a, b));
+      const cuts = lg.id === "nba" ? [6, 10] : [8];
+      return `<div class="gc-c"><h3>${esc(conf.name || "Standings")}</h3>${standTable([{ title: shortName(conf.name) || "Standings", ents, cuts }], cols, tm.lg, id)}<p class="hint st-hint">${lg.id === "nba" ? "Top 6 make the playoffs. 7 to 10 go to the Play-In." : "Top 8 make the playoffs."}</p></div>`;
+    }
+    // College: the conference, with conference and overall records
+    const ents = all.slice();
+    const isFb = lg.sport === "Football";
+    cols = [["CONF", e => sval(e, "vsconf"), "pts"], ["OVR", e => sval(e, "total") || sval(e, "overall")], ["HOME", e => sval(e, "home")], ["AWAY", e => sval(e, "road")], [isFb ? "PF" : "PPG", e => isFb ? sval(e, "pointsfor") : sval(e, "avgpointsfor")], [isFb ? "PA" : "OPP", e => isFb ? sval(e, "pointsagainst") : sval(e, "avgpointsagainst")], ["STRK", e => sval(e, "streak")]].filter(([, f]) => ents.some(e => f(e)));
+    if (!cols.length) return "";
+    return `<div class="gc-c"><h3>${esc(conf.name || "Standings")}</h3>${standTable([{ title: "Team", ents }], cols, tm.lg, id, { long: true })}</div>`;
+  }
   // NHL: division leaders + wild card, with the full set of columns (scrolls sideways, team column stays put)
-  function nhlStandings(j, id, lgId) {
+  function nhlStandings(j, id, lgId, tm) {
     const conf = (j.children || []).find(c => (c.children || []).some(d => d.standings?.entries?.some(e => String(e.team?.id) === id)));
     if (!conf) return "";
     const st = (e, k) => (e.stats || []).find(x => x.name === k || x.type === k);
@@ -2274,8 +2342,9 @@ button.brand, button.brand span { color: var(--accent); }
       ["L10", e => (st(e, "lasttengames")?.displayValue || "").replace(/,.*$/, "")], ["STRK", e => st(e, "streak")?.displayValue]];
     const row = (e, i, cut) => `<tr class="${String(e.team?.id) === id ? "me" : ""} ${cut ? "cut" : ""}"><td class="nm"><span class="tmn tap"${tmLink(lgId, { id: e.team?.id, name: e.team?.displayName, abbr: e.team?.abbreviation, logo: e.team?.logos?.[0]?.href, color: hexColor(e.team?.color) })}><i>${i + 1}</i>${e.team?.logos?.[0]?.href ? `<img src="${esc(e.team.logos[0].href)}" alt="">` : ""}${esc(e.team?.abbreviation || "")}</span></td>${COLS.map(([, f, c]) => `<td class="${c || ""}">${esc(f(e) ?? "-")}</td>`).join("")}</tr>`;
     const block = (title, ents, cutAt) => `<tr class="grp"><th class="nm">${esc(title)}</th>${COLS.map(([h]) => `<th class="${h === "PTS" ? "pts" : ""}">${h}</th>`).join("")}</tr>${ents.map((e, i) => row(e, i, cutAt != null && i === cutAt)).join("")}`;
-    return `<div class="gc-c"><h3>${esc(conf.name || "Standings")}</h3><div class="nhl-wrap"><table class="tm-stand nhl-st"><tbody>
-      ${divs.map(d => block(d.name, d.ents.slice(0, 3))).join("")}${block("Wild Card", wc, 2)}</tbody></table></div>
+    const v = tm?.standView === "Division" ? "Division" : "Wild Card";
+    return `${viewSeg(tm, ["Wild Card", "Division"], v)}<div class="gc-c"><h3>${esc(conf.name || "Standings")}</h3><div class="nhl-wrap"><table class="tm-stand nhl-st"><tbody>
+      ${v === "Division" ? divs.map(d => block(d.name, d.ents)).join("") : divs.map(d => block(d.name, d.ents.slice(0, 3))).join("") + block("Wild Card", wc, 2)}</tbody></table></div>
       <p class="hint" style="margin:8px 0 0;font-size:12px">Swipe the table for more. Top 3 in each division plus 2 wild cards make the playoffs. P% is points percentage, RW regulation wins, ROW regulation plus overtime wins.</p></div>`;
   }
   function teamTabBody(tm, lg, tab) {
@@ -2296,7 +2365,7 @@ button.brand, button.brand span { color: var(--accent); }
           <span class="r"><small>${esc([x.displayHeight, x.displayWeight].filter(Boolean).join(", "))}</small></span></div>`;
       }).join("")}</div>`).join("");
     }
-    if (tab === "standings" && lg.id === "nhl") { const h = nhlStandings(j, id, tm.lg); if (h) return h; }
+    if (tab === "standings") { const h = lg.id === "nhl" ? nhlStandings(j, id, tm.lg, tm) : fullStandings(j, id, lg, tm); if (h) return h; }
     if (tab === "standings") {
       let best = null;
       const walk = (n, d) => { if (n?.standings?.entries?.some(e => String(e.team?.id) === id) && (!best || d > best.d)) best = { n, d }; (n?.children || []).forEach(c => walk(c, d + 1)); };
@@ -2345,7 +2414,7 @@ button.brand, button.brand span { color: var(--accent); }
       el.innerHTML = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:${readable(tm.color)};--ch:${readable(tm.color)}"></div>
         <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span><button class="circ tm-star ${on ? "on" : ""}" data-team-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(tm.name)}" title="${on ? "Following" : "Follow"}">${on ? STAR : STAR_O}</button></div>
         <div class="tm-hero">${tm.logo ? `<img src="${esc(tm.logo)}" alt="">` : ""}<b>${esc(tm.name)}</b><small>${esc([lg.name, sched?.record, sched?.standing].filter(Boolean).join(" · "))}</small></div></div>
-        <div class="tm-tabs" role="tablist">${TM_TABS.map(([id, label]) => `<button role="tab" class="${tab === id ? "on" : ""}" data-tm-tab="${id}" aria-selected="${tab === id}">${label}</button>`).join("")}</div>
+        <div class="tm-tabs" role="tablist">${TM_TABS.map(([id, label]) => `<button role="tab" class="${tab === id ? "on" : ""}" data-tm-tab="${id}" aria-selected="${tab === id}">${id === "standings" && lg.soccer ? "Table" : label}</button>`).join("")}</div>
         ${tab !== "schedule" ? teamTabBody(tm, lg, tab) : `
         ${!sched ? `<div class="skel"></div><div class="skel"></div>` : ""}
         ${next.length ? `<div class="gc-c"><h3>Up Next</h3>${next.map(row).join("")}</div>` : ""}
@@ -3618,6 +3687,8 @@ button.brand, button.brand span { color: var(--accent); }
     const ot = e.target.closest("[data-open-tm]");
     if (ot) { let d = null; try { d = JSON.parse(ot.dataset.openTm); } catch {} if (d) { const same = teamView && String(teamView.id) === d.id && teamView.lg === d.lg; if (!same) openTeam(d); } return; }
     if (e.target.closest("[data-team-follow]") && teamView) { const tm = teamView; toggleFav(keyFor(tm), { lg: tm.lg, id: tm.id, name: tm.name, logo: tm.logo, color: tm.color, abbr: tm.abbr }); tm.paint ? tm.paint() : openTeamRepaint(); return; }
+    const sv = e.target.closest("[data-stand-view]");
+    if (sv && teamView) { teamView.standView = sv.dataset.standView; teamView.paint(); return; }
     const sg = e.target.closest("[data-stat-seg]");
     if (sg && teamView) { teamView.statSeg = sg.dataset.statSeg; teamView.paint(); return; }
     const sm = e.target.closest("[data-stat-more]");
