@@ -2,7 +2,7 @@
 
 Newest first. Beta changes move to Live when shipped.
 
-## In beta (not on live yet)
+## Oct 15, 2026: Live (11:48 AM)
 - Welcome screen has Your TV & Streaming under Your Leagues: home market plus every service group (TV networks, streaming, regional, league passes, Spanish, free). New people start with none picked.
 - New people start with nothing picked on the Welcome screen: no teams and no leagues. People already using Scores keep what they have.
 - Second setup code: JC (or the link ?setup=jc). Teams: UCLA football, UCLA hoops, 49ers, Giants, Kings. Leagues: NFL, NBA, MLB, College Football, Men's College Hoops.
