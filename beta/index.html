@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015152045">
+<meta name="build" content="20261015153142">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -447,6 +447,17 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .sr-tv { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lm-go { font-style: normal; color: var(--muted); text-align: right; }
 .lm-list .mc-fav { font-style: normal; }
+.sp-seg { margin-bottom: 10px; }
+.sp-row { display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 11px 0; border-top: 1px solid var(--line); }
+.sp-list .sp-row:first-child { border-top: 0; }
+.sp-side img { width: 26px; height: 26px; object-fit: contain; }
+.sp-side i { font-style: normal; font-size: 18px; }
+.sp-main { display: grid; gap: 2px; min-width: 0; }
+.sp-main b { font-size: 15px; } .sp-main b em { font-style: normal; }
+.sp-main small { color: var(--muted); font-size: 12px; font-weight: 700; }
+.sp-main span { font-size: 14px; line-height: 1.4; }
+.sp-row.goal { background: color-mix(in srgb, var(--accent) 8%, transparent); border-radius: 10px; padding-inline: 8px; margin-inline: -8px; }
+.sp-row.goal b { color: var(--accent); }
 .find-more { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
 .find-more small { color: var(--muted); margin-left: 4px; font-weight: 700; }
 .bl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; padding: 12px 16px 16px; }
@@ -2356,6 +2367,8 @@ button.brand, button.brand span { color: var(--accent); }
     return ` data-open-tm="${esc(JSON.stringify(d))}" role="button" tabindex="0"`;
   }
   const TM_TABS = [["schedule", "Schedule"], ["stats", "Stats"], ["roster", "Roster"], ["standings", "Standings"], ["injuries", "Injuries"], ["moves", "Transactions"]];
+  // Soccer speaks its own language: Fixtures, Table, Squad, and no transactions feed
+  const tmTabsFor = lg => lg.soccer ? [["schedule", "Fixtures"], ["standings", "Table"], ["stats", "Stats"], ["roster", "Squad"], ["injuries", "Injuries"]] : TM_TABS;
   const TM_URL = {
     stats: (lg, tm) => API + lg.path + "/teams/" + tm.id + "/statistics",
     roster: (lg, tm) => API + lg.path + "/teams/" + tm.id + "/roster",
@@ -2365,6 +2378,8 @@ button.brand, button.brand span { color: var(--accent); }
   };
   const getJ = u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null);
   // Stats tab: team stats + player leaders (ESPN core feed), matched to the roster for names and headshots
+  // Soccer leaders come as "Matches: 1, Goals: 1"; show just the number
+  const fmtStat = v => v == null ? "" : Number.isInteger(+v) ? String(+v) : (+v).toFixed(+v < 1 ? 3 : 1).replace(/^0\./, ".");
   async function loadTeamStats(tm, lg) {
     const [sp, lgk] = lg.path.split("/");
     const [team, roster] = await Promise.all([getJ(TM_URL.stats(lg, tm)), tm.data.roster ? Promise.resolve(tm.data.roster) : getJ(TM_URL.roster(lg, tm))]);
@@ -2381,7 +2396,7 @@ button.brand, button.brand span { color: var(--accent); }
     (list[0]?.items ? list.flatMap(g => g.items || []) : list).forEach(a => ath[String(a.id)] = a);
     const cats = (leaders?.categories || []).filter(c => c.leaders?.length).map(c => ({
       name: c.name || "", title: c.displayName || titleCase(c.name), abbr: c.abbreviation || "",
-      rows: c.leaders.map(l => ({ id: (String(l.athlete?.$ref || "").match(/athletes\/(\d+)/) || [])[1] || "", v: l.displayValue ?? l.value, n: +l.value })),
+      rows: c.leaders.map(l => ({ id: (String(l.athlete?.$ref || "").match(/athletes\/(\d+)/) || [])[1] || "", v: /:/.test(String(l.displayValue ?? "")) || l.displayValue == null ? fmtStat(l.value) : l.displayValue, n: +l.value })),
     }));
     // A few leaders may not be on today's roster (traded, released): look them up
     const miss = [...new Set(cats.flatMap(c => c.rows.slice(0, 5).map(x => x.id)).filter(id => id && !ath[id]))].slice(0, 20);
@@ -2421,7 +2436,9 @@ button.brand, button.brand span { color: var(--accent); }
   function teamStatsTab(tm, lg, j) {
     const PRI = ["points", "goals", "assists", "avgPoints", "pointsPerGame", "avgRebounds", "avgAssists", "passingYards", "rushingYards", "receivingYards", "avg", "homeRuns", "RBIs", "ERA", "wins", "strikeouts", "saves", "savePct", "avgGoalsAgainst", "totalTackles", "sacks"];
     const pri = c => { const i = PRI.indexOf(c.name); return i < 0 ? 99 : i; };
-    const cats = (j.cats || []).filter(c => !/Leader$/.test(c.name)).map((c, i) => ({ ...c, i })).sort((x, y) => pri(x) - pri(y) || x.i - y.i);
+    const seenT = new Set();
+    const cats = (j.cats || []).filter(c => !/Leader$/.test(c.name)).map((c, i) => ({ ...c, i })).sort((x, y) => pri(x) - pri(y) || x.i - y.i)
+      .filter(c => { const k = c.title.toLowerCase(); if (seenT.has(k)) return false; seenT.add(k); return true; });
     const teamCats = (j.team?.results?.stats?.categories || j.team?.statistics?.splits?.categories || []).filter(c => (c.stats || []).some(x => x.displayValue != null));
     const groups = [...(STAT_GROUPS[lg.sport] || (cats.length ? [["Players", () => true]] : []))].filter(([, f]) => cats.some(f));
     if (teamCats.length) groups.push(["Team", null]);
@@ -2431,7 +2448,7 @@ button.brand, button.brand span { color: var(--accent); }
     tm.more = tm.more || {};
     const who = id => { const a = ath[id] || {}; return { name: a.displayName || a.fullName || "", short: a.shortName || a.displayName || "", head: a.headshot?.href || "", jersey: a.jersey || "", pos: a.position?.abbreviation || "" }; };
     const ranks = rows => rows.map((x, i) => { let k = i; while (k > 0 && rows[k - 1].v === x.v) k--; const tie = rows.filter(y => y.v === x.v).length > 1; return (tie ? "T" : "") + (k + 1); });
-    let html = `<div class="seg gc-seg st-seg">${groups.map(([g]) => `<button class="${g === seg ? "on" : ""}" data-stat-seg="${esc(g)}">${esc(g)}</button>`).join("")}</div>`;
+    let html = groups.length > 1 ? `<div class="seg gc-seg st-seg">${groups.map(([g]) => `<button class="${g === seg ? "on" : ""}" data-stat-seg="${esc(g)}">${esc(g)}</button>`).join("")}</div>` : "";
     if (j.last && seg !== "Team") html += `<p class="hint" style="text-align:center;margin:-4px 0 10px">Last season. This season's numbers show up once games start.</p>`;
     if (seg === "Team") {
       return html + teamCats.slice(0, 6).map(c => `<div class="gc-c"><h3>${esc(c.displayName || titleCase(c.name))}</h3>${(c.stats || []).filter(x => x.displayValue != null).slice(0, 10).map(x => `<div class="tm-row" style="grid-template-columns:1fr auto auto"><span>${esc(x.displayName || x.shortDisplayName || x.name)}</span><span class="r">${esc(x.displayValue)}</span><span class="r"><small>${esc(x.rankDisplayValue || "")}</small></span></div>`).join("")}</div>`).join("");
@@ -2602,7 +2619,7 @@ button.brand, button.brand span { color: var(--accent); }
       el.innerHTML = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:${readable(tm.color)};--ch:${readable(tm.color)}"></div>
         <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span><button class="circ" data-share-tm aria-label="Share">${SHAREIC}</button><button class="circ tm-star ${on ? "on" : ""}" data-team-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(tm.name)}" title="${on ? "Following" : "Follow"}">${on ? STAR : STAR_O}</button></div>
         <div class="tm-hero">${tm.logo ? `<img src="${esc(tm.logo)}" alt="">` : ""}<b>${esc(tm.name)}</b><small>${esc([lg.name, sched?.record, sched?.standing].filter(Boolean).join(" · "))}</small></div></div>
-        <div class="tm-tabs" role="tablist">${TM_TABS.map(([id, label]) => `<button role="tab" class="${tab === id ? "on" : ""}" data-tm-tab="${id}" aria-selected="${tab === id}">${id === "standings" && lg.soccer ? "Table" : label}</button>`).join("")}</div>
+        <div class="tm-tabs" role="tablist">${tmTabsFor(lg).map(([id, label]) => `<button role="tab" class="${tab === id ? "on" : ""}" data-tm-tab="${id}" aria-selected="${tab === id}">${label}</button>`).join("")}</div>
         ${tab !== "schedule" ? teamTabBody(tm, lg, tab) : `
         ${!sched ? `<div class="skel"></div><div class="skel"></div>` : ""}
         ${next.length ? `<div class="gc-c"><h3>Up Next</h3>${next.map(row).join("")}</div>` : ""}
@@ -3933,7 +3950,24 @@ button.brand, button.brand span { color: var(--accent); }
     });
     return `<div class="gc-c"><div class="plays">${html}</div></div>`;
   }
+  // ---- Soccer: All Plays (full commentary) and Key Events (goals, cards, subs), newest first
+  let socSeg = "all";
+  const SOC_IC = t => /own goal/i.test(t) ? "⚽" : /goal|penalty - scored/i.test(t) ? "⚽" : /red card/i.test(t) ? "🟥" : /yellow/i.test(t) ? "🟨" : /substitut/i.test(t) ? "⇄" : /var|review/i.test(t) ? "📺" : /penalty/i.test(t) ? "◎" : /half|kickoff|end|start/i.test(t) ? "⏱" : "";
+  function soccerPlays(j) {
+    const comp = j.header?.competitions?.[0] || {};
+    const logo = {}; (comp.competitors || []).forEach(c => logo[String(c.team?.id)] = c.team?.logos?.[0]?.href || c.team?.logo || "");
+    const all = (j.commentary || []).slice().sort((a, b) => (b.sequence ?? 0) - (a.sequence ?? 0)).map(c => ({ min: c.time?.displayValue || "", title: c.play?.type?.text || "", text: c.text || "", team: String(c.play?.team?.id || ""), goal: /goal/i.test(c.play?.type?.text || "") && !/disallowed|attempt/i.test(c.play?.type?.text || "") || /^Goal!/.test(c.text || "") }));
+    const keys = (j.keyEvents || []).slice().reverse().filter(k => k.type?.text).map(k => ({ min: k.clock?.displayValue || "", title: k.type?.text || "", text: k.text || k.shortText || "", team: String(k.team?.id || ""), goal: !!k.scoringPlay, who: (k.participants || []).map(p => p.athlete?.displayName).filter(Boolean) }));
+    if (!all.length && !keys.length) return "";
+    const seg = socSeg === "keys" || !all.length ? "keys" : "all";
+    const list = seg === "keys" ? keys : all;
+    const row = x => `<div class="sp-row ${x.goal ? "goal" : ""}"><span class="sp-side">${logo[x.team] ? `<img src="${esc(logo[x.team])}" alt="">` : SOC_IC(x.title) ? `<i>${SOC_IC(x.title)}</i>` : ""}</span>
+      <span class="sp-main">${x.title ? `<b>${SOC_IC(x.title) && logo[x.team] ? `<em>${SOC_IC(x.title)}</em> ` : ""}${esc(x.title.replace(/ - /g, ": "))}</b>` : ""}<small>${esc(x.min)}</small><span>${esc(x.text)}</span></span></div>`;
+    return `<div class="seg gc-seg sp-seg">${all.length ? `<button class="${seg === "all" ? "on" : ""}" data-sp-seg="all">All Plays</button>` : ""}<button class="${seg === "keys" ? "on" : ""}" data-sp-seg="keys">Key Events</button></div>
+      <div class="gc-c"><div class="sp-list">${list.length ? list.map(row).join("") : `<div class="empty">Nothing yet.</div>`}</div></div>`;
+  }
   function playsTab(j, lg) {
+    if (lg.soccer) { const sp = soccerPlays(j); if (sp) return sp; }
     if (lg.sport === "Baseball") { const bb = baseballPlays(j, j.header?.competitions?.[0]?.status?.type?.state === "in"); if (bb) return bb; }
     let plays = [];
     if (Array.isArray(j.plays) && j.plays.length) plays = j.plays.slice(-40).reverse();
@@ -4013,6 +4047,8 @@ button.brand, button.brand span { color: var(--accent); }
     if (tt && teamView) { teamView.tab = tt.dataset.tmTab; teamView.paint(); return; }
     const tg = e.target.closest("[data-game]");
     if (tg && teamView) { e.stopPropagation(); pushView(); teamView = null; openGame(tg.dataset.game); return; }
+    const ss = e.target.closest("[data-sp-seg]");
+    if (ss) { socSeg = ss.dataset.spSeg; repaintGame(); return; }
     const lu = e.target.closest("[data-lu]");
     if (lu) { lineupSide = +lu.dataset.lu; repaintGame(); return; }
     const lf = e.target.closest("[data-lf]");

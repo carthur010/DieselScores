@@ -3,6 +3,9 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Soccer Play-By-Play: All Plays (every commentary line, newest first, with team crest, what happened in bold and the minute) and Key Events (goals, cards, subs, VAR with icons). Goals are highlighted.
+- Soccer team pages: tabs are Fixtures, Table, Stats, Squad, Injuries (no Transactions).
+- Team Stats cleanup: soccer leaders show just the number (1, not "Matches: 1, Goals: 1"), duplicate categories are gone, and the one-button Players bar is hidden.
 - New people's league picks line up in sport order (Football, Basketball, Baseball, Hockey, Soccer, Golf, Tennis) no matter what order they tap them. Once they drag to reorder, their order sticks. People already using Scores (and setup codes) keep their order.
 - All Leagues menu starts with My Leagues in your order (MLB, NHL, NFL...), then everything else grouped by sport under More Football, More Soccer and so on.
 
