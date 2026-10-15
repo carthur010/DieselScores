@@ -3,6 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- NHL team standings use the playoff format: top 3 in each division, then the Wild Card race with a line after the second spot. Columns: GP, W, L, OT, PTS, P%, RW, ROW, GF, GA, DIFF, L10 and streak (swipe for more; team names stay pinned).
 - Roster: injured players get a small red tag next to their name (IR, DTD, OUT, IL10 and so on) instead of a big label, and keep their height and weight.
 - Team Stats tab rebuilt: player leaders by category with headshots, ranks (T for ties) and See More, a swipeable row of top leaders, and tabs by group (Skaters/Goalies, Offense/Defense, Batting/Pitching) plus Team for the old team numbers. Before a season starts it shows last season.
 - Team page tab strip only scrolls sideways now (it was drifting up and down while you swiped) and keeps its spot when you switch tabs.

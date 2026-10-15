@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015104456">
+<meta name="build" content="20261015105110">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -476,6 +476,17 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .tl-row span small { color: var(--muted); font-size: 12px; }
 .tl-row strong { font-family: var(--display); font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .tl-more { width: 100%; margin-top: 8px; padding: 9px; border: 1px solid var(--line); border-radius: 10px; font-weight: 700; color: var(--accent); font-size: 14px; }
+.nhl-wrap { overflow-x: auto; margin: 0 -4px; overscroll-behavior-x: contain; scrollbar-width: none; }
+.nhl-wrap::-webkit-scrollbar { display: none; }
+.nhl-st { min-width: 640px; }
+.nhl-st .nm { position: sticky; left: 0; background: var(--surface); z-index: 1; text-align: left; min-width: 96px; }
+.nhl-st tr.grp th { padding: 14px 6px 6px; border-top: 0; font-size: 12px; color: var(--muted); }
+.nhl-st tr.grp th.nm { font-size: 13.5px; color: var(--fg); font-weight: 800; }
+.nhl-st td { padding: 8px 6px; }
+.nhl-st td.nm i { font-style: normal; color: var(--muted); font-size: 12px; width: 14px; display: inline-block; text-align: right; }
+.nhl-st .pts { color: var(--accent); font-weight: 800; }
+.nhl-st tr.cut td { border-top: 2px solid var(--fg); }
+.nhl-st tr.me td, .nhl-st tr.me td.nm { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
 .tm-move { padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.4; }
 .gc-c h3 + .tm-move { border-top: 0; }
 .tm-move small { display: block; color: var(--muted); font-size: 12px; margin-bottom: 2px; }
@@ -2157,7 +2168,7 @@ button.brand, button.brand span { color: var(--accent); }
   const TM_URL = {
     stats: (lg, tm) => API + lg.path + "/teams/" + tm.id + "/statistics",
     roster: (lg, tm) => API + lg.path + "/teams/" + tm.id + "/roster",
-    standings: (lg) => API.replace("/apis/site/v2/", "/apis/v2/") + lg.path + "/standings",
+    standings: (lg) => API.replace("/apis/site/v2/", "/apis/v2/") + lg.path + "/standings" + (lg.id === "nhl" ? "?level=3" : ""),
     injuries: (lg) => API + lg.path + "/injuries",
     moves: (lg) => API + lg.path + "/transactions",
   };
@@ -2246,6 +2257,27 @@ button.brand, button.brand span { color: var(--accent); }
     }).join("");
     return html;
   }
+  // NHL: division leaders + wild card, with the full set of columns (scrolls sideways, team column stays put)
+  function nhlStandings(j, id, lgId) {
+    const conf = (j.children || []).find(c => (c.children || []).some(d => d.standings?.entries?.some(e => String(e.team?.id) === id)));
+    if (!conf) return "";
+    const st = (e, k) => (e.stats || []).find(x => x.name === k || x.type === k);
+    const num = (e, k) => +(st(e, k)?.value ?? 0);
+    const pct = e => { const gp = num(e, "gamesPlayed"); return gp ? num(e, "points") / (2 * gp) : 0; };
+    const cmp = (a, b) => num(b, "points") - num(a, "points") || pct(b) - pct(a) || num(b, "regWins") - num(a, "regWins") || num(b, "rotWins") - num(a, "rotWins") || num(b, "wins") - num(a, "wins");
+    const divs = (conf.children || []).map(d => ({ name: (d.name || "").replace(/ Division$/, ""), ents: (d.standings?.entries || []).slice().sort(cmp) }));
+    const top = new Set(divs.flatMap(d => d.ents.slice(0, 3)));
+    const wc = divs.flatMap(d => d.ents).filter(e => !top.has(e)).sort(cmp);
+    const COLS = [["GP", e => st(e, "gamesPlayed")?.displayValue], ["W", e => st(e, "wins")?.displayValue], ["L", e => st(e, "losses")?.displayValue], ["OT", e => st(e, "otLosses")?.displayValue],
+      ["PTS", e => st(e, "points")?.displayValue, "pts"], ["P%", e => pct(e).toFixed(3).replace(/^0/, "")], ["RW", e => st(e, "regWins")?.displayValue], ["ROW", e => st(e, "rotWins")?.displayValue],
+      ["GF", e => st(e, "pointsFor")?.displayValue], ["GA", e => st(e, "pointsAgainst")?.displayValue], ["DIFF", e => st(e, "pointDifferential")?.displayValue ?? st(e, "pointsDiff")?.displayValue],
+      ["L10", e => (st(e, "lasttengames")?.displayValue || "").replace(/,.*$/, "")], ["STRK", e => st(e, "streak")?.displayValue]];
+    const row = (e, i, cut) => `<tr class="${String(e.team?.id) === id ? "me" : ""} ${cut ? "cut" : ""}"><td class="nm"><span class="tmn tap"${tmLink(lgId, { id: e.team?.id, name: e.team?.displayName, abbr: e.team?.abbreviation, logo: e.team?.logos?.[0]?.href, color: hexColor(e.team?.color) })}><i>${i + 1}</i>${e.team?.logos?.[0]?.href ? `<img src="${esc(e.team.logos[0].href)}" alt="">` : ""}${esc(e.team?.abbreviation || "")}</span></td>${COLS.map(([, f, c]) => `<td class="${c || ""}">${esc(f(e) ?? "-")}</td>`).join("")}</tr>`;
+    const block = (title, ents, cutAt) => `<tr class="grp"><th class="nm">${esc(title)}</th>${COLS.map(([h]) => `<th class="${h === "PTS" ? "pts" : ""}">${h}</th>`).join("")}</tr>${ents.map((e, i) => row(e, i, cutAt != null && i === cutAt)).join("")}`;
+    return `<div class="gc-c"><h3>${esc(conf.name || "Standings")}</h3><div class="nhl-wrap"><table class="tm-stand nhl-st"><tbody>
+      ${divs.map(d => block(d.name, d.ents.slice(0, 3))).join("")}${block("Wild Card", wc, 2)}</tbody></table></div>
+      <p class="hint" style="margin:8px 0 0;font-size:12px">Swipe the table for more. Top 3 in each division plus 2 wild cards make the playoffs. P% is points percentage, RW regulation wins, ROW regulation plus overtime wins.</p></div>`;
+  }
   function teamTabBody(tm, lg, tab) {
     loadTeamTab(tm, lg, tab);
     const j = tm.data[tab];
@@ -2264,6 +2296,7 @@ button.brand, button.brand span { color: var(--accent); }
           <span class="r"><small>${esc([x.displayHeight, x.displayWeight].filter(Boolean).join(", "))}</small></span></div>`;
       }).join("")}</div>`).join("");
     }
+    if (tab === "standings" && lg.id === "nhl") { const h = nhlStandings(j, id, tm.lg); if (h) return h; }
     if (tab === "standings") {
       let best = null;
       const walk = (n, d) => { if (n?.standings?.entries?.some(e => String(e.team?.id) === id) && (!best || d > best.d)) best = { n, d }; (n?.children || []).forEach(c => walk(c, d + 1)); };
