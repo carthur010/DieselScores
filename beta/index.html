@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015153927">
+<meta name="build" content="20261015154308">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -3001,10 +3001,11 @@ button.brand, button.brand span { color: var(--accent); }
 
     // Your teams strip: today's games plus the next game for everyone else
     if (["live", "all", "mine"].includes(tab)) {
-      const mine = games.filter(isMine).sort((a, b) => ({ in: 0, pre: 1, post: 2 }[a.state] - { in: 0, pre: 1, post: 2 }[b.state]) || (b.pin - a.pin) || gameRank(a) - gameRank(b));
+      // Live first, then by start time (earliest first), then finals; your team order only breaks ties
+      const mine = games.filter(isMine).sort((a, b) => ({ in: 0, pre: 1, post: 2 }[a.state] - { in: 0, pre: 1, post: 2 }[b.state]) || new Date(a.date) - new Date(b.date) || (b.pin - a.pin) || gameRank(a) - gameRank(b));
       const playing = new Set(mine.flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
       const nexts = isToday() ? [...state.favs].filter(k => !playing.has(k) && state.next[k]?.date)
-        .sort((a, b) => favRank(a) - favRank(b)) : [];
+        .sort((a, b) => new Date(state.next[a].date) - new Date(state.next[b].date) || favRank(a) - favRank(b)) : [];
       if (pickedNothing()) html += `<div class="pick-banner"><div><b>You're seeing every league</b><span>Follow your teams and leagues and Scores fills in with yours.</span></div><button class="chip on" data-open-welcome>Pick Favorites</button></div>`;
       html += `<div class="mystrip" aria-label="Your teams">${mine.map(stripChip).join("")}${nexts.map(nextChip).join("")}<button class="ms add" data-open-sheet>${state.favs.size ? "+ Teams" : "+ Follow Teams"}</button></div>`;
     }
