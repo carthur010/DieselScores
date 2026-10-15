@@ -2,7 +2,7 @@
 
 Newest first. Beta changes move to Live when shipped.
 
-## In beta (not on live yet)
+## Oct 15, 2026: Live (11:59 AM)
 - Nothing picked yet? Scores shows every league instead of an empty screen, with a "You're seeing every league" card and a Pick Favorites button.
 - Empty screens now give you a way forward: All Games Today (with a count), Upcoming, Search Teams & Leagues, and a Browse Leagues grid of today's leagues (tap for the league page) plus All Leagues.
 
