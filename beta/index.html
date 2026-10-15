@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015114607">
+<meta name="build" content="20261015115441">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -442,6 +442,15 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .blk-f small { color: var(--muted); font-weight: 700; margin-left: 5px; }
 .lp-filter { margin: -4px 0 12px; }
 #sheet-tv { margin-top: 18px; }
+.find-more { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
+.find-more small { color: var(--muted); margin-left: 4px; font-weight: 700; }
+.bl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; padding: 12px 16px 16px; }
+.bl-tile { text-align: left; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--bg); display: grid; gap: 2px; }
+.bl-tile b { font-size: 14px; } .bl-tile small { color: var(--muted); font-size: 12px; }
+.bl-tile.off { opacity: .6; }
+.pick-banner { display: flex; align-items: center; gap: 12px; justify-content: space-between; border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; }
+.pick-banner div { display: grid; gap: 2px; } .pick-banner b { font-size: 14.5px; } .pick-banner span { color: var(--muted); font-size: 13px; }
+.pick-banner .chip { flex: none; }
 .tv-grp { margin-bottom: 12px; }
 .tv-grp > b { display: block; font-size: 13px; margin-bottom: 6px; }
 .lp-logo-big { background: #fff; border-radius: 50%; padding: 10px; }
@@ -2820,12 +2829,25 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function specialsFor(tab) {
     const all = allSpecial();
-    if (tab === "all" || tab === "live") return all.filter(e => e.state === "in" && state.favLeagues.includes(e.lg.id));
+    if (tab === "all" || tab === "live") return all.filter(e => e.state === "in" && (pickedNothing() || state.favLeagues.includes(e.lg.id)));
     if (LG[tab]?.kind) { const pick = LG[tab].kind === "tennis" && state.conf?.[tab]; return all.filter(e => e.lg.id === tab && (!pick || String(e.id) === pick)); }
     return [];
   }
 
-  function inMyWorld(g) { return state.favLeagues.includes(g.lg.id) || isMine(g) || isWatched(g) || !!state.favGames?.[gameKey(g)]; }
+  // Nothing picked yet: show every league instead of an empty app
+  const pickedNothing = () => !state.favs.size && !state.favLeagues.length && !Object.keys(state.favGames || {}).length;
+  // Ways out of an empty screen: jump to everything, what's next, or a league
+  function findMore() {
+    const n = allGames().length;
+    return `<div class="find-more">${state.tab !== "all" && n ? `<button class="chip" data-go-tab="all">All Games${isToday() ? " Today" : ""} <small>${n}</small></button>` : ""}${state.tab !== "upcoming" ? `<button class="chip" data-go-tab="upcoming">Upcoming</button>` : ""}<button class="chip" data-open-q>Search Teams &amp; Leagues</button></div>`;
+  }
+  function browseLeagues() {
+    const cnt = {}; allGames().forEach(g => cnt[g.lg.id] = (cnt[g.lg.id] || 0) + 1);
+    let list = TEAM_LEAGUES.filter(lg => cnt[lg.id]).sort((a, b) => cnt[b.id] - cnt[a.id]);
+    if (!list.length) list = ["nfl", "nba", "mlb", "nhl", "ncaaf", "ncaam", "epl", "ucl"].map(id => LG[id]).filter(Boolean);
+    return block("browse", "Browse Leagues", "", `<div class="bl-grid">${list.map(lg => `<button class="bl-tile ${cnt[lg.id] ? "" : "off"}" data-open-lgpage="${lg.id}"><b>${esc(lg.name)}</b><small>${cnt[lg.id] ? countLabel(cnt[lg.id], allGames().filter(g => g.lg.id === lg.id)) + (isToday() ? " today" : "") : "None " + (isToday() ? "today" : "this day")}</small></button>`).join("")}</div><div class="find-more" style="margin:0 0 14px"><button class="chip" data-open-picker>All Leagues</button></div>`);
+  }
+  function inMyWorld(g) { return pickedNothing() || state.favLeagues.includes(g.lg.id) || isMine(g) || isWatched(g) || !!state.favGames?.[gameKey(g)]; }
   function renderTabs(games, everything = games) {
     const el = document.getElementById("tabs");
     const counts = {};
@@ -2935,6 +2957,7 @@ button.brand, button.brand span { color: var(--accent); }
       const playing = new Set(mine.flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
       const nexts = isToday() ? [...state.favs].filter(k => !playing.has(k) && state.next[k]?.date)
         .sort((a, b) => favRank(a) - favRank(b)) : [];
+      if (pickedNothing()) html += `<div class="pick-banner"><div><b>You're seeing every league</b><span>Follow your teams and leagues and Scores fills in with yours.</span></div><button class="chip on" data-open-welcome>Pick Favorites</button></div>`;
       html += `<div class="mystrip" aria-label="Your teams">${mine.map(stripChip).join("")}${nexts.map(nextChip).join("")}<button class="ms add" data-open-sheet>${state.favs.size ? "+ Teams" : "+ Follow Teams"}</button></div>`;
     }
 
@@ -2992,7 +3015,7 @@ button.brand, button.brand span { color: var(--accent); }
     // My Leagues: your leagues first, in your order, then everything else
     if (tab === "mine") {
       // Only leagues you follow (plus any league one of your teams is playing in)
-      const order = state.favLeagues.filter(id => LG[id]).concat([...new Set(games.filter(isMine).map(g => g.lg.id))].filter(id => !state.favLeagues.includes(id)));
+      const order = pickedNothing() ? LEAGUES.map(l => l.id) : state.favLeagues.filter(id => LG[id]).concat([...new Set(games.filter(isMine).map(g => g.lg.id))].filter(id => !state.favLeagues.includes(id)));
       const off = [];
       html += `<div class="mine-bar"><span>Your leagues first, in your order</span><button class="chip" data-edit-leagues>Edit Order</button></div>`;
       let dividerDone = false;
@@ -3052,12 +3075,14 @@ button.brand, button.brand span { color: var(--accent); }
       html += block("feed", title, live && tab !== "live" ? `${live} Live · ${feed.length} Total` : countLabel(feed.length, feed), timeline(feed));
     } else if (tab === "live" && !shown.size) {
       const upcoming = games.filter(g => g.state === "pre").sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
-      html += `<div class="block empty">Nothing live in your leagues right now.${upcoming.length ? " Here's what's up next." : ""}</div>`;
+      html += `<div class="block empty">Nothing live ${pickedNothing() ? "" : "in your leagues "}right now.${upcoming.length ? " Here's what's up next." : ""}${findMore()}</div>`;
       if (upcoming.length) html += block("upnext", "Up Next", countLabel(upcoming.length, upcoming), state.view === "league" ? `<div class="grid">${upcoming.map(card).join("")}</div>` : timeline(upcoming));
+      html += browseLeagues();
     } else if (tab === "close") {
       html += `<div class="block empty">No close games right now. Games show up here late with a tight score: under 5:00 in the 4th or 3rd, the 7th inning or later in baseball, or the 85th minute in soccer.</div>`;
     } else if (!specialsFor(tab).length) {
-      html += `<div class="block empty">No games on ${esc(dayLabel(state.date))}.</div>`;
+      html += `<div class="block empty">No games ${pickedNothing() ? "" : "in your leagues "}on ${esc(dayLabel(state.date))}.${findMore()}</div>`;
+      html += browseLeagues();
     }
 
     if (golfBelow) specialsFor(tab).forEach(e => { html += BLOCK[e.kind](e); });
@@ -3228,6 +3253,11 @@ button.brand, button.brand span { color: var(--accent); }
       return;
     }
     if (e.target.closest("[data-open-sheet]")) { openSheet(); return; }
+    const gt = e.target.closest("[data-go-tab]");
+    if (gt) { state.tab = gt.dataset.goTab; store.set("tab2", state.tab); render(); window.scrollTo({ top: 0, behavior: "smooth" }); return; }
+    if (e.target.closest("[data-open-q]")) { openSheet(); return; }
+    if (e.target.closest("[data-open-welcome]")) { openSheet(true); return; }
+    if (e.target.closest("[data-open-picker]")) { openPicker("leagues"); return; }
     const bf = e.target.closest("[data-blk-f]");
     if (bf) {
       const id = bf.dataset.blkF;

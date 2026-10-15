@@ -2,6 +2,10 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## In beta (not on live yet)
+- Nothing picked yet? Scores shows every league instead of an empty screen, with a "You're seeing every league" card and a Pick Favorites button.
+- Empty screens now give you a way forward: All Games Today (with a count), Upcoming, Search Teams & Leagues, and a Browse Leagues grid of today's leagues (tap for the league page) plus All Leagues.
+
 ## Oct 15, 2026: Live (11:48 AM)
 - Welcome screen has Your TV & Streaming under Your Leagues: home market plus every service group (TV networks, streaming, regional, league passes, Spanish, free). New people start with none picked.
 - New people start with nothing picked on the Welcome screen: no teams and no leagues. People already using Scores keep what they have.
