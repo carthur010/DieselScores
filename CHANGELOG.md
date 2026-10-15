@@ -2,6 +2,10 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## In beta (not on live yet)
+- Leagues you don't follow no longer show up in Live, All, Close Games, On My Services, Worth A Watch, My Leagues or the live count. Your teams and saved games still show wherever they play. The Other Live Games section is gone. Picking a league from the Leagues picker still shows it.
+- Baseball game header: base diamond, outs and count are spaced out and easier to see on the dark header, and "Pitch 1 : Ball 1" reads "Ball 1".
+
 ## Oct 14, 2026: Tennis app (separate, at /tennis, beta at /tennis/beta)
 - Rebuilt in the Scores look (cream, black and red, same fonts, cards and game-card hero) with its own beta channel. Results tab uses ESPN's free feed.
 - New solo Tennis app on Live Tennis API: Live and Upcoming, ATP/WTA filter, live game points and who's serving, match detail sheet, call counter for the free 100/day.

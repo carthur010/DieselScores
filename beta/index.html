@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014195631">
+<meta name="build" content="20261014204852">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -525,7 +525,14 @@ button.t-go { background: var(--surface); cursor: pointer; }
 .gc-ls td:first-child, .gc-ls th:first-child { text-align: left; font-weight: 700; }
 .gc-ls tbody tr + tr td { border-top: 1px solid rgba(255,255,255,.15); }
 .gc-ls td.tot { font-weight: 800; }
-.gc-sit { text-align: center; margin-top: 12px; font-size: 13px; color: rgba(255,255,255,.85); display: flex; justify-content: center; }
+.gc-sit { text-align: center; margin-top: 14px; font-size: 14px; color: rgba(255,255,255,.9); display: flex; justify-content: center; align-items: center; gap: 12px; }
+.gc-sit .diamond { width: 30px; height: 26px; }
+.gc-sit .diamond rect { stroke: rgba(255,255,255,.55); }
+.gc-sit .diamond rect.on { fill: #f2c94c; stroke: #f2c94c; }
+.gc-sit .outs { gap: 5px; }
+.gc-sit .outs i { width: 8px; height: 8px; border-color: rgba(255,255,255,.6); }
+.gc-sit .outs i.on { background: #fff; border-color: #fff; }
+.gc-sit .txt { white-space: nowrap; }
 .gc-sit .g-foot { color: inherit; }
 .gc-actions { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 18px 0 6px; }
 .watchbig { display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 22px; border-radius: 999px; background: var(--accent); color: var(--bg); font-weight: 700; font-size: 16px; }
@@ -1802,7 +1809,8 @@ button.brand, button.brand span { color: var(--accent); }
         <rect x="16.5" y="8.5" width="7" height="7" transform="rotate(45 20 12)" class="${s.onFirst ? "on" : ""}"/>
         <rect x="2.5" y="8.5" width="7" height="7" transform="rotate(45 6 12)" class="${s.onThird ? "on" : ""}"/></svg>`;
       const outs = `<span class="outs" aria-label="${s.outs} outs">${[0, 1, 2].map(i => `<i class="${i < s.outs ? "on" : ""}"></i>`).join("")}</span>`;
-      return `${bases}${outs}<span class="txt">${s.balls != null ? `${s.balls}-${s.strikes}` : ""}${s.lastPlay?.text ? " · " + esc(s.lastPlay.text) : ""}</span>`;
+      const last = (s.lastPlay?.text || "").replace(/^Pitch \d+\s*:\s*/i, "");   // "Pitch 1 : Ball 1" → "Ball 1"
+      return `${bases}${outs}<span class="txt">${s.balls != null ? `${s.balls}-${s.strikes}` : ""}${last ? " · " + esc(last) : ""}</span>`;
     }
     if (g.lg.sport === "Football" && s.downDistanceText) {
       return `<span class="txt">${s.isRedZone ? '<b style="color:var(--live)">Red Zone</b> · ' : ""}${esc(s.downDistanceText)}</span>`;
@@ -2280,17 +2288,18 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function specialsFor(tab) {
     const all = allSpecial();
-    if (tab === "all" || tab === "live") return all.filter(e => e.state === "in");
+    if (tab === "all" || tab === "live") return all.filter(e => e.state === "in" && state.favLeagues.includes(e.lg.id));
     if (LG[tab]?.kind) { const pick = LG[tab].kind === "tennis" && state.conf?.[tab]; return all.filter(e => e.lg.id === tab && (!pick || String(e.id) === pick)); }
     return [];
   }
 
-  function renderTabs(games) {
+  function inMyWorld(g) { return state.favLeagues.includes(g.lg.id) || isMine(g) || isWatched(g) || !!state.favGames?.[gameKey(g)]; }
+  function renderTabs(games, everything = games) {
     const el = document.getElementById("tabs");
     const counts = {};
     games.forEach(g => counts[g.lg.id] = (counts[g.lg.id] || 0) + 1);
     allSpecial().forEach(e => counts[e.lg.id] = (counts[e.lg.id] || 0) + 1);
-    const liveN = games.filter(g => g.state === "in").length + allSpecial().filter(e => e.state === "in").length;
+    const liveN = games.filter(g => g.state === "in").length + allSpecial().filter(e => e.state === "in" && state.favLeagues.includes(e.lg.id)).length;
     const closeN = games.filter(g => g.close).length;
     const chips = [
       { id: "live", label: "Live", n: liveN, hot: liveN > 0, cls: "livechip" },
@@ -2302,8 +2311,11 @@ button.brand, button.brand span { color: var(--accent); }
       { id: "onmine", label: "On My Services", n: games.filter(onMyServices).length },
     ];
     // Leagues live behind one picker instead of a long chip row
-    pickCounts = { counts, live: {} };
-    games.forEach(g => { if (g.state === "in") pickCounts.live[g.lg.id] = (pickCounts.live[g.lg.id] || 0) + 1; });
+    const allCounts = {};
+    everything.forEach(g => allCounts[g.lg.id] = (allCounts[g.lg.id] || 0) + 1);
+    allSpecial().forEach(e => allCounts[e.lg.id] = (allCounts[e.lg.id] || 0) + 1);
+    pickCounts = { counts: allCounts, live: {} };
+    everything.forEach(g => { if (g.state === "in") pickCounts.live[g.lg.id] = (pickCounts.live[g.lg.id] || 0) + 1; });
     allSpecial().forEach(e => { if (e.state === "in") pickCounts.live[e.lg.id] = (pickCounts.live[e.lg.id] || 0) + 1; });
     const curLg = confLg(state.tab) || (LG[state.tab] ? state.tab : null);
     el.innerHTML = `<button class="chip pick ${curLg ? "on" : ""}" data-pick="leagues" aria-haspopup="dialog">${esc(curLg ? (LG[curLg].short || LG[curLg].name) : "Leagues")}${curLg && counts[curLg] ? `<span class="n">${counts[curLg]}</span>` : ""}${CARET}</button>`
@@ -2364,9 +2376,13 @@ button.brand, button.brand span { color: var(--accent); }
     { const gs = allGames(); rememberOdds(gs); applySeeds(Object.values(state.data).flatMap(d => d.events || [])); loadSeeds(gs); setTimeout(() => fillClosingLines(allGames()), 0); }
     document.querySelectorAll("[data-view]").forEach(b => { const on = b.dataset.view === state.view; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
     renderDates();
-    const games = allGames();
-    renderTabs(games);
-    renderConfs(games);
+    // Mixed views (Live, All, Close Games, On My Services...) only show leagues you follow, your teams and games you saved.
+    // Picking a league from the Leagues picker still shows that league, followed or not.
+    const everything = allGames();
+    const pickedLg = confLg(state.tab) || (LG[state.tab] ? state.tab : null);
+    const games = pickedLg ? everything : everything.filter(inMyWorld);
+    renderTabs(games, everything);
+    renderConfs(everything);
     const main = document.getElementById("main");
     const liveN = games.filter(g => g.state === "in").length;
     document.getElementById("livebug").hidden = liveN === 0;
@@ -2443,7 +2459,8 @@ button.brand, button.brand span { color: var(--accent); }
 
     // My Leagues: your leagues first, in your order, then everything else
     if (tab === "mine") {
-      const order = state.favLeagues.filter(id => LG[id]).concat(LEAGUES.map(l => l.id).filter(id => !state.favLeagues.includes(id)));
+      // Only leagues you follow (plus any league one of your teams is playing in)
+      const order = state.favLeagues.filter(id => LG[id]).concat([...new Set(games.filter(isMine).map(g => g.lg.id))].filter(id => !state.favLeagues.includes(id)));
       const off = [];
       html += `<div class="mine-bar"><span>Your leagues first, in your order</span><button class="chip" data-edit-leagues>Edit Order</button></div>`;
       let dividerDone = false;
@@ -2478,12 +2495,6 @@ button.brand, button.brand span { color: var(--accent); }
     const quiet = [];
     TEAM_LEAGUES.forEach(lg => { if (!pool.some(g => g.lg.id === lg.id) && !state.data[lg.id]?.error && !state.data[lg.id]?.events?.length) quiet.push(lg.short || lg.name); });
     let feed = pool.filter(g => !shown.has(g.id));
-    // Live tab: your leagues, teams and saved games up top; everything else tucked into a collapsed section below
-    let otherLive = [];
-    if (tab === "live") {
-      const yours = g => state.favLeagues.includes(g.lg.id) || isMine(g) || isWatched(g) || !!state.favGames?.[gameKey(g)];
-      otherLive = feed.filter(g => !yours(g)); feed = feed.filter(yours);
-    }
     if (feed.length && state.view === "league" && tab === "live") {
       // Live tab, By League: one "You Are Looking Live" section with a card grid per league inside
       const parts = TEAM_LEAGUES.map(lg => {
@@ -2506,7 +2517,7 @@ button.brand, button.brand span { color: var(--accent); }
       const title = tab === "live" ? "You Are Looking Live" : tab === "close" ? "Close Games" : dayLabel(state.date);
       html += block("feed", title, live && tab !== "live" ? `${live} Live · ${feed.length} Total` : countLabel(feed.length, feed), timeline(feed));
     } else if (tab === "live" && !shown.size) {
-      const upcoming = games.filter(g => g.state === "pre" && (state.favLeagues.includes(g.lg.id) || isMine(g))).sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
+      const upcoming = games.filter(g => g.state === "pre").sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
       html += `<div class="block empty">Nothing live in your leagues right now.${upcoming.length ? " Here's what's up next." : ""}</div>`;
       if (upcoming.length) html += block("upnext", "Up Next", countLabel(upcoming.length, upcoming), state.view === "league" ? `<div class="grid">${upcoming.map(card).join("")}</div>` : timeline(upcoming));
     } else if (tab === "close") {
@@ -2514,8 +2525,7 @@ button.brand, button.brand span { color: var(--accent); }
     } else if (!specialsFor(tab).length) {
       html += `<div class="block empty">No games on ${esc(dayLabel(state.date))}.</div>`;
     }
-    if (otherLive.length) html += block("other-live", "Other Live Games", `${otherLive.length} in leagues you don't follow`,
-      state.view === "league" ? `<div class="grid">${otherLive.map(card).join("")}</div>` : timeline(otherLive));
+
     if (golfBelow) specialsFor(tab).forEach(e => { html += BLOCK[e.kind](e); });
     if (tab === "all" && quiet.length) html += `<p class="quiet">Off ${isToday() ? "today" : "this day"}: ${esc(quiet.join(", "))}</p>`;
     if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}${isToday() ? " · refreshes automatically" : ""}</p>`;
