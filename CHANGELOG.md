@@ -3,6 +3,8 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- New people start with nothing picked on the Welcome screen: no teams and no leagues. People already using Scores keep what they have.
+- Second setup code: JC (or the link ?setup=jc). Teams: UCLA football, UCLA hoops, 49ers, Giants, Kings. Leagues: NFL, NBA, MLB, College Football, Men's College Hoops.
 - Settings > Open To has a Smart option: opens to Live when any of your teams, leagues or saved games are on, and My Teams when nothing is. It checks again when you come back to the app after 10+ minutes.
 
 ## Oct 15, 2026: Live (11:28 AM)

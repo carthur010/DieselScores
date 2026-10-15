@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015113653">
+<meta name="build" content="20261015114053">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1055,7 +1055,19 @@ button.brand, button.brand span { color: var(--accent); }
   const DEFAULT_FAVS = [];
   const DEFAULT_FAV_LEAGUES = ["nfl", "nba", "mlb", "nhl", "ncaaf", "epl", "ucl", "ncaam"];
   // Saved setups that can be loaded with a link (?me) or a code in Settings
-  const SETUPS = { me: MY_SETUP, ca: MY_SETUP };
+  // JC's setup (code JC, or the link ?setup=jc)
+  const ucla = (lg, sport) => ({ lg, id: "26", abbr: "UCLA", name: "UCLA Bruins", color: "#2774ae", logo: "https://a.espncdn.com/i/teamlogos/ncaa/500/26.png" });
+  const JC_SETUP = {
+    favs: ["ncaaf:UCLA", "ncaam:UCLA", "nfl:SF", "mlb:SF", "nba:SAC"],
+    favMeta: {
+      "ncaaf:UCLA": ucla("ncaaf"), "ncaam:UCLA": ucla("ncaam"),
+      "nfl:SF": { lg: "nfl", id: "25", abbr: "SF", name: "San Francisco 49ers", color: "#aa0000", logo: "https://a.espncdn.com/i/teamlogos/nfl/500/sf.png" },
+      "mlb:SF": { lg: "mlb", id: "26", abbr: "SF", name: "San Francisco Giants", color: "#fd5a1e", logo: "https://a.espncdn.com/i/teamlogos/mlb/500/sf.png" },
+      "nba:SAC": { lg: "nba", id: "23", abbr: "SAC", name: "Sacramento Kings", color: "#5a2d81", logo: "https://a.espncdn.com/i/teamlogos/nba/500/sac.png" },
+    },
+    favLeagues: ["nfl", "nba", "mlb", "ncaaf", "ncaam"],
+  };
+  const SETUPS = { me: MY_SETUP, ca: MY_SETUP, jc: JC_SETUP };
   // ?me (or ?setup=ca) loads that setup on this browser, then tidies the address bar
   (() => {
     try {
@@ -1117,7 +1129,8 @@ button.brand, button.brand span { color: var(--accent); }
       return saved ? { team: { ...d.team, ...saved.team }, watched: { ...d.watched, ...saved.watched }, all: { ...d.all, ...saved.all } } : d;
     })(),
     watched: (() => { const w = store.get("watched", {}); const now = Date.now(); Object.keys(w).forEach(k => { if (now - w[k] > 2 * 864e5) delete w[k]; }); return w; })(),
-    favLeagues: store.get("favLeagues", DEFAULT_FAV_LEAGUES),
+    // New people start with no leagues picked; people who already use Scores keep the old starter set
+    favLeagues: (() => { if (!store.get("onboarded", false) && !store.get("favs", []).length && store.get("favLeagues", null) == null) { store.set("favLeagues", []); return []; } return store.get("favLeagues", DEFAULT_FAV_LEAGUES); })(),
     // Favorite games (just that game, not the team). key "lg:id" -> { at, date }. Dropped 2 days after the game.
     favGames: (() => { const f = store.get("favGames", {}); const now = Date.now(); Object.keys(f).forEach(k => { if (now - new Date(f[k].date || f[k].at).getTime() > 2 * 864e5) delete f[k]; }); return f; })(),
     showOdds: store.get("showOdds", true),
