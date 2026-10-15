@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015100711">
+<meta name="build" content="20261015100928">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2326,7 +2326,7 @@ button.brand, button.brand span { color: var(--accent); }
     ncaam: { order: [], name: { ...CBB_CONF } },   // empty order = alphabetical, like ESPN's list
     ncaaw: { order: [], name: { ...CBB_CONF } },
   };
-  const confLg = tab => ["ncaaf", "cfb25", "p4"].includes(tab) ? "ncaaf" : CONFS[tab] ? tab : null;
+  const confLg = tab => ["ncaaf", "cfb25", "cfbrr", "p4"].includes(tab) ? "ncaaf" : CONFS[tab] ? tab : null;
   const inConf = (g, c) => g.teams.some(t => t.conf === c);
   // One "Conference ▾" / "Tournament ▾" button under the tabs; the choices open in the picker sheet
   function subOptions(games) {
@@ -2351,6 +2351,7 @@ button.brand, button.brand span { color: var(--accent); }
     const items = [{ label: "All Games", on: state.tab === lg && !cur, tab: lg, conf: "", n: pool.length }];
     if (lg === "ncaaf") {
       items.push({ label: "Top 25", on: state.tab === "cfb25" && !cur, tab: "cfb25", conf: "", n: pool.filter(g => g.teams.some(t => t.rank)).length });
+      items.push({ label: "Ranked vs Ranked", on: state.tab === "cfbrr" && !cur, tab: "cfbrr", conf: "", n: pool.filter(g => g.teams.length === 2 && g.teams.every(t => t.rank)).length });
       items.push({ label: "Power 4", on: state.tab === "p4" && !cur, tab: "p4", conf: "", n: pool.filter(g => g.p4).length });
     }
     ids.forEach(c => items.push({ label: C.name[c], on: cur === c, tab: lg, conf: c, n: pool.filter(g => inConf(g, c)).length }));
@@ -2400,6 +2401,7 @@ button.brand, button.brand span { color: var(--accent); }
       case "teams": return games.filter(isMine);
       case "close": return games.filter(g => g.close);
       case "onmine": return games.filter(onMyServices);
+      case "cfbrr": return games.filter(g => g.lg.id === "ncaaf" && g.teams.length === 2 && g.teams.every(t => t.rank));
       case "cfb25": return games.filter(g => g.lg.id === "ncaaf" && g.teams.some(t => t.rank));
       case "p4": return games.filter(g => g.lg.id === "ncaaf" && g.p4);
       default: return games.filter(g => g.lg.id === tab);
