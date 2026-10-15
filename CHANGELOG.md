@@ -3,6 +3,8 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Live baseball games open on Play-By-Play and drop the Stats tab (Box Score has the numbers). Stats comes back before and after the game.
+- Baseball Play-By-Play filter: All Plays, Scoring (only at-bats that drove in runs), Key Moments (runs, homers, doubles, triples, errors, double plays, steals and pitching changes).
 - Soccer Play-By-Play: All Plays (every commentary line, newest first, with team crest, what happened in bold and the minute) and Key Events (goals, cards, subs, VAR with icons). Goals are highlighted.
 - Soccer team pages: tabs are Fixtures, Table, Stats, Squad, Injuries (no Transactions).
 - Team Stats cleanup: soccer leaders show just the number (1, not "Matches: 1, Goals: 1"), duplicate categories are gone, and the one-button Players bar is hidden.

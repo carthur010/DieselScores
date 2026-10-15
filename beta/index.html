@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015153142">
+<meta name="build" content="20261015153927">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -3590,8 +3590,10 @@ button.brand, button.brand span { color: var(--accent); }
     }
     if (!j) return html + `<div class="skel"></div><div class="skel"></div></div>`;
     const hasTable = !!(j.standings?.groups?.length || j.lastFiveGames?.length);
-    const tabs = [["stats", "Stats"], ["plays", "Play-By-Play"], lg.soccer ? null : ["box", "Box Score"], hasTable ? ["table", lg.soccer ? "Tournament" : "Standings"] : null].filter(Boolean);
-    if (!tabs.some(([k]) => k === gameTab)) gameTab = "stats";
+    // Live baseball: Box Score already covers the numbers, so the game opens on Play-By-Play
+    const liveBall = lg.sport === "Baseball" && gs === "in";
+    const tabs = [liveBall ? null : ["stats", "Stats"], ["plays", "Play-By-Play"], lg.soccer ? null : ["box", "Box Score"], hasTable ? ["table", lg.soccer ? "Tournament" : "Standings"] : null].filter(Boolean);
+    if (!tabs.some(([k]) => k === gameTab)) gameTab = tabs[0][0];
     html += `<div class="gtabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${gameTab === k}" class="${gameTab === k ? "on" : ""}" data-gtab="${k}">${l}</button>`).join("")}</div>`;
     html += gameTab === "stats" ? statsTab(j, a, h, lg) : gameTab === "plays" ? playsTab(j, lg) : gameTab === "table" ? tableTab(j, a, h, lg) : boxTab(j);
     if (g?.link) html += `<a class="ext" href="${esc(g.link)}" target="_blank" rel="noopener">Open Full Gamecast On ESPN</a>`;
@@ -3938,18 +3940,23 @@ button.brand, button.brand span { color: var(--accent); }
       if (cur && !cur.result && cur.pitches.length) { cur.result = t; cur.score = !!p.scoringPlay; continue; }
       abs.push({ half, note: t, score: !!p.scoringPlay });
     }
-    const list = abs.reverse().slice(0, 25);
+    // Filter: everything, only at-bats that scored, or the big moments (runs, extra-base hits, homers, errors, double plays, steals, pitching changes)
+    const KEY = /homer|home run|doubled|tripled|error|double play|grand slam|walk-off|stole|caught stealing/i;
+    const filt = bbSeg === "scoring" ? abs.filter(a => a.score) : bbSeg === "key" ? abs.filter(a => a.score || KEY.test(a.result || a.note || "") || /pitching change|now pitching|relieved|replaces/i.test(a.note || "")) : abs;
+    const list = filt.slice().reverse().slice(0, bbSeg === "all" ? 25 : 60);
     let html = "", lastHalf = null;
     list.forEach((ab, i) => {
       if (ab.half && ab.half !== lastHalf) { html += `<div class="ab-half">${esc(ab.half)}</div>`; lastHalf = ab.half; }
       if (ab.note) { html += `<div class="ab-note">${esc(ab.note)}</div>`; return; }
-      const now = live && i === 0 && !ab.result;
+      const now = live && bbSeg === "all" && i === 0 && !ab.result;
       html += `<div class="ab ${ab.score ? "score" : ""}"><div class="ab-h"><b>${esc(ab.batter || "At Bat")}</b>${ab.pitcher ? `<small>vs ${esc(ab.pitcher)}</small>` : ""}${now ? '<span class="ab-now">At Bat</span>' : ""}</div>
         ${ab.result ? `<div class="ab-r">${esc(ab.result)}</div>` : ""}
         ${ab.pitches.length ? `<ol class="pitches">${ab.pitches.map(pt => `<li><i class="pd ${pt.cls}">${pt.n}</i><span><b>${esc(pt.lbl)}</b>${pt.extra ? `<small>${esc(pt.extra)}</small>` : ""}</span><em>${pt.count}</em></li>`).join("")}</ol>` : ""}</div>`;
     });
-    return `<div class="gc-c"><div class="plays">${html}</div></div>`;
+    const segs = `<div class="seg gc-seg sp-seg">${[["all", "All Plays"], ["scoring", "Scoring"], ["key", "Key Moments"]].map(([k, l]) => `<button class="${bbSeg === k ? "on" : ""}" data-bb-seg="${k}">${l}</button>`).join("")}</div>`;
+    return segs + (list.length ? `<div class="gc-c"><div class="plays">${html}</div></div>` : `<div class="empty">${bbSeg === "scoring" ? "No runs yet." : "Nothing big yet."}</div>`);
   }
+  let bbSeg = "all";
   // ---- Soccer: All Plays (full commentary) and Key Events (goals, cards, subs), newest first
   let socSeg = "all";
   const SOC_IC = t => /own goal/i.test(t) ? "⚽" : /goal|penalty - scored/i.test(t) ? "⚽" : /red card/i.test(t) ? "🟥" : /yellow/i.test(t) ? "🟨" : /substitut/i.test(t) ? "⇄" : /var|review/i.test(t) ? "📺" : /penalty/i.test(t) ? "◎" : /half|kickoff|end|start/i.test(t) ? "⏱" : "";
@@ -4047,6 +4054,8 @@ button.brand, button.brand span { color: var(--accent); }
     if (tt && teamView) { teamView.tab = tt.dataset.tmTab; teamView.paint(); return; }
     const tg = e.target.closest("[data-game]");
     if (tg && teamView) { e.stopPropagation(); pushView(); teamView = null; openGame(tg.dataset.game); return; }
+    const bs = e.target.closest("[data-bb-seg]");
+    if (bs) { bbSeg = bs.dataset.bbSeg; repaintGame(); return; }
     const ss = e.target.closest("[data-sp-seg]");
     if (ss) { socSeg = ss.dataset.spSeg; repaintGame(); return; }
     const lu = e.target.closest("[data-lu]");
