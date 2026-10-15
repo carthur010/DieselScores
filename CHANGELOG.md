@@ -129,6 +129,7 @@ Built from beta as of today, plus a Home Layout switch in Settings (top of the l
 - All three open on a For You feed: Your Teams, Worth A Watch, You Are Looking Live, then Up Next for teams not playing today. Golf and tennis show when in progress.
 - Simple, Compact and Expanded all work in every layout. Tap the view pill in the header to switch. In For You, Your Teams follows the view you pick, even with Always Expand My Teams on.
 - Classic keeps the current beta home, so you can compare.
+- Open To is back for the new layouts (Settings › Layout & Display): Smart, My Games (Your Day / For You on the other layouts), Live or All. Starts on My Games. Smart opens on Live when any of your games or leagues are on.
 - Has its own saved settings (separate from beta and live); teams and leagues are shared.
 
 ## Beta 2.0 (at /beta2): snapshot of beta, Oct 14, 1:57 PM

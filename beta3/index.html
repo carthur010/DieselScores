@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta 3.0</title>
-<meta name="build" content="20261015184100">
+<meta name="build" content="20261015191005">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1283,7 +1283,7 @@ button.brand, button.brand span { color: var(--accent); }
   };
 
   // Beta 3.0: the new home layouts open on For You
-  if (state.homeLayout !== "classic") { state.tab = "foryou"; state.autoPending = false; }
+  if (state.homeLayout !== "classic") { const h3 = store.get("home3", "foryou"); state.tab = h3 === "auto" ? "foryou" : h3; state.autoPending = h3 === "auto"; }
   document.documentElement.dataset.home = state.homeLayout;
 
   // =====================================================================
@@ -2974,8 +2974,9 @@ button.brand, button.brand span { color: var(--accent); }
   }
   // "Smart" Open To: Live when any of your games or leagues are on right now, otherwise My Teams
   function homeTab() {
-    if (state.homeLayout !== "classic") return "foryou";
-    const h = store.get("home", "live");
+    const h = state.homeLayout !== "classic" ? store.get("home3", "foryou") : store.get("home", "live");
+    if (state.homeLayout !== "classic" && h === "auto") return allGames().some(g => g.state === "in" && inMyWorld(g)) || specialsFor("live").some(e => e.state === "in") ? "live" : "foryou";
+    if (state.homeLayout !== "classic") return ["foryou", "live", "all"].includes(h) ? h : "foryou";
     if (h !== "auto") return h;
     const live = allGames().some(g => g.state === "in" && inMyWorld(g)) || specialsFor("live").some(e => e.state === "in");
     return live ? "live" : "teams";
@@ -4545,7 +4546,7 @@ button.brand, button.brand span { color: var(--accent); }
       (store.get("owner", "") ? `<div class="set-row"><div class="set-lbl">Reset To My Setup<small>Puts back your saved teams and leagues, in order</small></div><button class="chip" data-reset-setup>Reset</button></div>` : "") +
       `<div class="set-row"><div class="set-lbl">Load A Setup<small>Have a setup code? Enter it to load those teams and leagues</small></div><button class="chip" data-load-setup>Enter Code</button></div>` +
       setSection("display", "Layout & Display", "Open to, layout, color, appearance, odds",
-        (state.homeLayout !== "classic" ? "" : segRow("Open To", "home", store.get("home", "live"), [["auto", "Smart"], ["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens. Smart picks Live when your games are on, and My Teams when nothing is.")) +
+        (state.homeLayout !== "classic" ? segRow("Open To", "home3", store.get("home3", "foryou"), [["auto", "Smart"], ["foryou", { bar: "My Games", day: "Your Day", rail: "For You" }[state.homeLayout]], ["live", "Live"], ["all", "All"]], "What you see when the app opens. Smart opens on Live when any of your games or leagues are on, otherwise " + { bar: "My Games", day: "Your Day", rail: "For You" }[state.homeLayout] + ".") : segRow("Open To", "home", store.get("home", "live"), [["auto", "Smart"], ["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens. Smart picks Live when your games are on, and My Teams when nothing is.")) +
         segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
         segRow("Scoreboard", "density", state.density, [["simple", "Simple"], ["compact", "Compact"], ["expanded", "Expanded"]], "Or pinch the scores: in for smaller, out for bigger") +
         segRow("Always Expand My Teams", "expandFavs", state.expandFavs ? "on" : "off", [["on", "On"], ["off", "Off"]], "In Compact and Simple, your teams' games stay full size") +
@@ -4576,6 +4577,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (b) {
       const key = b.dataset.set, val = b.dataset.val;
       if (key === "home") { store.set("home", val); state.tab = homeTab(); }
+      if (key === "home3") { store.set("home3", val); state.tab = homeTab(); }
       if (key === "homeLayout") { state.homeLayout = val; store.set("homeLayout", val); document.documentElement.dataset.home = val; state.showCal = false; state.tab = homeTab(); }
       if (key === "view") { state.view = val; store.set("view3", val); }
       if (key === "theme") { store.set("theme", val); applyTheme(); }
