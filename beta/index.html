@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015111209">
+<meta name="build" content="20261015112523">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -413,6 +413,7 @@ section.closed .bhead { border-bottom: 0; }
 .sheet-card { width: min(560px, 100%); max-height: min(80vh, 760px); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
 .sheet-body { padding: 14px 16px; display: grid; gap: 12px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .sheet { overscroll-behavior: contain; }
+#pksheet { z-index: 65; }
 html.locked, html.locked body { overflow: hidden; }
 body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .sheet input[type=search] { width: 100%; padding: 11px 12px; font: inherit; font-size: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); }
@@ -437,7 +438,9 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .circ.tm-star { color: #fff; }
 .gc-top .circ + .circ { margin-left: 8px; }
 .lg-link { cursor: pointer; }
-.lg-go { color: var(--muted); font-weight: 400; margin-left: 2px; }
+.blk-bar { padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.blk-f small { color: var(--muted); font-weight: 700; margin-left: 5px; }
+.lp-filter { margin: -4px 0 12px; }
 .lp-logo-big { background: #fff; border-radius: 50%; padding: 10px; }
 .lp-chips { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; margin: 0 -16px 12px; padding: 2px 16px; overscroll-behavior-x: contain; }
 .lp-chips::-webkit-scrollbar { display: none; }
@@ -1096,6 +1099,7 @@ button.brand, button.brand span { color: var(--accent); }
     date: startOfDay(new Date()),
     tab: store.get("home", "live"),
     conf: (() => { const c = store.get("conf", null); return c && typeof c === "object" ? c : {}; })(),
+    blkF: (() => { const c = store.get("blkF", null); return c && typeof c === "object" ? c : {}; })(),
     view: store.get("view3", "league"),
     favs: new Set(store.get("favs", DEFAULT_FAVS)),
     favMeta: { ...MY_SETUP.favMeta, ...store.get("favMeta", {}) },   // key -> { lg, id, name, logo, color }
@@ -2255,7 +2259,8 @@ button.brand, button.brand span { color: var(--accent); }
         const cur = lv.day || (first ? new Date(first) : base);
         chips = `<div class="lp-chips">${Array.from({ length: 15 }, (_, i) => addDays(base, i - 7)).map(d => `<button class="${ymd(d) === ymd(cur) ? "on" : ""}" data-lp-day="${ymd(d)}">${esc(ymd(d) === ymd(base) ? "Today" : d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }))}</button>`).join("")}</div>`;
       }
-      const games = lv.data.board;
+      let games = lv.data.board;
+      if (CONFS[lv.id]) { chips += `<div class="lp-filter"><button class="chip pick" data-lp-f>${esc(colLabel(lv.id, lv.filt || ""))}${CARET}</button></div>`; if (games) games = colFilter(games, lv.filt || ""); }
       if (!games) body = chips + `<div class="skel"></div><div class="skel"></div>`;
       else if (!games.length) body = chips + tmEmpty(`No ${gameWord(lg, true).toLowerCase()} ${isWeekly(lg) ? "this week" : "on this day"}.`);
       else {
@@ -2639,14 +2644,14 @@ button.brand, button.brand span { color: var(--accent); }
 
   // "8 Games", or "8 Matches" when every game in the list is soccer
   function countLabel(n, games) { const m = games?.length && games.every(g => g.lg?.soccer); return `${n} ${m ? (n === 1 ? "Match" : "Matches") : (n === 1 ? "Game" : "Games")}`; }
-  function block(id, title, meta, body, icon) {
+  function block(id, title, meta, body, icon, tool) {
     const closed = state.closed.has(id);
     const lgId = LG[id] ? id : (String(id).startsWith("m-") && LG[id.slice(2)] ? id.slice(2) : null);
     const lgPage = lgId && !LG[lgId].kind;
     return `<section class="block ${closed ? "closed" : ""}" data-block="${esc(id)}">
-      <div class="bhead">${icon || ""}<h2${lgPage ? ` class="tap lg-link" data-open-lgpage="${lgId}" role="button" tabindex="0" title="Open ${esc(title)}"` : ""}>${esc(title)}${lgPage ? ' <span class="lg-go" aria-hidden="true">›</span>' : ""}</h2>${meta ? `<span class="meta">${esc(meta)}</span>` : ""}
+      <div class="bhead">${icon || ""}<h2${lgPage ? ` class="tap lg-link" data-open-lgpage="${lgId}" role="button" tabindex="0" title="Open ${esc(title)}"` : ""}>${esc(title)}</h2>${meta ? `<span class="meta">${esc(meta)}</span>` : ""}
         <button class="tog" data-tog="${esc(id)}" aria-expanded="${!closed}" aria-label="${closed ? "Expand" : "Collapse"} ${esc(title)}">${CHEV}</button></div>
-      <div class="bbody">${body}</div></section>`;
+      <div class="bbody">${tool ? `<div class="blk-bar">${tool}</div>` : ""}${body}</div></section>`;
   }
 
   // =====================================================================
@@ -2676,6 +2681,34 @@ button.brand, button.brand span { color: var(--accent); }
   };
   const confLg = tab => ["ncaaf", "cfb25", "cfbrr", "p4"].includes(tab) ? "ncaaf" : CONFS[tab] ? tab : null;
   const inConf = (g, c) => g.teams.some(t => t.conf === c);
+  // ---- College filter (All, Top 25, Ranked vs Ranked, Power 4, each conference) for a league's own list
+  function colOpts(lgId, pool) {
+    const C = CONFS[lgId]; if (!C) return [];
+    const rank = c => (C.order.indexOf(c) + 1) || 999;
+    const items = [{ label: "All Games", key: "", n: pool.length }, { label: "Top 25", key: "t25", n: colFilter(pool, "t25").length }, { label: "Ranked vs Ranked", key: "rr", n: colFilter(pool, "rr").length }];
+    if (lgId === "ncaaf") items.push({ label: "Power 4", key: "p4", n: colFilter(pool, "p4").length });
+    const ids = [...new Set(pool.flatMap(g => g.teams.map(t => t.conf)).filter(c => c && C.name[c]))].sort((x, y) => rank(x) - rank(y) || C.name[x].localeCompare(C.name[y]));
+    ids.forEach(c => items.push({ label: C.name[c], key: c, n: pool.filter(g => inConf(g, c)).length, conf: true }));
+    return items;
+  }
+  function colFilter(pool, key) {
+    if (!key) return pool;
+    if (key === "t25") return pool.filter(g => g.teams.some(t => t.rank));
+    if (key === "rr") return pool.filter(g => g.teams.length === 2 && g.teams.every(t => t.rank));
+    if (key === "p4") return pool.filter(g => g.p4 || g.teams.some(t => P4_GROUPS.includes(+t.conf)));
+    return pool.filter(g => inConf(g, key));
+  }
+  const colLabel = (lgId, key) => !key ? "All Games" : key === "t25" ? "Top 25" : key === "rr" ? "Ranked vs Ranked" : key === "p4" ? "Power 4" : (CONFS[lgId]?.name[key] || "All Games");
+  let pkCustom = null;
+  function openCustomPicker(title, items, cur, onPick) {
+    pkCustom = onPick;
+    const el = document.getElementById("pksheet"), body = document.getElementById("pk-body");
+    document.getElementById("pk-h").textContent = title;
+    const firstConf = items.findIndex(i => i.conf);
+    body.innerHTML = `<div class="pk-list">${items.map((i, k) => `${k === firstConf ? "<h3>Conferences</h3>" : ""}<button class="pk-row ${i.key === cur ? "on" : ""}" data-pk-custom="${esc(i.key)}"><span>${esc(i.label)}</span><small>${esc(i.n)}</small>${i.key === cur ? CHECK : ""}</button>`).join("")}</div>`;
+    el.hidden = false; syncLock();
+  }
+  const colTool = (lgId, cnt) => `<button class="chip pick blk-f" data-blk-f="${lgId}">${esc(colLabel(lgId, state.blkF[lgId] || ""))}${cnt != null ? `<small>${cnt}</small>` : ""}${CARET}</button>`;
   // One "Conference ▾" / "Tournament ▾" button under the tabs; the choices open in the picker sheet
   function subOptions(games) {
     if (LG[state.tab]?.kind === "tennis") {
@@ -2939,11 +2972,12 @@ button.brand, button.brand span { color: var(--accent); }
         if (lg.kind) {
           section = allSpecial().filter(e => e.lg.id === id).map(e => BLOCK[e.kind] ? BLOCK[e.kind](e) : "").join("");
         } else {
-          const list = games.filter(g => g.lg.id === id).sort((x, y) => ({ in: 0, pre: 1, post: 2 }[x.state] - { in: 0, pre: 1, post: 2 }[y.state]) || new Date(x.date) - new Date(y.date));
-          if (list.length) {
+          const all = games.filter(g => g.lg.id === id).sort((x, y) => ({ in: 0, pre: 1, post: 2 }[x.state] - { in: 0, pre: 1, post: 2 }[y.state]) || new Date(x.date) - new Date(y.date));
+          const list = CONFS[id] ? colFilter(all, state.blkF[id] || "") : all;
+          if (all.length) {
             const liveN = list.filter(g => g.state === "in").length;
             section = block("m-" + id, lg.name, liveN ? `${liveN} Live · ${list.length} Total` : countLabel(list.length, list),
-              state.view === "league" ? `<div class="grid">${list.map(card).join("")}</div>` : timeline(list));
+              !list.length ? `<p class="hint" style="padding:14px 16px">No ${esc(colLabel(id, state.blkF[id]))} ${gameWord(lg, true).toLowerCase()} on this day.</p>` : state.view === "league" ? `<div class="grid">${list.map(card).join("")}</div>` : timeline(list), "", CONFS[id] ? colTool(id, list.length) : "");
           }
         }
         if (!section) { if (isFav) off.push(lg.short || lg.name); return; }
@@ -2976,10 +3010,11 @@ button.brand, button.brand span { color: var(--accent); }
       html += block("feed", "You Are Looking Live", countLabel(feed.length, feed), parts);
     } else if (feed.length && state.view === "league") {
       TEAM_LEAGUES.forEach(lg => {
-        const list = feed.filter(g => g.lg.id === lg.id).sort((x, y) => ({ in: 0, pre: 1, post: 2 }[x.state] - { in: 0, pre: 1, post: 2 }[y.state]) || new Date(x.date) - new Date(y.date));
-        if (!list.length) return;
+        const all = feed.filter(g => g.lg.id === lg.id).sort((x, y) => ({ in: 0, pre: 1, post: 2 }[x.state] - { in: 0, pre: 1, post: 2 }[y.state]) || new Date(x.date) - new Date(y.date));
+        if (!all.length) return;
+        const list = CONFS[lg.id] ? colFilter(all, state.blkF[lg.id] || "") : all;
         const liveN = list.filter(g => g.state === "in").length;
-        html += block(lg.id, lg.name, liveN ? `${liveN} Live · ${list.length} Total` : countLabel(list.length, list), `<div class="grid">${list.map(card).join("")}</div>`);
+        html += block(lg.id, lg.name, liveN ? `${liveN} Live · ${list.length} Total` : countLabel(list.length, list), list.length ? `<div class="grid">${list.map(card).join("")}</div>` : `<p class="hint" style="padding:14px 16px">Nothing in this filter on this day.</p>`, "", CONFS[lg.id] ? colTool(lg.id, list.length) : "");
       });
     } else if (feed.length) {
       const live = feed.filter(g => g.state === "in").length;
@@ -3162,6 +3197,13 @@ button.brand, button.brand span { color: var(--accent); }
       return;
     }
     if (e.target.closest("[data-open-sheet]")) { openSheet(); return; }
+    const bf = e.target.closest("[data-blk-f]");
+    if (bf) {
+      const id = bf.dataset.blkF;
+      const pool = allGames().filter(g => g.lg.id === id);
+      openCustomPicker(LG[id].name, colOpts(id, pool), state.blkF[id] || "", key => { state.blkF[id] = key; store.set("blkF", state.blkF); render(); });
+      return;
+    }
     const olp = e.target.closest("[data-open-lgpage]");
     if (olp) { e.stopPropagation(); navStack = []; openLeaguePage(olp.dataset.openLgpage); return; }
     const tog = e.target.closest("[data-tog]");
@@ -3279,6 +3321,8 @@ button.brand, button.brand span { color: var(--accent); }
   document.getElementById("pk-x").onclick = closePicker;
   document.getElementById("pksheet").addEventListener("click", e => {
     if (e.target.id === "pksheet") { closePicker(); return; }
+    const cp = e.target.closest("[data-pk-custom]");
+    if (cp && pkCustom) { const f = pkCustom; pkCustom = null; closePicker(); f(cp.dataset.pkCustom); return; }
     const b = e.target.closest("[data-pk-tab]"); if (!b) return;
     const tab = b.dataset.pkTab, conf = b.dataset.pkConf, lg = confLg(tab) || tab;
     state.tab = tab; store.set("tab2", tab);
@@ -3833,6 +3877,7 @@ button.brand, button.brand span { color: var(--accent); }
       const lt = e.target.closest("[data-lp-tab]"); if (lt) { lv.tab = lt.dataset.lpTab; lv.paint(); return; }
       const wk = e.target.closest("[data-lp-week]"); if (wk) { const [type, week] = wk.dataset.lpWeek.split("|"); lv.pick = { type, week }; loadLeagueBoard(lv); return; }
       const dy = e.target.closest("[data-lp-day]"); if (dy) { const v = dy.dataset.lpDay; lv.day = new Date(+v.slice(0, 4), +v.slice(4, 6) - 1, +v.slice(6, 8), 12); loadLeagueBoard(lv); return; }
+      if (e.target.closest("[data-lp-f]")) { openCustomPicker(LG[lv.id].name, colOpts(lv.id, lv.data.board || []), lv.filt || "", key => { lv.filt = key; lv.paint(); }); return; }
       const pl = e.target.closest("[data-lp-poll]"); if (pl) { lv.poll = pl.dataset.lpPoll; lv.paint(); return; }
       if (e.target.closest("[data-lp-follow]")) { const id = lv.id; state.favLeagues = state.favLeagues.includes(id) ? state.favLeagues.filter(x => x !== id) : [...state.favLeagues, id]; store.set("favLeagues", state.favLeagues); render(); lv.paint(); return; }
       const sl = e.target.closest("[data-share-lg]"); if (sl) { const lg = LG[sl.dataset.shareLg]; shareLink(lg.name, `${lg.name} scores and standings on Scores`, "league=" + lg.id); return; }

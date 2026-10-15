@@ -3,6 +3,9 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- College sections on the scoreboard (Football, Men's and Women's Hoops) have their own filter right under the header: All Games, Top 25, Ranked vs Ranked, Power 4 (football) and each conference. It remembers your pick.
+- League pages for college get the same filter dropdown above the games.
+- League names open the league page with a plain tap (no arrow).
 - Under game times (Simple rows and the top strip) you now see the channel, like ESPN or FOX, instead of YouTube TV. Watch buttons still open YouTube TV. (Ben's note.)
 - League pages: tap a league's name on the scoreboard (like College Football) to open its page. Scores by week for football (Week 1, Week 2...) or by day for everything else, Standings (Table for soccer), Rankings for college (AP, Coaches, CFP with movement), and Teams. Star to follow the league.
 - Share buttons on games, team pages and league pages now send a Scores link that opens straight to that page.
