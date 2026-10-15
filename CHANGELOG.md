@@ -3,6 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Team pages have tabs: Schedule, Stats, Roster, Standings, Injuries and Transactions. Follow moved to a star in the top right of the header.
 - Settings > TV & Streaming has an On My Services Tab switch (Show or Hide). Hiding it removes the chip from the tab row.
 
 ## Oct 15, 2026: Live (9:50 AM)

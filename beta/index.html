@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015095617">
+<meta name="build" content="20261015100711">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -433,6 +433,29 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .tm-hero img { width: 84px; height: 84px; object-fit: contain; filter: drop-shadow(0 3px 10px rgba(0,0,0,.35)); }
 .tm-hero b { font-family: var(--display); font-size: 30px; font-weight: 700; }
 .tm-hero small { color: rgba(255,255,255,.8); font-size: 13px; }
+.circ.tm-star { color: #fff; } .circ.tm-star.on { color: var(--star); }
+.tm-tabs { display: flex; gap: 22px; overflow-x: auto; scrollbar-width: none; margin: 14px 0 12px; border-bottom: 1px solid var(--line); padding: 0 2px; }
+.tm-tabs::-webkit-scrollbar { display: none; }
+.tm-tabs button { flex: none; font-size: 15px; font-weight: 700; color: var(--muted); padding: 10px 0; border-bottom: 3px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tm-tabs button.on { color: var(--fg); border-color: var(--accent); }
+.tm-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.gc-c h3 + .tm-row { border-top: 0; }
+.tm-row .hs { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: var(--line); display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--muted); font-style: normal; }
+.tm-row span { display: grid; line-height: 1.3; min-width: 0; }
+.tm-row span small, .tm-row .r small { color: var(--muted); font-size: 12px; }
+.tm-row .r { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; display: grid; }
+.tm-pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 99px; background: color-mix(in srgb, var(--live) 14%, transparent); color: var(--live); text-transform: uppercase; letter-spacing: .04em; }
+.tm-stand { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.tm-stand th { color: var(--muted); font-size: 11.5px; font-weight: 700; text-align: right; padding: 6px 4px; }
+.tm-stand th:first-child, .tm-stand td:first-child { text-align: left; }
+.tm-stand td { padding: 8px 4px; border-top: 1px solid var(--line); text-align: right; }
+.tm-stand td:first-child { font-weight: 600; }
+.tm-stand td .tmn { display: flex; align-items: center; gap: 8px; }
+.tm-stand td img { width: 20px; height: 20px; object-fit: contain; }
+.tm-stand tr.me td { background: color-mix(in srgb, var(--accent) 10%, transparent); font-weight: 800; }
+.tm-move { padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.4; }
+.gc-c h3 + .tm-move { border-top: 0; }
+.tm-move small { display: block; color: var(--muted); font-size: 12px; margin-bottom: 2px; }
 .watchbig.ghostbig { background: var(--surface); color: var(--fg); border: 1px solid var(--line); }
 .l5-row.tap { cursor: pointer; }
 .lg-badge { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-size: 8.5px; font-weight: 800; letter-spacing: .02em; }
@@ -2101,13 +2124,84 @@ button.brand, button.brand span { color: var(--accent); }
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   let teamView = null;
+  const TM_TABS = [["schedule", "Schedule"], ["stats", "Stats"], ["roster", "Roster"], ["standings", "Standings"], ["injuries", "Injuries"], ["moves", "Transactions"]];
+  const TM_URL = {
+    stats: (lg, tm) => API + lg.path + "/teams/" + tm.id + "/statistics",
+    roster: (lg, tm) => API + lg.path + "/teams/" + tm.id + "/roster",
+    standings: (lg) => API.replace("/apis/site/v2/", "/apis/v2/") + lg.path + "/standings",
+    injuries: (lg) => API + lg.path + "/injuries",
+    moves: (lg) => API + lg.path + "/transactions",
+  };
+  function loadTeamTab(tm, lg, tab) {
+    if (tm.data[tab] !== undefined) return;
+    tm.data[tab] = null;
+    fetch(TM_URL[tab](lg, tm)).then(r => r.ok ? r.json() : {}).catch(() => ({})).then(j => {
+      tm.data[tab] = j || {};
+      if (teamView === tm && tm.tab === tab) tm.paint();
+    });
+  }
+  const tmEmpty = msg => `<p class="hint" style="text-align:center;padding:20px 0">${esc(msg)}</p>`;
+  const titleCase = t => String(t || "").replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1).toLowerCase());
+  function teamTabBody(tm, lg, tab) {
+    loadTeamTab(tm, lg, tab);
+    const j = tm.data[tab];
+    if (!j) return `<div class="skel"></div><div class="skel"></div>`;
+    const id = String(tm.id);
+    if (tab === "stats") {
+      const cats = j.results?.stats?.categories || j.statistics?.splits?.categories || j.splits?.categories || [];
+      const ok = cats.filter(c => (c.stats || []).some(x => x.displayValue != null));
+      if (!ok.length) return tmEmpty("No team stats yet this season.");
+      return ok.slice(0, 6).map(c => `<div class="gc-c"><h3>${esc(c.displayName || titleCase(c.name))}</h3>${(c.stats || []).filter(x => x.displayValue != null).slice(0, 10).map(x => `<div class="tm-row" style="grid-template-columns:1fr auto auto"><span>${esc(x.displayName || x.shortDisplayName || x.name)}</span><span class="r">${esc(x.displayValue)}</span><span class="r"><small>${esc(x.rankDisplayValue || "")}</small></span></div>`).join("")}</div>`).join("");
+    }
+    if (tab === "roster") {
+      const a = j.athletes || [];
+      const groups = a.length && a[0]?.items ? a.map(g => ({ name: titleCase(g.position), list: g.items || [] })) :
+        Object.entries(a.reduce((m, x) => { const k = x.position?.displayName || x.position?.name || "Players"; (m[k] = m[k] || []).push(x); return m; }, {})).map(([name, list]) => ({ name, list }));
+      if (!groups.some(g => g.list.length)) return tmEmpty("No roster available.");
+      return groups.filter(g => g.list.length).map(g => `<div class="gc-c"><h3>${esc(g.name)}</h3>${g.list.map(x => {
+        const hurt = (x.injuries || []).length;
+        return `<div class="tm-row">${x.headshot?.href ? `<img class="hs" src="${esc(x.headshot.href)}" alt="" loading="lazy">` : `<i class="hs">${esc(x.jersey || "")}</i>`}
+          <span><b>${esc(x.displayName || x.fullName || "")}</b><small>${esc([x.jersey ? "#" + x.jersey : "", x.position?.abbreviation, x.age ? "Age " + x.age : ""].filter(Boolean).join(" · "))}</small></span>
+          <span class="r">${hurt ? `<span class="tm-pill">${esc(x.injuries[0].status || "Injured")}</span>` : `<small>${esc([x.displayHeight, x.displayWeight].filter(Boolean).join(", "))}</small>`}</span></div>`;
+      }).join("")}</div>`).join("");
+    }
+    if (tab === "standings") {
+      let best = null;
+      const walk = (n, d) => { if (n?.standings?.entries?.some(e => String(e.team?.id) === id) && (!best || d > best.d)) best = { n, d }; (n?.children || []).forEach(c => walk(c, d + 1)); };
+      walk(j, 0);
+      if (!best) return tmEmpty("No standings available.");
+      const ents = best.n.standings.entries;
+      const stat = (e, k) => (e.stats || []).find(x => x.name === k || x.type === k);
+      const cols = lg.soccer ? ["gamesPlayed", "wins", "ties", "losses", "points"] : lg.sport === "Hockey" ? ["wins", "losses", "otLosses", "points"] :
+        lg.sport === "Football" ? ["wins", "losses", "ties", "winPercent"] : ["wins", "losses", "winPercent", "gamesBehind"];
+      const use = cols.filter(k => ents.some(e => stat(e, k)));
+      const key = use.includes("points") ? "points" : "winPercent";
+      const sorted = ents.slice().sort((a, b) => (+(stat(b, key)?.value ?? 0) - +(stat(a, key)?.value ?? 0)) || (+(stat(b, "wins")?.value ?? 0) - +(stat(a, "wins")?.value ?? 0)));
+      return `<div class="gc-c"><h3>${esc(best.n.name || best.n.abbreviation || "Standings")}</h3><table class="tm-stand"><thead><tr><th>Team</th>${use.map(k => `<th>${esc(stat(ents[0], k)?.abbreviation || stat(ents.find(e => stat(e, k)), k)?.abbreviation || k)}</th>`).join("")}</tr></thead><tbody>
+        ${sorted.map(e => `<tr class="${String(e.team?.id) === id ? "me" : ""}"><td><span class="tmn">${e.team?.logos?.[0]?.href ? `<img src="${esc(e.team.logos[0].href)}" alt="">` : ""}${esc(e.team?.abbreviation || e.team?.shortDisplayName || "")}</span></td>${use.map(k => `<td>${esc(stat(e, k)?.displayValue ?? "-")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+    }
+    if (tab === "injuries") {
+      const t = (j.injuries || []).find(x => String(x.id) === id || String(x.team?.id) === id);
+      const list = t?.injuries || [];
+      if (!list.length) return tmEmpty("No injuries reported.");
+      return `<div class="gc-c"><h3>Injury Report</h3>${list.map(x => `<div class="tm-row">${x.athlete?.headshot?.href ? `<img class="hs" src="${esc(x.athlete.headshot.href)}" alt="" loading="lazy">` : `<i class="hs"></i>`}
+        <span><b>${esc(x.athlete?.displayName || "")}${x.athlete?.position?.abbreviation ? ` <small style="display:inline">${esc(x.athlete.position.abbreviation)}</small>` : ""}</b><small>${esc(x.shortComment || [x.details?.type, x.details?.detail].filter(Boolean).join(", ") || "")}</small></span>
+        <span class="r"><span class="tm-pill">${esc(x.status || x.type?.description || "Injured")}</span>${x.details?.returnDate ? `<small>Back ${esc(new Date(x.details.returnDate).toLocaleDateString(undefined, { month: "short", day: "numeric" }))}</small>` : ""}</span></div>`).join("")}</div>`;
+    }
+    if (tab === "moves") {
+      const list = (j.transactions || []).filter(x => String(x.team?.id) === id).slice(0, 40);
+      if (!list.length) return tmEmpty("No recent transactions.");
+      return `<div class="gc-c"><h3>Transactions</h3>${list.map(x => `<div class="tm-move"><small>${esc(x.date ? new Date(x.date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "")}</small>${esc(x.description || "")}</div>`).join("")}</div>`;
+    }
+    return "";
+  }
   async function openTeam(tm) {
     const lg = LG[tm.lg]; if (!lg || !tm.id) return;
     fromSettings = false; closeSheet(); closeGame(); teamView = tm;
     const el = document.getElementById("gsheet");
     const paintTeam = (sched) => {
       if (teamView !== tm) return;
-      const k = keyFor(tm), on = state.favs.has(k);
+      const k = keyFor(tm), on = state.favs.has(k), tab = tm.tab || "schedule";
       const games = sched?.games || [];
       const now = Date.now();
       const next = games.filter(g => g.state !== "post" && new Date(g.date).getTime() > now - 4 * 3600e3).slice(0, 4);
@@ -2116,14 +2210,18 @@ button.brand, button.brand span { color: var(--accent); }
         <span class="l5-at">${g.home ? "vs" : "@"}</span>${g.oppLogo ? `<img src="${esc(g.oppLogo)}" alt="">` : "<i></i>"}<span class="l5-o">${esc(g.opp)}</span>
         <span class="l5-r">${g.state === "post" ? `<small>Final</small><span><b class="${g.res === "W" ? "w" : g.res === "L" ? "l" : ""}">${esc(g.res || "")}</b> ${esc(g.score)}</span>` : `<small>${esc(g.state === "in" ? "Live" : g.tv || "")}</small><span>${esc(g.state === "in" ? g.score : timeLabel(g.date))}</span>`}</span></div>`;
       el.innerHTML = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:${readable(tm.color)};--ch:${readable(tm.color)}"></div>
-        <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span></div>
+        <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span><button class="circ tm-star ${on ? "on" : ""}" data-team-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(tm.name)}" title="${on ? "Following" : "Follow"}">${on ? STAR : STAR_O}</button></div>
         <div class="tm-hero">${tm.logo ? `<img src="${esc(tm.logo)}" alt="">` : ""}<b>${esc(tm.name)}</b><small>${esc([lg.name, sched?.record, sched?.standing].filter(Boolean).join(" · "))}</small></div></div>
-        <div class="gc-actions"><button class="watchbig ${on ? "ghostbig" : ""}" data-team-follow>${on ? "Following" : "Follow"}</button></div>
+        <div class="tm-tabs" role="tablist">${TM_TABS.map(([id, label]) => `<button role="tab" class="${tab === id ? "on" : ""}" data-tm-tab="${id}" aria-selected="${tab === id}">${label}</button>`).join("")}</div>
+        ${tab !== "schedule" ? teamTabBody(tm, lg, tab) : `
         ${!sched ? `<div class="skel"></div><div class="skel"></div>` : ""}
         ${next.length ? `<div class="gc-c"><h3>Up Next</h3>${next.map(row).join("")}</div>` : ""}
         ${past.length ? `<div class="gc-c"><h3>Previous ${gameWord(lg, true)}</h3>${past.map(row).join("")}</div>` : ""}
-        ${sched && !next.length && !past.length ? `<p class="hint" style="text-align:center">No schedule found for this team.</p>` : ""}</div>`;
+        ${sched && !next.length && !past.length ? `<p class="hint" style="text-align:center">No schedule found for this team.</p>` : ""}`}</div>`;
+      const tb = el.querySelector(".tm-tabs .on"); if (tb) tb.scrollIntoView({ block: "nearest", inline: "nearest" });
     };
+    tm.tab = tm.tab || "schedule"; tm.data = tm.data || {};
+    tm.paint = () => paintTeam(tm.sched || null);
     el.hidden = false; el.scrollTop = 0; paintTeam(null);
     const parse = (j) => (j.events || []).map(ev => {
       const c = ev.competitions?.[0] || {}, cs = c.competitors || [];
@@ -2143,8 +2241,8 @@ button.brand, button.brand span { color: var(--accent); }
       sched.games = js.flatMap(parse).filter(g => !seen.has(g.id) && seen.add(g.id)).sort((a, b) => new Date(a.date) - new Date(b.date));
       sched.record = js[0]?.team?.recordSummary || ""; sched.standing = js[0]?.team?.standingSummary || "";
     } catch {}
+    if (teamView === tm) tm.sched = sched;
     paintTeam(sched);
-    teamView.sched = sched;
   }
   // ---- Tennis match view: players, set-by-set score, the draw, match stats
   let tennisKey = null;
@@ -3373,7 +3471,9 @@ button.brand, button.brand span { color: var(--accent); }
   });
   document.getElementById("gsheet").addEventListener("click", async e => {
     if (e.target.closest("[data-gclose]")) { closeGame(); return; }
-    if (e.target.closest("[data-team-follow]") && teamView) { const tm = teamView; toggleFav(keyFor(tm), { lg: tm.lg, id: tm.id, name: tm.name, logo: tm.logo, color: tm.color, abbr: tm.abbr }); openTeamRepaint(); return; }
+    if (e.target.closest("[data-team-follow]") && teamView) { const tm = teamView; toggleFav(keyFor(tm), { lg: tm.lg, id: tm.id, name: tm.name, logo: tm.logo, color: tm.color, abbr: tm.abbr }); tm.paint ? tm.paint() : openTeamRepaint(); return; }
+    const tt = e.target.closest("[data-tm-tab]");
+    if (tt && teamView) { teamView.tab = tt.dataset.tmTab; teamView.paint(); return; }
     const tg = e.target.closest("[data-game]");
     if (tg && teamView) { teamView = null; openGame(tg.dataset.game); return; }
     const lu = e.target.closest("[data-lu]");
