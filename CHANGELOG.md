@@ -3,6 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Removed the "Open Full Gamecast On ESPN" link at the bottom of game pages.
 - Matchup shows Probable Pitchers (MLB) and Probable Goalies (NHL) at the top: headshot, name and record or W-L and ERA, TBD when not announced.
 - Hockey Goalies card (shots against, saves, goals against, save %) at the top of Box Score and in the Recap. Goalies were cut off in the box score before.
 - Live football: a Current Drive card on top of Play-By-Play with the drive summary, down and distance, a field bar showing the ball and the line to gain, red zone tag, and each play of the drive with yards gained.

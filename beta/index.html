@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015165629">
+<meta name="build" content="20261015165857">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -3639,7 +3639,6 @@ button.brand, button.brand span { color: var(--accent); }
     if (!tabs.some(([k]) => k === gameTab)) gameTab = tabs[0][0];
     html += `<div class="gtabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${gameTab === k}" class="${gameTab === k ? "on" : ""}" data-gtab="${k}">${l}</button>`).join("")}</div>`;
     html += gameTab === "recap" ? (lg.sport === "Baseball" ? recapTab(j, a, h, lg) : recapAll(j, a, h, lg)) : gameTab === "matchup" ? matchupTab(j, a, h, lg) : gameTab === "stats" ? statsTab(j, a, h, lg) : gameTab === "plays" ? playsTab(j, lg) : gameTab === "table" ? tableTab(j, a, h, lg) : boxTab(j);
-    if (g?.link) html += `<a class="ext" href="${esc(g.link)}" target="_blank" rel="noopener">Open Full Gamecast On ESPN</a>`;
     return html + `</div>`;
   }
   function scorers(j, a, h, lg) {
