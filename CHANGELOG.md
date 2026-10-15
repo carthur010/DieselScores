@@ -3,6 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- New people's league picks line up in sport order (Football, Basketball, Baseball, Hockey, Soccer, Golf, Tennis) no matter what order they tap them. Once they drag to reorder, their order sticks. People already using Scores (and setup codes) keep their order.
 - All Leagues menu starts with My Leagues in your order (MLB, NHL, NFL...), then everything else grouped by sport under More Football, More Soccer and so on.
 
 ## Oct 15, 2026: Live (2:35 PM)

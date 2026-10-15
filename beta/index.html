@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015151725">
+<meta name="build" content="20261015152045">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1104,6 +1104,7 @@ button.brand, button.brand span { color: var(--accent); }
       localStorage.setItem("scoreline-shared:favs", JSON.stringify(s.favs));
       localStorage.setItem("scoreline-shared:favMeta", JSON.stringify(s.favMeta));
       localStorage.setItem("scoreline-shared:favLeagues", JSON.stringify(s.favLeagues));
+      localStorage.setItem("scoreline-shared:lgCustom", "true");
       localStorage.setItem("scoreline-shared:onboarded", "true");
       localStorage.setItem("scoreline-shared:owner", JSON.stringify(code === "me" ? "ca" : code));
       localStorage.removeItem(P + "next");
@@ -1119,7 +1120,7 @@ button.brand, button.brand span { color: var(--accent); }
   // Storage (best effort) and state
   // =====================================================================
   // Teams and leagues live in one shared spot, so beta and live always show the same setup on this device
-  const SHARED = new Set(["favs", "favMeta", "favLeagues", "onboarded", "owner"]);
+  const SHARED = new Set(["favs", "favMeta", "favLeagues", "onboarded", "owner", "lgCustom"]);
   const store = {
     get(k, d) {
       try {
@@ -1155,7 +1156,9 @@ button.brand, button.brand span { color: var(--accent); }
     })(),
     watched: (() => { const w = store.get("watched", {}); const now = Date.now(); Object.keys(w).forEach(k => { if (now - w[k] > 2 * 864e5) delete w[k]; }); return w; })(),
     // New people start with no leagues picked; people who already use Scores keep the old starter set
-    favLeagues: (() => { if (!store.get("onboarded", false) && !store.get("favs", []).length && store.get("favLeagues", null) == null) { store.set("favLeagues", []); return []; } return store.get("favLeagues", DEFAULT_FAV_LEAGUES); })(),
+    favLeagues: (() => { if (!store.get("onboarded", false) && !store.get("favs", []).length && store.get("favLeagues", null) == null) { store.set("favLeagues", []); store.set("lgCustom", false); return []; }
+      if (store.get("lgCustom", null) == null) store.set("lgCustom", true);   // people already using Scores keep their order
+      return store.get("favLeagues", DEFAULT_FAV_LEAGUES); })(),
     // Favorite games (just that game, not the team). key "lg:id" -> { at, date }. Dropped 2 days after the game.
     favGames: (() => { const f = store.get("favGames", {}); const now = Date.now(); Object.keys(f).forEach(k => { if (now - new Date(f[k].date || f[k].at).getTime() > 2 * 864e5) delete f[k]; }); return f; })(),
     showOdds: store.get("showOdds", true),
@@ -3310,7 +3313,7 @@ button.brand, button.brand span { color: var(--accent); }
     const ot = e.target.closest("[data-open-team]");
     if (ot) { const [ls, i] = ot.dataset.openTeam.split("|"); const tm = (ls === "r" ? results : ls === "s" ? sugg : following)[+i]; if (tm) openTeam(tm); return; }
     const fl = e.target.closest("[data-follow-lg]");
-    if (fl) { const id = fl.dataset.followLg; state.favLeagues = state.favLeagues.includes(id) ? state.favLeagues.filter(x => x !== id) : [...state.favLeagues, id]; saveLeagues(); drawResults(); return; }
+    if (fl) { const id = fl.dataset.followLg; state.favLeagues = toggleLeague(id); saveLeagues(); drawResults(); return; }
     const b = e.target.closest(".follow");
     if (!b) return;
     const t = (b.dataset.list === "r" ? results : b.dataset.list === "s" ? sugg : following)[+b.dataset.i];
@@ -3360,6 +3363,13 @@ button.brand, button.brand span { color: var(--accent); }
         <span class="lnum"></span><span class="nm">${esc(l.name)}</span>
         <button class="follow" data-ltoggle="${l.id}">Add</button><span></span></div>`).join("");
   }
+  // New picks drop into sport order (Football, Basketball, Baseball, Hockey, Soccer, Golf, Tennis) until you drag your own order
+  const leagueRank = id => { const l = LG[id]; const sp = ["Football", "Basketball", "Baseball", "Hockey", "Soccer", "Golf", "Tennis"].indexOf(l?.sport); return (sp < 0 ? 9 : sp) * 100 + LEAGUES.findIndex(x => x.id === id); };
+  function toggleLeague(id) {
+    if (state.favLeagues.includes(id)) return state.favLeagues.filter(x => x !== id);
+    const next = [...state.favLeagues, id];
+    return store.get("lgCustom", false) ? next : next.sort((a, b) => leagueRank(a) - leagueRank(b));
+  }
   function saveLeagues() { store.set("favLeagues", state.favLeagues); renderLeagueSheet(); renderSheetLeagues(); render(); }
   // Welcome screen: pick leagues alongside teams
   function renderSheetLeagues() {
@@ -3383,7 +3393,7 @@ button.brand, button.brand span { color: var(--accent); }
   document.getElementById("sheet-lglist").addEventListener("click", e => {
     const b = e.target.closest("[data-sheet-lg]"); if (!b) return;
     const id = b.dataset.sheetLg;
-    state.favLeagues = state.favLeagues.includes(id) ? state.favLeagues.filter(x => x !== id) : [...state.favLeagues, id];
+    state.favLeagues = toggleLeague(id);
     saveLeagues();
   });
   let ldrag = null;
@@ -3408,7 +3418,7 @@ button.brand, button.brand span { color: var(--accent); }
     ldrag.row.classList.remove("dragging");
     ldrag = null;
     const order = [...lfav.querySelectorAll(".lrow")].map(r => r.dataset.lg).filter(Boolean);
-    if (order.join() !== state.favLeagues.filter(id => LG[id]).join()) { state.favLeagues = order; saveLeagues(); }
+    if (order.join() !== state.favLeagues.filter(id => LG[id]).join()) { state.favLeagues = order; store.set("lgCustom", true); saveLeagues(); }
   };
   lfav.addEventListener("pointerup", endLDrag);
   lfav.addEventListener("pointercancel", endLDrag);
@@ -3417,7 +3427,7 @@ button.brand, button.brand span { color: var(--accent); }
     const tg = e.target.closest("[data-ltoggle]");
     if (tg) {
       const id = tg.dataset.ltoggle;
-      state.favLeagues = state.favLeagues.includes(id) ? state.favLeagues.filter(x => x !== id) : [...state.favLeagues, id];
+      state.favLeagues = toggleLeague(id);
       saveLeagues();
     }
   });
@@ -3987,7 +3997,7 @@ button.brand, button.brand span { color: var(--accent); }
       const dy = e.target.closest("[data-lp-day]"); if (dy) { const v = dy.dataset.lpDay; lv.day = new Date(+v.slice(0, 4), +v.slice(4, 6) - 1, +v.slice(6, 8), 12); loadLeagueBoard(lv); return; }
       if (e.target.closest("[data-lp-f]")) { openCustomPicker(LG[lv.id].name, colOpts(lv.id, lv.data.board || []), lv.filt || "", key => { lv.filt = key; lv.paint(); }); return; }
       const pl = e.target.closest("[data-lp-poll]"); if (pl) { lv.poll = pl.dataset.lpPoll; lv.paint(); return; }
-      if (e.target.closest("[data-lp-follow]")) { const id = lv.id; state.favLeagues = state.favLeagues.includes(id) ? state.favLeagues.filter(x => x !== id) : [...state.favLeagues, id]; store.set("favLeagues", state.favLeagues); render(); lv.paint(); return; }
+      if (e.target.closest("[data-lp-follow]")) { const id = lv.id; state.favLeagues = toggleLeague(id); store.set("favLeagues", state.favLeagues); render(); lv.paint(); return; }
       const sl = e.target.closest("[data-share-lg]"); if (sl) { const lg = LG[sl.dataset.shareLg]; shareLink(lg.name, `${lg.name} scores and standings on Scores`, "league=" + lg.id); return; }
       const lg2 = e.target.closest("[data-game]"); if (lg2) { e.stopPropagation(); pushView(); openGame(lg2.dataset.game); return; }
     }
@@ -4205,7 +4215,7 @@ button.brand, button.brand span { color: var(--accent); }
     }
     if (e.target.closest("[data-reset-setup]")) {
       const S = SETUPS[store.get("owner", "")] || MY_SETUP;
-      state.favs = new Set(S.favs); state.favMeta = { ...state.favMeta, ...S.favMeta }; state.favLeagues = [...S.favLeagues];
+      state.favs = new Set(S.favs); state.favMeta = { ...state.favMeta, ...S.favMeta }; state.favLeagues = [...S.favLeagues]; store.set("lgCustom", true);
       store.set("onboarded", true);
       store.set("favs", [...state.favs]); store.set("favMeta", state.favMeta); store.set("favLeagues", state.favLeagues);
       state.next = {}; store.set("next", {});
