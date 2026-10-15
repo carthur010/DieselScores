@@ -2,7 +2,7 @@
 
 Newest first. Beta changes move to Live when shipped.
 
-## In beta (not on live yet)
+## Oct 14, 2026: Live (8:50 PM)
 - Leagues you don't follow no longer show up in Live, All, Close Games, On My Services, Worth A Watch, My Leagues or the live count. Your teams and saved games still show wherever they play. The Other Live Games section is gone. Picking a league from the Leagues picker still shows it.
 - Baseball game header: base diamond, outs and count are spaced out and easier to see on the dark header, and "Pitch 1 : Ball 1" reads "Ball 1".
 
