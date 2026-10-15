@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores</title>
-<meta name="build" content="20261014205025">
+<meta name="build" content="20261015095155">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores">
@@ -619,6 +619,26 @@ button.t-go { background: var(--surface); cursor: pointer; }
 .play .pc { color: var(--muted); font-size: 12px; white-space: nowrap; }
 .play.score { font-weight: 700; }
 .play.score .pc { color: var(--accent); }
+.ab-half { font-family: var(--display); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 14px 2px 6px; }
+.ab-half:first-child { padding-top: 2px; }
+.ab { border-bottom: 1px solid var(--line); padding: 10px 0 12px; }
+.ab:last-child { border-bottom: 0; }
+.ab-h { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.ab-h b { font-size: 15px; }
+.ab-h small { color: var(--muted); font-size: 12px; }
+.ab-h .ab-now { margin-left: auto; color: var(--live); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.ab-r { margin-top: 4px; font-size: 14px; font-weight: 600; }
+.ab.score { border-left: 3px solid var(--live); padding-left: 10px; }
+.ab.score .ab-r { color: var(--live); }
+.ab-note { padding: 8px 0; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--line); }
+.pitches { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.pitches li { display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 10px; }
+.pitches .pd { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-style: normal; font-size: 12px; font-weight: 700; }
+.pd.k { background: #c0352f; } .pd.b { background: #2f8a3e; } .pd.x { background: #2f63d6; } .pd.o { background: var(--muted); }
+.pitches li span { display: grid; line-height: 1.25; }
+.pitches li span b { font-size: 13.5px; }
+.pitches li span small { color: var(--muted); font-size: 12px; }
+.pitches li em { font-style: normal; font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; }
 .gcard .box { overflow-x: auto; }
 .gcard .box table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .gcard .box th, .gcard .box td { padding: 5px 6px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
@@ -646,7 +666,7 @@ button.t-go { background: var(--surface); cursor: pointer; }
 .g-foot .heartbtn + .bellbtn { margin-left: 0; }
 .heartbtn.on { color: var(--bg); background: var(--live); border-color: var(--live); }
 .belbig[data-favgame].on { background: color-mix(in srgb, var(--live) 14%, transparent); color: var(--live); border-color: var(--live); }
-.pin-mark { color: var(--live); margin-left: auto; font-size: 13px; }
+.pin-mark { color: var(--live); margin-left: auto; font-size: 13px; background: none; border: 0; padding: 6px 8px; margin-top: -6px; margin-bottom: -6px; margin-right: -8px; cursor: pointer; line-height: 1; font-family: inherit; }
 .g-foot .bellbtn + .linkbtn { margin-left: 0; }
 .nxt { display: grid; }
 .nxt-row[data-game] { cursor: pointer; }
@@ -1128,7 +1148,8 @@ button.brand, button.brand span { color: var(--accent); }
       status = type.shortDetail || type.detail || "";
       const p = st.period || 0, clk = st.displayClock;
       if (gstate === "in" && lg.label && clk && p && !/half|end|delay|susp|int/i.test(status)) {
-        status = (p > lg.reg ? "OT" + (p - lg.reg > 1 ? p - lg.reg : "") : lg.label + p) + " " + clk;
+        const on = p > lg.reg ? otName(lg, p, ev.season?.type === 3) : null;
+        status = on === "SO" ? "Shootout" : (on || lg.label + p) + " " + clk;
       }
     }
     const g = {
@@ -1989,7 +2010,7 @@ button.brand, button.brand span { color: var(--accent); }
     return `<div class="srow tap ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name)}: game details">
       <span class="sr-time"><span class="st ${statusClass(g)}">${esc(top)}</span><small>${showLg ? esc(g.lg.short || g.lg.name) : esc(sub)}</small></span>
       <span class="sr-teams">${team(a, h)}${team(h, a)}</span>
-      <span class="sr-act">${g.pin ? '<span class="pin-mark">♥</span>' : ""}${bellBtn(g)}</span></div>`;
+      <span class="sr-act">${g.pin ? `<button class="pin-mark" data-favgame="${g.lg.id}:${g.id}" aria-label="Remove this game from favorites" title="Remove from favorites">♥</button>` : ""}${bellBtn(g)}</span></div>`;
   }
   // Compact scoreboard card (CBS-style two-up grid)
   function miniCard(g, showLg) {
@@ -1998,7 +2019,7 @@ button.brand, button.brand span { color: var(--accent); }
     const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
     const row = (t, o) => `<span class="mcg-row ${lose(t, o) ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<i></i>"}<b>${t.seed ? `<small>(${t.seed})</small> ` : t.rank ? `<small>${t.rank}</small> ` : ""}${esc(t.abbr)}</b>${isFavTeam(g.lg, t.abbr) ? '<span class="mc-fav">★</span>' : ""}<em class="${g.state === "pre" ? "rec" : ""}">${esc(g.state === "pre" ? recText(t) : t.score)}</em></span>`;
     return `<article class="g mini tap ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name)}: game details">
-      <span class="mcg-top">${showLg ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span>${g.pin ? '<span class="pin-mark" aria-label="Favorite game">♥</span>' : ""}</span>${row(a, h)}${row(h, a)}</article>`;
+      <span class="mcg-top">${showLg ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span>${g.pin ? `<button class="pin-mark" data-favgame="${g.lg.id}:${g.id}" aria-label="Remove this game from favorites" title="Remove from favorites">♥</button>` : ""}</span>${row(a, h)}${row(h, a)}</article>`;
   }
   // Top strip: mini versions of the game cards
   function miniRow(logo, abbr, rec, score, lose, fav) {
@@ -2012,7 +2033,7 @@ button.brand, button.brand span { color: var(--accent); }
     const sit = g.state === "in" ? (g.sit?.downDistanceText || (g.lg.sport === "Baseball" && g.sit?.outs != null ? `${g.sit.outs} out${g.sit.outs === 1 ? "" : "s"}` : "")) : "";
     const foot = sit || (g.state !== "post" ? (g.watch?.[0]?.app || g.broadcast || "") : (g.series || g.lg.short || g.lg.name));
     return `<button class="ms mc ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" title="${esc(a.full + " at " + h.full)}">
-      <span class="mc-top"><span class="lgtag">${esc(g.lg.short || g.lg.name)}</span><span class="st ${statusClass(g)}">${esc(g.status)}</span>${g.pin ? '<span class="pin-mark" aria-label="Favorite game">♥</span>' : ""}</span>
+      <span class="mc-top"><span class="lgtag">${esc(g.lg.short || g.lg.name)}</span><span class="st ${statusClass(g)}">${esc(g.status)}</span>${g.pin ? `<button class="pin-mark" data-favgame="${g.lg.id}:${g.id}" aria-label="Remove this game from favorites" title="Remove from favorites">♥</button>` : ""}</span>
       ${row(a, h)}${row(h, a)}${foot ? `<span class="mc-foot">${esc(foot)}</span>` : ""}</button>`;
   }
   function nextChip(k) {
@@ -2851,6 +2872,8 @@ button.brand, button.brand span { color: var(--accent); }
     const lum = 0.299 * r + 0.587 * g + 0.114 * b;
     return lum < 30 ? "#3a3a3a" : lum > 215 ? "#7a7a7a" : c;
   }
+  function otName(lg, n, post) { const x = n - (lg.reg || 4); if (x <= 0) return null; if (lg.sport === "Hockey" && !post && x === 2) return "SO"; return "OT" + (x > 1 ? x : ""); }
+  function perName(lg, n, post) { return (!lg.soccer && lg.sport !== "Baseball" && otName(lg, n, post)) || ord(n); }
   function ord(n) { const s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
   function closeGame() {
     document.getElementById("gsheet").hidden = true;
@@ -2916,10 +2939,10 @@ button.brand, button.brand span { color: var(--accent); }
         <div class="gc-lbl">${esc(label)}</div>
         <div class="gc-when"><b>${gs === "in" ? '<i class="livedot"></i>' : ""}${esc(gs === "pre" && (g || comp.date) ? whenLabel(g?.date || comp.date) : status)}</b>${sub ? `<small>${esc(sub)}</small>` : ""}</div>
         ${lines.length ? `<div class="gc-info">${lines.map(l => `<span>${esc(l)}</span>`).join("")}</div>` : ""}</div>${fmtTeam(h, a, th)}</div>`;
-    html += scorers(j, a, h);
+    html += scorers(j, a, h, lg);
     if (a.lines.length && h.lines.length) {
       const n = Math.max(a.lines.length, h.lines.length, lg.sport === "Baseball" ? 9 : 0);
-      const lbl = i => lg.sport === "Baseball" ? i + 1 : lg.soccer ? (i === 0 ? "1H" : i === 1 ? "2H" : "ET") : (i < (lg.reg || 4) ? i + 1 : "OT" + (i - (lg.reg || 4) > 0 ? i - (lg.reg || 4) + 1 : ""));
+      const lbl = i => lg.sport === "Baseball" ? i + 1 : lg.soccer ? (i === 0 ? "1H" : i === 1 ? "2H" : "ET") : (otName(lg, i + 1, j.header?.season?.type === 3) || i + 1);
       const v = (x, i) => esc(x.lines[i]?.displayValue ?? x.lines[i]?.value ?? "-");
       const rhe = lg.sport === "Baseball" && a.hits != null;
       const extra = rhe ? ["R", "H", "E"] : ["T"];
@@ -2945,11 +2968,11 @@ button.brand, button.brand span { color: var(--accent); }
     if (g?.link) html += `<a class="ext" href="${esc(g.link)}" target="_blank" rel="noopener">Open Full Gamecast On ESPN</a>`;
     return html + `</div>`;
   }
-  function scorers(j, a, h) {
+  function scorers(j, a, h, lg) {
     if (!j) return "";
     let list = [];
     if (Array.isArray(j.scoringPlays) && j.scoringPlays.length && !/Football|Baseball|Basketball/.test(j.header?.league?.name || "")) {
-      list = j.scoringPlays.map(p => ({ team: String(p.team?.id || ""), who: p.participants?.[0]?.athlete?.shortName || (p.text || "").split(/[(,]/)[0].replace(/^Goal\.?\s*/i, "").trim(), when: p.period?.number ? ord(p.period.number) + " " + (p.clock?.displayValue || "") : (p.clock?.displayValue || "") }));
+      list = j.scoringPlays.map(p => ({ team: String(p.team?.id || ""), who: p.participants?.[0]?.athlete?.shortName || (p.text || "").split(/[(,]/)[0].replace(/^Goal\.?\s*/i, "").trim(), when: p.period?.number ? perName(lg, p.period.number, j.header?.season?.type === 3) + " " + (p.clock?.displayValue || "") : (p.clock?.displayValue || "") }));
     } else if (Array.isArray(j.keyEvents)) {
       list = j.keyEvents.filter(e => /goal/i.test(e.type?.text || "") && !/disallowed/i.test(e.type?.text || "")).map(e => ({ team: String(e.team?.id || ""), who: e.participants?.[0]?.athlete?.shortName || e.participants?.[0]?.athlete?.displayName || "", when: e.clock?.displayValue || "" }));
     }
@@ -3251,7 +3274,52 @@ button.brand, button.brand span { color: var(--accent); }
     }).join("");
     return rows ? `<div class="gc-c"><h3 class="h3-teams">${logoImg(a)}<span>League Rankings</span>${logoImg(h)}</h3>${rows}</div>` : "";
   }
+  // Baseball: group pitches into at-bats (batter vs pitcher, each pitch numbered with the count, then the result)
+  function baseballPlays(j, live) {
+    const all = (j.plays || []).filter(p => p && (p.text || p.type?.text));
+    if (!all.some(p => /^Pitch \d+\s*:/i.test(p.text || ""))) return "";
+    const abs = []; let cur = null, half = "";
+    const ordn = n => ord(n);
+    for (const p of all) {
+      const t = (p.text || p.type?.text || "").trim();
+      const hm = t.match(/^(Top|Bottom) of the (\d+)/i);
+      if (hm) { half = (/^t/i.test(hm[1]) ? "Top " : "Bottom ") + ordn(+hm[2]); continue; }
+      if (/^(Middle|End) of the \d+/i.test(t) || /^End Batter\/Pitcher/i.test(t)) continue;
+      if (!half && p.period?.number) half = (/^t/i.test(p.period.type || "") ? "Top " : /^b/i.test(p.period.type || "") ? "Bottom " : "Inning ") + ordn(p.period.number);
+      const vs = t.match(/^(.+?) pitches to (.+?)\.?$/i);
+      if (vs) { cur = { half, pitcher: vs[1], batter: vs[2], pitches: [], b: 0, s: 0, result: "", score: false }; abs.push(cur); continue; }
+      const pm = t.match(/^Pitch (\d+)\s*:\s*(.+)$/i);
+      if (pm) {
+        if (!cur) { cur = { half, pitcher: "", batter: "", pitches: [], b: 0, s: 0, result: "", score: false }; abs.push(cur); }
+        const d = pm[2], bn = d.match(/^Ball (\d+)/i), sn = d.match(/^Strike (\d+)/i);
+        let lbl, cls;
+        if (/in play/i.test(d)) { lbl = "In Play"; cls = "x"; }
+        else if (/hit by pitch/i.test(d)) { lbl = "Hit By Pitch"; cls = "b"; }
+        else if (bn) { lbl = /intent/i.test(d) ? "Intentional Ball" : "Ball"; cls = "b"; cur.b = +bn[1]; }
+        else if (sn) { cur.s = +sn[1]; lbl = /foul/i.test(d) ? "Foul" : /swing/i.test(d) ? "Swinging Strike" : /look/i.test(d) ? "Called Strike" : "Strike"; cls = "k"; }
+        else if (/foul/i.test(d)) { lbl = "Foul"; cls = "k"; }
+        else { lbl = d; cls = "o"; }
+        const extra = [p.pitchVelocity ? Math.round(p.pitchVelocity * 10) / 10 + " mph" : "", p.pitchType?.text || ""].filter(Boolean).join(" ");
+        cur.pitches.push({ n: +pm[1], lbl, cls, extra, count: cls === "x" || cur.s >= 3 || cur.b >= 4 ? "" : `${cur.b}-${cur.s}` });
+        continue;
+      }
+      if (cur && !cur.result && cur.pitches.length) { cur.result = t; cur.score = !!p.scoringPlay; continue; }
+      abs.push({ half, note: t, score: !!p.scoringPlay });
+    }
+    const list = abs.reverse().slice(0, 25);
+    let html = "", lastHalf = null;
+    list.forEach((ab, i) => {
+      if (ab.half && ab.half !== lastHalf) { html += `<div class="ab-half">${esc(ab.half)}</div>`; lastHalf = ab.half; }
+      if (ab.note) { html += `<div class="ab-note">${esc(ab.note)}</div>`; return; }
+      const now = live && i === 0 && !ab.result;
+      html += `<div class="ab ${ab.score ? "score" : ""}"><div class="ab-h"><b>${esc(ab.batter || "At Bat")}</b>${ab.pitcher ? `<small>vs ${esc(ab.pitcher)}</small>` : ""}${now ? '<span class="ab-now">At Bat</span>' : ""}</div>
+        ${ab.result ? `<div class="ab-r">${esc(ab.result)}</div>` : ""}
+        ${ab.pitches.length ? `<ol class="pitches">${ab.pitches.map(pt => `<li><i class="pd ${pt.cls}">${pt.n}</i><span><b>${esc(pt.lbl)}</b>${pt.extra ? `<small>${esc(pt.extra)}</small>` : ""}</span><em>${pt.count}</em></li>`).join("")}</ol>` : ""}</div>`;
+    });
+    return `<div class="gc-c"><div class="plays">${html}</div></div>`;
+  }
   function playsTab(j, lg) {
+    if (lg.sport === "Baseball") { const bb = baseballPlays(j, j.header?.competitions?.[0]?.status?.type?.state === "in"); if (bb) return bb; }
     let plays = [];
     if (Array.isArray(j.plays) && j.plays.length) plays = j.plays.slice(-40).reverse();
     else if (j.drives) plays = [...(j.drives.current?.plays || [])].reverse().concat([...(j.drives.previous || [])].reverse().flatMap(d => (d.plays || []).slice().reverse())).slice(0, 40);
@@ -3260,7 +3328,7 @@ button.brand, button.brand span { color: var(--accent); }
     plays = plays.filter(p => p && (p.text || p.type?.text));
     if (!plays.length) return `<div class="empty">No plays yet.</div>`;
     return `<div class="gc-c"><div class="plays">${plays.map(p => {
-      const per = p.period?.number ? (lg.sport === "Baseball" ? (p.period.displayValue || "Inn " + p.period.number) : ord(p.period.number)) : "";
+      const per = p.period?.number ? (lg.sport === "Baseball" ? (p.period.displayValue || "Inn " + p.period.number) : perName(lg, p.period.number, j.header?.season?.type === 3)) : "";
       const clk = p.clock?.displayValue || (typeof p.clock === "string" ? p.clock : "") || "";
       return `<div class="play ${p.scoringPlay ? "score" : ""}"><span class="pc">${esc([per, clk].filter(Boolean).join(" "))}</span><span>${esc(p.text || p.type?.text || "")}</span></div>`;
     }).join("")}</div></div>`;
@@ -3277,6 +3345,17 @@ button.brand, button.brand span { color: var(--accent); }
         <tbody>${rows.map(x => `<tr><td>${esc(x.athlete?.shortName || x.athlete?.displayName || "")}</td>${x.stats.map(v => `<td>${esc(v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
     }).join("")).join("");
   }
+  // In the iPhone app, try the streaming app first (its URL scheme), then fall back to the website
+  document.addEventListener("click", e => {
+    const a = e.target.closest("a[data-app]");
+    if (!a || !(window.Capacitor?.isNativePlatform?.())) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    const web = a.href; let left = false;
+    const off = () => { if (document.hidden) left = true; };
+    document.addEventListener("visibilitychange", off);
+    location.href = a.dataset.app;
+    setTimeout(() => { document.removeEventListener("visibilitychange", off); if (!left && !document.hidden) window.open(web, "_blank"); }, 1400);
+  }, true);
   document.addEventListener("click", e => {
     const fg = e.target.closest("[data-favgame]");
     if (fg) { e.preventDefault(); toggleFavGame(fg.dataset.favgame); return; }

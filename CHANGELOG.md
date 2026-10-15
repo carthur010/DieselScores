@@ -2,7 +2,7 @@
 
 Newest first. Beta changes move to Live when shipped.
 
-## In beta (not on live yet)
+## Oct 15, 2026: Live (9:50 AM)
 - NHL regular-season shootouts read "Shootout" instead of "OT2 0:00", and the line score and plays say SO. Hockey plays in overtime say OT instead of 4th.
 - The heart on a game tile is now a button: tap it to unfavorite the game and drop it from your top strip.
 - Baseball Play-By-Play is grouped by at-bat: batter vs pitcher, the result, then each pitch as a numbered dot (red strike, green ball, blue in play) with speed, pitch type and the count. Inning headers like Bottom 3rd, and the filler lines (End Batter/Pitcher) are gone.
