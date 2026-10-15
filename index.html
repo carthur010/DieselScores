@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores</title>
-<meta name="build" content="20261015161118">
+<meta name="build" content="20261015171629">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores">
@@ -448,6 +448,20 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .lm-go { font-style: normal; color: var(--muted); text-align: right; }
 .lm-list .mc-fav { font-style: normal; }
 .sp-seg { margin-bottom: 10px; }
+.gl-t { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.gl-t th { color: var(--muted); font-size: 11.5px; text-align: right; padding: 4px; } .gl-t th:first-child, .gl-t td:first-child { text-align: left; }
+.gl-t td { padding: 8px 4px; border-top: 1px solid var(--line); text-align: right; }
+.gl-n { display: flex; align-items: center; gap: 8px; font-weight: 600; } .gl-n img { width: 20px; height: 20px; object-fit: contain; }
+.dr-top { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: 10px; } .dr-top img { width: 24px; height: 24px; object-fit: contain; }
+.dr-top span { color: var(--muted); } .dr-top em { font-style: normal; font-size: 11px; font-weight: 800; color: var(--live); background: color-mix(in srgb, var(--live) 12%, transparent); padding: 2px 7px; border-radius: 99px; margin-left: auto; }
+.dr-field { position: relative; height: 34px; border-radius: 6px; background: #2f7d43; overflow: hidden; }
+.dr-ez { position: absolute; top: 0; bottom: 0; left: 0; width: 6%; background: rgba(0,0,0,.25); } .dr-ez.r { left: auto; right: 0; }
+.dr-yd { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,.35); }
+.dr-line { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1px; background: #f5c400; }
+.dr-ball { position: absolute; top: 50%; width: 16px; height: 11px; margin: -6px 0 0 -8px; border-radius: 50%; background: #7a4a24; border: 2px solid #fff; }
+.dr-lbl { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin: 4px 0 8px; }
+.dr-p { display: grid; grid-template-columns: 74px 1fr auto; gap: 8px; padding: 7px 0; border-top: 1px solid var(--line); font-size: 13px; }
+.dr-p span:first-child { color: var(--muted); font-size: 12px; font-weight: 700; } .dr-p b { font-variant-numeric: tabular-nums; } .dr-p b.neg { color: var(--live); }
 .inj-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
 .inj-tm { display: flex; align-items: center; gap: 6px; font-size: 13px; margin-bottom: 4px; } .inj-tm img { width: 18px; height: 18px; object-fit: contain; }
 .inj-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
@@ -1275,6 +1289,9 @@ button.brand, button.brand span { color: var(--accent); }
       record: c.records?.find(r => r.type === "total" || r.name === "overall")?.summary || c.records?.[0]?.summary || "",
       rank: c.curatedRank?.current && c.curatedRank.current <= 25 ? c.curatedRank.current : null,
       conf: c.team?.conferenceId || "",
+      probable: (() => { const pr = (c.probables || [])[0]; if (!pr?.athlete) return null; const at = pr.athlete;
+        return { kind: /goal/i.test(pr.name || "") ? "Goalie" : "Pitcher", id: String(at.id || pr.playerId || ""), name: at.displayName || at.fullName || at.shortName || "", short: at.shortName || at.displayName || "",
+          head: typeof at.headshot === "string" ? at.headshot : at.headshot?.href || "", rec: pr.record || "", stats: (pr.statistics || []).filter(x => x.displayValue != null).map(x => ({ k: x.abbreviation || x.name, v: x.displayValue })) }; })(),
     }));
     if (ev.groups?.isConference && ev.groups.id && ev.groups.shortName && CONFS?.[lg.id]) CONFS[lg.id].name[ev.groups.id] = ev.groups.shortName;
     teams.sort((a, b) => (a.homeAway === "away" ? -1 : 1) - (b.homeAway === "away" ? -1 : 1));
@@ -3605,7 +3622,7 @@ button.brand, button.brand span { color: var(--accent); }
     html += `</div>`;
     if (g) {
       const w = gs !== "post" && g.watch?.find(x => x.url);
-      html += `<div class="gc-actions">${w ? `<a class="watchbig" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">${PLAY_BIG} Watch On ${esc(w.app)}</a>` : g.link ? `<a class="watchbig" href="${esc(g.link)}" target="_blank" rel="noopener">Open On ESPN</a>` : ""}
+      html += `<div class="gc-actions">${w ? `<a class="watchbig" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">${PLAY_BIG} Watch On ${esc(w.app)}</a>` : g.link && gs !== "post" ? `<a class="watchbig" href="${esc(g.link)}" target="_blank" rel="noopener">Open On ESPN</a>` : ""}
         <button class="belbig ${state.favGames[g.lg.id + ":" + g.id] ? "on" : ""}" data-favgame="${g.lg.id}:${g.id}" aria-label="${state.favGames[g.lg.id + ":" + g.id] ? "Remove this game from favorites" : "Favorite this game"}">${(state.favGames[g.lg.id + ":" + g.id] ? HEART_ON : HEART).replace(' width="15" height="15"', "")}</button>
         ${gs !== "post" ? `<button class="belbig ${state.watched[g.lg.id + ":" + g.id] ? "on" : ""}" data-watchgame="${g.lg.id}:${g.id}" aria-label="${state.watched[g.lg.id + ":" + g.id] ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL_BIG}</button>` : ""}</div>`;
     }
@@ -3622,7 +3639,6 @@ button.brand, button.brand span { color: var(--accent); }
     if (!tabs.some(([k]) => k === gameTab)) gameTab = tabs[0][0];
     html += `<div class="gtabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${gameTab === k}" class="${gameTab === k ? "on" : ""}" data-gtab="${k}">${l}</button>`).join("")}</div>`;
     html += gameTab === "recap" ? (lg.sport === "Baseball" ? recapTab(j, a, h, lg) : recapAll(j, a, h, lg)) : gameTab === "matchup" ? matchupTab(j, a, h, lg) : gameTab === "stats" ? statsTab(j, a, h, lg) : gameTab === "plays" ? playsTab(j, lg) : gameTab === "table" ? tableTab(j, a, h, lg) : boxTab(j);
-    if (g?.link) html += `<a class="ext" href="${esc(g.link)}" target="_blank" rel="noopener">Open Full Gamecast On ESPN</a>`;
     return html + `</div>`;
   }
   function scorers(j, a, h, lg) {
@@ -3661,8 +3677,50 @@ button.brand, button.brand span { color: var(--accent); }
     if (!teams.length) return "";
     return `<div class="gc-c"><h3>Injuries</h3><div class="inj-cols">${teams.map(t => `<div><b class="inj-tm">${t.x.logo ? `<img src="${esc(t.x.logo)}" alt="">` : ""}${esc(t.x.abbr)}</b>${t.list.map(i => `<div class="inj-row"><span>${esc(i.athlete?.shortName || i.athlete?.displayName || "")}<small>${esc(i.athlete?.position?.abbreviation || "")}</small></span><em class="inj-tag">${esc(injAbbr(i.status || i.type?.description))}</em></div>`).join("")}</div>`).join("")}</div></div>`;
   }
+  // Probable starters (pitchers, goalies) come from the scoreboard, so read them off the game in the list
+  function probablesCard(a, h) {
+    const g = findGame(openGameKey); if (!g) return "";
+    const pick = (x, i) => (g.teams.find(t => String(t.id) === String(x.id) || t.abbr === x.abbr) || g.teams[i])?.probable;
+    const pa = pick(a, 0), ph = pick(h, 1);
+    if (!pa && !ph) return "";
+    const kind = (pa || ph).kind;
+    const one = (pr, x) => { if (!pr) return `<div class="rc-p"><i></i><small>${esc(x.abbr)}</small><b>TBD</b></div>`;
+      const line = pr.rec || pr.stats.filter(s => /^(W|L|ERA|GAA|SV%|W-L)$/i.test(s.k)).map(s => `${s.k} ${s.v}`).join(" · ");
+      return `<div class="rc-p">${pr.head ? `<img src="${esc(pr.head)}" alt="" loading="lazy">` : `<i></i>`}<small>${esc(x.abbr)}</small><b>${esc(pr.short || pr.name)}</b><span>${esc(line)}</span></div>`; };
+    return `<div class="gc-c"><h3>Probable ${kind === "Goalie" ? "Goalies" : "Pitchers"}</h3><div class="rc-dec">${one(pa, a)}${one(ph, h)}</div></div>`;
+  }
+  // Hockey: each goalie's night (shots against, saves, goals against, save %)
+  function goaliesCard(j) {
+    const rows = [];
+    (j.boxscore?.players || []).forEach(t => (t.statistics || []).forEach(grp => {
+      const L = (grp.labels || grp.names || []).map(x => String(x).toUpperCase());
+      if (!(/goal/i.test(grp.name || grp.text || grp.type || "") || L.includes("SV%"))) return;
+      const at = k => { const i = L.indexOf(k); return i < 0 ? "" : null; };
+      (grp.athletes || []).filter(x => (x.stats || []).length).forEach(x => { const v = k => { const i = L.indexOf(k); return i < 0 ? "" : x.stats[i]; };
+        rows.push({ team: t.team?.abbreviation || "", logo: t.team?.logo || t.team?.logos?.[0]?.href || "", name: x.athlete?.shortName || x.athlete?.displayName || "", sa: v("SA"), sv: v("SV"), ga: v("GA"), pct: v("SV%"), toi: v("TOI") }); });
+    }));
+    if (!rows.length) return "";
+    return `<div class="gc-c"><h3>Goalies</h3><table class="gl-t"><thead><tr><th>Goalie</th><th>SA</th><th>SV</th><th>GA</th><th>SV%</th></tr></thead><tbody>${rows.map(r => `<tr><td><span class="gl-n">${r.logo ? `<img src="${esc(r.logo)}" alt="">` : ""}${esc(r.name)}</span></td><td>${esc(r.sa)}</td><td>${esc(r.sv)}</td><td>${esc(r.ga)}</td><td><b>${esc(r.pct)}</b></td></tr>`).join("")}</tbody></table></div>`;
+  }
+  // Football: the drive happening now, with the ball on a field bar
+  function driveCard(j, lg) {
+    const d = j.drives?.current; if (!d || lg.sport !== "Football") return "";
+    const plays = (d.plays || []).filter(p => p && p.text);
+    const last = plays[plays.length - 1];
+    const sit = j.situation || j.header?.competitions?.[0]?.situation || findGame(openGameKey)?.sit || {};
+    let ytez = last?.end?.yardsToEndzone ?? last?.start?.yardsToEndzone;
+    if (ytez == null && d.start?.yardsToEndzone != null) ytez = d.start.yardsToEndzone;
+    const dist = +(sit.distance ?? last?.end?.distance ?? 0) || 0;
+    const ball = ytez != null ? Math.max(0, Math.min(100, 100 - ytez)) : null, line = ball != null && dist ? Math.min(100, ball + dist) : null;
+    const dd = sit.downDistanceText || last?.end?.downDistanceText || "";
+    const team = d.team || {}, logo = team.logos?.[0]?.href || team.logo || "";
+    return `<div class="gc-c dr-card"><h3>Current Drive<small style="margin-left:6px;text-transform:none;letter-spacing:0">${esc(d.description || "")}</small></h3>
+      <div class="dr-top">${logo ? `<img src="${esc(logo)}" alt="">` : ""}<b>${esc(team.abbreviation || team.displayName || "")} ball</b>${dd ? `<span>${esc(dd)}</span>` : ""}${sit.isRedZone ? `<em>Red Zone</em>` : ""}</div>
+      ${ball != null ? `<div class="dr-field" role="img" aria-label="Ball on the ${esc(String(100 - ball))} yards from the end zone"><i class="dr-ez"></i><i class="dr-ez r"></i>${[10, 20, 30, 40, 50, 60, 70, 80, 90].map(x => `<i class="dr-yd" style="left:${x}%"></i>`).join("")}${line != null ? `<i class="dr-line" style="left:${line}%"></i>` : ""}<i class="dr-ball" style="left:${ball}%"></i></div><div class="dr-lbl"><span>Own goal</span><span>Midfield</span><span>End zone</span></div>` : ""}
+      ${plays.length ? `<div class="dr-plays">${plays.slice().reverse().slice(0, 8).map(p => `<div class="dr-p"><span>${esc(p.start?.shortDownDistanceText || p.start?.downDistanceText || "")}</span><span>${esc(p.text)}</span><b class="${(p.statYardage || 0) < 0 ? "neg" : ""}">${p.statYardage != null ? (p.statYardage > 0 ? "+" : "") + p.statYardage : ""}</b></div>`).join("")}</div>` : ""}</div>`;
+  }
   function matchupTab(j, a, h, lg) {
-    const more = lastFiveCard(j, a, h, lg) + injuriesCard(j, a, h), base = statsTab(j, a, h, lg);
+    const more = lastFiveCard(j, a, h, lg) + injuriesCard(j, a, h), base = probablesCard(a, h) + statsTab(j, a, h, lg);
     return more && /class="empty"/.test(base) && base.length < 120 ? more : base + more;
   }
   // ---- Recap (final) for football, basketball, hockey and soccer
@@ -3680,6 +3738,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (lg.soccer) sp = (j.keyEvents || []).filter(k => k.scoringPlay).map(k => ({ per: k.clock?.displayValue || "", team: k.team?.id, text: k.text || k.shortText || "", score: "" }));
     else if ((j.scoringPlays || []).length) sp = j.scoringPlays.map(p => ({ per: perName(lg, p.period?.number || 0, j.header?.season?.type === 3) + (p.clock?.displayValue ? " " + p.clock.displayValue : ""), team: p.team?.id, text: p.text || "", score: `${p.awayScore}-${p.homeScore}` }));
     else if (lg.sport === "Hockey") sp = (j.plays || []).filter(p => p.scoringPlay).map(p => ({ per: perName(lg, p.period?.number || 0, j.header?.season?.type === 3) + (p.clock?.displayValue ? " " + p.clock.displayValue : ""), team: p.team?.id, text: p.text || "", score: p.awayScore != null ? `${p.awayScore}-${p.homeScore}` : "" }));
+    if (lg.sport === "Hockey") html += goaliesCard(j);
     if (sp.length) html += `<div class="gc-c"><h3>${lg.soccer ? "Goals" : "Scoring Summary"}</h3>${sp.map(p => `<div class="rc-sp"><span class="rc-inn">${esc(p.per)}</span>${logoOf(p.team) ? `<img src="${esc(logoOf(p.team))}" alt="">` : "<i></i>"}<span class="rc-t">${esc(p.text)}</span><b>${esc(p.score)}</b></div>`).join("")}</div>`;
     // Leaders, game flow, team stats (no odds after the game)
     const rest = statsTab(j, a, h, lg, true);
@@ -4061,6 +4120,7 @@ button.brand, button.brand span { color: var(--accent); }
   function playsTab(j, lg) {
     if (lg.soccer) { const sp = soccerPlays(j); if (sp) return sp; }
     if (lg.sport === "Baseball") { const bb = baseballPlays(j, j.header?.competitions?.[0]?.status?.type?.state === "in"); if (bb) return bb; }
+    const drive = j.header?.competitions?.[0]?.status?.type?.state === "in" ? driveCard(j, lg) : "";
     let plays = [];
     if (Array.isArray(j.plays) && j.plays.length) plays = j.plays.slice(-40).reverse();
     else if (j.drives) plays = [...(j.drives.current?.plays || [])].reverse().concat([...(j.drives.previous || [])].reverse().flatMap(d => (d.plays || []).slice().reverse())).slice(0, 40);
@@ -4078,7 +4138,7 @@ button.brand, button.brand span { color: var(--accent); }
       if (j.drives && !(j.plays || []).length) pool = [...(j.drives.current?.plays || [])].reverse().concat([...(j.drives.previous || [])].reverse().flatMap(d => (d.plays || []).slice().reverse()));
       plays = pool.filter(p => p && (p.text || p.type?.text) && (seg === "scoring" ? p.scoringPlay : isKey(p))).slice(0, 80);
     }
-    const bar = segs ? `<div class="seg gc-seg sp-seg">${segs.map(([k, l]) => `<button class="${seg === k ? "on" : ""}" data-gen-seg="${k}">${l}</button>`).join("")}</div>` : "";
+    const bar = drive + `<div class="seg gc-seg sp-seg">${segs.map(([k, l]) => `<button class="${seg === k ? "on" : ""}" data-gen-seg="${k}">${l}</button>`).join("")}</div>`;
     if (!plays.length) return bar + `<div class="empty">${seg === "all" ? "No plays yet." : "Nothing here yet."}</div>`;
     return bar + `<div class="gc-c"><div class="plays">${plays.map(p => {
       const per = p.period?.number ? (lg.sport === "Baseball" ? (p.period.displayValue || "Inn " + p.period.number) : perName(lg, p.period.number, j.header?.season?.type === 3)) : "";
@@ -4089,7 +4149,8 @@ button.brand, button.brand span { color: var(--accent); }
   function boxTab(j) {
     const box = (j.boxscore?.players || []).filter(t => t.statistics?.length);
     if (!box.length) return `<div class="empty">No box score yet.</div>`;
-    return box.map(t => t.statistics.slice(0, 2).map(grp => {
+    const gl = goaliesCard(j);   // hockey: goalies first (they were cut off below the skaters)
+    return gl + box.map(t => t.statistics.slice(0, 2).map(grp => {
       const labels = grp.labels || grp.names || [];
       const rows = (grp.athletes || []).filter(x => (x.stats || []).length);
       if (!rows.length) return "";
