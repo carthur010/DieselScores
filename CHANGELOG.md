@@ -121,6 +121,16 @@ Newest first. Beta changes move to Live when shipped.
 ## Oct 14, 2026: iOS App Shell
 - Added `app/`, a Capacitor iOS project that wraps the live site. App name Scores, bundle id com.carthur.scores, Scores icon and dark splash.
 
+## Beta 3.0 (at /beta3): new home layouts, Oct 15, 2026 (6:45 PM)
+Built from beta as of today, plus a Home Layout switch in Settings (top of the list). Opens on Bottom Bar.
+- Bottom Bar: slim header (Scores, view pill, live count), date strip, a My Games / Live / All switch, and a bottom bar for Scores, Leagues, Search and Settings.
+- Your Day: big date header with calendar, search and settings buttons. The date strip hides until you tap the calendar. Ends with Everything Else: every league on today, yours first, one tap in, with a back button to Your Day.
+- League Rail: search bar up top, a row of league circles (For You, then your leagues, then the rest on today; red dot = live), and For You groups the rest of the day by start time with finals at the bottom.
+- All three open on a For You feed: Your Teams, Worth A Watch, You Are Looking Live, then Up Next for teams not playing today. Golf and tennis show when in progress.
+- Simple, Compact and Expanded all work in every layout. Tap the view pill in the header to switch. In For You, Your Teams follows the view you pick, even with Always Expand My Teams on.
+- Classic keeps the current beta home, so you can compare.
+- Has its own saved settings (separate from beta and live); teams and leagues are shared.
+
 ## Beta 2.0 (at /beta2): snapshot of beta, Oct 14, 1:57 PM
 A frozen copy of beta as of this moment: everything in the "In beta" list below plus the live app. Beta keeps moving; Beta 2.0 stays put until you say to refresh it. Its own saved settings (Beta 2.0 label), same shared teams and leagues.
 
