@@ -2,6 +2,11 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## In beta (not on live yet)
+- Matchup shows Probable Pitchers (MLB) and Probable Goalies (NHL) at the top: headshot, name and record or W-L and ERA, TBD when not announced.
+- Hockey Goalies card (shots against, saves, goals against, save %) at the top of Box Score and in the Recap. Goalies were cut off in the box score before.
+- Live football: a Current Drive card on top of Play-By-Play with the drive summary, down and distance, a field bar showing the ball and the line to gain, red zone tag, and each play of the drive with yards gained.
+
 ## Oct 15, 2026: Live (4:10 PM)
 - Every sport now follows the same game view. Before: Matchup (Preview for soccer) with odds, season team stats and ranks, leaders, last 5 and a new Injuries card. Live: opens on Play-By-Play, then Box Score (Stats for soccer) and Standings. Final: opens on Recap.
 - Recap for every sport: hockey Three Stars and goal-by-goal Scoring Summary; football Scoring Summary by quarter; soccer Goals; then game leaders, win probability and team stats (no odds). Baseball keeps its W/L/S recap.
