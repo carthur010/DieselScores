@@ -2,7 +2,7 @@
 
 Newest first. Beta changes move to Live when shipped.
 
-## In beta (not on live yet)
+## Oct 15, 2026: Live (10:15 AM)
 - Tap a team's logo or name in a game's header, or a team in any standings table, to open that team's page.
 - College standings in games now show Conference and Overall records (they were blank before).
 - College Football picker has a Ranked vs Ranked option (both teams in the Top 25), right under Top 25.
