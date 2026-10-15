@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015114053">
+<meta name="build" content="20261015114607">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -441,6 +441,9 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .blk-bar { padding: 10px 16px; border-bottom: 1px solid var(--line); }
 .blk-f small { color: var(--muted); font-weight: 700; margin-left: 5px; }
 .lp-filter { margin: -4px 0 12px; }
+#sheet-tv { margin-top: 18px; }
+.tv-grp { margin-bottom: 12px; }
+.tv-grp > b { display: block; font-size: 13px; margin-bottom: 6px; }
 .lp-logo-big { background: #fff; border-radius: 50%; padding: 10px; }
 .lp-chips { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; margin: 0 -16px 12px; padding: 2px 16px; overscroll-behavior-x: contain; }
 .lp-chips::-webkit-scrollbar { display: none; }
@@ -899,6 +902,9 @@ button.brand, button.brand span { color: var(--accent); }
       <div class="res" id="following"></div>
       <div id="sheet-lgs" hidden><h3>Your Leagues <span class="h3-note">tap to add or remove</span></h3>
         <div class="toggles" id="sheet-lglist"></div></div>
+      <div id="sheet-tv" hidden><h3>Your TV &amp; Streaming <span class="h3-note">tap what you have</span></h3>
+        <p class="hint" style="margin:0 0 8px">Watch buttons open the right app for each game.</p>
+        <div id="sheet-tvlist"></div></div>
       <button class="set-done" id="sheet-done">Done</button>
     </div>
   </div>
@@ -1134,7 +1140,9 @@ button.brand, button.brand span { color: var(--accent); }
     // Favorite games (just that game, not the team). key "lg:id" -> { at, date }. Dropped 2 days after the game.
     favGames: (() => { const f = store.get("favGames", {}); const now = Date.now(); Object.keys(f).forEach(k => { if (now - new Date(f[k].date || f[k].at).getTime() > 2 * 864e5) delete f[k]; }); return f; })(),
     showOdds: store.get("showOdds", true),
-    tv: (() => { const s = store.get("tv", null); return s && Array.isArray(s.services) ? { ...DEFAULT_TV, ...s } : { ...DEFAULT_TV, services: [...DEFAULT_TV.services] }; })(),
+    tv: (() => { const s = store.get("tv", null); if (s && Array.isArray(s.services)) return { ...DEFAULT_TV, ...s };
+      if (!store.get("onboarded", false) && !store.get("favs", []).length) { const t = { services: [], market: "" }; store.set("tv", t); return t; }   // new people pick their own
+      return { ...DEFAULT_TV, services: [...DEFAULT_TV.services] }; })(),
     density: store.get("density", "expanded"),       // "compact" | "expanded"
     expandFavs: store.get("expandFavs", true),       // in Compact, keep your teams' games full size
     upcoming: { key: "", at: 0, days: [], loading: false },
@@ -3067,7 +3075,8 @@ button.brand, button.brand span { color: var(--accent); }
     document.getElementById("sheet-h").textContent = welcome === true ? "Welcome To Scores" : "Your Teams";
     document.getElementById("sheet-intro").hidden = welcome !== true;
     document.getElementById("sheet-lgs").hidden = welcome !== true;
-    renderSheetLeagues();
+    document.getElementById("sheet-tv").hidden = welcome !== true;
+    renderSheetLeagues(); renderSheetTV();
     document.getElementById("sheet").hidden = false;
     setTimeout(() => document.getElementById("q").focus(), 50);
     renderSheet();
@@ -3298,6 +3307,20 @@ button.brand, button.brand span { color: var(--accent); }
     const el = document.getElementById("sheet-lglist"); if (!el) return;
     el.innerHTML = LEAGUES.map(l => { const on = state.favLeagues.includes(l.id); return `<button class="chip ${on ? "on" : ""}" data-sheet-lg="${l.id}" aria-pressed="${on}">${esc(l.name)}</button>`; }).join("");
   }
+  // Welcome screen: home market and the services you have (same choices as Settings > TV & Streaming)
+  function renderSheetTV() {
+    const el = document.getElementById("sheet-tvlist"); if (!el) return;
+    el.innerHTML = `<div class="tv-grp"><b>Home Market</b><div class="toggles">${Object.entries(MARKETS).map(([k, m]) => `<button class="chip ${state.tv.market === k ? "on" : ""}" data-tv-market="${k}" aria-pressed="${state.tv.market === k}">${esc(m.name)}</button>`).join("")}</div></div>` +
+      SERVICE_GROUPS.map(([label, grp]) => `<div class="tv-grp"><b>${esc(label)}</b><div class="toggles">${SERVICES.filter(x => x.grp === grp).map(x => { const on = state.tv.services.includes(x.id); return `<button class="chip ${on ? "on" : ""}" data-tv-svc="${x.id}" aria-pressed="${on}">${esc(x.label || x.name)}</button>`; }).join("")}</div></div>`).join("");
+  }
+  document.getElementById("sheet-tvlist").addEventListener("click", e => {
+    const tvs = e.target.closest("[data-tv-svc]"), tvm = e.target.closest("[data-tv-market]");
+    if (!tvs && !tvm) return;
+    if (tvs) { const id = tvs.dataset.tvSvc; state.tv.services = state.tv.services.includes(id) ? state.tv.services.filter(x => x !== id) : [...state.tv.services, id]; }
+    if (tvm) state.tv.market = tvm.dataset.tvMarket;
+    store.set("tv", state.tv);
+    refreshWatch(); renderSheetTV(); render();
+  });
   document.getElementById("sheet-lglist").addEventListener("click", e => {
     const b = e.target.closest("[data-sheet-lg]"); if (!b) return;
     const id = b.dataset.sheetLg;
