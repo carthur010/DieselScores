@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015100928">
+<meta name="build" content="20261015101329">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -433,6 +433,7 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .tm-hero img { width: 84px; height: 84px; object-fit: contain; filter: drop-shadow(0 3px 10px rgba(0,0,0,.35)); }
 .tm-hero b { font-family: var(--display); font-size: 30px; font-weight: 700; }
 .tm-hero small { color: rgba(255,255,255,.8); font-size: 13px; }
+.gc-team .tap, .tm .tap, .tmn.tap { cursor: pointer; }
 .circ.tm-star { color: #fff; } .circ.tm-star.on { color: var(--star); }
 .tm-tabs { display: flex; gap: 22px; overflow-x: auto; scrollbar-width: none; margin: 14px 0 12px; border-bottom: 1px solid var(--line); padding: 0 2px; }
 .tm-tabs::-webkit-scrollbar { display: none; }
@@ -2124,6 +2125,12 @@ button.brand, button.brand span { color: var(--accent); }
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   let teamView = null;
+  // Any team name or logo can open that team's page
+  function tmLink(lgId, x) {
+    if (!lgId || !x?.id || !LG[lgId]) return "";
+    const d = { lg: lgId, id: String(x.id), name: x.name || "", abbr: x.abbr || "", logo: x.logo || "", color: x.color || "" };
+    return ` data-open-tm="${esc(JSON.stringify(d))}" role="button" tabindex="0"`;
+  }
   const TM_TABS = [["schedule", "Schedule"], ["stats", "Stats"], ["roster", "Roster"], ["standings", "Standings"], ["injuries", "Injuries"], ["moves", "Transactions"]];
   const TM_URL = {
     stats: (lg, tm) => API + lg.path + "/teams/" + tm.id + "/statistics",
@@ -2178,7 +2185,7 @@ button.brand, button.brand span { color: var(--accent); }
       const key = use.includes("points") ? "points" : "winPercent";
       const sorted = ents.slice().sort((a, b) => (+(stat(b, key)?.value ?? 0) - +(stat(a, key)?.value ?? 0)) || (+(stat(b, "wins")?.value ?? 0) - +(stat(a, "wins")?.value ?? 0)));
       return `<div class="gc-c"><h3>${esc(best.n.name || best.n.abbreviation || "Standings")}</h3><table class="tm-stand"><thead><tr><th>Team</th>${use.map(k => `<th>${esc(stat(ents[0], k)?.abbreviation || stat(ents.find(e => stat(e, k)), k)?.abbreviation || k)}</th>`).join("")}</tr></thead><tbody>
-        ${sorted.map(e => `<tr class="${String(e.team?.id) === id ? "me" : ""}"><td><span class="tmn">${e.team?.logos?.[0]?.href ? `<img src="${esc(e.team.logos[0].href)}" alt="">` : ""}${esc(e.team?.abbreviation || e.team?.shortDisplayName || "")}</span></td>${use.map(k => `<td>${esc(stat(e, k)?.displayValue ?? "-")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+        ${sorted.map(e => `<tr class="${String(e.team?.id) === id ? "me" : ""}"><td><span class="tmn tap"${tmLink(tm.lg, { id: e.team?.id, name: e.team?.displayName || e.team?.shortDisplayName, abbr: e.team?.abbreviation, logo: e.team?.logos?.[0]?.href, color: hexColor(e.team?.color) })}>${e.team?.logos?.[0]?.href ? `<img src="${esc(e.team.logos[0].href)}" alt="">` : ""}${esc(e.team?.abbreviation || e.team?.shortDisplayName || "")}</span></td>${use.map(k => `<td>${esc(stat(e, k)?.displayValue ?? "-")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
     }
     if (tab === "injuries") {
       const t = (j.injuries || []).find(x => String(x.id) === id || String(x.team?.id) === id);
@@ -2239,6 +2246,10 @@ button.brand, button.brand span { color: var(--accent); }
       const js = await Promise.all(urls.map(u => fetch(u).then(r => r.ok ? r.json() : {}).catch(() => ({}))));
       const seen = new Set();
       sched.games = js.flatMap(parse).filter(g => !seen.has(g.id) && seen.add(g.id)).sort((a, b) => new Date(a.date) - new Date(b.date));
+      const tj = js[0]?.team || {};
+      if (!tm.logo) tm.logo = tj.logo || tj.logos?.[0]?.href || "";
+      if (!tm.color && tj.color) tm.color = hexColor(tj.color);
+      if (tj.displayName && (!tm.name || tm.name.length <= 4)) tm.name = tj.displayName;
       sched.record = js[0]?.team?.recordSummary || ""; sched.standing = js[0]?.team?.standingSummary || "";
     } catch {}
     if (teamView === tm) tm.sched = sched;
@@ -3027,7 +3038,7 @@ button.brand, button.brand span { color: var(--accent); }
     const status = g ? g.status : (st.shortDetail || "");
     const lose = (x, o) => gs !== "pre" && (+x.score) < (+o.score);
     const fmtTeam = (x, o, t) => `<div class="gc-team">${gs === "pre" ? "" : `<div class="big ${lose(x, o) ? "lose" : ""}">${esc(x.score)}</div>`}
-      ${x.logo ? `<img src="${esc(x.logo)}" alt="">` : ""}<b class="${((n) => n > 11 ? "xlong" : n > 9 ? "long" : "")((x.name || x.abbr || "").length + (x.rank ? 4 : 0))}">${x.rank ? `<i>${x.rank}</i> ` : ""}${esc(x.name || x.abbr)}</b><small>${esc(x.record)}</small>${g && t?.abbr ? starBtn(g.lg, t) : ""}</div>`;
+      ${x.logo ? `<img class="tap" src="${esc(x.logo)}" alt=""${tmLink(lg.id, { ...x, name: x.full || x.name })}>` : ""}<b${tmLink(lg.id, { ...x, name: x.full || x.name })} class="tap ${((n) => n > 11 ? "xlong" : n > 9 ? "long" : "")((x.name || x.abbr || "").length + (x.rank ? 4 : 0))}">${x.rank ? `<i>${x.rank}</i> ` : ""}${esc(x.name || x.abbr)}</b><small>${esc(x.record)}</small>${g && t?.abbr ? starBtn(g.lg, t) : ""}</div>`;
     const sub = g?.series || seriesText(comp.series?.summary);
     const vn = j?.gameInfo?.venue || comp.venue;
     const label = [lg.short || lg.name, g?.note].filter(Boolean).join(" · ");
@@ -3244,11 +3255,14 @@ button.brand, button.brand span { color: var(--accent); }
     const followIds = new Set([...state.favs].map(k => state.favMeta[k]).filter(m => m && (m.lg === lg.id || (lg.soccer && LG[m.lg]?.soccer))).map(m => String(m.id)));
     (show.length ? show : groups.slice(0, 1)).forEach(gr => {
       const ents = gr.standings.entries;
-      const used = COLS.filter(([k]) => ents.some(e => (e.stats || []).some(s => s.type === k)));
-      const val = (e, k) => (e.stats || []).find(s => s.type === k)?.displayValue ?? "";
+      const has = k => ents.some(e => (e.stats || []).some(s => s.type === k));
+      let used = COLS.filter(([k]) => has(k));
+      // College feeds only carry records (conference and overall), not wins/losses columns
+      if (used.length < 2) used = [["vsconf", "Conf"], ["total", "Overall"], ["overall", "Overall"], ["streak", "Strk"]].filter(([k]) => has(k)).filter((c, i, arr) => !(c[0] === "overall" && arr.some(x => x[0] === "total")));
+      const val = (e, k) => { const s = (e.stats || []).find(s => s.type === k); return s?.displayValue ?? s?.summary ?? ""; };
       const rank = (e, i) => val(e, "rank") || i + 1;
       html += `<div class="gc-c"><h3>${esc(gr.header && !/Standings$/.test(gr.header) ? gr.header : (lg.soccer ? "Table" : "Standings"))}</h3><div class="tbl-wrap"><table class="tbl st-tbl"><thead><tr><th></th><th>Team</th>${used.map(([, l]) => `<th>${l}</th>`).join("")}</tr></thead><tbody>${
-        ents.map((e, i) => { const mine = isTeam(e, a) || isTeam(e, h); return `<tr class="${mine ? "me" : ""}"><td class="rk">${esc(rank(e, i))}</td><td class="tm">${esc(e.team || "")}${followIds.has(String(e.id)) ? ' <span class="mc-fav">★</span>' : ""}</td>${used.map(([k]) => `<td>${esc(val(e, k))}</td>`).join("")}</tr>`; }).join("")}</tbody></table></div></div>`;
+        ents.map((e, i) => { const mine = isTeam(e, a) || isTeam(e, h); return `<tr class="${mine ? "me" : ""}"><td class="rk">${esc(rank(e, i))}</td><td class="tm"><span class="tap"${tmLink(lg.id, { id: e.id, name: e.team, logo: e.logo?.[0]?.href || "" })}>${esc(e.team || "")}</span>${followIds.has(String(e.id)) ? ' <span class="mc-fav">★</span>' : ""}</td>${used.map(([k]) => `<td>${esc(val(e, k))}</td>`).join("")}</tr>`; }).join("")}</tbody></table></div></div>`;
     });
     return html || `<div class="empty">No table for this game.</div>`;
   }
@@ -3473,6 +3487,8 @@ button.brand, button.brand span { color: var(--accent); }
   });
   document.getElementById("gsheet").addEventListener("click", async e => {
     if (e.target.closest("[data-gclose]")) { closeGame(); return; }
+    const ot = e.target.closest("[data-open-tm]");
+    if (ot) { let d = null; try { d = JSON.parse(ot.dataset.openTm); } catch {} if (d) { const same = teamView && String(teamView.id) === d.id && teamView.lg === d.lg; if (!same) openTeam(d); } return; }
     if (e.target.closest("[data-team-follow]") && teamView) { const tm = teamView; toggleFav(keyFor(tm), { lg: tm.lg, id: tm.id, name: tm.name, logo: tm.logo, color: tm.color, abbr: tm.abbr }); tm.paint ? tm.paint() : openTeamRepaint(); return; }
     const tt = e.target.closest("[data-tm-tab]");
     if (tt && teamView) { teamView.tab = tt.dataset.tmTab; teamView.paint(); return; }
