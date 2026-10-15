@@ -2,6 +2,12 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## In beta (not on live yet)
+- Settings no longer drags sideways: option rows (like Open To with Smart) wrap to a second line instead of pushing the sheet wider.
+- New All Leagues button (grid icon) at the top right: every league grouped by sport with live and game counts. Tap one to open its league page (golf and tennis open their tab).
+- Simple rows in mixed lists (like You Are Looking Live) show the channel under the league, e.g. UEL / Paramount+.
+- Header icons are a touch smaller on phones so all five fit on one line.
+
 ## Oct 15, 2026: Live (11:59 AM)
 - Nothing picked yet? Scores shows every league instead of an empty screen, with a "You're seeing every league" card and a Pick Favorites button.
 - Empty screens now give you a way forward: All Games Today (with a count), Upcoming, Search Teams & Leagues, and a Browse Leagues grid of today's leagues (tap for the league page) plus All Leagues.
