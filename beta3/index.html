@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta 3.0</title>
-<meta name="build" content="20261015194603">
+<meta name="build" content="20261015195011">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1901,7 +1901,8 @@ button.brand, button.brand span { color: var(--accent); }
       const events = [];
       if (prev.state === "pre" && g.state === "in") events.push(g.playoff ? "playoff" : "start", ...(g.playoff ? ["start"] : []));
       if (g.state === "in" && now.half && !prev.half) events.push("half");
-      if (g.state === "in" && prev.leader && now.leader && prev.leader !== now.leader) events.push("lead");
+      // Basketball leads flip too often to be worth a buzz (same as Every Score)
+      if (g.state === "in" && prev.leader && now.leader && prev.leader !== now.leader && g.lg.sport !== "Basketball") events.push("lead");
       if (prev.state !== "post" && g.state === "post") events.push("final");
       if (g.state === "in") {
         if (now.total > prev.total && g.lg.sport !== "Basketball") events.push("score");

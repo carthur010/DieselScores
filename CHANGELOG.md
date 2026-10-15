@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## In beta (not on live yet)
+- No more Lead Change alerts for basketball (NBA, WNBA, college). Leads flip too often. Other sports keep them. Also in Beta 3.0.
+
 ## Oct 15, 2026: Live (5:16 PM)
 - Finished games no longer show the "Open On ESPN" button; just the heart. Upcoming and live games keep their Watch button.
 - Removed the "Open Full Gamecast On ESPN" link at the bottom of game pages.
