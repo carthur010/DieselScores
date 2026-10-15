@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## In beta (not on live yet)
+- Settings > TV & Streaming has an On My Services Tab switch (Show or Hide). Hiding it removes the chip from the tab row.
+
 ## Oct 15, 2026: Live (9:50 AM)
 - NHL regular-season shootouts read "Shootout" instead of "OT2 0:00", and the line score and plays say SO. Hockey plays in overtime say OT instead of 4th.
 - The heart on a game tile is now a button: tap it to unfavorite the game and drop it from your top strip.

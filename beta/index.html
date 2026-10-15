@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015094805">
+<meta name="build" content="20261015095617">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2330,7 +2330,7 @@ button.brand, button.brand span { color: var(--accent); }
       { id: "upcoming", label: "Upcoming" },
       { id: "close", label: "Close Games", n: closeN, hot: closeN > 0 },
       { id: "onmine", label: "On My Services", n: games.filter(onMyServices).length },
-    ];
+    ].filter(c => c.id !== "onmine" || store.get("svcTab", true));
     // Leagues live behind one picker instead of a long chip row
     const allCounts = {};
     everything.forEach(g => allCounts[g.lg.id] = (allCounts[g.lg.id] || 0) + 1);
@@ -3501,6 +3501,7 @@ button.brand, button.brand span { color: var(--accent); }
         segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
         segRow("Betting Odds", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "Lines on game cards and in Gamecast")) +
       setSection("tv", "TV & Streaming", `${state.tv.services.length} service${state.tv.services.length === 1 ? "" : "s"} · ${(MARKETS[state.tv.market] || MARKETS.other).name}`,
+        segRow("On My Services Tab", "svcTab", store.get("svcTab", true) ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "A tab of games you can watch on your services") +
         `<div class="set-row set-col"><div class="set-lbl">Home Market<small>Sets which regional channels you get and when local games are blacked out on league packages</small></div>
           <div class="toggles">${Object.entries(MARKETS).map(([k, m]) => `<button class="chip ${state.tv.market === k ? "on" : ""}" data-tv-market="${k}" aria-pressed="${state.tv.market === k}">${esc(m.name)}</button>`).join("")}</div></div>` +
         SERVICE_GROUPS.map(([label, grp, hint]) => `<div class="set-row set-col"><div class="set-lbl">${esc(label)}${hint ? `<small>${esc(hint)}</small>` : ""}</div>
@@ -3529,6 +3530,7 @@ button.brand, button.brand span { color: var(--accent); }
       if (key === "density") setDensity(val);
       if (key === "expandFavs") { state.expandFavs = val === "on"; store.set("expandFavs", state.expandFavs); }
       if (key === "odds") { state.showOdds = val === "on"; store.set("showOdds", state.showOdds); }
+      if (key === "svcTab") { store.set("svcTab", val === "on"); if (val === "off" && state.tab === "onmine") { state.tab = store.get("home", "live"); store.set("tab2", state.tab); } }
 
       renderSettings(); render();
       return;
