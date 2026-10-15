@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015101329">
+<meta name="build" content="20261015102111">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -435,9 +435,9 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .tm-hero small { color: rgba(255,255,255,.8); font-size: 13px; }
 .gc-team .tap, .tm .tap, .tmn.tap { cursor: pointer; }
 .circ.tm-star { color: #fff; } .circ.tm-star.on { color: var(--star); }
-.tm-tabs { display: flex; gap: 22px; overflow-x: auto; scrollbar-width: none; margin: 14px 0 12px; border-bottom: 1px solid var(--line); padding: 0 2px; }
+.tm-tabs { display: flex; gap: 22px; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin: 14px 0 12px; border-bottom: 1px solid var(--line); padding: 0 2px; }
 .tm-tabs::-webkit-scrollbar { display: none; }
-.tm-tabs button { flex: none; font-size: 15px; font-weight: 700; color: var(--muted); padding: 10px 0; border-bottom: 3px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tm-tabs button { flex: none; font-size: 15px; font-weight: 700; color: var(--muted); padding: 10px 0 7px; border-bottom: 3px solid transparent; white-space: nowrap; }
 .tm-tabs button.on { color: var(--fg); border-color: var(--accent); }
 .tm-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; }
 .gc-c h3 + .tm-row { border-top: 0; }
@@ -2216,6 +2216,7 @@ button.brand, button.brand span { color: var(--accent); }
       const row = g => `<div class="l5-row tap" role="button" tabindex="0" data-game="${lg.id}:${esc(g.id)}"><span class="l5-d">${esc(new Date(g.date).toLocaleDateString(undefined, { weekday: "short" }))}<br>${esc(new Date(g.date).toLocaleDateString(undefined, { month: "numeric", day: "numeric" }))}</span>
         <span class="l5-at">${g.home ? "vs" : "@"}</span>${g.oppLogo ? `<img src="${esc(g.oppLogo)}" alt="">` : "<i></i>"}<span class="l5-o">${esc(g.opp)}</span>
         <span class="l5-r">${g.state === "post" ? `<small>Final</small><span><b class="${g.res === "W" ? "w" : g.res === "L" ? "l" : ""}">${esc(g.res || "")}</b> ${esc(g.score)}</span>` : `<small>${esc(g.state === "in" ? "Live" : g.tv || "")}</small><span>${esc(g.state === "in" ? g.score : timeLabel(g.date))}</span>`}</span></div>`;
+      const keepLeft = el.querySelector(".tm-tabs")?.scrollLeft || 0;
       el.innerHTML = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:${readable(tm.color)};--ch:${readable(tm.color)}"></div>
         <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span><button class="circ tm-star ${on ? "on" : ""}" data-team-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(tm.name)}" title="${on ? "Following" : "Follow"}">${on ? STAR : STAR_O}</button></div>
         <div class="tm-hero">${tm.logo ? `<img src="${esc(tm.logo)}" alt="">` : ""}<b>${esc(tm.name)}</b><small>${esc([lg.name, sched?.record, sched?.standing].filter(Boolean).join(" · "))}</small></div></div>
@@ -2225,7 +2226,9 @@ button.brand, button.brand span { color: var(--accent); }
         ${next.length ? `<div class="gc-c"><h3>Up Next</h3>${next.map(row).join("")}</div>` : ""}
         ${past.length ? `<div class="gc-c"><h3>Previous ${gameWord(lg, true)}</h3>${past.map(row).join("")}</div>` : ""}
         ${sched && !next.length && !past.length ? `<p class="hint" style="text-align:center">No schedule found for this team.</p>` : ""}`}</div>`;
-      const tb = el.querySelector(".tm-tabs .on"); if (tb) tb.scrollIntoView({ block: "nearest", inline: "nearest" });
+      // Keep the tab strip where it was, nudging sideways only (never scroll the page)
+      const strip = el.querySelector(".tm-tabs"), tb = strip?.querySelector(".on");
+      if (strip) { strip.scrollLeft = keepLeft; if (tb) { const l = tb.offsetLeft - strip.offsetLeft, r = l + tb.offsetWidth; if (l < strip.scrollLeft) strip.scrollLeft = l - 8; else if (r > strip.scrollLeft + strip.clientWidth) strip.scrollLeft = r - strip.clientWidth + 8; } }
     };
     tm.tab = tm.tab || "schedule"; tm.data = tm.data || {};
     tm.paint = () => paintTeam(tm.sched || null);
