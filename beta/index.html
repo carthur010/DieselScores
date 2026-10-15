@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015112523">
+<meta name="build" content="20261015112716">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1173,7 +1173,7 @@ button.brand, button.brand span { color: var(--accent); }
   // NBC Sports Washington became Monumental (2023); NBCSN shut down in 2021.
   var NET_ALIAS = { NBCSBA: "NBCS-BA", NBCSCA: "NBCS-CA", NBCSP: "NBCS-PHI", NBCSPHI: "NBCS-PHI", NBCP: "NBCS-PHI",
     NBCSB: "NBCS-BOS", NBCSBOS: "NBCS-BOS", NBCC: "CHSN", NBCSC: "CHSN", NBCW: "Monumental", NBCSW: "Monumental", NBCS: "NBC",
-    MNMT: "Monumental", MARQ: "Marquee", SPECSN: "Spectrum SportsNet", SNLA: "Spectrum SportsNet LA", FDSW: "FDSN West", NFLREDZONE: "NFL RedZone", REDZONE: "NFL RedZone", GOLF: "Golf Channel" };
+    MNMT: "Monumental", MARQ: "Marquee", SPECSN: "Spectrum SportsNet", SNLA: "Spectrum SportsNet LA", FDSW: "FDSN West", NFLREDZONE: "NFL RedZone", REDZONE: "NFL RedZone", GOLF: "Golf Channel", FOX: "FOX", ABC: "ABC", CBS: "CBS", NBC: "NBC", ESPN: "ESPN", ESPN2: "ESPN2", FS1: "FS1", FS2: "FS2", TNT: "TNT", TBS: "TBS" };
   const netName = n => NET_ALIAS[String(n).trim().toUpperCase().replace(/\s+/g, "")] || String(n).trim();
   // "MIL leads series 2-0" → "MIL Leads 2-0", "Series tied 1-1" → "Tied 1-1", "NYY win series 4-2" → "NYY Win 4-2"
   function seriesText(s) {
@@ -3426,7 +3426,8 @@ button.brand, button.brand span { color: var(--accent); }
     const vn = j?.gameInfo?.venue || comp.venue;
     const label = [lg.short || lg.name, g?.note].filter(Boolean).join(" · ");
     // Everything between the teams, stacked: league, time, series, then network, arena, city
-    const lines = [g?.broadcast?.replace(" / ", ", "), vn?.fullName, placeName(vn)].filter(Boolean);
+    // ESPN sometimes tacks the city onto the stadium: "Memorial Stadium (Bloomington, IN)". The city already has its own line.
+    const lines = [g?.broadcast?.replace(" / ", ", "), (vn?.fullName || "").replace(/\s*\([^)]*\)\s*$/, ""), placeName(vn)].filter(Boolean);
     let html = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:${readable(a.color)};--ch:${readable(h.color)}"></div>
       <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span>${g ? `<button class="circ" data-share="${g.lg.id}:${g.id}" aria-label="Share">${SHAREIC}</button>` : ""}</div>
       <div class="gc-grid">${fmtTeam(a, h, ta)}<div class="gc-mid">
