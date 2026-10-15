@@ -131,7 +131,7 @@ Built from beta as of today, plus a Home Layout switch in Settings (top of the l
 - Classic keeps the current beta home, so you can compare.
 - Getting around from game, team and league pages: on Bottom Bar the bar stays on screen over those pages (Scores goes home, Search and Settings open right away). On Your Day and League Rail a Home button sits next to the X.
 - Open To is back for the new layouts (Settings › Layout & Display): Smart, My Games (Your Day / For You on the other layouts), Live or All. Starts on My Games. Smart opens on Live when any of your games or leagues are on.
-- Has its own saved settings (separate from beta and live); teams and leagues are shared.
+- Has its own saved settings (separate from beta and live); teams and leagues are shared. The first time it opens, it brings over your TV & Streaming services, home market, alerts, color, appearance, odds and favorite games from beta (or live). Fixed: TV & Streaming came over empty.
 
 ## Beta 2.0 (at /beta2): snapshot of beta, Oct 14, 1:57 PM
 A frozen copy of beta as of this moment: everything in the "In beta" list below plus the live app. Beta keeps moving; Beta 2.0 stays put until you say to refresh it. Its own saved settings (Beta 2.0 label), same shared teams and leagues.

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta 3.0</title>
-<meta name="build" content="20261015193219">
+<meta name="build" content="20261015193851">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1240,6 +1240,21 @@ button.brand, button.brand span { color: var(--accent); }
     set(k, v) { try { localStorage.setItem((SHARED.has(k) ? "scoreline-shared:" : "scoreline-b3:") + k, JSON.stringify(v)); } catch {} }
   };
 
+  // Beta 3.0: bring over your TV, streaming, alert and display picks from beta (or live) once, so nothing needs redoing.
+  // An empty TV pick (left by an earlier Beta 3.0 visit) gets replaced too.
+  try {
+    const CARRY = ["tv", "svcTab", "alerts", "alertPrefs", "palette", "theme", "showOdds", "view3", "expandFavs", "favGames", "watched", "conf", "blkF", "setOpen"];
+    const emptyTv = v => { try { const t = JSON.parse(v); return !t || !(t.services || []).length; } catch { return true; } };
+    if (!localStorage.getItem("scoreline-b3:carried")) {
+      CARRY.forEach(k => {
+        const mine = localStorage.getItem("scoreline-b3:" + k);
+        if (mine != null && !(k === "tv" && emptyTv(mine))) return;
+        const src = [localStorage.getItem("scoreline-beta:" + k), localStorage.getItem("scoreline:" + k)].find(v => v != null && !(k === "tv" && emptyTv(v)));
+        if (src != null) localStorage.setItem("scoreline-b3:" + k, src);
+      });
+      localStorage.setItem("scoreline-b3:carried", "true");
+    }
+  } catch {}
   // First run with shared storage: the beta's saved setup becomes the shared one
   try { if (location.pathname.includes("/beta") && !localStorage.getItem("scoreline-shared:favs")) ["favs", "favMeta", "favLeagues"].forEach(k => { const v = localStorage.getItem("scoreline-b3:" + k); if (v) localStorage.setItem("scoreline-shared:" + k, v); }); } catch {}
   const state = {
