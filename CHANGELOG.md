@@ -2,7 +2,7 @@
 
 Newest first. Beta changes move to Live when shipped.
 
-## In beta (not on live yet)
+## Oct 15, 2026: Live (2:35 PM)
 - Worth A Watch switches to two-up compact cards when there are more than 4 picks, so it doesn't take over the page. 4 or fewer keep the big featured cards.
 - Fixed: a hearted game in the top strip broke apart (teams spilled outside the card). The heart was a button inside a button; it's now a tappable label, so the card stays whole and the heart still unfavorites.
 - Settings no longer drags sideways: option rows (like Open To with Smart) wrap to a second line instead of pushing the sheet wider.
