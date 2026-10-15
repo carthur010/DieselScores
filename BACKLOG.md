@@ -18,7 +18,7 @@ Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 Nothing. Everything shipped to live on Oct 14. Still worth a real-phone check: each watch app opening (YouTube TV, Peacock, Paramount+, HBO Max) and game-day betting odds on the card.
 
 ## Future features (Charles)
-- **Make This Your Multiview**: pick up to four games for a window (Morning, Afternoon, Primetime, Late Night) and get a Quad Box screen like BoxScore's week 6 graphic: four live scores side by side with each game's network, plus a shareable image of your slate. Could suggest a default four from Worth A Watch and your teams.
+- **Make This Your Multiview**: one tap and the app picks the four best games on right now and lays them out as a Quad Box (like BoxScore's week 6 graphic), with each game's network. Ranked by closeness, late-game drama, upset alerts and your teams, and it reshuffles as games end or tighten up.
 - **Any Game That's On**: one tap for "I just want something on." Picks the best game live right now, ranked by closeness, stakes and whether it's on your services, with a Watch button.
 - **Rivalry**: tag rivalry games and boost them in Worth A Watch and alerts. Especially college (Texas vs. OU, Bama vs. Auburn, USC vs. UCLA), plus pro (Giants vs. Dodgers, Yankees vs. Red Sox). Starting list: [Bleacher Report, The 100 Most Heated Rivalries in Sports](https://bleacherreport.com/articles/1128435-the-100-most-heated-rivalries-in-sports).
 - **Halftime countdown**: a live clock on the game card showing how long until the second half starts (about 15 min in college football, 13 in the NFL and NBA, 15 in soccer). Could pair with a "Second Half Starting" alert.
