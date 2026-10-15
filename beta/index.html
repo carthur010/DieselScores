@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015154308">
+<meta name="build" content="20261015155229">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -448,6 +448,21 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .lm-go { font-style: normal; color: var(--muted); text-align: right; }
 .lm-list .mc-fav { font-style: normal; }
 .sp-seg { margin-bottom: 10px; }
+.rc-dec { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; text-align: center; }
+.rc-p { display: grid; justify-items: center; gap: 2px; }
+.rc-p img, .rc-p > i { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; background: var(--line); margin-bottom: 4px; }
+.rc-p small { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.rc-p b { font-size: 14px; } .rc-p span { font-size: 12px; color: var(--muted); }
+.rc-p em { font-style: normal; font-size: 11.5px; color: var(--muted); line-height: 1.3; margin-top: 2px; }
+.rc-sp { display: grid; grid-template-columns: 52px 22px 1fr auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+.gc-c h3 + .rc-sp { border-top: 0; }
+.rc-sp img, .rc-sp > i { width: 22px; height: 22px; object-fit: contain; }
+.rc-inn { color: var(--muted); font-size: 12px; font-weight: 700; } .rc-sp b { font-variant-numeric: tabular-nums; }
+.rc-g { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; padding: 9px 6px; border-top: 1px solid var(--line); font-size: 14px; border-radius: 8px; }
+.rc-g[data-game] { cursor: pointer; } .rc-g.on { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.rc-gn { display: grid; font-weight: 700; font-size: 13px; } .rc-gn small { color: var(--muted); font-weight: 500; font-size: 11.5px; }
+.rc-gt { display: grid; gap: 2px; } .rc-gt span { display: flex; justify-content: space-between; max-width: 120px; font-weight: 700; } .rc-gt .lose { color: var(--muted); font-weight: 500; }
+.rc-gs { color: var(--muted); font-size: 12px; text-align: right; }
 .sp-row { display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 11px 0; border-top: 1px solid var(--line); }
 .sp-list .sp-row:first-child { border-top: 0; }
 .sp-side img { width: 26px; height: 26px; object-fit: contain; }
@@ -3573,7 +3588,8 @@ button.brand, button.brand span { color: var(--accent); }
     if (a.lines.length && h.lines.length) {
       const n = Math.max(a.lines.length, h.lines.length, lg.sport === "Baseball" ? 9 : 0);
       const lbl = i => lg.sport === "Baseball" ? i + 1 : lg.soccer ? (i === 0 ? "1H" : i === 1 ? "2H" : "ET") : (otName(lg, i + 1, j.header?.season?.type === 3) || i + 1);
-      const v = (x, i) => esc(x.lines[i]?.displayValue ?? x.lines[i]?.value ?? "-");
+      const done = (j?.header?.competitions?.[0]?.status?.type?.state || "") === "post";
+      const v = (x, i) => esc(x.lines[i]?.displayValue ?? x.lines[i]?.value ?? (lg.sport === "Baseball" && done && x === h && i === n - 1 && a.lines[i] ? "x" : "-"));
       const rhe = lg.sport === "Baseball" && a.hits != null;
       const extra = rhe ? ["R", "H", "E"] : ["T"];
       const ex = x => rhe ? [x.score, x.hits, x.errors] : [x.score];
@@ -3593,10 +3609,11 @@ button.brand, button.brand span { color: var(--accent); }
     const hasTable = !!(j.standings?.groups?.length || j.lastFiveGames?.length);
     // Live baseball: Box Score already covers the numbers, so the game opens on Play-By-Play
     const liveBall = lg.sport === "Baseball" && gs === "in";
-    const tabs = [liveBall ? null : ["stats", "Stats"], ["plays", "Play-By-Play"], lg.soccer ? null : ["box", "Box Score"], hasTable ? ["table", lg.soccer ? "Tournament" : "Standings"] : null].filter(Boolean);
+    const finalBall = lg.sport === "Baseball" && gs === "post";
+    const tabs = [finalBall ? ["recap", "Recap"] : liveBall ? null : ["stats", "Stats"], ["plays", "Play-By-Play"], lg.soccer ? null : ["box", "Box Score"], hasTable ? ["table", lg.soccer ? "Tournament" : "Standings"] : null].filter(Boolean);
     if (!tabs.some(([k]) => k === gameTab)) gameTab = tabs[0][0];
     html += `<div class="gtabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${gameTab === k}" class="${gameTab === k ? "on" : ""}" data-gtab="${k}">${l}</button>`).join("")}</div>`;
-    html += gameTab === "stats" ? statsTab(j, a, h, lg) : gameTab === "plays" ? playsTab(j, lg) : gameTab === "table" ? tableTab(j, a, h, lg) : boxTab(j);
+    html += gameTab === "recap" ? recapTab(j, a, h, lg) : gameTab === "stats" ? statsTab(j, a, h, lg) : gameTab === "plays" ? playsTab(j, lg) : gameTab === "table" ? tableTab(j, a, h, lg) : boxTab(j);
     if (g?.link) html += `<a class="ext" href="${esc(g.link)}" target="_blank" rel="noopener">Open Full Gamecast On ESPN</a>`;
     return html + `</div>`;
   }
@@ -3629,6 +3646,35 @@ button.brand, button.brand span { color: var(--accent); }
       </tbody></table>${foot}</div>`;
     }
     return pc.details ? `<div class="gc-c">${head}<div style="text-align:center;font-weight:600">${esc(pc.details)}</div>${foot}</div>` : "";
+  }
+  // ---- Baseball final: W/L/S, scoring summary, team stats, the series
+  function recapTab(j, a, h, lg) {
+    const comp = j.header?.competitions?.[0] || {};
+    const logoOf = id => String(id) === String(a.id) ? a.logo : String(id) === String(h.id) ? h.logo : "";
+    let html = "";
+    // Decisions with the pitching line from the box score
+    const pitchLine = id => {
+      for (const t of (j.boxscore?.players || [])) { const g = (t.statistics || []).find(x => /pitch/i.test(x.type || "")); const row = g?.athletes?.find(x => String(x.athlete?.id) === String(id));
+        if (row) { const L = g.labels || [], st = row.stats || [], at = k => st[L.indexOf(k)]; return [at("IP") && at("IP") + " IP", at("H") && at("H") + " H", at("ER") && at("ER") + " ER", at("K") && at("K") + " K", at("BB") && at("BB") + " BB"].filter(Boolean).join(", "); } }
+      return "";
+    };
+    const dec = (comp.status?.featuredAthletes || []).filter(f => /winning|losing|sav/i.test(f.name));
+    if (dec.length) html += `<div class="gc-c rc-dec">${dec.map(f => { const k = /winning/i.test(f.name) ? "Win" : /losing/i.test(f.name) ? "Loss" : "Save"; const at = f.athlete || {};
+      return `<div class="rc-p">${(at.headshot?.href || (typeof at.headshot === "string" && at.headshot)) ? `<img src="${esc(at.headshot.href || at.headshot)}" alt="" loading="lazy">` : `<i></i>`}<small>${k}</small><b>${esc(at.shortName || at.displayName || "")}</b><span>${esc(k === "Save" ? (at.saves != null ? String(at.saves) : "") : (at.record || ""))}</span><em>${esc(pitchLine(at.id))}</em></div>`; }).join("")}</div>`;
+    // Scoring summary
+    const sp = (j.plays || []).filter(p => p.scoringPlay);
+    if (sp.length) html += `<div class="gc-c"><h3>Scoring Summary</h3>${sp.map(p => `<div class="rc-sp"><span class="rc-inn">${esc((p.period?.type === "Top" ? "Top " : p.period?.type === "Bottom" ? "Bot " : "") + ord(p.period?.number || 0))}</span>${logoOf(p.team?.id) ? `<img src="${esc(logoOf(p.team.id))}" alt="">` : "<i></i>"}<span class="rc-t">${esc(p.text || "")}</span><b>${esc(p.awayScore)}-${esc(p.homeScore)}</b></div>`).join("")}</div>`;
+    // Team stats
+    const tstat = (x, k) => { const t = (j.boxscore?.teams || []).find(tt => String(tt.team?.id) === String(x.id)); const g = (t?.statistics || []).find(q => q.name === "batting"); const s = (g?.stats || []).find(q => q.abbreviation === k); return s ? +s.displayValue || 0 : null; };
+    const rows = [["Hits", "H"], ["Home Runs", "HR"], ["Total Bases", "TB"], ["Walks", "BB"], ["Strikeouts", "SO"], ["Left On Base", "LOB"]].map(([lbl, k]) => ({ lbl, av: tstat(a, k), hv: tstat(h, k) })).filter(x => x.av != null && x.hv != null);
+    if (rows.length) { const ca = readable(a.color), ch = readable(h.color);
+      html += `<div class="gc-c"><h3 class="h3-teams">${a.logo ? `<img src="${esc(a.logo)}" alt="">` : ""}<span>Team Stats</span>${h.logo ? `<img src="${esc(h.logo)}" alt="">` : ""}</h3>${rows.map(x => { const tot = x.av + x.hv || 1, l = Math.max(.04, x.av / tot), r = Math.max(.04, x.hv / tot);
+        return `<div class="sbar"><b>${x.av}</b><span>${x.lbl}</span><b>${x.hv}</b></div><div class="bar-track" style="--l:${l}fr;--r:${r}fr"><i style="background:${ca}"></i><i style="background:${ch}"></i></div>`; }).join("")}</div>`; }
+    // The series
+    const ss = (j.seasonseries || []).find(x => (x.events || []).length > 1 && /series/i.test(x.title || x.type || ""));
+    if (ss) html += `<div class="gc-c"><h3>${esc(/current/i.test(ss.title || "") ? "Playoff Series" : ss.title || "Series")}<small style="margin-left:6px;text-transform:none;letter-spacing:0">${esc(seriesText(ss.summary))}</small></h3>${ss.events.map((e, i) => { const cs = (e.competitors || []).slice().sort(x => x.homeAway === "away" ? -1 : 1); const fin = e.statusType?.completed;
+      return `<div class="rc-g ${String(e.id) === String(comp.id || "") ? "on" : ""}" ${fin ? `data-game="${lg.id}:${esc(e.id)}"` : ""}><span class="rc-gn">Game ${i + 1}<small>${esc(new Date(e.date).toLocaleDateString(undefined, { month: "numeric", day: "numeric" }))}</small></span><span class="rc-gt">${cs.map(c => `<span class="${fin && !c.winner ? "lose" : ""}">${esc(c.team?.abbreviation || "")} ${fin ? `<b>${esc(c.score ?? "")}</b>` : ""}</span>`).join("")}</span><span class="rc-gs">${esc(fin ? "Final" : e.statusType?.state === "in" ? "Live" : (e.statusType?.shortDetail && !/TBD/.test(e.statusType.shortDetail) ? e.statusType.shortDetail : ""))}</span></div>`; }).join("")}</div>`;
+    return html || statsTab(j, a, h, lg);
   }
   function statsTab(j, a, h, lg) {
     let html = "";

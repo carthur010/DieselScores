@@ -3,6 +3,8 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Finished baseball games open on a Recap tab in place of Stats: Win / Loss / Save with headshots and pitching lines, Scoring Summary by inning with the score after each run, Team Stats bars (hits, homers, total bases, walks, strikeouts, left on base), and the playoff series game by game (tap a game to open it).
+- Baseball line score shows x when the home team didn't need to bat in the last inning.
 - Top strip of your games: live first, then upcoming by start time (7:00 PM before 7:30 PM before 8:00 PM), then finals. Your team order only breaks ties.
 - Live baseball games open on Play-By-Play and drop the Stats tab (Box Score has the numbers). Stats comes back before and after the game.
 - Baseball Play-By-Play filter: All Plays, Scoring (only at-bats that drove in runs), Key Moments (runs, homers, doubles, triples, errors, double plays, steals and pitching changes).
