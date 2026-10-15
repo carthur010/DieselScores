@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## In beta (not on live yet)
+- All Leagues menu starts with My Leagues in your order (MLB, NHL, NFL...), then everything else grouped by sport under More Football, More Soccer and so on.
+
 ## Oct 15, 2026: Live (2:35 PM)
 - Worth A Watch switches to two-up compact cards when there are more than 4 picks, so it doesn't take over the page. 4 or fewer keep the big featured cards.
 - Fixed: a hearted game in the top strip broke apart (teams spilled outside the card). The heart was a button inside a button; it's now a tappable label, so the card stays whole and the heart still unfavorites.

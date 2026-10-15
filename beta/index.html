@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015143435">
+<meta name="build" content="20261015151725">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2752,9 +2752,12 @@ button.brand, button.brand span { color: var(--accent); }
     allGames().forEach(g => { cnt[g.lg.id] = (cnt[g.lg.id] || 0) + 1; if (g.state === "in") live[g.lg.id] = (live[g.lg.id] || 0) + 1; });
     allSpecial().forEach(e => { cnt[e.lg.id] = (cnt[e.lg.id] || 0) + 1; if (e.state === "in") live[e.lg.id] = (live[e.lg.id] || 0) + 1; });
     const when = isToday() ? "today" : "this day";
-    body.innerHTML = `<div class="pk-list lm-list">${SPORT_ORDER.map(sp => { const lgs = LEAGUES.filter(l => l.sport === sp); if (!lgs.length) return "";
-      return `<h3>${esc(sp)}</h3>` + lgs.map(l => { const fav = state.favLeagues.includes(l.id);
-        return `<button class="pk-row" data-menu-lg="${l.id}"><span>${esc(l.name)}${fav ? ' <i class="mc-fav">★</i>' : ""}</span><small class="${live[l.id] ? "hot" : ""}">${live[l.id] ? live[l.id] + " Live" : cnt[l.id] ? cnt[l.id] + " " + when : ""}</small><i class="lm-go">›</i></button>`; }).join(""); }).join("")}</div>`;
+    // Your leagues first, in your order; everything else below by sport
+    const row = l => `<button class="pk-row" data-menu-lg="${l.id}"><span>${esc(l.name)}</span><small class="${live[l.id] ? "hot" : ""}">${live[l.id] ? live[l.id] + " Live" : cnt[l.id] ? cnt[l.id] + " " + when : ""}</small><i class="lm-go">›</i></button>`;
+    const mine = state.favLeagues.map(id => LG[id]).filter(Boolean);
+    const rest = LEAGUES.filter(l => !state.favLeagues.includes(l.id));
+    body.innerHTML = `<div class="pk-list lm-list">${mine.length ? `<h3>My Leagues</h3>${mine.map(row).join("")}` : ""}${SPORT_ORDER.map(sp => { const lgs = rest.filter(l => l.sport === sp); if (!lgs.length) return "";
+      return `<h3>${esc(mine.length ? "More " + sp : sp)}</h3>` + lgs.map(row).join(""); }).join("")}</div>`;
     el.hidden = false; syncLock();
   }
   function openCustomPicker(title, items, cur, onPick) {
