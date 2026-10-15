@@ -3,6 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Finished games no longer show the "Open On ESPN" button; just the heart. Upcoming and live games keep their Watch button.
 - Removed the "Open Full Gamecast On ESPN" link at the bottom of game pages.
 - Matchup shows Probable Pitchers (MLB) and Probable Goalies (NHL) at the top: headshot, name and record or W-L and ERA, TBD when not announced.
 - Hockey Goalies card (shots against, saves, goals against, save %) at the top of Box Score and in the Recap. Goalies were cut off in the box score before.
