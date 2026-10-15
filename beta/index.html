@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261014232957">
+<meta name="build" content="20261015094805">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -619,6 +619,26 @@ button.t-go { background: var(--surface); cursor: pointer; }
 .play .pc { color: var(--muted); font-size: 12px; white-space: nowrap; }
 .play.score { font-weight: 700; }
 .play.score .pc { color: var(--accent); }
+.ab-half { font-family: var(--display); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 14px 2px 6px; }
+.ab-half:first-child { padding-top: 2px; }
+.ab { border-bottom: 1px solid var(--line); padding: 10px 0 12px; }
+.ab:last-child { border-bottom: 0; }
+.ab-h { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.ab-h b { font-size: 15px; }
+.ab-h small { color: var(--muted); font-size: 12px; }
+.ab-h .ab-now { margin-left: auto; color: var(--live); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.ab-r { margin-top: 4px; font-size: 14px; font-weight: 600; }
+.ab.score { border-left: 3px solid var(--live); padding-left: 10px; }
+.ab.score .ab-r { color: var(--live); }
+.ab-note { padding: 8px 0; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--line); }
+.pitches { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.pitches li { display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 10px; }
+.pitches .pd { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-style: normal; font-size: 12px; font-weight: 700; }
+.pd.k { background: #c0352f; } .pd.b { background: #2f8a3e; } .pd.x { background: #2f63d6; } .pd.o { background: var(--muted); }
+.pitches li span { display: grid; line-height: 1.25; }
+.pitches li span b { font-size: 13.5px; }
+.pitches li span small { color: var(--muted); font-size: 12px; }
+.pitches li em { font-style: normal; font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; }
 .gcard .box { overflow-x: auto; }
 .gcard .box table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .gcard .box th, .gcard .box td { padding: 5px 6px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
@@ -3254,7 +3274,52 @@ button.brand, button.brand span { color: var(--accent); }
     }).join("");
     return rows ? `<div class="gc-c"><h3 class="h3-teams">${logoImg(a)}<span>League Rankings</span>${logoImg(h)}</h3>${rows}</div>` : "";
   }
+  // Baseball: group pitches into at-bats (batter vs pitcher, each pitch numbered with the count, then the result)
+  function baseballPlays(j, live) {
+    const all = (j.plays || []).filter(p => p && (p.text || p.type?.text));
+    if (!all.some(p => /^Pitch \d+\s*:/i.test(p.text || ""))) return "";
+    const abs = []; let cur = null, half = "";
+    const ordn = n => ord(n);
+    for (const p of all) {
+      const t = (p.text || p.type?.text || "").trim();
+      const hm = t.match(/^(Top|Bottom) of the (\d+)/i);
+      if (hm) { half = (/^t/i.test(hm[1]) ? "Top " : "Bottom ") + ordn(+hm[2]); continue; }
+      if (/^(Middle|End) of the \d+/i.test(t) || /^End Batter\/Pitcher/i.test(t)) continue;
+      if (!half && p.period?.number) half = (/^t/i.test(p.period.type || "") ? "Top " : /^b/i.test(p.period.type || "") ? "Bottom " : "Inning ") + ordn(p.period.number);
+      const vs = t.match(/^(.+?) pitches to (.+?)\.?$/i);
+      if (vs) { cur = { half, pitcher: vs[1], batter: vs[2], pitches: [], b: 0, s: 0, result: "", score: false }; abs.push(cur); continue; }
+      const pm = t.match(/^Pitch (\d+)\s*:\s*(.+)$/i);
+      if (pm) {
+        if (!cur) { cur = { half, pitcher: "", batter: "", pitches: [], b: 0, s: 0, result: "", score: false }; abs.push(cur); }
+        const d = pm[2], bn = d.match(/^Ball (\d+)/i), sn = d.match(/^Strike (\d+)/i);
+        let lbl, cls;
+        if (/in play/i.test(d)) { lbl = "In Play"; cls = "x"; }
+        else if (/hit by pitch/i.test(d)) { lbl = "Hit By Pitch"; cls = "b"; }
+        else if (bn) { lbl = /intent/i.test(d) ? "Intentional Ball" : "Ball"; cls = "b"; cur.b = +bn[1]; }
+        else if (sn) { cur.s = +sn[1]; lbl = /foul/i.test(d) ? "Foul" : /swing/i.test(d) ? "Swinging Strike" : /look/i.test(d) ? "Called Strike" : "Strike"; cls = "k"; }
+        else if (/foul/i.test(d)) { lbl = "Foul"; cls = "k"; }
+        else { lbl = d; cls = "o"; }
+        const extra = [p.pitchVelocity ? Math.round(p.pitchVelocity * 10) / 10 + " mph" : "", p.pitchType?.text || ""].filter(Boolean).join(" ");
+        cur.pitches.push({ n: +pm[1], lbl, cls, extra, count: cls === "x" || cur.s >= 3 || cur.b >= 4 ? "" : `${cur.b}-${cur.s}` });
+        continue;
+      }
+      if (cur && !cur.result && cur.pitches.length) { cur.result = t; cur.score = !!p.scoringPlay; continue; }
+      abs.push({ half, note: t, score: !!p.scoringPlay });
+    }
+    const list = abs.reverse().slice(0, 25);
+    let html = "", lastHalf = null;
+    list.forEach((ab, i) => {
+      if (ab.half && ab.half !== lastHalf) { html += `<div class="ab-half">${esc(ab.half)}</div>`; lastHalf = ab.half; }
+      if (ab.note) { html += `<div class="ab-note">${esc(ab.note)}</div>`; return; }
+      const now = live && i === 0 && !ab.result;
+      html += `<div class="ab ${ab.score ? "score" : ""}"><div class="ab-h"><b>${esc(ab.batter || "At Bat")}</b>${ab.pitcher ? `<small>vs ${esc(ab.pitcher)}</small>` : ""}${now ? '<span class="ab-now">At Bat</span>' : ""}</div>
+        ${ab.result ? `<div class="ab-r">${esc(ab.result)}</div>` : ""}
+        ${ab.pitches.length ? `<ol class="pitches">${ab.pitches.map(pt => `<li><i class="pd ${pt.cls}">${pt.n}</i><span><b>${esc(pt.lbl)}</b>${pt.extra ? `<small>${esc(pt.extra)}</small>` : ""}</span><em>${pt.count}</em></li>`).join("")}</ol>` : ""}</div>`;
+    });
+    return `<div class="gc-c"><div class="plays">${html}</div></div>`;
+  }
   function playsTab(j, lg) {
+    if (lg.sport === "Baseball") { const bb = baseballPlays(j, j.header?.competitions?.[0]?.status?.type?.state === "in"); if (bb) return bb; }
     let plays = [];
     if (Array.isArray(j.plays) && j.plays.length) plays = j.plays.slice(-40).reverse();
     else if (j.drives) plays = [...(j.drives.current?.plays || [])].reverse().concat([...(j.drives.previous || [])].reverse().flatMap(d => (d.plays || []).slice().reverse())).slice(0, 40);
