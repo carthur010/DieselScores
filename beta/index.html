@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015110604">
+<meta name="build" content="20261015111035">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2215,7 +2215,7 @@ button.brand, button.brand span { color: var(--accent); }
     let url = API + lg.path + "/scoreboard";
     const q = [];
     if (isWeekly(lg) && lv.pick) { q.push("seasontype=" + lv.pick.type, "week=" + lv.pick.week); }
-    else if (!isWeekly(lg)) q.push("dates=" + ymd(lv.day || new Date()));
+    else if (!isWeekly(lg) && lv.day) q.push("dates=" + ymd(lv.day));   // no date: ESPN shows the current day or matchday
     if (lg.extra) q.push(lg.extra.replace(/^&/, ""));
     if (lg.id === "ncaaf" || CONFS[lg.id]) q.push("limit=300");
     const j = await getJ(url + (q.length ? "?" + q.join("&") : ""));
@@ -2249,7 +2249,8 @@ button.brand, button.brand span { color: var(--accent); }
         chips = `<div class="lp-chips">${lv.cal.map(c => { const sel = lv.pick && String(c.week) === String(lv.pick.week) && String(c.type) === String(lv.pick.type); return `<button class="${sel ? "on" : ""}" data-lp-week="${esc(c.type)}|${esc(c.week)}">${esc(c.label)}</button>`; }).join("")}</div>`;
       } else if (!isWeekly(lg)) {
         const base = new Date(); base.setHours(12, 0, 0, 0);
-        const cur = lv.day || base;
+        const first = lv.data.board?.[0]?.date;
+        const cur = lv.day || (first ? new Date(first) : base);
         chips = `<div class="lp-chips">${Array.from({ length: 15 }, (_, i) => addDays(base, i - 7)).map(d => `<button class="${ymd(d) === ymd(cur) ? "on" : ""}" data-lp-day="${ymd(d)}">${esc(ymd(d) === ymd(base) ? "Today" : d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }))}</button>`).join("")}</div>`;
       }
       const games = lv.data.board;
