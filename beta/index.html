@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015111035">
+<meta name="build" content="20261015111209">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1346,6 +1346,8 @@ button.brand, button.brand span { color: var(--accent); }
     (state.upcoming.days || []).forEach(d => d.games.forEach(g => { g.watch = watchOptions(g.nets, g.lg); }));
   }
 
+  // The channel (ESPN, FOX, ABC), not the app you watch it on. The Watch button still opens the app.
+  function netLabel(g) { return g.watch?.[0]?.nets?.[0] || (g.broadcast || "").split(" / ")[0] || ""; }
   function watchPill(g) {
     if (g.state === "post") return "";
     if (!g.watch?.length) return g.broadcast ? `<span class="net none" title="None of your TV Settings services carry ${esc(g.broadcast)}">Not on your services · ${esc(g.broadcast)}</span>` : "";
@@ -2082,7 +2084,7 @@ button.brand, button.brand span { color: var(--accent); }
     const team = (t, o) => `<span class="sr-t ${lose(t, o) ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<i></i>"}<span class="nm">${t.seed ? `<small>(${t.seed})</small> ` : t.rank ? `<small>${t.rank}</small> ` : ""}${esc(t.name || t.abbr)}</span>${isFavTeam(g.lg, t.abbr) ? '<span class="mc-fav">★</span>' : ""}${g.state === "pre" ? "" : `<b>${esc(t.score)}</b>`}</span>`;
     const top = g.state === "pre" ? timeLabel(g.date) : g.status;
     // Under the time: before a game, where to watch; live, "Live"; playoffs, the series game
-    const tv = g.watch?.[0]?.app || g.broadcast || "";
+    const tv = netLabel(g);
     const sub = g.state === "pre" ? (g.status !== timeLabel(g.date) ? g.status : (tv || (g.note ? g.note.replace(/^.*-\s*/, "") : ""))) : (g.state === "in" ? "Live" : (g.note ? g.note.replace(/^.*-\s*/, "") : ""));
     return `<div class="srow tap ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name)}: game details">
       <span class="sr-time"><span class="st ${statusClass(g)}">${esc(top)}</span><small>${showLg ? esc(g.lg.short || g.lg.name) : esc(sub)}</small></span>
@@ -2108,7 +2110,7 @@ button.brand, button.brand span { color: var(--accent); }
     const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
     const row = (t, o) => miniRow(t.logo, seedTag(t) + t.abbr, g.state === "pre" ? recText(t) : "", g.state === "pre" ? null : t.score, lose(t, o), isFavTeam(g.lg, t.abbr));
     const sit = g.state === "in" ? (g.sit?.downDistanceText || (g.lg.sport === "Baseball" && g.sit?.outs != null ? `${g.sit.outs} out${g.sit.outs === 1 ? "" : "s"}` : "")) : "";
-    const foot = sit || (g.state !== "post" ? (g.watch?.[0]?.app || g.broadcast || "") : (g.series || g.lg.short || g.lg.name));
+    const foot = sit || (g.state !== "post" ? netLabel(g) : (g.series || g.lg.short || g.lg.name));
     return `<button class="ms mc ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" title="${esc(a.full + " at " + h.full)}">
       <span class="mc-top"><span class="lgtag">${esc(g.lg.short || g.lg.name)}</span><span class="st ${statusClass(g)}">${esc(g.status)}</span>${g.pin ? `<button class="pin-mark" data-favgame="${g.lg.id}:${g.id}" aria-label="Remove this game from favorites" title="Remove from favorites">♥</button>` : ""}</span>
       ${row(a, h)}${row(h, a)}${foot ? `<span class="mc-foot">${esc(foot)}</span>` : ""}</button>`;

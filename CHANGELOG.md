@@ -3,6 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- Under game times (Simple rows and the top strip) you now see the channel, like ESPN or FOX, instead of YouTube TV. Watch buttons still open YouTube TV. (Ben's note.)
 - League pages: tap a league's name on the scoreboard (like College Football) to open its page. Scores by week for football (Week 1, Week 2...) or by day for everything else, Standings (Table for soccer), Rankings for college (AP, Coaches, CFP with movement), and Teams. Star to follow the league.
 - Share buttons on games, team pages and league pages now send a Scores link that opens straight to that page.
 - Close button steps back: game to team to league and back again.
