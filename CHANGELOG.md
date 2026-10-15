@@ -6,7 +6,7 @@ Newest first. Beta changes move to Live when shipped.
 - Rebuilt in the Scores look (cream, black and red, same fonts, cards and game-card hero) with its own beta channel. Results tab uses ESPN's free feed.
 - New solo Tennis app on Live Tennis API: Live and Upcoming, ATP/WTA filter, live game points and who's serving, match detail sheet, call counter for the free 100/day.
 
-## In beta (not on live yet)
+## Oct 14, 2026: Live (8:10 PM)
 - Live tab shows only your leagues, your teams and games you saved or set alerts for. Everything else live (like MLS if you don't follow it) goes in a collapsed Other Live Games section at the bottom.
 - Easier league switching (Jack's feedback): league chips are replaced by one Leagues ▾ button that opens a picker (Your Leagues first, then More Leagues, each tile showing live or game counts). Inside a league, one dropdown (All Games ▾, Big Ten ▾, Shanghai Masters ▾) opens an ESPN-style list with a checkmark: Top 25, Power 4 and conferences for college football, conferences for college hoops, tournaments for tennis.
 - Tennis tabs get a tournament row (like conferences in college): All Tournaments, then each event playing that day, busiest and live first, with counts. Sponsor names trimmed ("Rolex Shanghai Masters" → "Shanghai Masters").
