@@ -3,6 +3,9 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## In beta (not on live yet)
+- League pages: tap a league's name on the scoreboard (like College Football) to open its page. Scores by week for football (Week 1, Week 2...) or by day for everything else, Standings (Table for soccer), Rankings for college (AP, Coaches, CFP with movement), and Teams. Star to follow the league.
+- Share buttons on games, team pages and league pages now send a Scores link that opens straight to that page.
+- Close button steps back: game to team to league and back again.
 - Standings on team pages for every league, in the same pinned-team, swipe-for-more table. NFL and MLB: Division and Wild Card views. NBA: conference with playoff and Play-In lines. NHL: Wild Card and Division views. College: conference with conference and overall records. Soccer is a Table (tab says Table) with colored edges for European spots and relegation, plus a key.
 - NHL team standings use the playoff format: top 3 in each division, then the Wild Card race with a line after the second spot. Columns: GP, W, L, OT, PTS, P%, RW, ROW, GF, GA, DIFF, L10 and streak (swipe for more; team names stay pinned).
 - Roster: injured players get a small red tag next to their name (IR, DTD, OUT, IL10 and so on) instead of a big label, and keep their height and weight.

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015105803">
+<meta name="build" content="20261015110604">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -434,7 +434,23 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .tm-hero b { font-family: var(--display); font-size: 30px; font-weight: 700; }
 .tm-hero small { color: rgba(255,255,255,.8); font-size: 13px; }
 .gc-team .tap, .tm .tap, .tmn.tap { cursor: pointer; }
-.circ.tm-star { color: #fff; } .circ.tm-star.on { color: var(--star); }
+.circ.tm-star { color: #fff; }
+.gc-top .circ + .circ { margin-left: 8px; }
+.lg-link { cursor: pointer; }
+.lg-go { color: var(--muted); font-weight: 400; margin-left: 2px; }
+.lp-logo-big { background: #fff; border-radius: 50%; padding: 10px; }
+.lp-chips { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; margin: 0 -16px 12px; padding: 2px 16px; overscroll-behavior-x: contain; }
+.lp-chips::-webkit-scrollbar { display: none; }
+.lp-chips button { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 7px 13px; font-size: 13.5px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+.lp-chips button.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.lp-day { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; margin-bottom: 12px; }
+.lp-day h3 { display: flex; align-items: baseline; gap: 8px; margin: 0; padding: 12px 14px 10px; font-size: 15px; border-bottom: 1px solid var(--line); }
+.lp-day h3 small { color: var(--muted); font-weight: 600; font-size: 12px; }
+.grid.lp-grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); }
+.tm-row .lp-logo { border-radius: 0; object-fit: contain; background: none; }
+.rk-row { grid-template-columns: 26px auto 1fr auto; }
+.rk-n { font-style: normal; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; }
+.rk-row .up { color: #2f8a3e; } .rk-row .dn { color: var(--live); } .circ.tm-star.on { color: var(--star); }
 .tm-tabs { display: flex; gap: 22px; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin: 14px 0 12px; border-bottom: 1px solid var(--line); padding: 0 2px; }
 .tm-tabs::-webkit-scrollbar { display: none; }
 .tm-tabs button { flex: none; font-size: 15px; font-weight: 700; color: var(--muted); padding: 10px 0 7px; border-bottom: 3px solid transparent; white-space: nowrap; }
@@ -2161,7 +2177,125 @@ button.brand, button.brand span { color: var(--accent); }
     state.tab = id; render();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
-  let teamView = null;
+  let teamView = null, leagueView = null;
+  // ---- Back stack inside the sheet: game -> team -> league and back again
+  let navStack = [];
+  function pushView() {
+    if (document.getElementById("gsheet").hidden) { navStack = []; return; }
+    if (teamView) { const t = teamView; navStack.push(() => openTeam(t, true)); }
+    else if (leagueView) { const l = leagueView; navStack.push(() => openLeaguePage(l.id, l)); }
+    else if (openGameKey) { const k = openGameKey; navStack.push(() => openGame(k)); }
+    if (navStack.length > 10) navStack.shift();
+  }
+  // ---- Share links that open right to a game, team or league
+  const APP_URL = "https://carthur010.github.io/DieselScores/" + (location.pathname.includes("/beta") ? "beta/" : "");
+  async function shareLink(title, text, param) {
+    const url = APP_URL + "?" + param;
+    try {
+      if (navigator.share) await navigator.share({ title, text, url });
+      else { await navigator.clipboard.writeText(text + " " + url); toast("Link Copied", text, "", "", false); }
+    } catch {}
+  }
+  // ---- League page: scores by week or day, standings (or table), rankings for college, teams
+  const LP_TABS = lg => [["scores", "Scores"], ["standings", lg.soccer ? "Table" : "Standings"], ...(CONFS[lg.id] || lg.id === "ncaaf" ? [["rankings", "Rankings"]] : []), ["teams", "Teams"]];
+  async function openLeaguePage(id, keep) {
+    const lg = LG[id]; if (!lg || lg.kind) return;
+    const lv = keep && keep.id === id ? keep : { id, tab: "scores", data: {}, pick: null, cal: null };
+    fromSettings = false; closeSheet(); closeGame(); leagueView = lv;
+    const el = document.getElementById("gsheet");
+    lv.paint = () => paintLeague(lv);
+    el.hidden = false; if (!keep) el.scrollTop = 0;
+    lv.paint();
+    if (!lv.data.board) loadLeagueBoard(lv);
+  }
+  const isWeekly = lg => lg.sport === "Football";
+  async function loadLeagueBoard(lv) {
+    const lg = LG[lv.id];
+    lv.data.board = null; lv.paint();
+    let url = API + lg.path + "/scoreboard";
+    const q = [];
+    if (isWeekly(lg) && lv.pick) { q.push("seasontype=" + lv.pick.type, "week=" + lv.pick.week); }
+    else if (!isWeekly(lg)) q.push("dates=" + ymd(lv.day || new Date()));
+    if (lg.extra) q.push(lg.extra.replace(/^&/, ""));
+    if (lg.id === "ncaaf" || CONFS[lg.id]) q.push("limit=300");
+    const j = await getJ(url + (q.length ? "?" + q.join("&") : ""));
+    if (leagueView !== lv) return;
+    const L = j?.leagues?.[0] || {};
+    if (!lv.logo) lv.logo = L.logos?.[0]?.href || "";
+    if (!lv.season) lv.season = L.season?.displayName || "";
+    if (isWeekly(lg) && !lv.cal) {
+      lv.cal = (L.calendar || []).filter(c => typeof c === "object" && c.entries).flatMap(c => c.entries.map(e => ({ label: e.label, week: e.value, type: c.value, start: e.startDate, end: e.endDate })));
+      if (!lv.pick) lv.pick = { week: String(j?.week?.number || ""), type: String(j?.season?.type || 2) };
+    }
+    lv.data.board = (j?.events || []).map(ev => { try { return normalize(ev, lg); } catch { return null; } }).filter(Boolean);
+    lv.paint();
+  }
+  function loadLeagueTab(lv, tab) {
+    const lg = LG[lv.id];
+    if (lv.data[tab] !== undefined) return;
+    lv.data[tab] = null;
+    const u = tab === "rankings" ? API + lg.path + "/rankings" : TM_URL.standings(lg);
+    getJ(u).then(j => { lv.data[tab] = j || {}; if (leagueView === lv && (lv.tab === tab || (tab === "standings" && lv.tab === "teams"))) lv.paint(); });
+  }
+  function paintLeague(lv) {
+    if (leagueView !== lv) return;
+    const lg = LG[lv.id], el = document.getElementById("gsheet");
+    const keepLeft = el.querySelector(".tm-tabs")?.scrollLeft || 0, chipLeft = el.querySelector(".lp-chips")?.scrollLeft;
+    const on = state.favLeagues.includes(lg.id);
+    let body = "";
+    if (lv.tab === "scores") {
+      let chips = "";
+      if (isWeekly(lg) && lv.cal?.length) {
+        chips = `<div class="lp-chips">${lv.cal.map(c => { const sel = lv.pick && String(c.week) === String(lv.pick.week) && String(c.type) === String(lv.pick.type); return `<button class="${sel ? "on" : ""}" data-lp-week="${esc(c.type)}|${esc(c.week)}">${esc(c.label)}</button>`; }).join("")}</div>`;
+      } else if (!isWeekly(lg)) {
+        const base = new Date(); base.setHours(12, 0, 0, 0);
+        const cur = lv.day || base;
+        chips = `<div class="lp-chips">${Array.from({ length: 15 }, (_, i) => addDays(base, i - 7)).map(d => `<button class="${ymd(d) === ymd(cur) ? "on" : ""}" data-lp-day="${ymd(d)}">${esc(ymd(d) === ymd(base) ? "Today" : d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }))}</button>`).join("")}</div>`;
+      }
+      const games = lv.data.board;
+      if (!games) body = chips + `<div class="skel"></div><div class="skel"></div>`;
+      else if (!games.length) body = chips + tmEmpty(`No ${gameWord(lg, true).toLowerCase()} ${isWeekly(lg) ? "this week" : "on this day"}.`);
+      else {
+        const days = new Map();
+        games.slice().sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(g => { const k = new Date(g.date).toDateString(); if (!days.has(k)) days.set(k, []); days.get(k).push(g); });
+        body = chips + [...days.entries()].map(([k, list]) => `<div class="lp-day"><h3>${esc(new Date(k).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" }))}<small>${esc(countLabel(list.length, list))}</small></h3><div class="grid lp-grid">${list.map(g => miniCard(g, false)).join("")}</div></div>`).join("");
+      }
+    } else if (lv.tab === "standings" || lv.tab === "teams") {
+      loadLeagueTab(lv, "standings");
+      const j = lv.data.standings;
+      if (!j) body = `<div class="skel"></div><div class="skel"></div>`;
+      else if (lv.tab === "standings") {
+        const confs = (j.children || []).filter(c => c.standings?.entries?.length || c.children?.length);
+        if (lg.soccer) body = fullStandings(j, "", lg, lv) || tmEmpty("No table yet.");
+        else body = confs.map((c, i) => lg.id === "nhl" ? nhlStandings(j, "", lv.id, lv, c, i > 0) : fullStandings(j, "", lg, lv, c, i > 0)).join("") || tmEmpty("No standings yet.");
+      } else {
+        const groups = [];
+        const walk = (n, name) => { if (n.standings?.entries?.length) groups.push({ name: n.name || name, ents: n.standings.entries }); (n.children || []).forEach(c => walk(c, c.name)); };
+        walk(j, lg.name);
+        body = groups.length ? groups.map(g => `<div class="gc-c"><h3>${esc(g.name)}</h3>${g.ents.slice().sort((a, b) => (a.team?.displayName || "").localeCompare(b.team?.displayName || "")).map(e => `<div class="tm-row tap"${tmLink(lv.id, { id: e.team?.id, name: e.team?.displayName, abbr: e.team?.abbreviation, logo: e.team?.logos?.[0]?.href, color: hexColor(e.team?.color) })}>${e.team?.logos?.[0]?.href ? `<img class="hs lp-logo" src="${esc(e.team.logos[0].href)}" alt="" loading="lazy">` : `<i class="hs"></i>`}<span><b>${esc(e.team?.displayName || "")}</b><small>${esc(sval(e, "total") || sval(e, "overall") || "")}</small></span><span class="r"><small>›</small></span></div>`).join("")}</div>`).join("") : tmEmpty("No teams found.");
+      }
+    } else if (lv.tab === "rankings") {
+      loadLeagueTab(lv, "rankings");
+      const j = lv.data.rankings;
+      const polls = (j?.rankings || []).filter(p => p.ranks?.length);
+      if (!j) body = `<div class="skel"></div><div class="skel"></div>`;
+      else if (!polls.length) body = tmEmpty("No rankings yet.");
+      else {
+        const cur = polls.find(p => p.name === lv.poll) || polls[0];
+        body = `<div class="seg gc-seg st-seg">${polls.slice(0, 3).map(p => `<button class="${p === cur ? "on" : ""}" data-lp-poll="${esc(p.name)}">${esc((p.shortName || p.name).replace(/ Top 25$/, "").replace(/ Poll$/, ""))}</button>`).join("")}</div>
+          <div class="gc-c">${cur.ranks.map(rk => { const t = rk.team || {}; const mv = (rk.previous || 0) && rk.current ? rk.previous - rk.current : 0;
+            return `<div class="tm-row tap rk-row"${tmLink(lv.id, { id: t.id, name: [t.location, t.name].filter(Boolean).join(" ") || t.nickname, abbr: t.abbreviation, logo: t.logos?.[0]?.href || t.logo, color: hexColor(t.color) })}><i class="rk-n">${esc(rk.current)}</i>${t.logos?.[0]?.href || t.logo ? `<img class="hs lp-logo" src="${esc(t.logos?.[0]?.href || t.logo)}" alt="" loading="lazy">` : ""}<span><b>${esc(t.location || t.nickname || t.name || "")}</b><small>${esc([rk.recordSummary, rk.points ? rk.points + " pts" : "", rk.firstPlaceVotes ? rk.firstPlaceVotes + " first-place" : ""].filter(Boolean).join(" · "))}</small></span><span class="r"><small class="${mv > 0 ? "up" : mv < 0 ? "dn" : ""}">${mv > 0 ? "▲" + mv : mv < 0 ? "▼" + -mv : "–"}</small></span></div>`; }).join("")}</div>`;
+      }
+    }
+    el.innerHTML = `<div class="gc-wrap"><div class="gc-hero lp-hero"><div class="gc-bg" style="--ca:var(--accent);--ch:var(--accent)"></div>
+      <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span><button class="circ" data-share-lg="${lg.id}" aria-label="Share">${SHAREIC}</button><button class="circ tm-star ${on ? "on" : ""}" data-lp-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(lg.name)}">${on ? STAR : STAR_O}</button></div>
+      <div class="tm-hero">${lv.logo ? `<img src="${esc(lv.logo)}" alt="" class="lp-logo-big">` : ""}<b>${esc(lg.name)}</b><small>${esc(lv.season || lg.sport)}</small></div></div>
+      <div class="tm-tabs" role="tablist">${LP_TABS(lg).map(([id, label]) => `<button role="tab" class="${lv.tab === id ? "on" : ""}" data-lp-tab="${id}" aria-selected="${lv.tab === id}">${label}</button>`).join("")}</div>
+      ${body}</div>`;
+    const strip = el.querySelector(".tm-tabs"); if (strip) strip.scrollLeft = keepLeft;
+    const ch = el.querySelector(".lp-chips");
+    if (ch) { if (chipLeft != null) ch.scrollLeft = chipLeft; else { const o = ch.querySelector(".on"); if (o) ch.scrollLeft = o.offsetLeft - ch.offsetLeft - ch.clientWidth / 2 + o.offsetWidth / 2; } }
+  }
   // Any team name or logo can open that team's page
   function tmLink(lgId, x) {
     if (!lgId || !x?.id || !LG[lgId]) return "";
@@ -2274,8 +2408,8 @@ button.brand, button.brand span { color: var(--accent); }
     };
     return `<div class="nhl-wrap"><table class="tm-stand nhl-st" style="min-width:${Math.max(360, 130 + cols.length * 46)}px"><tbody>${groups.map(g => `<tr class="grp"><th class="nm">${esc(g.title)}</th>${cols.map(([h, , c]) => `<th class="${c || ""}">${h}</th>`).join("")}</tr>${g.ents.map((e, i) => row(e, i, g)).join("")}`).join("")}</tbody></table></div>`;
   }
-  const viewSeg = (tm, views, cur) => views.length > 1 ? `<div class="seg gc-seg st-seg">${views.map(v => `<button class="${v === cur ? "on" : ""}" data-stand-view="${esc(v)}">${esc(v)}</button>`).join("")}</div>` : "";
-  function fullStandings(j, id, lg, tm) {
+  const viewSegF = (tm, views, cur) => views.length > 1 ? `<div class="seg gc-seg st-seg">${views.map(v => `<button class="${v === cur ? "on" : ""}" data-stand-view="${esc(v)}">${esc(v)}</button>`).join("")}</div>` : "";
+  function fullStandings(j, id, lg, tm, confOverride, noSeg) {
     const has = (n) => n?.standings?.entries?.some(e => String(e.team?.id) === id) || (n?.children || []).some(has);
     const pctFmt = e => { const v = sval(e, "winpercent"); return v ? v.replace(/^0\./, ".") : ""; };
     const bySeed = (a, b) => (snum(a, "playoffseed") || 99) - (snum(b, "playoffseed") || 99);
@@ -2283,7 +2417,7 @@ button.brand, button.brand span { color: var(--accent); }
     const shortName = n => String(n || "").replace(/^(American|National) (Football )?(League|Conference) /, "").replace(/ Division$/, "");
     // Soccer: one league table, colored edge for Champions League / relegation spots
     if (lg.soccer) {
-      let grp = null; const walk = n => { if (!grp && n?.standings?.entries?.some(e => String(e.team?.id) === id)) grp = n; (n?.children || []).forEach(walk); }; walk(j);
+      let grp = null; const walk = n => { if (!grp && n?.standings?.entries?.some(e => !id || String(e.team?.id) === id)) grp = n; (n?.children || []).forEach(walk); }; walk(j);
       if (!grp) return "";
       const ents = grp.standings.entries.slice().sort((a, b) => (snum(a, "rank") || 99) - (snum(b, "rank") || 99) || snum(b, "points") - snum(a, "points"));
       const cols = [["GP", e => sval(e, "gamesplayed")], ["W", e => sval(e, "wins")], ["D", e => sval(e, "ties")], ["L", e => sval(e, "losses")], ["GD", e => sval(e, "pointdifferential")], ["PTS", e => sval(e, "points"), "pts"], ["GF", e => sval(e, "pointsfor")], ["GA", e => sval(e, "pointsagainst")]];
@@ -2291,8 +2425,9 @@ button.brand, button.brand span { color: var(--accent); }
       return `<div class="gc-c"><h3>${esc(grp.name || lg.name)}</h3>${standTable([{ title: "Table", ents, rank: e => sval(e, "rank") || "" }], cols, tm.lg, id, { notes: true, long: true })}
         ${notes.length ? `<div class="st-key">${notes.map(([d, c]) => `<span><i style="background:${esc(c)}"></i>${esc(d)}</span>`).join("")}</div>` : ""}</div>`;
     }
-    const conf = (j.children || []).find(has);
+    const conf = confOverride || (j.children || []).find(has);
     if (!conf) return "";
+    const viewSeg = noSeg ? () => "" : viewSegF;
     const divs = conf.children?.length ? conf.children.filter(d => d.standings?.entries?.length) : null;
     const all = divs ? divs.flatMap(d => d.standings.entries) : (conf.standings?.entries || []);
     let cols, views = [], groups;
@@ -2326,8 +2461,8 @@ button.brand, button.brand span { color: var(--accent); }
     return `<div class="gc-c"><h3>${esc(conf.name || "Standings")}</h3>${standTable([{ title: "Team", ents }], cols, tm.lg, id, { long: true })}</div>`;
   }
   // NHL: division leaders + wild card, with the full set of columns (scrolls sideways, team column stays put)
-  function nhlStandings(j, id, lgId, tm) {
-    const conf = (j.children || []).find(c => (c.children || []).some(d => d.standings?.entries?.some(e => String(e.team?.id) === id)));
+  function nhlStandings(j, id, lgId, tm, confOverride, noSeg) {
+    const conf = confOverride || (j.children || []).find(c => (c.children || []).some(d => d.standings?.entries?.some(e => String(e.team?.id) === id)));
     if (!conf) return "";
     const st = (e, k) => (e.stats || []).find(x => x.name === k || x.type === k);
     const num = (e, k) => +(st(e, k)?.value ?? 0);
@@ -2343,7 +2478,7 @@ button.brand, button.brand span { color: var(--accent); }
     const row = (e, i, cut) => `<tr class="${String(e.team?.id) === id ? "me" : ""} ${cut ? "cut" : ""}"><td class="nm"><span class="tmn tap"${tmLink(lgId, { id: e.team?.id, name: e.team?.displayName, abbr: e.team?.abbreviation, logo: e.team?.logos?.[0]?.href, color: hexColor(e.team?.color) })}><i>${i + 1}</i>${e.team?.logos?.[0]?.href ? `<img src="${esc(e.team.logos[0].href)}" alt="">` : ""}${esc(e.team?.abbreviation || "")}</span></td>${COLS.map(([, f, c]) => `<td class="${c || ""}">${esc(f(e) ?? "-")}</td>`).join("")}</tr>`;
     const block = (title, ents, cutAt) => `<tr class="grp"><th class="nm">${esc(title)}</th>${COLS.map(([h]) => `<th class="${h === "PTS" ? "pts" : ""}">${h}</th>`).join("")}</tr>${ents.map((e, i) => row(e, i, cutAt != null && i === cutAt)).join("")}`;
     const v = tm?.standView === "Division" ? "Division" : "Wild Card";
-    return `${viewSeg(tm, ["Wild Card", "Division"], v)}<div class="gc-c"><h3>${esc(conf.name || "Standings")}</h3><div class="nhl-wrap"><table class="tm-stand nhl-st"><tbody>
+    return `${noSeg ? "" : viewSegF(tm, ["Wild Card", "Division"], v)}<div class="gc-c"><h3>${esc(conf.name || "Standings")}</h3><div class="nhl-wrap"><table class="tm-stand nhl-st"><tbody>
       ${v === "Division" ? divs.map(d => block(d.name, d.ents)).join("") : divs.map(d => block(d.name, d.ents.slice(0, 3))).join("") + block("Wild Card", wc, 2)}</tbody></table></div>
       <p class="hint" style="margin:8px 0 0;font-size:12px">Swipe the table for more. Top 3 in each division plus 2 wild cards make the playoffs. P% is points percentage, RW regulation wins, ROW regulation plus overtime wins.</p></div>`;
   }
@@ -2396,9 +2531,9 @@ button.brand, button.brand span { color: var(--accent); }
     }
     return "";
   }
-  async function openTeam(tm) {
+  async function openTeam(tm, restoring) {
     const lg = LG[tm.lg]; if (!lg || !tm.id) return;
-    fromSettings = false; closeSheet(); closeGame(); teamView = tm;
+    fromSettings = false; closeSheet(); closeGame(); leagueView = null; teamView = tm;
     const el = document.getElementById("gsheet");
     const paintTeam = (sched) => {
       if (teamView !== tm) return;
@@ -2412,7 +2547,7 @@ button.brand, button.brand span { color: var(--accent); }
         <span class="l5-r">${g.state === "post" ? `<small>Final</small><span><b class="${g.res === "W" ? "w" : g.res === "L" ? "l" : ""}">${esc(g.res || "")}</b> ${esc(g.score)}</span>` : `<small>${esc(g.state === "in" ? "Live" : g.tv || "")}</small><span>${esc(g.state === "in" ? g.score : timeLabel(g.date))}</span>`}</span></div>`;
       const keepLeft = el.querySelector(".tm-tabs")?.scrollLeft || 0;
       el.innerHTML = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:${readable(tm.color)};--ch:${readable(tm.color)}"></div>
-        <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span><button class="circ tm-star ${on ? "on" : ""}" data-team-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(tm.name)}" title="${on ? "Following" : "Follow"}">${on ? STAR : STAR_O}</button></div>
+        <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span><button class="circ" data-share-tm aria-label="Share">${SHAREIC}</button><button class="circ tm-star ${on ? "on" : ""}" data-team-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(tm.name)}" title="${on ? "Following" : "Follow"}">${on ? STAR : STAR_O}</button></div>
         <div class="tm-hero">${tm.logo ? `<img src="${esc(tm.logo)}" alt="">` : ""}<b>${esc(tm.name)}</b><small>${esc([lg.name, sched?.record, sched?.standing].filter(Boolean).join(" · "))}</small></div></div>
         <div class="tm-tabs" role="tablist">${TM_TABS.map(([id, label]) => `<button role="tab" class="${tab === id ? "on" : ""}" data-tm-tab="${id}" aria-selected="${tab === id}">${id === "standings" && lg.soccer ? "Table" : label}</button>`).join("")}</div>
         ${tab !== "schedule" ? teamTabBody(tm, lg, tab) : `
@@ -2503,8 +2638,10 @@ button.brand, button.brand span { color: var(--accent); }
   function countLabel(n, games) { const m = games?.length && games.every(g => g.lg?.soccer); return `${n} ${m ? (n === 1 ? "Match" : "Matches") : (n === 1 ? "Game" : "Games")}`; }
   function block(id, title, meta, body, icon) {
     const closed = state.closed.has(id);
+    const lgId = LG[id] ? id : (String(id).startsWith("m-") && LG[id.slice(2)] ? id.slice(2) : null);
+    const lgPage = lgId && !LG[lgId].kind;
     return `<section class="block ${closed ? "closed" : ""}" data-block="${esc(id)}">
-      <div class="bhead">${icon || ""}<h2>${esc(title)}</h2>${meta ? `<span class="meta">${esc(meta)}</span>` : ""}
+      <div class="bhead">${icon || ""}<h2${lgPage ? ` class="tap lg-link" data-open-lgpage="${lgId}" role="button" tabindex="0" title="Open ${esc(title)}"` : ""}>${esc(title)}${lgPage ? ' <span class="lg-go" aria-hidden="true">›</span>' : ""}</h2>${meta ? `<span class="meta">${esc(meta)}</span>` : ""}
         <button class="tog" data-tog="${esc(id)}" aria-expanded="${!closed}" aria-label="${closed ? "Expand" : "Collapse"} ${esc(title)}">${CHEV}</button></div>
       <div class="bbody">${body}</div></section>`;
   }
@@ -3022,6 +3159,8 @@ button.brand, button.brand span { color: var(--accent); }
       return;
     }
     if (e.target.closest("[data-open-sheet]")) { openSheet(); return; }
+    const olp = e.target.closest("[data-open-lgpage]");
+    if (olp) { e.stopPropagation(); navStack = []; openLeaguePage(olp.dataset.openLgpage); return; }
     const tog = e.target.closest("[data-tog]");
     if (tog) {
       const id = tog.dataset.tog;
@@ -3185,7 +3324,7 @@ button.brand, button.brand span { color: var(--accent); }
   function ord(n) { const s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
   function closeGame() {
     document.getElementById("gsheet").hidden = true;
-    clearTimeout(gameTimer); openGameKey = null; lastSummary = null; tennisKey = null; teamView = null;
+    clearTimeout(gameTimer); openGameKey = null; lastSummary = null; tennisKey = null; teamView = null; leagueView = null;
   }
   function repaintGame() {
     if (!openGameKey) return;
@@ -3683,12 +3822,23 @@ button.brand, button.brand span { color: var(--accent); }
     openGame(b.dataset.game);
   });
   document.getElementById("gsheet").addEventListener("click", async e => {
-    if (e.target.closest("[data-gclose]")) { closeGame(); return; }
+    if (e.target.closest("[data-gclose]")) { const back = navStack.pop(); if (back) back(); else closeGame(); return; }
     const ot = e.target.closest("[data-open-tm]");
-    if (ot) { let d = null; try { d = JSON.parse(ot.dataset.openTm); } catch {} if (d) { const same = teamView && String(teamView.id) === d.id && teamView.lg === d.lg; if (!same) openTeam(d); } return; }
+    if (ot) { let d = null; try { d = JSON.parse(ot.dataset.openTm); } catch {} if (d) { const same = teamView && String(teamView.id) === d.id && teamView.lg === d.lg; if (!same) { pushView(); openTeam(d); } } return; }
+    if (leagueView) {
+      const lv = leagueView;
+      const lt = e.target.closest("[data-lp-tab]"); if (lt) { lv.tab = lt.dataset.lpTab; lv.paint(); return; }
+      const wk = e.target.closest("[data-lp-week]"); if (wk) { const [type, week] = wk.dataset.lpWeek.split("|"); lv.pick = { type, week }; loadLeagueBoard(lv); return; }
+      const dy = e.target.closest("[data-lp-day]"); if (dy) { const v = dy.dataset.lpDay; lv.day = new Date(+v.slice(0, 4), +v.slice(4, 6) - 1, +v.slice(6, 8), 12); loadLeagueBoard(lv); return; }
+      const pl = e.target.closest("[data-lp-poll]"); if (pl) { lv.poll = pl.dataset.lpPoll; lv.paint(); return; }
+      if (e.target.closest("[data-lp-follow]")) { const id = lv.id; state.favLeagues = state.favLeagues.includes(id) ? state.favLeagues.filter(x => x !== id) : [...state.favLeagues, id]; store.set("favLeagues", state.favLeagues); render(); lv.paint(); return; }
+      const sl = e.target.closest("[data-share-lg]"); if (sl) { const lg = LG[sl.dataset.shareLg]; shareLink(lg.name, `${lg.name} scores and standings on Scores`, "league=" + lg.id); return; }
+      const lg2 = e.target.closest("[data-game]"); if (lg2) { e.stopPropagation(); pushView(); openGame(lg2.dataset.game); return; }
+    }
+    if (e.target.closest("[data-share-tm]") && teamView) { const t = teamView; shareLink(t.name, `${t.name} on Scores`, "team=" + encodeURIComponent(t.lg + ":" + t.id)); return; }
     if (e.target.closest("[data-team-follow]") && teamView) { const tm = teamView; toggleFav(keyFor(tm), { lg: tm.lg, id: tm.id, name: tm.name, logo: tm.logo, color: tm.color, abbr: tm.abbr }); tm.paint ? tm.paint() : openTeamRepaint(); return; }
     const sv = e.target.closest("[data-stand-view]");
-    if (sv && teamView) { teamView.standView = sv.dataset.standView; teamView.paint(); return; }
+    if (sv && (teamView || leagueView)) { const v = teamView || leagueView; v.standView = sv.dataset.standView; v.paint(); return; }
     const sg = e.target.closest("[data-stat-seg]");
     if (sg && teamView) { teamView.statSeg = sg.dataset.statSeg; teamView.paint(); return; }
     const sm = e.target.closest("[data-stat-more]");
@@ -3696,7 +3846,7 @@ button.brand, button.brand span { color: var(--accent); }
     const tt = e.target.closest("[data-tm-tab]");
     if (tt && teamView) { teamView.tab = tt.dataset.tmTab; teamView.paint(); return; }
     const tg = e.target.closest("[data-game]");
-    if (tg && teamView) { teamView = null; openGame(tg.dataset.game); return; }
+    if (tg && teamView) { e.stopPropagation(); pushView(); teamView = null; openGame(tg.dataset.game); return; }
     const lu = e.target.closest("[data-lu]");
     if (lu) { lineupSide = +lu.dataset.lu; repaintGame(); return; }
     const lf = e.target.closest("[data-lf]");
@@ -3709,13 +3859,12 @@ button.brand, button.brand span { color: var(--accent); }
     if (fav) { let meta = null; try { meta = JSON.parse(fav.dataset.meta || "null"); } catch {} toggleFav(fav.dataset.fav, meta); repaintGame(); return; }
     const sh = e.target.closest("[data-share]");
     if (sh) {
-      const g = findGame(sh.dataset.share);
+      const g = findGame(sh.dataset.share) || (lastSummary && (() => { const c = lastSummary.header?.competitions?.[0]; const cs = (c?.competitors || []).slice().sort((x) => x.homeAway === "away" ? -1 : 1); return { state: c?.status?.type?.state, status: c?.status?.type?.shortDetail || "", teams: cs.map(x => ({ name: x.team?.shortDisplayName || x.team?.displayName, score: x.score })) }; })());
       if (!g) return;
       const title = `${g.teams[0]?.name} ${g.state === "pre" ? "at" : g.teams[0]?.score + " -"} ${g.state === "pre" ? g.teams[1]?.name : g.teams[1]?.score + " " + g.teams[1]?.name}`;
       const text = `${title} · ${g.status}`;
       try {
-        if (navigator.share) await navigator.share({ title: "Scores", text, url: g.link || location.href });
-        else { await navigator.clipboard.writeText(text + (g.link ? " " + g.link : "")); toast("Copied", text, "", "", false); }
+        await shareLink(title, text, "game=" + encodeURIComponent(sh.dataset.share));
       } catch {}
     }
   });
@@ -3958,6 +4107,22 @@ button.brand, button.brand span { color: var(--accent); }
 
   renderDates();
   loadAll();
+  // Shared links: ?game=nhl:123, ?team=nhl:18, ?league=nfl open straight to that page
+  const deepLink = (() => {
+    try {
+      const q = new URLSearchParams(location.search);
+      const out = { game: q.get("game"), team: q.get("team"), league: q.get("league") };
+      if (!out.game && !out.team && !out.league) return null;
+      ["game", "team", "league"].forEach(k => q.delete(k));
+      history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : "") + location.hash);
+      return out;
+    } catch { return null; }
+  })();
+  if (deepLink) setTimeout(() => {
+    if (deepLink.game && LG[deepLink.game.split(":")[0]]) openGame(deepLink.game);
+    else if (deepLink.team) { const [l, i] = deepLink.team.split(":"); if (LG[l] && i) openTeam({ lg: l, id: i, name: "", abbr: "", logo: "", color: "" }); }
+    else if (deepLink.league && LG[deepLink.league]) openLeaguePage(deepLink.league);
+  }, 400);
   // First visit for someone new: no saved teams yet, so open Pick Your Teams
   if (window.__setupLoaded) toast("Setup Loaded", "Your teams and leagues are on this device", "", "", false);
   else if (!store.get("onboarded", false) && !store.get("favs", []).length) { store.set("onboarded", true); setTimeout(() => openSheet(true), 600); }
