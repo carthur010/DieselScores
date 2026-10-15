@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta 3.0</title>
-<meta name="build" content="20261015193851">
+<meta name="build" content="20261015194603">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1016,7 +1016,7 @@ button.brand, button.brand span { color: var(--accent); }
     <div class="bhead"><h2 id="sheet-h">Your Teams</h2>
       <button class="tog" id="sheet-x" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="sheet-body">
-      <p class="hint" id="sheet-intro" hidden>Follow a few teams and pick your leagues to get started. You can change these anytime in Settings.</p>
+      <p class="hint" id="sheet-intro" hidden>Follow a few teams and pick your leagues to get started. You can change these anytime in Settings. <button class="chip" data-welcome-code style="margin-top:8px">Have A Setup Code?</button></p>
       <input type="search" id="q" placeholder="Search teams and leagues: Mets, NFL, Tennis…" autocomplete="off" aria-label="Search teams and leagues">
       <div class="res" id="results"></div>
       <div id="suggest"></div>
@@ -1216,6 +1216,7 @@ button.brand, button.brand span { color: var(--accent); }
       localStorage.setItem("scoreline-shared:lgCustom", "true");
       localStorage.setItem("scoreline-shared:onboarded", "true");
       localStorage.setItem("scoreline-shared:owner", JSON.stringify(code === "me" ? "ca" : code));
+      if (code !== "jc") { const t = JSON.parse(localStorage.getItem(P + "tv") || "null"); if (!t || !(t.services || []).length) localStorage.setItem(P + "tv", JSON.stringify(DEFAULT_TV)); }
       localStorage.removeItem(P + "next");
       q.delete("me"); q.delete("setup");
       history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : "") + location.hash);
@@ -4652,6 +4653,7 @@ button.brand, button.brand span { color: var(--accent); }
       if (!code) return;
       if (!SETUPS[code]) { toast("Code Not Found", "Check the spelling and try again", "", "", false); return; }
       store.set("owner", code === "me" ? "ca" : code);
+      if (code !== "jc" && !state.tv.services.length) { state.tv = { ...DEFAULT_TV, services: [...DEFAULT_TV.services] }; store.set("tv", state.tv); }
       e.target.closest("[data-load-setup]").setAttribute("data-reset-setup", "");
     }
     if (e.target.closest("[data-reset-setup]")) {
@@ -4672,6 +4674,26 @@ button.brand, button.brand span { color: var(--accent); }
       if (o.dataset.setOpen === "teams") openSheet();
       else { renderLeagueSheet(); document.getElementById("lsheet").hidden = false; }
     }
+  });
+  // Home Screen apps on iPhone start with empty storage, so the welcome screen takes a setup code too
+  function applySetupCode(code) {
+    code = (code || "").trim().toLowerCase();
+    if (!code) return false;
+    if (!SETUPS[code]) { toast("Code Not Found", "Check the spelling and try again", "", "", false); return false; }
+    const S = SETUPS[code];
+    store.set("owner", code === "me" ? "ca" : code);
+    state.favs = new Set(S.favs); state.favMeta = { ...state.favMeta, ...S.favMeta }; state.favLeagues = [...S.favLeagues];
+    store.set("lgCustom", true); store.set("onboarded", true);
+    store.set("favs", [...state.favs]); store.set("favMeta", state.favMeta); store.set("favLeagues", state.favLeagues);
+    if (["me", "ca"].includes(code) && !state.tv.services.length) { state.tv = { ...DEFAULT_TV, services: [...DEFAULT_TV.services] }; store.set("tv", state.tv); }
+    state.next = {}; store.set("next", {});
+    toast("Setup Loaded", "Your teams and leagues are on this device", "", "", false);
+    return true;
+  }
+  document.addEventListener("click", e => {
+    if (!e.target.closest("[data-welcome-code]")) return;
+    if (!applySetupCode(prompt("Setup code"))) return;
+    fromSettings = false; closeSheet(); state.tab = homeTab(); render(); refreshNext();
   });
   // Page scroll lock (iOS ignores overflow:hidden alone, so pin the body in place)
   const LOCKERS = ["sheet", "ssheet", "lsheet", "gsheet", "pksheet"].map(id => document.getElementById(id));
