@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015233945">
+<meta name="build" content="20261016131353">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1124,6 +1124,7 @@ button.brand, button.brand span { color: var(--accent); }
     { id: "foxone", grp: "stream", name: "Fox One", kind: "stream", url: "https://www.foxone.com/", re: /Fox One|FOX One|Fox Nation/i },
     { id: "dazn", grp: "stream", name: "DAZN", kind: "stream", url: "https://www.dazn.com/", re: /DAZN/i },
     { id: "victory", grp: "regional", name: "Victory+", kind: "stream", url: "https://www.victoryplus.com/", re: /Victory\+/i },
+    { id: "fandango", grp: "free", name: "Fandango", kind: "stream", url: "https://www.fandango.com/", re: /Fandango/i },
     { id: "youtube", grp: "free", name: "YouTube", kind: "stream", url: "https://www.youtube.com/", scheme: "youtube://", re: /^YouTube$/i },
     { id: "leaguepass", grp: "pass", name: "NBA League Pass", kind: "package", league: "nba", url: "https://www.nba.com/watch/league-pass-stream", re: /NBA League Pass/i },
     { id: "mlbtv", grp: "pass", name: "MLB.TV", kind: "package", league: "mlb", url: "https://www.mlb.com/tv", scheme: "mlbatbat://", re: /MLB\.?TV/i },
@@ -1144,7 +1145,7 @@ button.brand, button.brand span { color: var(--accent); }
     ["Spanish", "spanish", ""],
     ["Free To Watch", "free", "No subscription needed"],
   ];
-  const DEFAULT_TV = { services: ["youtubetv", "gotham", "espnplus", "peacock", "paramount", "max", "prime", "apple", "netflix", "leaguepass", "mlbtv", "nhlespn"], market: "nyc" };
+  const DEFAULT_TV = { services: ["youtubetv", "gotham", "espnplus", "peacock", "paramount", "max", "prime", "apple", "netflix", "leaguepass", "mlbtv", "nhlespn", "fandango"], market: "nyc" };
   // Soccer favorites are keyed "soccer:ABBR" so a club follows you across competitions
   // Charles's setup: the starting teams (in order) and leagues for every version, and what Reset To My Setup restores
   const MY_SETUP = {
@@ -1239,7 +1240,10 @@ button.brand, button.brand span { color: var(--accent); }
     // Favorite games (just that game, not the team). key "lg:id" -> { at, date }. Dropped 2 days after the game.
     favGames: (() => { const f = store.get("favGames", {}); const now = Date.now(); Object.keys(f).forEach(k => { if (now - new Date(f[k].date || f[k].at).getTime() > 2 * 864e5) delete f[k]; }); return f; })(),
     showOdds: store.get("showOdds", true),
-    tv: (() => { const s = store.get("tv", null); if (s && Array.isArray(s.services)) return { ...DEFAULT_TV, ...s };
+    tv: (() => { const s = store.get("tv", null);
+      // Fandango is free (Bundesliga since Aug 2026), so switch it on once for anyone who already picked services
+      if (s && Array.isArray(s.services) && s.services.length && !store.get("fandangoOn", false)) { if (!s.services.includes("fandango")) s.services.push("fandango"); store.set("tv", s); store.set("fandangoOn", true); }
+      if (s && Array.isArray(s.services)) return { ...DEFAULT_TV, ...s };
       if (!store.get("onboarded", false) && !store.get("favs", []).length) { const t = { services: [], market: "" }; store.set("tv", t); return t; }   // new people pick their own
       return { ...DEFAULT_TV, services: [...DEFAULT_TV.services] }; })(),
     density: store.get("density", "expanded"),       // "compact" | "expanded"
