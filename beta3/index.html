@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta 3.0</title>
-<meta name="build" content="20261015223224">
+<meta name="build" content="20261015223335">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -209,6 +209,7 @@ section.closed .bhead { border-bottom: 0; }
 .sr-t.lose .nm, .sr-t.lose b { color: var(--muted); }
 .sr-act { display: flex; align-items: center; gap: 8px; }
 .sr-act .bellbtn { width: 34px; height: 34px; }
+.srow .sr-act { width: 76px; }
 .g.mini { padding: 10px 12px; gap: 4px; align-content: start; }
 .g.mini.live { box-shadow: inset 3px 0 0 var(--live); }
 .mcg-top { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; min-height: 18px; }
@@ -857,7 +858,7 @@ button.brand span { color: var(--accent); }
 [data-density="simple"] .sr-t { font-size: 14.5px; gap: 8px; }
 [data-density="simple"] .sr-t img, [data-density="simple"] .sr-t > i { width: 18px; height: 18px; }
 [data-density="simple"] .sr-t b { font-size: 16px; }
-[data-density="simple"] .sr-act { gap: 6px; }
+[data-density="simple"] .sr-act { gap: 6px; width: 62px; }
 [data-density="simple"] .sr-act .bellbtn { width: 28px; height: 28px; }
 [data-density="simple"] .sr-act .bellbtn svg { width: 14px; height: 14px; }
 [data-density="simple"] .tl-head { padding: 8px 14px 2px; gap: 8px; }
@@ -2295,7 +2296,7 @@ button.brand, button.brand span { color: var(--accent); }
     return `<div class="srow tap ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name)}: game details">
       <span class="sr-time"><span class="st ${statusClass(g)}">${esc(top)}</span><small>${showLg ? esc(g.lg.short || g.lg.name) : esc(sub)}</small>${showLg && g.state !== "post" && tv ? `<small class="sr-tv">${esc(tv)}</small>` : ""}</span>
       <span class="sr-teams">${team(a, h)}${team(h, a)}</span>
-      <span class="sr-act">${g.pin ? `<span class="pin-mark" role="button" tabindex="0" data-favgame="${g.lg.id}:${g.id}" aria-label="Remove this game from favorites" title="Remove from favorites">♥</span>` : ""}${bellBtn(g)}</span></div>`;
+      <span class="sr-act">${heartBtn(g)}${bellBtn(g)}</span></div>`;
   }
   // Compact scoreboard card (CBS-style two-up grid)
   function miniCard(g, showLg) {
