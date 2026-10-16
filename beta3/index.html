@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta 3.0</title>
-<meta name="build" content="20261015224226">
+<meta name="build" content="20261015225444">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -186,7 +186,7 @@ section.closed .bhead { border-bottom: 0; }
 
 /* CBS-style compact grid */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
-.g { padding: 14px 16px 12px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); display: grid; gap: 6px; min-width: 0; }
+.g { padding: 14px 16px 12px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; min-width: 0; }
 .g-top { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
 .g-top .st { color: var(--muted); }
 [data-density="compact"] .grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); }
@@ -2311,6 +2311,12 @@ button.brand, button.brand span { color: var(--accent); }
     if (!t) return "";
     return `<span class="mcg-dd ${g.sit.isRedZone ? "rz" : ""}" title="${esc(t)}">${esc(tight ? t.split(" at ")[0] : t.replace(/ at /, " · "))}</span>`;
   }
+  // Yards gained on a play: where the ball actually moved (ESPN gives penalty yards as positive even when they're a loss)
+  function playYards(p) {
+    const a = p.start?.yardsToEndzone, b = p.end?.yardsToEndzone;
+    if (a != null && b != null && p.start?.team?.id === p.end?.team?.id && !/kick|punt|turnover|intercept|fumble/i.test(p.type?.text || "")) return a - b;
+    return p.statYardage ?? null;
+  }
   function miniCard(g, showLg) {
     const [a, h] = g.teams;
     if (!a || !h) return "";
@@ -2439,7 +2445,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (isWeekly(lg) && lv.pick) { q.push("seasontype=" + lv.pick.type, "week=" + lv.pick.week); }
     else if (!isWeekly(lg) && lv.day) q.push("dates=" + ymd(lv.day));   // no date: ESPN shows the current day or matchday
     if (lg.extra) q.push(lg.extra.replace(/^&/, ""));
-    if (lg.id === "ncaaf" || CONFS[lg.id]) q.push("limit=300");
+    if ((lg.id === "ncaaf" || CONFS[lg.id]) && !/limit=/.test(lg.extra || "")) q.push("limit=300");
     const j = await getJ(url + (q.length ? "?" + q.join("&") : ""));
     if (leagueView !== lv) return;
     const L = j?.leagues?.[0] || {};
@@ -3183,7 +3189,8 @@ button.brand, button.brand span { color: var(--accent); }
     const picks = isToday() ? worthPicks(games) : [];
     const pickIds = new Set(picks.map(g => g.id));
     const mineIds = new Set(mine.map(g => g.id));
-    const live = games.filter(g => g.state === "in" && !pickIds.has(g.id) && !mineIds.has(g.id)).sort(byState);
+    // Rail has no Your Teams section, so your live games stay in this list there
+    const live = games.filter(g => g.state === "in" && !pickIds.has(g.id) && (L === "rail" || !mineIds.has(g.id))).sort(byState);
     const liveMine = mine.filter(g => g.state === "in").length;
     if (L !== "rail") {
       if (mine.length) html += block("fy-mine", "Your Teams", liveMine ? `${liveMine} Live · ${mine.length} Total` : countLabel(mine.length, mine) + (isToday() ? " Today" : ""), gridOf(mine));
@@ -3919,7 +3926,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (!j) return "";
     let list = [];
     if (Array.isArray(j.scoringPlays) && j.scoringPlays.length && !/Football|Baseball|Basketball/.test(j.header?.league?.name || "")) {
-      list = j.scoringPlays.map(p => ({ team: String(p.team?.id || ""), who: p.participants?.[0]?.athlete?.shortName || (p.text || "").split(/[(,]/)[0].replace(/^Goal\.?\s*/i, "").trim(), when: p.period?.number ? perName(lg, p.period.number, j.header?.season?.type === 3) + " " + (p.clock?.displayValue || "") : (p.clock?.displayValue || "") }));
+      list = j.scoringPlays.map(p => ({ team: String(p.team?.id || ""), who: p.participants?.[0]?.athlete?.shortName || (p.text || "").split(/[(,]/)[0].replace(/^Goal\.?\s*/i, "").trim(), when: p.period?.number ? perName(lg, p.period.number, j.header?.season?.type === 3) + " " + hockeyLeft(lg, p, j) : (p.clock?.displayValue || "") }));
     } else if (Array.isArray(j.keyEvents)) {
       list = j.keyEvents.filter(e => /goal/i.test(e.type?.text || "") && !/disallowed/i.test(e.type?.text || "")).map(e => ({ team: String(e.team?.id || ""), who: e.participants?.[0]?.athlete?.shortName || e.participants?.[0]?.athlete?.displayName || "", when: e.clock?.displayValue || "" }));
     }
@@ -3991,7 +3998,7 @@ button.brand, button.brand span { color: var(--accent); }
     return `<div class="gc-c dr-card"><h3>Current Drive<small style="margin-left:6px;text-transform:none;letter-spacing:0">${esc(d.description || "")}</small></h3>
       <div class="dr-top">${logo ? `<img src="${esc(logo)}" alt="">` : ""}<b>${esc(team.abbreviation || team.displayName || "")} ball</b>${dd ? `<span>${esc(dd)}</span>` : ""}${sit.isRedZone ? `<em>Red Zone</em>` : ""}</div>
       ${ball != null ? `<div class="dr-field" role="img" aria-label="Ball on the ${esc(String(100 - ball))} yards from the end zone"><i class="dr-ez"></i><i class="dr-ez r"></i>${[10, 20, 30, 40, 50, 60, 70, 80, 90].map(x => `<i class="dr-yd" style="left:${x}%"></i>`).join("")}${line != null ? `<i class="dr-line" style="left:${line}%"></i>` : ""}<i class="dr-ball" style="left:${ball}%"></i></div><div class="dr-lbl"><span>Own goal</span><span>Midfield</span><span>End zone</span></div>` : ""}
-      ${plays.length ? `<div class="dr-plays">${plays.slice().reverse().slice(0, 8).map(p => `<div class="dr-p"><span>${esc(p.start?.shortDownDistanceText || p.start?.downDistanceText || "")}</span><span>${esc(p.text)}</span><b class="${(p.statYardage || 0) < 0 ? "neg" : ""}">${p.statYardage != null ? (p.statYardage > 0 ? "+" : "") + p.statYardage : ""}</b></div>`).join("")}</div>` : ""}</div>`;
+      ${plays.length ? `<div class="dr-plays">${plays.slice().reverse().slice(0, 8).map(p => `<div class="dr-p"><span>${esc(p.start?.shortDownDistanceText || p.start?.downDistanceText || "")}</span><span>${esc(p.text)}</span>${(() => { const y = playYards(p); return `<b class="${(y || 0) < 0 ? "neg" : ""}">${y != null ? (y > 0 ? "+" : "") + y : ""}</b>`; })()}</div>`).join("")}</div>` : ""}</div>`;
   }
   function matchupTab(j, a, h, lg) {
     const more = lastFiveCard(j, a, h, lg) + injuriesCard(j, a, h), base = probablesCard(a, h) + statsTab(j, a, h, lg);
@@ -4010,8 +4017,8 @@ button.brand, button.brand span { color: var(--accent); }
     // Scoring summary
     let sp = [];
     if (lg.soccer) sp = (j.keyEvents || []).filter(k => k.scoringPlay).map(k => ({ per: k.clock?.displayValue || "", team: k.team?.id, text: k.text || k.shortText || "", score: "" }));
-    else if ((j.scoringPlays || []).length) sp = j.scoringPlays.map(p => ({ per: perName(lg, p.period?.number || 0, j.header?.season?.type === 3) + (p.clock?.displayValue ? " " + p.clock.displayValue : ""), team: p.team?.id, text: p.text || "", score: `${p.awayScore}-${p.homeScore}` }));
-    else if (lg.sport === "Hockey") sp = (j.plays || []).filter(p => p.scoringPlay).map(p => ({ per: perName(lg, p.period?.number || 0, j.header?.season?.type === 3) + (p.clock?.displayValue ? " " + p.clock.displayValue : ""), team: p.team?.id, text: p.text || "", score: p.awayScore != null ? `${p.awayScore}-${p.homeScore}` : "" }));
+    else if ((j.scoringPlays || []).length) sp = j.scoringPlays.map(p => ({ per: perName(lg, p.period?.number || 0, j.header?.season?.type === 3) + (hockeyLeft(lg, p, j) ? " " + hockeyLeft(lg, p, j) : ""), team: p.team?.id, text: p.text || "", score: `${p.awayScore}-${p.homeScore}` }));
+    else if (lg.sport === "Hockey") sp = (j.plays || []).filter(p => p.scoringPlay).map(p => ({ per: perName(lg, p.period?.number || 0, j.header?.season?.type === 3) + (hockeyLeft(lg, p, j) ? " " + hockeyLeft(lg, p, j) : ""), team: p.team?.id, text: p.text || "", score: p.awayScore != null ? `${p.awayScore}-${p.homeScore}` : "" }));
     if (lg.sport === "Hockey") html += goaliesCard(j);
     if (sp.length) html += `<div class="gc-c"><h3>${lg.soccer ? "Goals" : "Scoring Summary"}</h3>${sp.map(p => `<div class="rc-sp"><span class="rc-inn">${esc(p.per)}</span>${logoOf(p.team) ? `<img src="${esc(logoOf(p.team))}" alt="">` : "<i></i>"}<span class="rc-t">${esc(p.text)}</span><b>${esc(p.score)}</b></div>`).join("")}</div>`;
     // Leaders, game flow, team stats (no odds after the game)
@@ -4397,7 +4404,7 @@ button.brand, button.brand span { color: var(--accent); }
     const drive = j.header?.competitions?.[0]?.status?.type?.state === "in" ? driveCard(j, lg) : "";
     let plays = [];
     if (Array.isArray(j.plays) && j.plays.length) plays = j.plays.slice(-40).reverse();
-    else if (j.drives) plays = [...(j.drives.current?.plays || [])].reverse().concat([...(j.drives.previous || [])].reverse().flatMap(d => (d.plays || []).slice().reverse())).slice(0, 40);
+    else if (j.drives) plays = [...(j.drives.current?.plays || [])].reverse().concat([...(j.drives.previous || [])].filter(d => d.id !== j.drives.current?.id).reverse().flatMap(d => (d.plays || []).slice().reverse())).slice(0, 40);
     else if (Array.isArray(j.keyEvents) && j.keyEvents.length) plays = j.keyEvents.slice().reverse();
     else if (Array.isArray(j.commentary)) plays = j.commentary.slice(-40).reverse().map(c => ({ text: c.text, clock: c.time }));
     plays = plays.filter(p => p && (p.text || p.type?.text));
@@ -4409,16 +4416,26 @@ button.brand, button.brand span { color: var(--accent); }
     const seg = segs.some(x => x[0] === genSeg) ? genSeg : "all";
     if (seg !== "all") {
       let pool = Array.isArray(j.plays) && j.plays.length ? j.plays.slice().reverse() : plays;
-      if (j.drives && !(j.plays || []).length) pool = [...(j.drives.current?.plays || [])].reverse().concat([...(j.drives.previous || [])].reverse().flatMap(d => (d.plays || []).slice().reverse()));
+      if (j.drives && !(j.plays || []).length) pool = [...(j.drives.current?.plays || [])].reverse().concat([...(j.drives.previous || [])].filter(d => d.id !== j.drives.current?.id).reverse().flatMap(d => (d.plays || []).slice().reverse()));
       plays = pool.filter(p => p && (p.text || p.type?.text) && (seg === "scoring" ? p.scoringPlay : isKey(p))).slice(0, 80);
     }
     const bar = drive + `<div class="seg gc-seg sp-seg">${segs.map(([k, l]) => `<button class="${seg === k ? "on" : ""}" data-gen-seg="${k}">${l}</button>`).join("")}</div>`;
     if (!plays.length) return bar + `<div class="empty">${seg === "all" ? "No plays yet." : "Nothing here yet."}</div>`;
     return bar + `<div class="gc-c"><div class="plays">${plays.map(p => {
       const per = p.period?.number ? (lg.sport === "Baseball" ? (p.period.displayValue || "Inn " + p.period.number) : perName(lg, p.period.number, j.header?.season?.type === 3)) : "";
-      const clk = p.clock?.displayValue || (typeof p.clock === "string" ? p.clock : "") || "";
+      const clk = lg.sport === "Hockey" ? hockeyLeft(lg, p, j) : p.clock?.displayValue || (typeof p.clock === "string" ? p.clock : "") || "";
       return `<div class="play ${p.scoringPlay ? "score" : ""}"><span class="pc">${esc([per, clk].filter(Boolean).join(" "))}</span><span>${esc(p.text || p.type?.text || "")}</span></div>`;
     }).join("")}</div></div>`;
+  }
+  // NHL plays come with time elapsed in the period; show time left, like the broadcast clock
+  function hockeyLeft(lg, p, j) {
+    const v = p.clock?.displayValue || "";
+    if (lg.sport !== "Hockey" || !v || !/^\d+:\d\d$/.test(v)) return v;
+    const n = p.period?.number || 0, playoffs = j?.header?.season?.type === 3;
+    if (n > 3 && !playoffs && n > 4) return "";            // shootout: no clock
+    const len = n > 3 && !playoffs ? 300 : 1200;
+    const [m, sec] = v.split(":").map(Number), left = Math.max(0, len - (m * 60 + sec));
+    return `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
   }
   function boxTab(j) {
     const box = (j.boxscore?.players || []).filter(t => t.statistics?.length);

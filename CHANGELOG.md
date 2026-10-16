@@ -9,6 +9,11 @@ Newest first. Beta changes move to Live when shipped.
 - Watch buttons on your phone (Safari, the Home Screen app, the iPhone app) open the streaming app itself, like YouTube TV or Prime Video, instead of its website's sign-up or home page. If the app isn't on the phone, the website opens after a couple of seconds. Computers still open the website. Also in beta and Beta 3.0.
 
 ## In beta (not on live yet)
+- Hockey play-by-play and scoring times now show time left in the period, like the broadcast (ESPN sends time elapsed). Shootout attempts show no clock.
+- Fixed: game cards on wide screens could spill into the next card when a play-by-play line was long (also on live, waiting to ship).
+- Fixed: football Current Drive plays showed twice in All Plays, and penalty yards showed as a gain (+3) when they were a loss.
+- Fixed: Rail layout hid your own teams' live games on For You.
+- Fixed: a doubled limit setting on college league page requests.
 - Compact cards: clock and down and distance moved to the bottom row, under the teams. League tag stays on top.
 - Compact, Live tab: You Are Looking Live is one two-up grid with a league tag on each card, instead of a big header per league with half-empty rows. Your teams stay compact here (they're in the strip up top).
 - Compact football cards show down and distance next to the clock ("1st & 10 · ODU 10"), in red inside the red zone.
