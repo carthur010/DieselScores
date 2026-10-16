@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 16, 2026: Live (1:15 PM)
+- Fandango is in Settings under Free To Watch and on by default. It's the free home for most Bundesliga games in the US, so those cards show a Fandango watch chip instead of Not On Your Services. Switched on once for existing setups; turning it off sticks. Also in beta and Beta 3.0.
+
 ## Oct 15, 2026: Live (8:40 PM)
 - Welcome screen has a Have A Setup Code? button, so a new phone or Home Screen app can load a setup in one tap. CA loads Charles's teams, leagues and TV & Streaming. JC loads UCLA football and hoops, 49ers, Giants and Kings with the NFL, NBA, MLB, college football and men's college hoops. A wrong code says Code Not Found. Also in beta and Beta 3.0.
 
@@ -9,7 +12,6 @@ Newest first. Beta changes move to Live when shipped.
 - Watch buttons on your phone (Safari, the Home Screen app, the iPhone app) open the streaming app itself, like YouTube TV or Prime Video, instead of its website's sign-up or home page. If the app isn't on the phone, the website opens after a couple of seconds. Computers still open the website. Also in beta and Beta 3.0.
 
 ## In beta (not on live yet)
-- Oct 16: Fandango is in Settings under Free To Watch and on by default. It's the free home for most Bundesliga games in the US, so those cards show a Fandango watch chip instead of Not On Your Services. Switched on once for existing setups; turning it off sticks. Beta and Beta 3.0.
 - Fixed: Rail layout hid your own teams' live games on For You.
 - New app icon: football, basketball, baseball and soccer ball split by a red cross (beta and Beta 3.0).
 
