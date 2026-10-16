@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015225901">
+<meta name="build" content="20261015231425">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1349,7 +1349,8 @@ button.brand, button.brand span { color: var(--accent); }
       const p = st.period || 0, clk = st.displayClock;
       if (gstate === "in" && lg.label && clk && p && !/half|end|delay|susp|int/i.test(status)) {
         const on = p > lg.reg ? otName(lg, p, ev.season?.type === 3) : null;
-        status = on === "SO" ? "Shootout" : (on || lg.label + p) + " " + clk;
+        // College football overtime has no game clock (ESPN sends 0:00), so just "OT", "2OT"
+        status = on === "SO" ? "Shootout" : on && lg.id === "ncaaf" ? on : (on || lg.label + p) + " " + clk;
       }
     }
     const g = {
@@ -2052,7 +2053,9 @@ button.brand, button.brand span { color: var(--accent); }
     let changed = false;
     games.forEach(g => {
       const k = g.lg.id + ":" + g.id;
-      if (g.state !== "post" && g.odds && (g.odds.spread != null || g.odds.ou != null)) {
+      // Lock the line at kickoff: live odds move during the game and aren't the closing line.
+      // A game first seen already live keeps the first line we saw.
+      if ((g.state === "pre" || (g.state === "in" && !oddsCache[k])) && g.odds && (g.odds.spread != null || g.odds.ou != null)) {
         const o = { spread: g.odds.spread, ou: g.odds.ou ?? null, t: Date.now() };
         if (JSON.stringify(oddsCache[k]?.spread) !== JSON.stringify(o.spread) || oddsCache[k]?.ou !== o.ou) { oddsCache[k] = o; changed = true; }
       }
@@ -3104,7 +3107,7 @@ button.brand, button.brand span { color: var(--accent); }
         if (tab === "live") shown = new Set(picks.map(g => g.id));
         html += block("worth", "Worth A Watch", countLabel(picks.length, picks),
           // More than 4 picks: switch to the two-up compact cards so the section doesn't take over the page
-          state.density === "simple" ? `<div class="grid">${picks.map(g => card(g, true)).join("")}</div>` : picks.length > 4 ? `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>` : `<div class="feat">${picks.map(featured).join("")}</div>`);
+          state.density === "simple" ? `<div class="grid">${picks.map(g => card(g, true)).join("")}</div>` : (state.density === "compact" || picks.length > 4) ? `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>` : `<div class="feat">${picks.map(featured).join("")}</div>`);
       }
     }
 
@@ -3585,7 +3588,7 @@ button.brand, button.brand span { color: var(--accent); }
     const lum = 0.299 * r + 0.587 * g + 0.114 * b;
     return lum < 30 ? "#3a3a3a" : lum > 215 ? "#7a7a7a" : c;
   }
-  function otName(lg, n, post) { const x = n - (lg.reg || 4); if (x <= 0) return null; if (lg.sport === "Hockey" && !post && x === 2) return "SO"; return "OT" + (x > 1 ? x : ""); }
+  function otName(lg, n, post) { const x = n - (lg.reg || 4); if (x <= 0) return null; if (lg.sport === "Hockey" && !post && x === 2) return "SO"; return (x > 1 ? x : "") + "OT"; }
   function perName(lg, n, post) { return (!lg.soccer && lg.sport !== "Baseball" && otName(lg, n, post)) || ord(n); }
   function ord(n) { const s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
   function closeGame() {
@@ -4171,7 +4174,7 @@ button.brand, button.brand span { color: var(--accent); }
     const drive = j.header?.competitions?.[0]?.status?.type?.state === "in" ? driveCard(j, lg) : "";
     let plays = [];
     if (Array.isArray(j.plays) && j.plays.length) plays = j.plays.slice(-40).reverse();
-    else if (j.drives) plays = [...(j.drives.current?.plays || [])].reverse().concat([...(j.drives.previous || [])].filter(d => d.id !== j.drives.current?.id).reverse().flatMap(d => (d.plays || []).slice().reverse())).slice(0, 40);
+    else if (j.drives) plays = [...(j.drives.current?.plays || [])].reverse().concat([...(j.drives.previous || [])].filter(d => d.id !== j.drives.current?.id).reverse().flatMap(d => (d.plays || []).slice().reverse())).slice(0, 200);
     else if (Array.isArray(j.keyEvents) && j.keyEvents.length) plays = j.keyEvents.slice().reverse();
     else if (Array.isArray(j.commentary)) plays = j.commentary.slice(-40).reverse().map(c => ({ text: c.text, clock: c.time }));
     plays = plays.filter(p => p && (p.text || p.type?.text));
