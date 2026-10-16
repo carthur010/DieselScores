@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261016131353">
+<meta name="build" content="20261016132528">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -452,6 +452,9 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .blk-bar { padding: 10px 16px; border-bottom: 1px solid var(--line); }
 .blk-f small { color: var(--muted); font-weight: 700; margin-left: 5px; }
 .lp-filter { margin: -4px 0 12px; }
+.sv-filter { margin: 0 0 12px; }
+.rk-row.me { background: color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 10px; }
+.rk-row.me b { font-weight: 800; }
 #sheet-tv { margin-top: 18px; }
 .lm-list .pk-row { grid-template-columns: 1fr auto 14px; }
 .sr-tv { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2361,6 +2364,69 @@ button.brand, button.brand span { color: var(--accent); }
     } catch {}
   }
   // ---- League page: scores by week or day, standings (or table), rankings for college, teams
+  // ---- Standings & Rankings dropdown, shared by league, team and game pages
+  const pollCache = {}, svMenus = {};
+  let gameSv = "";
+  function pollsFor(lgId, repaint) {
+    const c = pollCache[lgId], fresh = c && Date.now() - c.at < 30 * 60e3;
+    if (!fresh && !c?.pending) {
+      pollCache[lgId] = { j: c?.j, at: c?.at || 0, pending: true };
+      getJ(API + LG[lgId].path + "/rankings").then(j => { pollCache[lgId] = { j: j || {}, at: Date.now() }; if (repaint) repaint(); });
+    }
+    const j = pollCache[lgId].j;
+    return j ? (j.rankings || []).filter(p => p.ranks?.length) : null;
+  }
+  const pollLabel = p => String(p.name || p.shortName || "Rankings").replace(/ Poll$/, "");
+  const inNode = (n, id) => !!(n?.standings?.entries?.some(e => String(e.team?.id) === String(id)) || (n?.children || []).some(c => inNode(c, id)));
+  const POWER = /^(Atlantic Coast|Big 12|Big Ten|Southeastern|Big East)\b/;
+  function confList(j, lg) {
+    const list = (j?.children || []).filter(c => c.standings?.entries?.length || c.children?.length);
+    return CONFS[lg.id] ? list.slice().sort((a, b) => (POWER.test(b.name || "") ? 1 : 0) - (POWER.test(a.name || "") ? 1 : 0)) : list;
+  }
+  const confLabel = n => String(n || "").replace(/^\d{4}(-\d{2,4})?\s+/, "").replace(/ Standings$/, "").replace(/^American Football Conference$/, "AFC").replace(/^National Football Conference$/, "NFC")
+    .replace(/^Atlantic Coast Conference$/, "ACC").replace(/^Southeastern Conference$/, "SEC").replace(/^(.+?) Conference$/, (m, x) => /^(Eastern|Western)$/.test(x) ? m : x) || "Standings";
+  function defaultConf(lgId, confs) {
+    if (!CONFS[lgId] && confs.length <= 2) return "";
+    const mine = [...state.favs].map(k => state.favMeta[k]).filter(m => m && m.lg === lgId).map(m => String(m.id));
+    const hit = mine.map(id => confs.find(c => inNode(c, id))).find(Boolean);
+    return (hit || confs[0])?.name || "";
+  }
+  function menuItems(confs, polls, lg, withAll) {
+    const items = [];
+    if (withAll && confs.length > 1) items.push({ key: "conf:", label: lg.id === "mlb" ? "Both Leagues" : confs.length === 2 ? "Both Conferences" : "All Conferences", head: "Standings", n: "" });
+    confs.forEach(c => items.push({ key: "conf:" + c.name, label: confLabel(c.name), head: "Standings", n: "" }));
+    (polls || []).forEach(p => items.push({ key: "poll:" + p.name, label: pollLabel(p), head: "Rankings", n: "" }));
+    return items;
+  }
+  const svLabel = (items, cur) => items.find(i => i.key === cur)?.label || items[0]?.label || "";
+  const svPick = (label, ctx) => `<div class="lp-filter sv-filter"><button class="chip pick" data-sv-pick="${ctx}" aria-haspopup="dialog">${esc(label)}${CARET}</button></div>`;
+  function pollCard(p, lgId, mine) {
+    mine = mine || new Set();
+    return `<div class="gc-c"><h3>${esc(pollLabel(p))}</h3>${p.ranks.map(rk => { const t = rk.team || {}; const mv = (rk.previous || 0) && rk.current ? rk.previous - rk.current : 0;
+      return `<div class="tm-row tap rk-row ${mine.has(String(t.id)) ? "me" : ""}"${tmLink(lgId, { id: t.id, name: [t.location, t.name].filter(Boolean).join(" ") || t.nickname, abbr: t.abbreviation, logo: t.logos?.[0]?.href || t.logo, color: hexColor(t.color) })}><i class="rk-n">${esc(rk.current)}</i>${t.logos?.[0]?.href || t.logo ? `<img class="hs lp-logo" src="${esc(t.logos?.[0]?.href || t.logo)}" alt="" loading="lazy">` : ""}<span><b>${esc(t.location || t.nickname || t.name || "")}</b><small>${esc([rk.recordSummary, rk.points ? rk.points + " pts" : "", rk.firstPlaceVotes ? rk.firstPlaceVotes + " first-place" : ""].filter(Boolean).join(" · "))}</small></span><span class="r"><small class="${mv > 0 ? "up" : mv < 0 ? "dn" : ""}">${mv > 0 ? "▲" + mv : mv < 0 ? "▼" + -mv : "–"}</small></span></div>`; }).join("")}</div>`;
+  }
+  // League page: one menu for both tabs, so any conference or poll is a tap away
+  function lpMenu(lv, cur, confs, polls) {
+    const lg = LG[lv.id], items = menuItems(confs, polls, lg, true);
+    svMenus.lp = { title: lg.name, items, cur, pick: k => { if (k.startsWith("poll:")) { lv.tab = "rankings"; lv.poll = k.slice(5); } else { lv.tab = "standings"; lv.sv = k.slice(5); } lv.paint(); } };
+    return items.length > 1 ? svPick(svLabel(items, cur), "lp") : "";
+  }
+  // Team page: its own conference by default, then any other conference or poll
+  function teamStandings(j, id, lg, tm) {
+    const confs = confList(j, lg), own = confs.find(c => inNode(c, id));
+    const polls = CONFS[lg.id] ? pollsFor(lg.id, () => { if (teamView === tm) tm.paint(); }) : null;
+    let cur = tm.sv || (own ? "conf:" + own.name : ""), body = "";
+    if (cur.startsWith("poll:") && polls) { const p = polls.find(x => "poll:" + x.name === cur); if (p) body = pollCard(p, lg.id, new Set([String(id)])); }
+    if (!body) {
+      const node = confs.find(c => "conf:" + c.name === cur) || own;
+      if (!node) return "";
+      cur = "conf:" + node.name;
+      body = lg.id === "nhl" ? nhlStandings(j, id, tm.lg, tm, node) : fullStandings(j, id, lg, tm, node);
+    }
+    const items = menuItems(confs, polls, lg, false);
+    svMenus.tm = { title: tm.name || lg.name, items, cur, pick: k => { tm.sv = k; tm.paint(); } };
+    return (items.length > 1 ? svPick(svLabel(items, cur), "tm") : "") + body;
+  }
   const LP_TABS = lg => [["scores", "Scores"], ["standings", lg.soccer ? "Table" : "Standings"], ...(CONFS[lg.id] || lg.id === "ncaaf" ? [["rankings", "Rankings"]] : []), ["teams", "Teams"]];
   async function openLeaguePage(id, keep) {
     const lg = LG[id]; if (!lg || lg.kind) return;
@@ -2431,9 +2497,14 @@ button.brand, button.brand span { color: var(--accent); }
       const j = lv.data.standings;
       if (!j) body = `<div class="skel"></div><div class="skel"></div>`;
       else if (lv.tab === "standings") {
-        const confs = (j.children || []).filter(c => c.standings?.entries?.length || c.children?.length);
+        const confs = confList(j, lg);
         if (lg.soccer) body = fullStandings(j, "", lg, lv) || tmEmpty("No table yet.");
-        else body = confs.map((c, i) => lg.id === "nhl" ? nhlStandings(j, "", lv.id, lv, c, i > 0) : fullStandings(j, "", lg, lv, c, i > 0)).join("") || tmEmpty("No standings yet.");
+        else {
+          const cur = lv.sv !== undefined ? lv.sv : defaultConf(lv.id, confs);
+          const shown = confs.filter(c => !cur || c.name === cur);
+          const polls = CONFS[lv.id] ? pollsFor(lv.id, () => { if (leagueView === lv) lv.paint(); }) : null;
+          body = lpMenu(lv, "conf:" + cur, confs, polls) + ((shown.length ? shown : confs).map((c, i) => lg.id === "nhl" ? nhlStandings(j, "", lv.id, lv, c, i > 0) : fullStandings(j, "", lg, lv, c, i > 0)).join("") || tmEmpty("No standings yet."));
+        }
       } else {
         const groups = [];
         const walk = (n, name) => { if (n.standings?.entries?.length) groups.push({ name: n.name || name, ents: n.standings.entries }); (n.children || []).forEach(c => walk(c, c.name)); };
@@ -2441,17 +2512,11 @@ button.brand, button.brand span { color: var(--accent); }
         body = groups.length ? groups.map(g => `<div class="gc-c"><h3>${esc(g.name)}</h3>${g.ents.slice().sort((a, b) => (a.team?.displayName || "").localeCompare(b.team?.displayName || "")).map(e => `<div class="tm-row tap"${tmLink(lv.id, { id: e.team?.id, name: e.team?.displayName, abbr: e.team?.abbreviation, logo: e.team?.logos?.[0]?.href, color: hexColor(e.team?.color) })}>${e.team?.logos?.[0]?.href ? `<img class="hs lp-logo" src="${esc(e.team.logos[0].href)}" alt="" loading="lazy">` : `<i class="hs"></i>`}<span><b>${esc(e.team?.displayName || "")}</b><small>${esc(sval(e, "total") || sval(e, "overall") || "")}</small></span><span class="r"><small>›</small></span></div>`).join("")}</div>`).join("") : tmEmpty("No teams found.");
       }
     } else if (lv.tab === "rankings") {
-      loadLeagueTab(lv, "rankings");
-      const j = lv.data.rankings;
-      const polls = (j?.rankings || []).filter(p => p.ranks?.length);
-      if (!j) body = `<div class="skel"></div><div class="skel"></div>`;
+      const polls = pollsFor(lv.id, () => { if (leagueView === lv) lv.paint(); });
+      loadLeagueTab(lv, "standings");
+      if (!polls) body = `<div class="skel"></div><div class="skel"></div>`;
       else if (!polls.length) body = tmEmpty("No rankings yet.");
-      else {
-        const cur = polls.find(p => p.name === lv.poll) || polls[0];
-        body = `<div class="seg gc-seg st-seg">${polls.slice(0, 3).map(p => `<button class="${p === cur ? "on" : ""}" data-lp-poll="${esc(p.name)}">${esc((p.shortName || p.name).replace(/ Top 25$/, "").replace(/ Poll$/, ""))}</button>`).join("")}</div>
-          <div class="gc-c">${cur.ranks.map(rk => { const t = rk.team || {}; const mv = (rk.previous || 0) && rk.current ? rk.previous - rk.current : 0;
-            return `<div class="tm-row tap rk-row"${tmLink(lv.id, { id: t.id, name: [t.location, t.name].filter(Boolean).join(" ") || t.nickname, abbr: t.abbreviation, logo: t.logos?.[0]?.href || t.logo, color: hexColor(t.color) })}><i class="rk-n">${esc(rk.current)}</i>${t.logos?.[0]?.href || t.logo ? `<img class="hs lp-logo" src="${esc(t.logos?.[0]?.href || t.logo)}" alt="" loading="lazy">` : ""}<span><b>${esc(t.location || t.nickname || t.name || "")}</b><small>${esc([rk.recordSummary, rk.points ? rk.points + " pts" : "", rk.firstPlaceVotes ? rk.firstPlaceVotes + " first-place" : ""].filter(Boolean).join(" · "))}</small></span><span class="r"><small class="${mv > 0 ? "up" : mv < 0 ? "dn" : ""}">${mv > 0 ? "▲" + mv : mv < 0 ? "▼" + -mv : "–"}</small></span></div>`; }).join("")}</div>`;
-      }
+      else { const cur = polls.find(p => p.name === lv.poll) || polls[0]; body = lpMenu(lv, "poll:" + cur.name, confList(lv.data.standings, lg), polls) + pollCard(cur, lv.id); }
     }
     el.innerHTML = `<div class="gc-wrap"><div class="gc-hero lp-hero"><div class="gc-bg" style="--ca:var(--accent);--ch:var(--accent)"></div>
       <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span><button class="circ" data-share-lg="${lg.id}" aria-label="Share">${SHAREIC}</button><button class="circ tm-star ${on ? "on" : ""}" data-lp-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(lg.name)}">${on ? STAR : STAR_O}</button></div>
@@ -2626,7 +2691,10 @@ button.brand, button.brand span { color: var(--accent); }
       return `<div class="gc-c"><h3>${esc(conf.name || "Standings")}</h3>${standTable([{ title: shortName(conf.name) || "Standings", ents, cuts }], cols, tm.lg, id)}<p class="hint st-hint">${lg.id === "nba" ? "Top 6 make the playoffs. 7 to 10 go to the Play-In." : "Top 8 make the playoffs."}</p></div>`;
     }
     // College: the conference, with conference and overall records
-    const ents = all.slice();
+    const rec = v => { const m = String(v || "").match(/(\d+)-(\d+)/); return m ? [+m[1], +m[2]] : [0, 0]; };
+    const pctR = ([w, l]) => w + l ? w / (w + l) : 0;
+    const ents = all.slice().sort((a, b) => { const ca = rec(sval(a, "vsconf")), cb = rec(sval(b, "vsconf")), oa = rec(sval(a, "total") || sval(a, "overall")), ob = rec(sval(b, "total") || sval(b, "overall"));
+      return pctR(cb) - pctR(ca) || cb[0] - ca[0] || ca[1] - cb[1] || pctR(ob) - pctR(oa) || ob[0] - oa[0] || oa[1] - ob[1]; });
     const isFb = lg.sport === "Football";
     cols = [["CONF", e => sval(e, "vsconf"), "pts"], ["OVR", e => sval(e, "total") || sval(e, "overall")], ["HOME", e => sval(e, "home")], ["AWAY", e => sval(e, "road")], [isFb ? "PF" : "PPG", e => isFb ? sval(e, "pointsfor") : sval(e, "avgpointsfor")], [isFb ? "PA" : "OPP", e => isFb ? sval(e, "pointsagainst") : sval(e, "avgpointsagainst")], ["STRK", e => sval(e, "streak")]].filter(([, f]) => ents.some(e => f(e)));
     if (!cols.length) return "";
@@ -2672,7 +2740,7 @@ button.brand, button.brand span { color: var(--accent); }
           <span class="r"><small>${esc([x.displayHeight, x.displayWeight].filter(Boolean).join(", "))}</small></span></div>`;
       }).join("")}</div>`).join("");
     }
-    if (tab === "standings") { const h = lg.id === "nhl" ? nhlStandings(j, id, tm.lg, tm) : fullStandings(j, id, lg, tm); if (h) return h; }
+    if (tab === "standings") { const h = lg.soccer ? fullStandings(j, id, lg, tm) : teamStandings(j, id, lg, tm); if (h) return h; }
     if (tab === "standings") {
       let best = null;
       const walk = (n, d) => { if (n?.standings?.entries?.some(e => String(e.team?.id) === id) && (!best || d > best.d)) best = { n, d }; (n?.children || []).forEach(c => walk(c, d + 1)); };
@@ -2887,7 +2955,7 @@ button.brand, button.brand span { color: var(--accent); }
     const el = document.getElementById("pksheet"), body = document.getElementById("pk-body");
     document.getElementById("pk-h").textContent = title;
     const firstConf = items.findIndex(i => i.conf);
-    body.innerHTML = `<div class="pk-list">${items.map((i, k) => `${k === firstConf ? "<h3>Conferences</h3>" : ""}<button class="pk-row ${i.key === cur ? "on" : ""}" data-pk-custom="${esc(i.key)}"><span>${esc(i.label)}</span><small>${esc(i.n)}</small>${i.key === cur ? CHECK : ""}</button>`).join("")}</div>`;
+    body.innerHTML = `<div class="pk-list">${items.map((i, k) => `${k === firstConf ? "<h3>Conferences</h3>" : ""}${i.head && i.head !== items[k - 1]?.head ? `<h3>${esc(i.head)}</h3>` : ""}<button class="pk-row ${i.key === cur ? "on" : ""}" data-pk-custom="${esc(i.key)}"><span>${esc(i.label)}</span><small>${esc(i.n)}</small>${i.key === cur ? CHECK : ""}</button>`).join("")}</div>`;
     el.hidden = false; syncLock();
   }
   const colTool = (lgId, cnt) => `<button class="chip pick blk-f" data-blk-f="${lgId}">${esc(colLabel(lgId, state.blkF[lgId] || ""))}${cnt != null ? `<small>${cnt}</small>` : ""}${CARET}</button>`;
@@ -3627,7 +3695,7 @@ button.brand, button.brand span { color: var(--accent); }
     clearTimeout(gameTimer);
     const el = document.getElementById("gsheet");
     if (!quiet) {
-      gameTab = "stats"; lastSummary = null; lfSide = 0; lineupSide = 0; bbSeg = genSeg = socSeg = "all";
+      gameTab = "stats"; gameSv = ""; lastSummary = null; lfSide = 0; lineupSide = 0; bbSeg = genSeg = socSeg = "all";
       el.innerHTML = gameShell(g, null, lg);
       el.hidden = false; el.scrollTop = 0;
     }
@@ -3985,7 +4053,15 @@ button.brand, button.brand span { color: var(--accent); }
       Baseball: [["wins", "W"], ["losses", "L"], ["winpercent", "PCT"], ["gamesbehind", "GB"]],
     }[lg.soccer ? "Soccer" : lg.sport] || [["wins", "W"], ["losses", "L"]];
     const followIds = new Set([...state.favs].map(k => state.favMeta[k]).filter(m => m && (m.lg === lg.id || (lg.soccer && LG[m.lg]?.soccer))).map(m => String(m.id)));
-    (show.length ? show : groups.slice(0, 1)).forEach(gr => {
+    const list = show.length ? show : groups.slice(0, 1);
+    const polls = CONFS[lg.id] ? pollsFor(lg.id, () => { if (lastSummary === j) repaintGame(); }) : null;
+    const items = [...(list.length > 1 ? [{ key: "grp:all", label: "Both Conferences", head: "Standings", n: "" }] : []), ...list.map((gr, i) => ({ key: "grp:" + i, label: confLabel(gr.header), head: "Standings", n: "" })), ...(polls || []).map(p => ({ key: "poll:" + p.name, label: pollLabel(p), head: "Rankings", n: "" }))];
+    const cur = items.some(i => i.key === gameSv) ? gameSv : items[0]?.key || "";
+    svMenus.gm = { title: "Standings & Rankings", items, cur, pick: k => { gameSv = k; repaintGame(); } };
+    if (items.length > 1 && !lg.soccer) html += svPick(svLabel(items, cur), "gm");
+    const poll = cur.startsWith("poll:") && (polls || []).find(p => "poll:" + p.name === cur);
+    if (poll) return html + pollCard(poll, lg.id, new Set([String(a.id), String(h.id)]));
+    (cur === "grp:all" || !cur.startsWith("grp:") ? list : [list[+cur.slice(4)]].filter(Boolean)).forEach(gr => {
       const ents = gr.standings.entries;
       const has = k => ents.some(e => (e.stats || []).some(s => s.type === k));
       let used = COLS.filter(([k]) => has(k));
@@ -3993,7 +4069,7 @@ button.brand, button.brand span { color: var(--accent); }
       if (used.length < 2) used = [["vsconf", "Conf"], ["total", "Overall"], ["overall", "Overall"], ["streak", "Strk"]].filter(([k]) => has(k)).filter((c, i, arr) => !(c[0] === "overall" && arr.some(x => x[0] === "total")));
       const val = (e, k) => { const s = (e.stats || []).find(s => s.type === k); return s?.displayValue ?? s?.summary ?? ""; };
       const rank = (e, i) => val(e, "rank") || i + 1;
-      html += `<div class="gc-c"><h3>${esc(gr.header && !/Standings$/.test(gr.header) ? gr.header : (lg.soccer ? "Table" : "Standings"))}</h3><div class="tbl-wrap"><table class="tbl st-tbl"><thead><tr><th></th><th>Team</th>${used.map(([, l]) => `<th>${l}</th>`).join("")}</tr></thead><tbody>${
+      html += `<div class="gc-c"><h3>${esc(lg.soccer ? (gr.header && !/Standings$/.test(gr.header) ? gr.header : "Table") : confLabel(gr.header))}</h3><div class="tbl-wrap"><table class="tbl st-tbl"><thead><tr><th></th><th>Team</th>${used.map(([, l]) => `<th>${l}</th>`).join("")}</tr></thead><tbody>${
         ents.map((e, i) => { const mine = isTeam(e, a) || isTeam(e, h); return `<tr class="${mine ? "me" : ""}"><td class="rk">${esc(rank(e, i))}</td><td class="tm"><span class="tap"${tmLink(lg.id, { id: e.id, name: e.team, logo: e.logo?.[0]?.href || "" })}>${esc(e.team || "")}</span>${followIds.has(String(e.id)) ? ' <span class="mc-fav">★</span>' : ""}</td>${used.map(([k]) => `<td>${esc(val(e, k))}</td>`).join("")}</tr>`; }).join("")}</tbody></table></div></div>`;
     });
     return html || `<div class="empty">No table for this game.</div>`;
@@ -4274,6 +4350,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (e.target.closest("[data-gclose]")) { const back = navStack.pop(); if (back) back(); else closeGame(); return; }
     const ot = e.target.closest("[data-open-tm]");
     if (ot) { let d = null; try { d = JSON.parse(ot.dataset.openTm); } catch {} if (d) { const same = teamView && String(teamView.id) === d.id && teamView.lg === d.lg; if (!same) { pushView(); openTeam(d); } } return; }
+    const svp = e.target.closest("[data-sv-pick]"); if (svp) { const mm = svMenus[svp.dataset.svPick]; if (mm) openCustomPicker(mm.title, mm.items, mm.cur, mm.pick); return; }
     if (leagueView) {
       const lv = leagueView;
       const lt = e.target.closest("[data-lp-tab]"); if (lt) { lv.tab = lt.dataset.lpTab; lv.paint(); return; }
