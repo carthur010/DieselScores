@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores</title>
-<meta name="build" content="20261016132642">
+<meta name="build" content="20261016133259">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores">
@@ -1474,7 +1474,11 @@ button.brand, button.brand span { color: var(--accent); }
       if (!found && lg.id === "nfl" && /^(CBS|FOX)$/i.test(name) && tv.services.includes("sundayticket") && !mine.some(s => s.kind === "bundle")) add(SVC.sundayticket, name);
     });
     const rank = { bundle: 0, antenna: 1, regional: 2, stream: 3, package: 4 };
-    out.sort((a, b) => rank[a.kind] - rank[b.kind]);
+    // English first: a Spanish feed (ESPN Deportes, TUDN, Telemundo) only leads when it's the only way to watch,
+    // or when you picked a Spanish service in TV Settings
+    const esFirst = mine.some(s => s.grp === "spanish");
+    out.forEach(o => { o.nets.sort((x, y) => isSpanishNet(x) - isSpanishNet(y)); o.es = o.nets.every(isSpanishNet); });
+    out.sort((a, b) => (esFirst ? 0 : a.es - b.es) || rank[a.kind] - rank[b.kind]);
     return out;
   }
   function refreshWatch() {
@@ -1483,7 +1487,14 @@ button.brand, button.brand span { color: var(--accent); }
   }
 
   // The channel (ESPN, FOX, ABC), not the app you watch it on. The Watch button still opens the app.
-  function netLabel(g) { return g.watch?.[0]?.nets?.[0] || (g.broadcast || "").split(" / ")[0] || ""; }
+  const SPANISH_NET = /Deportes|TUDN|Telemundo|Universo|Univision|UniM[aá]s|Galavisi[oó]n|^ViX|en Espa[ñn]ol/i;
+  const isSpanishNet = n => SPANISH_NET.test(String(n || "")) ? 1 : 0;
+  const shortNet = n => String(n || "").replace(/^(ESPN|FOX|Fox) Deportes$/, "$1 Dep.").replace(/^beIN SPORTS en Espa[ñn]ol$/i, "beIN Español");
+  function netLabel(g) {
+    if (g.watch?.[0]?.nets?.[0]) return shortNet(g.watch[0].nets[0]);
+    const all = (g.broadcast || "").split(" / ").map(x => x.trim()).filter(Boolean);
+    return shortNet(all.find(x => !isSpanishNet(x)) || all[0] || "");
+  }
   function watchPill(g) {
     if (g.state === "post") return "";
     if (!g.watch?.length) return g.broadcast ? `<span class="net none" title="None of your TV Settings services carry ${esc(g.broadcast)}">Not on your services · ${esc(g.broadcast)}</span>` : "";
