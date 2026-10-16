@@ -9,6 +9,7 @@ Newest first. Beta changes move to Live when shipped.
 - Watch buttons on your phone (Safari, the Home Screen app, the iPhone app) open the streaming app itself, like YouTube TV or Prime Video, instead of its website's sign-up or home page. If the app isn't on the phone, the website opens after a couple of seconds. Computers still open the website. Also in beta and Beta 3.0.
 
 ## In beta (not on live yet)
+- Compact football cards show down and distance next to the clock ("1st & 10 · ODU 10"), in red inside the red zone.
 - Simple rows show a heart button on every game (tap to favorite), next to the bell, so scores stay lined up.
 - Worth A Watch skips your own teams' games, since they already show in your teams strip or Your Teams above it.
 - Simple scoreboard is tighter: smaller rows, logos, headers and spacing. Worth A Watch on the Live and All tabs now uses Simple rows too, instead of big cards.

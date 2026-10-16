@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015223335">
+<meta name="build" content="20261015223742">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -216,6 +216,9 @@ section.closed .bhead { border-bottom: 0; }
 .mcg-top .st { color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
 .mcg-top .st.live { color: var(--live); }
 .mcg-top .st.final { color: var(--fg); }
+.mcg-top .mcg-dd { margin-left: auto; font-size: 11.5px; font-weight: 600; color: var(--muted); overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.mcg-top .mcg-dd.rz { color: var(--live); }
+.mcg-top .mcg-dd + .pin-mark { margin-left: 0; }
 .mcg-row { display: flex; align-items: center; gap: 7px; min-height: 26px; }
 .mcg-row img, .mcg-row > i { width: 22px; height: 22px; object-fit: contain; flex: 0 0 auto; }
 .mcg-row b { font-family: var(--display); font-stretch: condensed; font-size: 18px; font-weight: 700; white-space: nowrap; }
@@ -2213,13 +2216,20 @@ button.brand, button.brand span { color: var(--accent); }
       <span class="sr-act">${heartBtn(g)}${bellBtn(g)}</span></div>`;
   }
   // Compact scoreboard card (CBS-style two-up grid)
+  // Compact football cards: down and distance in the top row, "1st & 10 · ODU 10"
+  function miniDD(g) {
+    if (g.state !== "in" || g.lg.sport !== "Football") return "";
+    const t = g.sit?.downDistanceText || "";
+    if (!t) return "";
+    return `<span class="mcg-dd ${g.sit.isRedZone ? "rz" : ""}">${esc(t.replace(/ at /, " · "))}</span>`;
+  }
   function miniCard(g, showLg) {
     const [a, h] = g.teams;
     if (!a || !h) return "";
     const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
     const row = (t, o) => `<span class="mcg-row ${lose(t, o) ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<i></i>"}<b>${t.seed ? `<small>(${t.seed})</small> ` : t.rank ? `<small>${t.rank}</small> ` : ""}${esc(t.abbr)}</b>${isFavTeam(g.lg, t.abbr) ? '<span class="mc-fav">★</span>' : ""}<em class="${g.state === "pre" ? "rec" : ""}">${esc(g.state === "pre" ? recText(t) : t.score)}</em></span>`;
     return `<article class="g mini tap ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name)}: game details">
-      <span class="mcg-top">${showLg ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span>${g.pin ? `<span class="pin-mark" role="button" tabindex="0" data-favgame="${g.lg.id}:${g.id}" aria-label="Remove this game from favorites" title="Remove from favorites">♥</span>` : ""}</span>${row(a, h)}${row(h, a)}</article>`;
+      <span class="mcg-top">${showLg ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span>${miniDD(g)}${g.pin ? `<span class="pin-mark" role="button" tabindex="0" data-favgame="${g.lg.id}:${g.id}" aria-label="Remove this game from favorites" title="Remove from favorites">♥</span>` : ""}</span>${row(a, h)}${row(h, a)}</article>`;
   }
   // Top strip: mini versions of the game cards
   function miniRow(logo, abbr, rec, score, lose, fav) {
