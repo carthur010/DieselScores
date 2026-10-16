@@ -9,6 +9,7 @@ Newest first. Beta changes move to Live when shipped.
 - Watch buttons on your phone (Safari, the Home Screen app, the iPhone app) open the streaming app itself, like YouTube TV or Prime Video, instead of its website's sign-up or home page. If the app isn't on the phone, the website opens after a couple of seconds. Computers still open the website. Also in beta and Beta 3.0.
 
 ## In beta (not on live yet)
+- Alerts during a game (scores, red zone, close game, lead changes, periods) no longer add "Watch on Prime Video". Game-starting alerts and reminders before the game keep it. Also in Beta 3.0.
 - Fixed: Rail layout hid your own teams' live games on For You.
 - New app icon: football, basketball, baseball and soccer ball split by a red cross (beta and Beta 3.0).
 

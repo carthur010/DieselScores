@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015232544">
+<meta name="build" content="20261015233945">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1890,7 +1890,8 @@ button.brand, button.brand span { color: var(--accent); }
     const [a, h] = g.teams;
     const who = g.fav ? favName(g) : `${a.abbr} at ${h.abbr}`;
     const line = `${a.abbr} ${a.score}, ${h.abbr} ${h.score}` + (g.state === "in" ? ` · ${g.status}` : "");
-    const watch = g.watch?.[0] ? `Watch on ${g.watch[0].app}${g.watch[0].nets[0] && g.watch[0].nets[0] !== g.watch[0].app ? " (" + g.watch[0].nets[0] + ")" : ""}` : (g.lg.short || g.lg.name);
+    // "Watch on" only when the game is starting; mid-game alerts are just the score
+    const watch = ["start", "playoff"].includes(ev) ? (g.watch?.[0] ? `Watch on ${g.watch[0].app}${g.watch[0].nets[0] && g.watch[0].nets[0] !== g.watch[0].app ? " (" + g.watch[0].nets[0] + ")" : ""}` : (g.lg.short || g.lg.name)) : "";
     const k = g.id + ":" + ev;
     switch (ev) {
       case "start": return notify(g.fav ? `${who} game is on` : `${who} is on`, `${a.name || a.abbr} at ${h.name || h.abbr}`, watch, g.link, false, k);
