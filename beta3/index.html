@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta 3.0</title>
-<meta name="build" content="20261015225444">
+<meta name="build" content="20261015225901">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2105,6 +2105,7 @@ button.brand, button.brand span { color: var(--accent); }
   const HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M12 20s-7-4.4-9-9.2C1.6 7.3 4 4 7.3 4c2 0 3.4 1.1 4.7 2.7C13.3 5.1 14.7 4 16.7 4 20 4 22.4 7.3 21 10.8 19 15.6 12 20 12 20z"/></svg>';
   const HEART_ON = HEART.replace('fill="none"', 'fill="currentColor"');
   function heartBtn(g) {
+    if (g.state === "post") return "";   // nothing left to follow once it's final
     const k = g.lg.id + ":" + g.id, on = !!state.favGames[k];
     return `<button class="bellbtn heartbtn ${on ? "on" : ""}" data-favgame="${k}" aria-pressed="${on}" title="${on ? "Favorite Game" : "Favorite this game"}" aria-label="${on ? "Remove this game from favorites" : "Favorite this game"}">${on ? HEART_ON : HEART}</button>`;
   }
@@ -2323,7 +2324,7 @@ button.brand, button.brand span { color: var(--accent); }
     const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
     const row = (t, o) => `<span class="mcg-row ${lose(t, o) ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<i></i>"}<b>${t.seed ? `<small>(${t.seed})</small> ` : t.rank ? `<small>${t.rank}</small> ` : ""}${esc(t.abbr)}</b>${isFavTeam(g.lg, t.abbr) ? '<span class="mc-fav">★</span>' : ""}<em class="${g.state === "pre" ? "rec" : ""}">${esc(g.state === "pre" ? recText(t) : t.score)}</em></span>`;
     return `<article class="g mini tap ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name)}: game details">
-      ${showLg || g.pin ? `<span class="mcg-top">${showLg ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}${g.pin ? `<span class="pin-mark" role="button" tabindex="0" data-favgame="${g.lg.id}:${g.id}" aria-label="Remove this game from favorites" title="Remove from favorites">♥</span>` : ""}</span>` : ""}${row(a, h)}${row(h, a)}
+      ${showLg || (g.pin && g.state !== "post") ? `<span class="mcg-top">${showLg ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}${g.pin && g.state !== "post" ? `<span class="pin-mark" role="button" tabindex="0" data-favgame="${g.lg.id}:${g.id}" aria-label="Remove this game from favorites" title="Remove from favorites">♥</span>` : ""}</span>` : ""}${row(a, h)}${row(h, a)}
       <span class="mcg-top mcg-foot"><span class="st ${statusClass(g)}">${esc(g.status)}</span>${miniDD(g)}</span></article>`;
   }
   // Top strip: mini versions of the game cards
@@ -2338,7 +2339,7 @@ button.brand, button.brand span { color: var(--accent); }
     const sit = g.state === "in" ? (g.sit?.downDistanceText || (g.lg.sport === "Baseball" && g.sit?.outs != null ? `${g.sit.outs} out${g.sit.outs === 1 ? "" : "s"}` : "")) : "";
     const foot = sit || (g.state !== "post" ? netLabel(g) : (g.series || g.lg.short || g.lg.name));
     return `<button class="ms mc ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" title="${esc(a.full + " at " + h.full)}">
-      <span class="mc-top"><span class="lgtag">${esc(g.lg.short || g.lg.name)}</span><span class="st ${statusClass(g)}">${esc(g.status)}</span>${g.pin ? `<span class="pin-mark" role="button" tabindex="0" data-favgame="${g.lg.id}:${g.id}" aria-label="Remove this game from favorites" title="Remove from favorites">♥</span>` : ""}</span>
+      <span class="mc-top"><span class="lgtag">${esc(g.lg.short || g.lg.name)}</span><span class="st ${statusClass(g)}">${esc(g.status)}</span>${g.pin && g.state !== "post" ? `<span class="pin-mark" role="button" tabindex="0" data-favgame="${g.lg.id}:${g.id}" aria-label="Remove this game from favorites" title="Remove from favorites">♥</span>` : ""}</span>
       ${row(a, h)}${row(h, a)}${foot ? `<span class="mc-foot">${esc(foot)}</span>` : ""}</button>`;
   }
   function nextChip(k) {
@@ -3901,10 +3902,10 @@ button.brand, button.brand span { color: var(--accent); }
     }
     if (g && gs === "in" && situation(g)) html += `<div class="gc-sit">${situation(g)}</div>`;
     html += `</div>`;
-    if (g) {
+    if (g && gs !== "post") {   // finals: no watch, heart or bell, so no empty action row
       const w = gs !== "post" && g.watch?.find(x => x.url);
       html += `<div class="gc-actions">${w ? `<a class="watchbig" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">${PLAY_BIG} Watch On ${esc(w.app)}</a>` : g.link && gs !== "post" ? `<a class="watchbig" href="${esc(g.link)}" target="_blank" rel="noopener">Open On ESPN</a>` : ""}
-        <button class="belbig ${state.favGames[g.lg.id + ":" + g.id] ? "on" : ""}" data-favgame="${g.lg.id}:${g.id}" aria-label="${state.favGames[g.lg.id + ":" + g.id] ? "Remove this game from favorites" : "Favorite this game"}">${(state.favGames[g.lg.id + ":" + g.id] ? HEART_ON : HEART).replace(' width="15" height="15"', "")}</button>
+        ${gs !== "post" ? `<button class="belbig ${state.favGames[g.lg.id + ":" + g.id] ? "on" : ""}" data-favgame="${g.lg.id}:${g.id}" aria-label="${state.favGames[g.lg.id + ":" + g.id] ? "Remove this game from favorites" : "Favorite this game"}">${(state.favGames[g.lg.id + ":" + g.id] ? HEART_ON : HEART).replace(' width="15" height="15"', "")}</button>` : ""}
         ${gs !== "post" ? `<button class="belbig ${state.watched[g.lg.id + ":" + g.id] ? "on" : ""}" data-watchgame="${g.lg.id}:${g.id}" aria-label="${state.watched[g.lg.id + ":" + g.id] ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL_BIG}</button>` : ""}</div>`;
     }
     if (!j) return html + `<div class="skel"></div><div class="skel"></div></div>`;

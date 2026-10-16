@@ -9,6 +9,7 @@ Newest first. Beta changes move to Live when shipped.
 - Watch buttons on your phone (Safari, the Home Screen app, the iPhone app) open the streaming app itself, like YouTube TV or Prime Video, instead of its website's sign-up or home page. If the app isn't on the phone, the website opens after a couple of seconds. Computers still open the website. Also in beta and Beta 3.0.
 
 ## In beta (not on live yet)
+- No heart on finished games: cards, Simple rows and the game page. Finals drop the empty button row on the game page too.
 - Hockey play-by-play and scoring times now show time left in the period, like the broadcast (ESPN sends time elapsed). Shootout attempts show no clock.
 - Fixed: game cards on wide screens could spill into the next card when a play-by-play line was long (also on live, waiting to ship).
 - Fixed: football Current Drive plays showed twice in All Plays, and penalty yards showed as a gain (+3) when they were a loss.
