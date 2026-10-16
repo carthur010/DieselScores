@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015232213">
+<meta name="build" content="20261015232413">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -164,6 +164,8 @@ section.closed .bhead { border-bottom: 0; }
 .f-team { display: grid; justify-items: center; gap: 4px; position: relative; text-align: center; min-width: 0; }
 .f-team img { width: 52px; height: 52px; object-fit: contain; }
 .f-team .nm { font-size: 14px; font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.f-team .nm { white-space: normal; text-overflow: clip; line-height: 1.15; }
+.f-team .nm.long { font-size: 12px; letter-spacing: -.01em; }
 .f-team.fav .nm { color: var(--fg); }
 .f-sc { font-family: var(--display); font-weight: 700; font-size: 52px; line-height: 1; text-align: center; }
 .f-sc.lose { color: var(--dim); }
@@ -305,9 +307,9 @@ section.closed .bhead { border-bottom: 0; }
 .seg button.on { background: var(--accent); color: var(--bg); }
 
 /* Sofascore-style timeline */
-.tl-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px 6px; }
+.tl-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px 4px; }
 .tl-badge { min-width: 38px; height: 38px; padding-inline: 6px; white-space: nowrap; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: .02em; flex: 0 0 auto; max-width: 92px; overflow: hidden; }
-.tl-head .crumb { font-weight: 700; font-size: 15px; }
+.tl-head .crumb { font-weight: 700; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .tl-head .crumb span { color: var(--muted); font-weight: 500; }
 .tl-group { border-bottom: 6px solid var(--bg); }
 .tl-group:last-child { border-bottom: 0; }
@@ -341,8 +343,9 @@ section.closed .bhead { border-bottom: 0; }
 
 @media (max-width: 480px) {
   .f-team img { width: 42px; height: 42px; }
-  .f-sc { font-size: 42px; }
-  .f-grid { grid-template-columns: minmax(60px, 1fr) auto minmax(80px, 1.1fr) auto minmax(60px, 1fr); }
+  .f-team .nm { font-size: 13px; white-space: normal; text-overflow: clip; line-height: 1.15; overflow-wrap: normal; }
+  .f-sc { font-size: 38px; }
+  .f-grid { grid-template-columns: minmax(70px, 1fr) auto minmax(72px, 1fr) auto minmax(70px, 1fr); gap: 4px; }
   .grid { grid-template-columns: 1fr; }
   .viewrow { order: 5; width: 100%; }
   .viewrow .seg { flex: 1; }
@@ -867,7 +870,7 @@ button.brand span { color: var(--accent); }
 [data-density="simple"] .sr-act .bellbtn svg { width: 14px; height: 14px; }
 [data-density="simple"] .tl-head { padding: 8px 14px 2px; gap: 8px; }
 [data-density="simple"] .tl-badge { min-width: 30px; height: 24px; border-radius: 6px; font-size: 11px; }
-[data-density="simple"] .tl-head .crumb { font-size: 13px; }
+[data-density="simple"] .tl-head .crumb { font-size: 11px; }
 [data-density="simple"] .tl-group { border-bottom-width: 4px; }
 
 /* ---------- Color: Red (default) with cream, black and white ---------- */
@@ -2188,7 +2191,7 @@ button.brand, button.brand span { color: var(--accent); }
     const [a, h] = g.teams;
     if (!a || !h) return "";
     const side = t => `<div class="f-team ${t.homeAway === "home" ? "home" : ""} ${isFavTeam(g.lg, t.abbr) ? "fav" : ""}">${starBtn(g.lg, t)}
-        ${t.logo ? `<img src="${esc(t.logo)}" alt="">` : ""}<span class="nm">${esc(t.name)}</span></div>`;
+        ${t.logo ? `<img src="${esc(t.logo)}" alt="">` : ""}<span class="nm ${!/\s/.test(t.name) && t.name.length > 9 ? "long" : ""}">${esc(t.name)}</span></div>`;
     const score = (t, o) => {
       if (g.state === "pre") return `<div class="f-sc rec">${esc(recText(t))}</div>`;
       const lose = (g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score));
@@ -2262,7 +2265,7 @@ button.brand, button.brand span { color: var(--accent); }
     const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
     const row = (t, o) => miniRow(t.logo, seedTag(t) + t.abbr, g.state === "pre" ? recText(t) : "", g.state === "pre" ? null : t.score, lose(t, o), isFavTeam(g.lg, t.abbr));
     const sit = g.state === "in" ? (g.sit?.downDistanceText || (g.lg.sport === "Baseball" && g.sit?.outs != null ? `${g.sit.outs} out${g.sit.outs === 1 ? "" : "s"}` : "")) : "";
-    const foot = sit || (g.state !== "post" ? netLabel(g) : (g.series || g.lg.short || g.lg.name));
+    const foot = sit || (g.state !== "post" ? netLabel(g) : (g.series || ""));
     return `<button class="ms mc ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" title="${esc(a.full + " at " + h.full)}">
       <span class="mc-top"><span class="lgtag">${esc(g.lg.short || g.lg.name)}</span><span class="st ${statusClass(g)}">${esc(g.status)}</span>${g.pin && g.state !== "post" ? `<span class="pin-mark" role="button" tabindex="0" data-favgame="${g.lg.id}:${g.id}" aria-label="Remove this game from favorites" title="Remove from favorites">♥</span>` : ""}</span>
       ${row(a, h)}${row(h, a)}${foot ? `<span class="mc-foot">${esc(foot)}</span>` : ""}</button>`;
@@ -3201,8 +3204,7 @@ button.brand, button.brand span { color: var(--accent); }
         : TEAM_LEAGUES.map(lg => {
         const list = feed.filter(g => g.lg.id === lg.id).sort((x, y) => new Date(x.date) - new Date(y.date));
         if (!list.length) return "";
-        return `<div class="tl-group"><div class="tl-head"><span class="tl-badge">${esc(lg.short || lg.name)}</span>
-          <span class="crumb">${esc(lg.sport)} <span>› ${esc(lg.name)}</span></span></div>
+        return `<div class="tl-group"><div class="tl-head"><span class="crumb">${esc(lg.name)}</span></div>
           <div class="grid">${list.map(card).join("")}</div></div>`;
       }).join("");
       html += block("feed", "You Are Looking Live", countLabel(feed.length, feed), parts);
