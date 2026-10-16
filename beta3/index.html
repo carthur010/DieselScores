@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta 3.0</title>
-<meta name="build" content="20261015221644">
+<meta name="build" content="20261015223031">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -842,6 +842,28 @@ button.brand span { color: var(--accent); }
   .sheet-card { border-radius: 14px 14px 0 0; max-height: calc(88vh - env(safe-area-inset-top)); max-height: calc(100dvh - env(safe-area-inset-top) - 44px); }
   .sheet-body { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
 }
+
+/* ---------- Simple scoreboard: tighter rows and headers ---------- */
+[data-density="simple"] main { gap: 12px; }
+[data-density="simple"] .bhead { padding: 9px 14px; gap: 8px; }
+[data-density="simple"] .bhead h2 { font-size: 20px; }
+[data-density="simple"] .bhead .meta { font-size: 12px; }
+[data-density="simple"] .bhead .tog { width: 28px; height: 28px; border-radius: 8px; }
+[data-density="simple"] .blk-bar { padding: 6px 14px; }
+[data-density="simple"] .srow { grid-template-columns: 62px minmax(0, 1fr) auto; gap: 10px; padding: 6px 14px; }
+[data-density="simple"] .sr-time { font-size: 12px; gap: 0; }
+[data-density="simple"] .sr-time small { font-size: 10.5px; }
+[data-density="simple"] .sr-teams { gap: 2px; }
+[data-density="simple"] .sr-t { font-size: 14.5px; gap: 8px; }
+[data-density="simple"] .sr-t img, [data-density="simple"] .sr-t > i { width: 18px; height: 18px; }
+[data-density="simple"] .sr-t b { font-size: 16px; }
+[data-density="simple"] .sr-act { gap: 6px; }
+[data-density="simple"] .sr-act .bellbtn { width: 28px; height: 28px; }
+[data-density="simple"] .sr-act .bellbtn svg { width: 14px; height: 14px; }
+[data-density="simple"] .tl-head { padding: 8px 14px 2px; gap: 8px; }
+[data-density="simple"] .tl-badge { min-width: 30px; height: 24px; border-radius: 6px; font-size: 11px; }
+[data-density="simple"] .tl-head .crumb { font-size: 13px; }
+[data-density="simple"] .tl-group { border-bottom-width: 4px; }
 
 /* ---------- Color: Red (default) with cream, black and white ---------- */
 :root {
@@ -3294,7 +3316,7 @@ button.brand, button.brand span { color: var(--accent); }
         if (tab === "live") shown = new Set(picks.map(g => g.id));
         html += block("worth", "Worth A Watch", countLabel(picks.length, picks),
           // More than 4 picks: switch to the two-up compact cards so the section doesn't take over the page
-          picks.length > 4 ? `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>` : `<div class="feat">${picks.map(featured).join("")}</div>`);
+          state.density === "simple" ? gridOf(picks) : picks.length > 4 ? `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>` : `<div class="feat">${picks.map(featured).join("")}</div>`);
       }
     }
 
