@@ -2,6 +2,10 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 16, 2026: Live (1:30 PM)
+- Standings and Rankings share one dropdown. Game pages: the Standings tab picks the conference table or a poll (AP Top 25, AFCA Coaches and more for college), with both teams highlighted. League pages: Standings opens on your team's conference (All Conferences, Power 4 first, then the rest) and Rankings lists every poll, and one menu jumps between the two tabs. Team pages: opens on the team's conference, switch to any other conference or poll. Pro leagues get their conferences in the same menu. Also in beta and Beta 3.0.
+- Fixed: college standings on team and league pages could list a 3-1 team above a 3-0 team. They now sort by conference record, then overall record.
+
 ## Oct 16, 2026: Live (1:15 PM)
 - Fandango is in Settings under Free To Watch and on by default. It's the free home for most Bundesliga games in the US, so those cards show a Fandango watch chip instead of Not On Your Services. Switched on once for existing setups; turning it off sticks. Also in beta and Beta 3.0.
 
