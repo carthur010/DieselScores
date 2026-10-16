@@ -9,6 +9,7 @@ Newest first. Beta changes move to Live when shipped.
 - Watch buttons on your phone (Safari, the Home Screen app, the iPhone app) open the streaming app itself, like YouTube TV or Prime Video, instead of its website's sign-up or home page. If the app isn't on the phone, the website opens after a couple of seconds. Computers still open the website. Also in beta and Beta 3.0.
 
 ## In beta (not on live yet)
+- Visual cleanup: the date strip fades at both ends instead of chopping a label in half.
 - Visual cleanup: removed the stray short lines under every team abbreviation on game cards (a baseball style was leaking onto them), which also tightens the rows.
 - Visual cleanup: all-caps play text from ESPN ("END QUARTER 4") shows in normal case; team codes stay in caps.
 - Visual cleanup: top strip chips no longer repeat the league at the bottom of finals.
