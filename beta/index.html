@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015223742">
+<meta name="build" content="20261015223843">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -2217,11 +2217,12 @@ button.brand, button.brand span { color: var(--accent); }
   }
   // Compact scoreboard card (CBS-style two-up grid)
   // Compact football cards: down and distance in the top row, "1st & 10 · ODU 10"
-  function miniDD(g) {
+  // With a league tag there's only room for "3rd & 7"; the full text stays in the tooltip
+  function miniDD(g, tight) {
     if (g.state !== "in" || g.lg.sport !== "Football") return "";
     const t = g.sit?.downDistanceText || "";
     if (!t) return "";
-    return `<span class="mcg-dd ${g.sit.isRedZone ? "rz" : ""}">${esc(t.replace(/ at /, " · "))}</span>`;
+    return `<span class="mcg-dd ${g.sit.isRedZone ? "rz" : ""}" title="${esc(t)}">${esc(tight ? t.split(" at ")[0] : t.replace(/ at /, " · "))}</span>`;
   }
   function miniCard(g, showLg) {
     const [a, h] = g.teams;
@@ -2229,7 +2230,7 @@ button.brand, button.brand span { color: var(--accent); }
     const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
     const row = (t, o) => `<span class="mcg-row ${lose(t, o) ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<i></i>"}<b>${t.seed ? `<small>(${t.seed})</small> ` : t.rank ? `<small>${t.rank}</small> ` : ""}${esc(t.abbr)}</b>${isFavTeam(g.lg, t.abbr) ? '<span class="mc-fav">★</span>' : ""}<em class="${g.state === "pre" ? "rec" : ""}">${esc(g.state === "pre" ? recText(t) : t.score)}</em></span>`;
     return `<article class="g mini tap ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name)}: game details">
-      <span class="mcg-top">${showLg ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span>${miniDD(g)}${g.pin ? `<span class="pin-mark" role="button" tabindex="0" data-favgame="${g.lg.id}:${g.id}" aria-label="Remove this game from favorites" title="Remove from favorites">♥</span>` : ""}</span>${row(a, h)}${row(h, a)}</article>`;
+      <span class="mcg-top">${showLg ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span>${miniDD(g, showLg)}${g.pin ? `<span class="pin-mark" role="button" tabindex="0" data-favgame="${g.lg.id}:${g.id}" aria-label="Remove this game from favorites" title="Remove from favorites">♥</span>` : ""}</span>${row(a, h)}${row(h, a)}</article>`;
   }
   // Top strip: mini versions of the game cards
   function miniRow(logo, abbr, rec, score, lose, fav) {
@@ -3173,8 +3174,11 @@ button.brand, button.brand span { color: var(--accent); }
     TEAM_LEAGUES.forEach(lg => { if (!pool.some(g => g.lg.id === lg.id) && !state.data[lg.id]?.error && !state.data[lg.id]?.events?.length) quiet.push(lg.short || lg.name); });
     let feed = pool.filter(g => !shown.has(g.id));
     if (feed.length && state.view === "league" && tab === "live") {
-      // Live tab, By League: one "You Are Looking Live" section with a card grid per league inside
-      const parts = TEAM_LEAGUES.map(lg => {
+      // Live tab, By League: one "You Are Looking Live" section with a card grid per league inside.
+      // Compact: one two-up grid in league order with a league tag on each card, so no half-empty rows or big league headers.
+      const parts = state.density === "compact"
+        ? `<div class="grid">${TEAM_LEAGUES.flatMap(lg => feed.filter(g => g.lg.id === lg.id).sort((x, y) => new Date(x.date) - new Date(y.date))).map(g => miniCard(g, true)).join("")}</div>`
+        : TEAM_LEAGUES.map(lg => {
         const list = feed.filter(g => g.lg.id === lg.id).sort((x, y) => new Date(x.date) - new Date(y.date));
         if (!list.length) return "";
         return `<div class="tl-group"><div class="tl-head"><span class="tl-badge">${esc(lg.short || lg.name)}</span>
