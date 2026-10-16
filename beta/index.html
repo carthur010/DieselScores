@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015231425">
+<meta name="build" content="20261015232213">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -769,8 +769,8 @@ button.t-go { background: var(--surface); cursor: pointer; }
 .play.score .pc { color: var(--accent); }
 .ab-half { font-family: var(--display); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 14px 2px 6px; }
 .ab-half:first-child { padding-top: 2px; }
-.ab { border-bottom: 1px solid var(--line); padding: 10px 0 12px; }
-.ab:last-child { border-bottom: 0; }
+div.ab { border-bottom: 1px solid var(--line); padding: 10px 0 12px; }
+div.ab:last-child { border-bottom: 0; }
 .ab-h { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .ab-h b { font-size: 15px; }
 .ab-h small { color: var(--muted); font-size: 12px; }
@@ -2027,6 +2027,14 @@ button.brand, button.brand span { color: var(--accent); }
   const recText = t => t.seriesRec ? `${t.record} Series` : t.record;
   function statusClass(g) { return g.state === "in" ? "live" : g.state === "post" ? "final" : ""; }
 
+  // ESPN sometimes shouts ("END QUARTER 4"): bring all-caps text back to normal case
+  function calmCaps(t) {
+    t = String(t || "");
+    if (!/[A-Z]{3}/.test(t) || /[a-z]/.test(t)) return t;
+    const COMMON = /^(END|OF|THE|AND|TO|FOR|IN|AT|ON|BY|OUT|OFF|UP|NO|ONE|TWO|HALF|GAME|PLAY|SHOT|GOAL|KICK|PASS|RUN|FOUL|JUMP|BALL|LEFT|WIDE|SAVE|STOP|TV)$/;
+    // Long words and plain English go to normal case; short codes like DEN or OT stay as they are
+    return t.split(/(\s+)/).map(w => /^[A-Z]{2,4}\d*$/.test(w) && !COMMON.test(w.replace(/\d+$/, "")) ? w : w.charAt(0) + w.slice(1).toLowerCase()).join("");
+  }
   function situation(g) {
     const s = g.sit;
     if (g.state !== "in" || !s) return "";
@@ -2043,7 +2051,7 @@ button.brand, button.brand span { color: var(--accent); }
       return `<span class="txt">${s.isRedZone ? '<b style="color:var(--live)">Red Zone</b> · ' : ""}${esc(s.downDistanceText)}</span>`;
     }
     // Basketball, hockey, soccer: the latest play when ESPN sends one
-    if (s.lastPlay?.text) return `<span class="txt" title="${esc(s.lastPlay.text)}">${esc(s.lastPlay.text)}</span>`;
+    if (s.lastPlay?.text) { const t = calmCaps(s.lastPlay.text); return `<span class="txt" title="${esc(t)}">${esc(t)}</span>`; }
     return "";
   }
   // ---- Betting results on finals: the closing line, remembered while the game was upcoming or live,
