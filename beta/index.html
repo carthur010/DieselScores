@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261015195011">
+<meta name="build" content="20261015201310">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -4160,16 +4160,23 @@ button.brand, button.brand span { color: var(--accent); }
         <tbody>${rows.map(x => `<tr><td>${esc(x.athlete?.shortName || x.athlete?.displayName || "")}</td>${x.stats.map(v => `<td>${esc(v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
     }).join("")).join("");
   }
-  // In the iPhone app, try the streaming app first (its URL scheme), then fall back to the website
+  // On a phone (Safari, the Home Screen app or the iPhone app), open the streaming app itself (its URL scheme).
+  // A plain https link only lands on the service's website (YouTube TV's sign-up page, Prime Video's home page).
+  // If the app doesn't open (not installed), fall back to the website. Desktop keeps the website.
+  const ON_PHONE = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   document.addEventListener("click", e => {
     const a = e.target.closest("a[data-app]");
-    if (!a || !(window.Capacitor?.isNativePlatform?.())) return;
+    if (!a || !(window.Capacitor?.isNativePlatform?.() || ON_PHONE)) return;
     e.preventDefault(); e.stopImmediatePropagation();
     const web = a.href; let left = false;
-    const off = () => { if (document.hidden) left = true; };
-    document.addEventListener("visibilitychange", off);
+    const gone = () => { left = true; };
+    const vis = () => { if (document.hidden) left = true; };
+    document.addEventListener("visibilitychange", vis); window.addEventListener("pagehide", gone); window.addEventListener("blur", gone);
     location.href = a.dataset.app;
-    setTimeout(() => { document.removeEventListener("visibilitychange", off); if (!left && !document.hidden) window.open(web, "_blank"); }, 1400);
+    setTimeout(() => {
+      document.removeEventListener("visibilitychange", vis); window.removeEventListener("pagehide", gone); window.removeEventListener("blur", gone);
+      if (!left && !document.hidden && web) { const w = window.open(web, "_blank"); if (!w) location.href = web; }
+    }, 2500);
   }, true);
   document.addEventListener("click", e => {
     const fg = e.target.closest("[data-favgame]");
