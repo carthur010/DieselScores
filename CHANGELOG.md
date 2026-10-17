@@ -2,6 +2,10 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 17, 2026: Live (3:55 PM)
+- Long network names are shortened everywhere so they fit: SEC Network → SECN, ACC Network → ACCN, Big Ten Network → BTN, CBS Sports Network → CBSSN, NFL Network → NFLN, USA Network → USA, Golf Channel → GOLF.
+- Compact cards show the channel next to the league tag (NCAAF  FOX) before and during games. Also in beta and Beta 3.0.
+
 ## Oct 17, 2026: Live (2:45 PM)
 - Worth A Watch skips blowouts, ranked teams or not: 17+ points in football's second half, 20+ in basketball's second half, 3+ goals in hockey's 3rd or anytime in soccer, 6+ runs from the 6th inning on.
 - Your Multiview on the home screen is smaller (team names, scores, logos, clock and tag), so Worth A Watch sits higher. The full Multiview stays the same size. Also in beta and Beta 3.0.
