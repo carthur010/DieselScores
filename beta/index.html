@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261016233017">
+<meta name="build" content="20261017122805">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -3809,6 +3809,8 @@ button.brand, button.brand span { color: var(--accent); }
   const mvName = g => { const [a, h] = g.teams, col = !!CONFS[g.lg.id]; const nm = t => col ? (t.name || t.abbr) : (t.full || t.name || t.abbr); return `${nm(a)} at ${nm(h)}`; };
   function mvWhy(g) {
     if (g.state === "pre") return "Starts " + timeLabel(g.date);
+    // One tag per game; the red zone beats everything while the ball is inside the 20
+    if (g.lg.sport === "Football" && g.sit?.isRedZone) return "Red zone";
     const m = mvMargin(g), p = g.period || 0, out = [];
     if (isMine(g)) out.push("Your team");
     const up = (g.reasons || []).find(r => /^Upset/.test(r)); if (up) out.push(up.replace("Upset Alert: ", "Upset watch: "));
@@ -3817,13 +3819,12 @@ button.brand, button.brand span { color: var(--accent); }
       else if (m === 0) out.push("Tied");
       else if (m <= 8) out.push(m <= 3 ? "Field goal game" : "One-score game");
       else if (m >= 22) out.push("Blowout");
-      if (g.sit?.isRedZone) out.push("Red zone");
     } else {
       (g.reasons || []).filter(r => !/^Upset|Starting Soon|Playoffs/.test(r)).slice(0, 1).forEach(r => out.push(r));
       if (!out.length && m === 0) out.push("Tied");
     }
     if (g.playoff) out.push("Playoffs");
-    return out.slice(0, 2).join(" · ");
+    return out[0] || "";
   }
   function mvPool() {
     // YouTube TV Multiview only takes channels YouTube TV carries, so Peacock, Paramount+, Prime
@@ -3871,7 +3872,6 @@ button.brand, button.brand span { color: var(--accent); }
       ${row(a, h)}${row(h, a)}
       <div class="mv-st"><span class="${statusClass(g)}">${esc(g.state === "pre" ? "Starts " + timeLabel(g.date) : g.status)}</span>${dd ? `<small>${esc(dd)}</small>` : ""}</div>
       ${why && g.state === "in" ? `<div class="mv-tag">${esc(why)}</div>` : ""}
-      ${mini ? "" : hasYTTV() && !onYTTV(g) && w ? `<a class="mv-watch none" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">${esc(w.app)} only, not in YouTube TV</a>` : w ? `<a class="mv-watch" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">Watch On ${esc(w.app)}</a>` : g.broadcast ? `<span class="mv-watch none">Not on your services</span>` : ""}
     </div>`;
   }
   function paintMv() {
