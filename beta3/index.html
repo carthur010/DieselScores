@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta 3.0</title>
-<meta name="build" content="20261017122805">
+<meta name="build" content="20261017123003">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -4028,7 +4028,7 @@ button.brand, button.brand span { color: var(--accent); }
   const mvMargin = g => Math.abs((parseInt(g.teams[0]?.score) || 0) - (parseInt(g.teams[1]?.score) || 0));
   function mvScore(g) {
     let s = g.hype || 0;
-    if (isMine(g)) s += 45;
+    if (isMine(g)) s += 80;   // your teams make the quad once they kick off
     if (g.pin || state.watched?.[mvKey(g)]) s += 20;
     if (g.state === "in" && g.lg.sport === "Football") {
       const m = mvMargin(g), p = g.period || 0;
@@ -4066,7 +4066,8 @@ button.brand, button.brand span { color: var(--accent); }
     // and other streaming-only games are left out (CBS games still count, and so do ESPN+ games)
     const pool = allGames().filter(g => inMyWorld(g) && (!hasYTTV() || onYTTV(g)));
     const anyFb = pool.some(g => g.state === "in" && g.lg.sport === "Football");
-    if (!mvSport) { const d = new Date().getDay(); mvSport = anyFb && (d === 0 || d === 6 || pool.filter(g => g.state === "in" && g.lg.sport === "Football").length >= 4) ? "football" : "all"; }
+    // Opens on All Sports: football still ranks high on its own, and your other teams (a Newcastle match) can get in
+    if (!mvSport) mvSport = "all";
     mvFilt = mvFilters(pool);
     // Football with only one football league on means that league; a league with nothing live falls back to All Sports
     mvCur = mvFilt.find(x => x[0] === mvSport) || (mvSport === "football" && mvFilt.find(x => x[0] === "lg:nfl" || x[0] === "lg:ncaaf")) || mvFilt[0];
