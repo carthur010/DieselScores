@@ -2,6 +2,10 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 17, 2026: Live (12:40 PM)
+- Multiview tiles: the clock and down and distance are white and bold like the scores, instead of a red clock and a faded line.
+- Your Multiview section ends at the Make This Your Multiview button (no extra line under it). Also in beta and Beta 3.0.
+
 ## Oct 17, 2026: Live (12:35 PM)
 - Multiview opens on All Sports (football still ranks high on its own), and your teams get a bigger boost so they make the quad once they kick off (a Newcastle match next to college football).
 - Multiview tiles: one tag each, and Red Zone wins whenever a team is inside the 20. No Watch button on the tiles.
