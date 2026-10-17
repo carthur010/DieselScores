@@ -2,6 +2,10 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 17, 2026: Live (12:55 PM)
+- Live clocks read time first, then the period: "3:57 1st" instead of "Q1 3:57", "8:38 3rd" for hockey, "4:12 OT" in overtime. College football OT still says OT; soccer keeps its minute; baseball keeps innings.
+- Multiview: no subtitle under the title and no note at the bottom. Also in beta and Beta 3.0.
+
 ## Oct 17, 2026: Live (12:47 PM)
 - Multiview tiles line up: every tile has the same rows (clock, down and distance, tag). A game with no down and distance or no tag keeps the space, so all four tiles match. Tags stay on one line. Also in beta and Beta 3.0.
 
