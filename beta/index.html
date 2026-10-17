@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261017131125">
+<meta name="build" content="20261017143721">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1492,6 +1492,18 @@ button.brand, button.brand span { color: var(--accent); }
   }
   // Upset = the team leading in the second half was +200 or longer on the pregame moneyline (SportsDudes rule)
   const UPSET_ML = 200;
+  // Blowouts never make Worth A Watch, ranked or not (Mississippi St 0, LSU 31 in the 3rd)
+  function isBlowout(g) {
+    if (g.state !== "in") return false;
+    const [a, h] = g.teams; if (!a || !h) return false;
+    const m = Math.abs((parseInt(a.score) || 0) - (parseInt(h.score) || 0)), p = g.period || 0, sp = g.lg.soccer ? "Soccer" : g.lg.sport;
+    if (sp === "Football") return m >= 17 && p >= 3;
+    if (sp === "Basketball") return m >= 20 && p > (g.lg.reg || 4) / 2;
+    if (sp === "Hockey") return m >= 3 && p >= 3;
+    if (sp === "Soccer") return m >= 3;
+    if (sp === "Baseball") return m >= 6 && p >= 6;
+    return false;
+  }
   // What makes a game worth flipping to
   function interest(g) {
     const reasons = [];
@@ -3278,7 +3290,7 @@ button.brand, button.brand span { color: var(--accent); }
     let shown = new Set();
     if (["live", "all"].includes(tab)) html += mvSection();
     if (["live", "all"].includes(tab)) {
-      const earned = g => g.state === "in" && !isMine(g) && (g.close || g.playoff || g.reasons.some(r => /Overtime|Extra|Upset|Top 25/.test(r)));
+      const earned = g => g.state === "in" && !isMine(g) && !isBlowout(g) && (g.close || g.playoff || g.reasons.some(r => /Overtime|Extra|Upset|Top 25/.test(r)));
       const must = games.filter(g => earned(g) && (g.close || g.playoff)).sort((x, y) => y.hype - x.hype);
       const other = games.filter(g => earned(g) && !g.close && !g.playoff).sort((x, y) => y.hype - x.hype);
       const picks = must.concat(other.slice(0, Math.max(0, 6 - must.length)));
