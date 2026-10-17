@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261017123813">
+<meta name="build" content="20261017124633">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -488,6 +488,8 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .mv-tm b { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .mv-st { font-size: 15px; font-weight: 700; color: #fff; }
 .mv-st .live { color: #fff; }
+.mv-blank { visibility: hidden; }
+.mv-tag { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mv-tag { align-self: flex-start; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; line-height: 1.35; background: var(--star); color: #111; padding: 2px 6px; border-radius: 5px; max-width: 100%; }
 .mv-watch { margin-top: auto; text-align: center; font-size: 12px; font-weight: 800; color: #fff; background: rgba(255,255,255,.15); border-radius: 999px; padding: 7px 8px; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mv-watch.none { opacity: .6; font-weight: 600; }
@@ -3875,8 +3877,8 @@ button.brand, button.brand span { color: var(--accent); }
     return `<div class="mv-tile ${mini ? "mv-sm" : ""}" style="--ca:${readable(a.color)};--ch:${readable(h.color)}" ${mini ? `data-game="${esc(k)}"` : `data-mv-tile="${esc(k)}"`} role="button" tabindex="0" aria-label="${esc(mvName(g))}: game details">
       <div class="mv-top"><span class="mv-n">${i + 1}</span><span class="mv-lg">${esc(g.lg.short || g.lg.name)}</span>${net ? `<span class="mv-net">${esc(net)}</span>` : ""}${mini ? (pinned ? `<span class="mv-lock on" aria-label="Pinned">${PIN_IC}</span>` : "") : `<button class="mv-lock ${pinned ? "on" : ""}" data-mv-lock="${esc(k)}" aria-pressed="${pinned}" aria-label="${pinned ? "Let this spot reshuffle" : "Keep this game in place"}">${PIN_IC}</button>`}</div>
       ${row(a, h)}${row(h, a)}
-      <div class="mv-st"><span class="${statusClass(g)}">${esc(g.state === "pre" ? "Starts " + timeLabel(g.date) : g.status)}</span>${dd ? `<small>${esc(dd)}</small>` : ""}</div>
-      ${why && g.state === "in" ? `<div class="mv-tag">${esc(why)}</div>` : ""}
+      <div class="mv-st"><span class="${statusClass(g)}">${esc(g.state === "pre" ? "Starts " + timeLabel(g.date) : g.status)}</span><small class="${dd ? "" : "mv-blank"}">${dd ? esc(dd) : "&nbsp;"}</small></div>
+      <div class="mv-tag ${why && g.state === "in" ? "" : "mv-blank"}">${why && g.state === "in" ? esc(why) : "&nbsp;"}</div>
     </div>`;
   }
   function paintMv() {
