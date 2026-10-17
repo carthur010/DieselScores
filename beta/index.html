@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261016232930">
+<meta name="build" content="20261016233017">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -3784,7 +3784,7 @@ button.brand, button.brand span { color: var(--accent); }
       .sort((a, b) => ((MV_SPORT_ORD.indexOf(a.sport) + 1) || 9) - ((MV_SPORT_ORD.indexOf(b.sport) + 1) || 9) || n(g => g.lg.id === b.id) - n(g => g.lg.id === a.id));
     const out = [["all", "All Sports", () => true]];
     if (lgs.filter(l => l.sport === "Football").length > 1) out.push(["football", "Football", g => g.lg.sport === "Football"]);
-    lgs.forEach(l => out.push(["lg:" + l.id, l.id === "ncaaf" ? "College Football" : (l.short || l.name), g => g.lg.id === l.id]));
+    lgs.forEach(l => out.push(["lg:" + l.id, l.id === "ncaaf" ? "CFB" : (l.short || l.name), g => g.lg.id === l.id]));
     return out.map(([id, label, f]) => [id, label, f, n(f)]);
   }
   let mvCur = ["all", "All Sports", () => true, 0], mvFilt = [];
