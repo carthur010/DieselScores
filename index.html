@@ -2595,7 +2595,9 @@ button.brand, button.brand span { color: var(--accent); }
       else {
         const days = new Map();
         games.slice().sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(g => { const k = new Date(g.date).toDateString(); if (!days.has(k)) days.set(k, []); days.get(k).push(g); });
-        body = chips + [...days.entries()].map(([k, list]) => `<div class="lp-day"><h3>${esc(new Date(k).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" }))}<small>${esc(countLabel(list.length, list))}</small></h3><div class="grid lp-grid">${list.map(g => miniCard(g, false)).join("")}</div></div>`).join("");
+        // Today's section reads "Today" and lists live games first, then upcoming, then finals
+        const todayK = new Date().toDateString(), rank = { in: 0, pre: 1, post: 2 };
+        body = chips + [...days.entries()].map(([k, list]) => { const isT = k === todayK, live = list.some(g => g.state === "in"); if (isT) list = list.slice().sort((a, b) => (rank[a.state] ?? 1) - (rank[b.state] ?? 1) || new Date(a.date) - new Date(b.date)); const d = new Date(k).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" }); return `<div class="lp-day" data-lp-k="${+new Date(k)}"${isT ? " data-lp-today" : ""}${live ? " data-lp-live" : ""}><h3>${esc(isT ? "Today · " + d : d)}<small>${esc(countLabel(list.length, list))}</small></h3><div class="grid lp-grid">${list.map(g => miniCard(g, false)).join("")}</div></div>`; }).join("");
       }
     } else if (lv.tab === "standings" || lv.tab === "teams") {
       loadLeagueTab(lv, "standings");
@@ -2631,6 +2633,14 @@ button.brand, button.brand span { color: var(--accent); }
     const strip = el.querySelector(".tm-tabs"); if (strip) strip.scrollLeft = keepLeft;
     const ch = el.querySelector(".lp-chips");
     if (ch) { if (chipLeft != null) ch.scrollLeft = chipLeft; else { const o = ch.querySelector(".on"); if (o) ch.scrollLeft = o.offsetLeft - ch.offsetLeft - ch.clientWidth / 2 + o.offsetWidth / 2; } }
+    // First load of the Scores tab lands on what's on now: live games, else today, else the next day with games
+    if (lv.tab === "scores" && lv.data.board && !lv.jumped) {
+      lv.jumped = true;
+      const days = [...el.querySelectorAll(".lp-day")], now = new Date().toDateString();
+      const t = el.querySelector(".lp-day[data-lp-live]") || el.querySelector(".lp-day[data-lp-today]")
+        || days.find(d => +d.dataset.lpK >= +new Date(now));
+      if (t && t !== days[0]) el.scrollTop = t.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - 12;
+    }
   }
   // Any team name or logo can open that team's page
   function tmLink(lgId, x) {
