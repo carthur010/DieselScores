@@ -2,6 +2,11 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 17, 2026: Live (12:35 PM)
+- Multiview opens on All Sports (football still ranks high on its own), and your teams get a bigger boost so they make the quad once they kick off (a Newcastle match next to college football).
+- Multiview tiles: one tag each, and Red Zone wins whenever a team is inside the 20. No Watch button on the tiles.
+- Add These In YouTube TV and Also Worth A Look show team ranks ("Florida at 7 Texas"), and Also Worth A Look is numbered 5, 6, 7... continuing the quad's order. Also in beta and Beta 3.0.
+
 ## Oct 16, 2026: Live (11:30 PM)
 - Multiview filter chips follow what's on: All Sports, then a chip for every league with a live game and its count (CFB 4 · NBA 3 · NHL 2). Football shows when NFL and college are both live. A chip goes away when its games end; an empty pick falls back to All Sports. Picking a chip updates the home Your Multiview section too.
 - Removed the explainer under Add These In YouTube TV. Also in beta and Beta 3.0.
