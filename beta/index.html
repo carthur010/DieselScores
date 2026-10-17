@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261016230104">
+<meta name="build" content="20261016230526">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -454,7 +454,7 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .mv-cta { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
 .mv-cta svg { width: 15px; height: 15px; }
 .mv-wrap { padding-bottom: 28px; }
-.mv-head { display: flex; align-items: center; gap: 12px; padding: 14px 2px 12px; }
+.mv-head { display: flex; align-items: center; gap: 12px; padding: calc(env(safe-area-inset-top, 0px) + 14px) 2px 12px; }
 .mv-head > div { flex: 1; min-width: 0; }
 .mv-head b { display: block; font-size: 22px; font-weight: 800; line-height: 1.15; }
 .mv-head small { color: var(--muted); font-size: 13px; }
@@ -475,7 +475,7 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .mv-tm b { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .mv-st { font-size: 13px; font-weight: 700; }
 .mv-st .live { color: #ff6b70; }
-.mv-tag { align-self: flex-start; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; background: var(--star); color: #111; padding: 2px 6px; border-radius: 5px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mv-tag { align-self: flex-start; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; line-height: 1.35; background: var(--star); color: #111; padding: 2px 6px; border-radius: 5px; max-width: 100%; }
 .mv-watch { margin-top: auto; text-align: center; font-size: 12px; font-weight: 800; color: #fff; background: rgba(255,255,255,.15); border-radius: 999px; padding: 7px 8px; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mv-watch.none { opacity: .6; font-weight: 600; }
 .mv-empty { align-items: center; justify-content: center; color: rgba(255,255,255,.5); background: #18181b; font-size: 13px; text-align: center; cursor: default; }
@@ -1384,7 +1384,9 @@ button.brand, button.brand span { color: var(--accent); }
       const me = sc.find(s => String(s.id) === String(t.id)), opp = sc.find(s => s !== me);
       if (me && opp) { t.seasonRecord = t.record; t.record = `${me.wins || 0}-${opp.wins || 0}`; t.seriesRec = true; }
     });
-    const gstate = type.state || "pre";
+    // Postponed or canceled: ESPN can mark it final with a 0-0 score; show it like an unplayed game
+    const ppd = /POSTPONED|CANCELED|CANCELLED/.test(type.name || "");
+    const gstate = ppd ? "pre" : (type.state || "pre");
     const nets = [];
     (comp.geoBroadcasts || []).forEach(b => {
       if (/radio/i.test(b.type?.shortName || "")) return;   // ESPN lists radio too (e.g. "ERADM" = ESPN Radio); TV and streaming only
@@ -1398,7 +1400,7 @@ button.brand, button.brand span { color: var(--accent); }
     const odds = comp.odds?.[0];
     let status;
     if (gstate === "pre") {
-      status = type.name === "STATUS_POSTPONED" ? "Postponed" : (type.completed ? type.shortDetail : timeLabel(ev.date));
+      status = ppd ? (/CANCEL/.test(type.name) ? "Canceled" : "Postponed") : (type.completed ? type.shortDetail : timeLabel(ev.date));
     } else {
       status = type.shortDetail || type.detail || "";
       // "Delayed, Top 1st" and "Rain Delay, Bot 3rd" just say Delayed (Suspended the same)
@@ -3792,7 +3794,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (!mvSport) { const d = new Date().getDay(); mvSport = anyFb && (d === 0 || d === 6 || pool.filter(g => g.state === "in" && g.lg.sport === "Football").length >= 4) ? "football" : "all"; }
     const f = (MV_SPORTS.find(x => x[0] === mvSport) || MV_SPORTS[0])[2];
     const live = pool.filter(g => g.state === "in" && f(g)).sort((a, b) => mvScore(b) - mvScore(a));
-    const soon = pool.filter(g => g.state === "pre" && f(g) && new Date(g.date) - Date.now() < 60 * 60e3).sort((a, b) => new Date(a.date) - new Date(b.date));
+    const soon = pool.filter(g => g.state === "pre" && f(g) && !/Postponed|Canceled/.test(g.status) && new Date(g.date) - Date.now() < 60 * 60e3 && new Date(g.date) - Date.now() > -20 * 60e3).sort((a, b) => new Date(a.date) - new Date(b.date));
     return { live, soon, anyFb, all: pool };
   }
   function mvPick(reset) {
