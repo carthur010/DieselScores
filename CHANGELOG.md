@@ -2,6 +2,11 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 17, 2026: Beta and Beta 3.0 (6:00 PM, not on live yet)
+- New people no longer see "Not On Your Services" on every game. Until they pick TV & Streaming, games just show the channel (FOX, ESPN, Peacock). Once services are picked, the note comes back for games they can't watch.
+- Welcome is now three short steps with progress dots and Back / Next: 1) Follow your teams (setup code still here), 2) Your Leagues, grouped by sport, 3) How Do You Watch? with one-tap presets: YouTube TV, Cable Or Satellite, Another Live TV App, Streaming Apps Only, Antenna And Free Channels. Fine-Tune opens the full service list and Home Market. Free picks (Fandango, YouTube) come with every preset. League and service chips in Welcome are bigger and easier to tap.
+- Beta 3.0: sheets (Welcome, Your Teams, Settings, Leagues) sit above the bottom bar, so their last row and the Done button are no longer hidden behind it.
+
 ## Oct 17, 2026: Live (3:55 PM)
 - Long network names are shortened everywhere so they fit: SEC Network → SECN, ACC Network → ACCN, Big Ten Network → BTN, CBS Sports Network → CBSSN, NFL Network → NFLN, USA Network → USA, Golf Channel → GOLF.
 - Compact cards show the channel next to the league tag (NCAAF  FOX) before and during games. Also in beta and Beta 3.0.
