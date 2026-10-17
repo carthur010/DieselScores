@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261016231355">
+<meta name="build" content="20261016231657">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -127,6 +127,19 @@ header.top {
 .chip.hot .n { opacity: 1; font-weight: 700; }
 
 main { padding-block: 16px 48px; display: grid; gap: 18px; }
+/* Section order (Settings › Layout & Display): everything else rides with You Are Looking Live */
+#main > * { order: var(--o-live, 3); }
+#main > [data-block="fy-mine"] { order: var(--o-mine, 0); }
+#main > [data-block="mv"] { order: var(--o-mv, 1); }
+#main > [data-block="worth"] { order: var(--o-worth, 2); }
+#main > .pick-banner { order: -1; }
+#main > [data-block="fy-next"], #main > [data-block="fy-else"], #main > .quiet, #main > .updated { order: 99; }
+.sec-list { display: grid; gap: 6px; }
+.sec-it { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.sec-it span { flex: 1; font-weight: 600; }
+.sec-it i { font-style: normal; color: var(--muted); font-size: 12px; font-weight: 700; width: 16px; }
+.sec-it button { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: var(--ink); font-size: 13px; cursor: pointer; }
+.sec-it button:disabled { opacity: .3; cursor: default; }
 .updated { font-size: 12px; color: var(--muted); text-align: right; }
 
 /* Sections */
@@ -3216,6 +3229,7 @@ button.brand, button.brand span { color: var(--accent); }
   }
 
   function render() {
+    applySecOrder();
     mvShownR = false; if (mvOpen) setTimeout(paintMv, 0);
     { const gs = allGames(); rememberOdds(gs); applySeeds(Object.values(state.data).flatMap(d => d.events || [])); loadSeeds(gs); setTimeout(() => fillClosingLines(allGames()), 0); }
     document.querySelectorAll("[data-view]").forEach(b => { const on = b.dataset.view === state.view; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
@@ -4691,6 +4705,19 @@ button.brand, button.brand span { color: var(--accent); }
       toast("Alerts On", "You'll get a heads-up when a game turns close, goes to overtime, or an upset starts brewing.", "Works while Scores is open");
     }
   }
+  // ---- Home section order: Your Multiview, Worth A Watch, You Are Looking Live (and Your Teams in Beta 3.0)
+  const SEC_NAMES = { mine: "Your Teams", mv: "Your Multiview", worth: "Worth A Watch", live: "You Are Looking Live" };
+  const secKeys = () => ("homeLayout" in state ? ["mine", "mv", "worth", "live"] : ["mv", "worth", "live"]);
+  function secOrder() {
+    const keys = secKeys(), saved = store.get("secOrder", []).filter(k => keys.includes(k));
+    return saved.concat(keys.filter(k => !saved.includes(k)));
+  }
+  function applySecOrder() { const m = document.getElementById("main"); if (m) secOrder().forEach((k, i) => m.style.setProperty("--o-" + k, i)); }
+  function secRow() {
+    const ord = secOrder();
+    return `<div class="set-row set-col"><div class="set-lbl">Section Order<small>How sections stack on ${"homeLayout" in state ? "For You, Live and All" : "Live and All"}. Your teams strip stays on top.</small></div>
+      <div class="sec-list">${ord.map((k, i) => `<div class="sec-it"><i>${i + 1}</i><span>${esc(SEC_NAMES[k])}</span><button data-sec-mv="${k}" data-dir="-1" ${i === 0 ? "disabled" : ""} aria-label="Move ${esc(SEC_NAMES[k])} up">▲</button><button data-sec-mv="${k}" data-dir="1" ${i === ord.length - 1 ? "disabled" : ""} aria-label="Move ${esc(SEC_NAMES[k])} down">▼</button></div>`).join("")}</div></div>`;
+  }
   function segRow(label, key, value, options, hint) {
     return `<div class="set-row"><div class="set-lbl">${esc(label)}${hint ? `<small>${esc(hint)}</small>` : ""}</div>
       <div class="seg set-seg">${options.map(([v, l]) => `<button data-set="${key}" data-val="${v}" class="${String(value) === String(v) ? "on" : ""}">${esc(l)}</button>`).join("")}</div></div>`;
@@ -4721,7 +4748,7 @@ button.brand, button.brand span { color: var(--accent); }
         segRow("Always Expand My Teams", "expandFavs", state.expandFavs ? "on" : "off", [["on", "On"], ["off", "Off"]], "In Compact and Simple, your teams' games stay full size") +
         segRow("Color", "palette", store.get("palette", "red"), [["red", "Red"], ["navy", "Navy"], ["green", "Green"], ["purple", "Purple"], ["orange", "Orange"]]) +
         segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
-        segRow("Betting Odds", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "Lines on game cards and in Gamecast")) +
+        segRow("Betting Odds", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "Lines on game cards and in Gamecast") + secRow()) +
       setSection("tv", "TV & Streaming", `${state.tv.services.length} service${state.tv.services.length === 1 ? "" : "s"} · ${(MARKETS[state.tv.market] || MARKETS.other).name}`,
         segRow("On My Services Tab", "svcTab", store.get("svcTab", true) ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "A tab of games you can watch on your services") +
         `<div class="set-row set-col"><div class="set-lbl">Home Market<small>Sets which regional channels you get and when local games are blacked out on league packages</small></div>
@@ -4742,6 +4769,8 @@ button.brand, button.brand span { color: var(--accent); }
   document.getElementById("ssheet-x").onclick = () => { document.getElementById("ssheet").hidden = true; };
   document.getElementById("ssheet").addEventListener("click", async e => {
     if (e.target.id === "ssheet") { document.getElementById("ssheet").hidden = true; return; }
+    const sm = e.target.closest("[data-sec-mv]");
+    if (sm) { const ord = secOrder(), i = ord.indexOf(sm.dataset.secMv), j = i + (+sm.dataset.dir); if (i >= 0 && j >= 0 && j < ord.length) { [ord[i], ord[j]] = [ord[j], ord[i]]; store.set("secOrder", ord); applySecOrder(); renderSettings(); render(); } return; }
     const b = e.target.closest("[data-set]");
     if (b) {
       const key = b.dataset.set, val = b.dataset.val;
