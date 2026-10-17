@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 17, 2026: Live (12:47 PM)
+- Multiview tiles line up: every tile has the same rows (clock, down and distance, tag). A game with no down and distance or no tag keeps the space, so all four tiles match. Tags stay on one line. Also in beta and Beta 3.0.
+
 ## Oct 17, 2026: Live (12:40 PM)
 - Multiview tiles: the clock and down and distance are white and bold like the scores, instead of a red clock and a faded line.
 - Your Multiview section ends at the Make This Your Multiview button (no extra line under it). Also in beta and Beta 3.0.
