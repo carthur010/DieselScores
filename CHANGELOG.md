@@ -2,6 +2,12 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 16, 2026: Live (11:10 PM)
+- Multiview header sits below the iPhone status bar, and the reason tags (One-Score Game · Red Zone) wrap instead of cutting off.
+- Postponed and canceled games show no 0-0 score, just Postponed or Canceled, and never land in Multiview.
+- By Time lists live games first, then upcoming, then finals.
+- Hockey before a period starts reads "Start of 2nd" (or "Start of OT") instead of "P2 20:00". Also in beta and Beta 3.0.
+
 ## Oct 16, 2026: Live (11:05 PM)
 - Make This Your Multiview: a button at the top of Worth A Watch (or You Are Looking Live) when 2+ of your games are live. Scores picks the four best games on right now and lays them out as a quad box with the network, score, clock, down and distance, and why each made it (Field Goal Game, One-Score Game, Red Zone, Tied, Upset Watch, Your Team). Football ranking boosts one-score games in the second half and 4th quarter, red zone and field goal games, and drops blowouts.
 - Multiview is built for YouTube TV: only games YouTube TV carries make it (no Peacock, Paramount+ or Prime-only games), and an Add These In YouTube TV list names them the way YouTube TV does ("Washington at Purdue · FOX"). Also Worth A Look lists the next best games with Swap In.
