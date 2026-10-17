@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta 3.0</title>
-<meta name="build" content="20261017125152">
+<meta name="build" content="20261017125337">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1522,7 +1522,8 @@ button.brand, button.brand span { color: var(--accent); }
       if (gstate === "in" && lg.label && clk && p && !/half|end|delay|susp|int/i.test(status)) {
         const on = p > lg.reg ? otName(lg, p, ev.season?.type === 3) : null;
         // College football overtime has no game clock (ESPN sends 0:00), so just "OT", "2OT"
-        status = on === "SO" ? "Shootout" : on && lg.id === "ncaaf" ? on : (on || lg.label + p) + " " + clk;
+        // Clock first, then the period: "3:57 1st", "5:00 OT" (soccer keeps its minute)
+        status = on === "SO" ? "Shootout" : on && lg.id === "ncaaf" ? on : clk + " " + (on || ord(p));
         // Hockey between the intermission and the faceoff: "Start of 2nd", not "P2 20:00"
         if (lg.sport === "Hockey" && p > 1 && on !== "SO" && (clk === "20:00" || (on && clk === "5:00"))) status = "Start of " + (on || ord(p));
       }
