@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261016225909">
+<meta name="build" content="20261016230104">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1151,7 +1151,9 @@ button.brand, button.brand span { color: var(--accent); }
   const ANY_RSN = /^(MSG|MSG ?2|MSGSN|MSG\+|MSG WNY|YES|SNY|MNMT|MASN2?|MASN\+|SNP|MARQ|ALT|SCHN|SNLA|SPEC SN|MIDCO|SWX|DSN|PSN|GCSEN|ABTV|BCSN|SEN|OC16|NSN|RSN|AZFS|HHN|BJHN|TGN|The Spot)$|NBC ?Sports|NBCS-|Spectrum ?Sport|SportsNet|Sports Network|Sports Net|FanDuel Sports|FDSN|FDSW|NESN|CHSN|Marquee|Bally|Root Sports|Altitude|Monumental|KJZZ|Space City|Victory\+|Gotham|MavsTV|Jazz\+|Suns\+|BlazerVision|Wild\+|Blue Note\+|Midco|YurView|Arizona'?s Family Sports|Hockey Network|Gameday Network|Angels Broadcast/i;
   // kind: bundle = live TV (carries the national channels and in-market regionals), stream, package, regional
   const SERVICES = [
-    { id: "youtubetv", grp: "tv", name: "YouTube TV", kind: "bundle", url: "https://tv.youtube.com/", scheme: "youtubetv://", rsn: /SNY|SportsNet NY|NBC ?Sports|NBCS-/i },
+    { id: "youtubetv", grp: "tv", name: "YouTube TV", kind: "bundle", url: "https://tv.youtube.com/", scheme: "youtubetv://", rsn: /SNY|SportsNet NY|NBC ?Sports|NBCS-/i,
+      // ESPN Unlimited (ESPN+) is in YouTube TV's base plan since Sept 1, 2026, Multiview included
+      also: /ESPN\+|ESPN Unlimited|ESPN Deportes\+|^ESPN3$|^ACCNX$|ACC Network Extra|^SECN\+$|SEC Network\+|Big 12 Now/i },
     { id: "hulu", grp: "tv", name: "Hulu + Live TV", kind: "bundle", url: "https://www.hulu.com/live-tv", scheme: "hulu://", rsn: /SNY|SportsNet NY|NBC ?Sports|NBCS-/i, also: /ESPN\+|ESPN Unlimited/i },
     { id: "sling", grp: "tv", name: "Sling TV", kind: "bundle", url: "https://watch.sling.com/", scheme: "sling://", rsn: /$^/, lacks: /^(CBS|CBSSN|CBS Sports Network)$/i },
     { id: "fubo", grp: "tv", name: "Fubo", kind: "bundle", url: "https://www.fubo.tv/", scheme: "fubotv://", rsn: /MSG|YES|SNY|NBC ?Sports|NBCS-|NESN|Marquee|Spectrum/i, lacks: /^(TNT|TBS|truTV)$/i },
@@ -3784,7 +3786,7 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function mvPool() {
     // YouTube TV Multiview only takes channels YouTube TV carries, so Peacock, Paramount+, Prime
-    // and other streaming-only games are left out (CBS games still count: YouTube TV has CBS)
+    // and other streaming-only games are left out (CBS games still count, and so do ESPN+ games)
     const pool = allGames().filter(g => inMyWorld(g) && (!hasYTTV() || onYTTV(g)));
     const anyFb = pool.some(g => g.state === "in" && g.lg.sport === "Football");
     if (!mvSport) { const d = new Date().getDay(); mvSport = anyFb && (d === 0 || d === 6 || pool.filter(g => g.state === "in" && g.lg.sport === "Football").length >= 4) ? "football" : "all"; }
