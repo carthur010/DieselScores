@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261016230526">
+<meta name="build" content="20261016230910">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1410,6 +1410,8 @@ button.brand, button.brand span { color: var(--accent); }
         const on = p > lg.reg ? otName(lg, p, ev.season?.type === 3) : null;
         // College football overtime has no game clock (ESPN sends 0:00), so just "OT", "2OT"
         status = on === "SO" ? "Shootout" : on && lg.id === "ncaaf" ? on : (on || lg.label + p) + " " + clk;
+        // Hockey between the intermission and the faceoff: "Start of 2nd", not "P2 20:00"
+        if (lg.sport === "Hockey" && p > 1 && on !== "SO" && (clk === "20:00" || (on && clk === "5:00"))) status = "Start of " + (on || ord(p));
       }
     }
     const g = {
@@ -2249,7 +2251,9 @@ button.brand, button.brand span { color: var(--accent); }
   }
   // By Time: the same cards as By League, in start-time order with a league tag
   function timeline(list) {
-    const sorted = list.slice().sort((x, y) => (new Date(x.date) - new Date(y.date)) || x.lg.id.localeCompare(y.lg.id));
+    // Live games first, then upcoming, then finals; start time within each
+    const ORDT = { in: 0, pre: 1, post: 2 };
+    const sorted = list.slice().sort((x, y) => (ORDT[x.state] ?? 1) - (ORDT[y.state] ?? 1) || (new Date(x.date) - new Date(y.date)) || x.lg.id.localeCompare(y.lg.id));
     return `<div class="grid">${sorted.map(g => card(g, true)).join("")}</div>`;
   }
 
