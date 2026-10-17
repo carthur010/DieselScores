@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261016133259">
+<meta name="build" content="20261016203740">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -1358,6 +1358,8 @@ button.brand, button.brand span { color: var(--accent); }
       status = type.name === "STATUS_POSTPONED" ? "Postponed" : (type.completed ? type.shortDetail : timeLabel(ev.date));
     } else {
       status = type.shortDetail || type.detail || "";
+      // "Delayed, Top 1st" and "Rain Delay, Bot 3rd" just say Delayed (Suspended the same)
+      if (/^(Rain )?Delay(ed)?\b/i.test(status)) status = "Delayed"; else if (/^Suspended\b/i.test(status)) status = "Suspended";
       const p = st.period || 0, clk = st.displayClock;
       if (gstate === "in" && lg.label && clk && p && !/half|end|delay|susp|int/i.test(status)) {
         const on = p > lg.reg ? otName(lg, p, ev.season?.type === 3) : null;
