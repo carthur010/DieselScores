@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta 3.0</title>
-<meta name="build" content="20261016232718">
+<meta name="build" content="20261016232930">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -494,6 +494,7 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .mv-empty { align-items: center; justify-content: center; color: rgba(255,255,255,.5); background: #18181b; font-size: 13px; text-align: center; cursor: default; }
 .mv-hint { margin: 12px 4px 0; font-size: 13px; }
 .mv-chips { margin: 0 0 10px; }
+.mv-chips button small { opacity: .6; font-weight: 700; margin-left: 2px; }
 .mv-mini { margin: 12px 12px 0; border-radius: 14px; gap: 4px; padding: 4px; }
 .mv-tile.mv-sm { min-height: 0; padding: 8px 9px 9px; gap: 4px; border-radius: 10px; }
 .mv-sm .mv-tm { font-size: 15px; } .mv-sm .mv-tm b { font-size: 19px; } .mv-sm .mv-tm img, .mv-sm .mv-tm i { width: 20px; height: 20px; }
@@ -4010,7 +4011,18 @@ button.brand, button.brand span { color: var(--accent); }
   let mvOpen = false, mvSlots = [], mvShownR = false, mvSport = null;
   const mvLocks = new Set();
   const mvKey = g => g.lg.id + ":" + g.id;
-  const MV_SPORTS = [["all", "All Sports", () => true], ["football", "Football", g => g.lg.sport === "Football"], ["nfl", "NFL", g => g.lg.id === "nfl"], ["ncaaf", "College Football", g => g.lg.id === "ncaaf"]];
+  // Filter chips: All Sports, Football (when NFL and college are both on), then one per league that has a live game
+  const MV_SPORT_ORD = ["Football", "Basketball", "Baseball", "Hockey", "Soccer"];
+  function mvFilters(pool) {
+    const live = pool.filter(g => g.state === "in"), n = f => live.filter(f).length;
+    const lgs = [...new Map(live.map(g => [g.lg.id, g.lg])).values()]
+      .sort((a, b) => ((MV_SPORT_ORD.indexOf(a.sport) + 1) || 9) - ((MV_SPORT_ORD.indexOf(b.sport) + 1) || 9) || n(g => g.lg.id === b.id) - n(g => g.lg.id === a.id));
+    const out = [["all", "All Sports", () => true]];
+    if (lgs.filter(l => l.sport === "Football").length > 1) out.push(["football", "Football", g => g.lg.sport === "Football"]);
+    lgs.forEach(l => out.push(["lg:" + l.id, l.id === "ncaaf" ? "College Football" : (l.short || l.name), g => g.lg.id === l.id]));
+    return out.map(([id, label, f]) => [id, label, f, n(f)]);
+  }
+  let mvCur = ["all", "All Sports", () => true, 0], mvFilt = [];
   const hasYTTV = () => (state.tv || DEFAULT_TV).services.includes("youtubetv");
   const onYTTV = g => !!g.watch?.some(w => w.app === "YouTube TV");
   const mvMargin = g => Math.abs((parseInt(g.teams[0]?.score) || 0) - (parseInt(g.teams[1]?.score) || 0));
@@ -4054,7 +4066,10 @@ button.brand, button.brand span { color: var(--accent); }
     const pool = allGames().filter(g => inMyWorld(g) && (!hasYTTV() || onYTTV(g)));
     const anyFb = pool.some(g => g.state === "in" && g.lg.sport === "Football");
     if (!mvSport) { const d = new Date().getDay(); mvSport = anyFb && (d === 0 || d === 6 || pool.filter(g => g.state === "in" && g.lg.sport === "Football").length >= 4) ? "football" : "all"; }
-    const f = (MV_SPORTS.find(x => x[0] === mvSport) || MV_SPORTS[0])[2];
+    mvFilt = mvFilters(pool);
+    // Football with only one football league on means that league; a league with nothing live falls back to All Sports
+    mvCur = mvFilt.find(x => x[0] === mvSport) || (mvSport === "football" && mvFilt.find(x => x[0] === "lg:nfl" || x[0] === "lg:ncaaf")) || mvFilt[0];
+    const f = mvCur[2];
     const live = pool.filter(g => g.state === "in" && f(g)).sort((a, b) => mvScore(b) - mvScore(a));
     const soon = pool.filter(g => g.state === "pre" && f(g) && !/Postponed|Canceled/.test(g.status) && new Date(g.date) - Date.now() < 60 * 60e3 && new Date(g.date) - Date.now() > -20 * 60e3).sort((a, b) => new Date(a.date) - new Date(b.date));
     return { live, soon, anyFb, all: pool };
@@ -4101,13 +4116,13 @@ button.brand, button.brand span { color: var(--accent); }
     const { anyFb } = mvPool();
     const liveN = shown.filter(g => g.state === "in").length;
     const yt = hasYTTV() ? shown.filter(onYTTV) : [];
-    const chips = anyFb ? `<div class="lp-chips mv-chips">${MV_SPORTS.map(([id, label]) => `<button class="${mvSport === id ? "on" : ""}" data-mv-sport="${id}">${label}</button>`).join("")}</div>` : "";
+    const chips = mvFilt.length > 2 ? `<div class="lp-chips mv-chips">${mvFilt.map(([id, label, , n]) => `<button class="${mvCur[0] === id ? "on" : ""}" data-mv-sport="${id}">${esc(label)}${id !== "all" ? ` <small>${n}</small>` : ""}</button>`).join("")}</div>` : "";
     const list = yt.length ? `<div class="gc-c mv-list"><h3>Add These In YouTube TV</h3>
         ${yt.map(g => `<div class="mv-li" data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><i>${tiles.indexOf(g) + 1}</i><span><b>${esc(mvName(g))}</b><small>${esc([netLabel(g), g.state === "in" ? g.status : "Starts " + timeLabel(g.date)].filter(Boolean).join(" · "))}</small></span></div>`).join("")}</div>` : "";
     const benchHTML = bench.length ? `<div class="gc-c mv-list"><h3>Also Worth A Look</h3>${bench.map(g => `<div class="mv-li"><span data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><b>${esc(mvName(g))}</b><small>${esc([netLabel(g), g.status, mvWhy(g)].filter(Boolean).join(" · "))}</small></span><button class="chip" data-mv-swap="${esc(mvKey(g))}">Swap In</button></div>`).join("")}</div>` : "";
     el.innerHTML = `<div class="gc-wrap mv-wrap"><div class="mv-head"><button class="circ" data-gclose aria-label="Close">${XIC}</button><div><b>Your Multiview</b><small>${liveN ? `${liveN} live · reshuffles as games end or tighten` : "Nothing live yet"}</small></div><button class="chip" data-mv-shuffle>Reshuffle</button></div>
       ${chips}
-      ${shown.length ? `<div class="mv-grid">${tiles.map((g, i) => mvTile(g, i)).join("")}</div>` : `<div class="block empty">Nothing live ${mvSport !== "all" ? "in " + esc((MV_SPORTS.find(x => x[0] === mvSport) || [])[1] || "") + " " : ""}right now.</div>`}
+      ${shown.length ? `<div class="mv-grid">${tiles.map((g, i) => mvTile(g, i)).join("")}</div>` : `<div class="block empty">Nothing live ${mvCur[0] !== "all" ? "in " + esc(mvCur[1]) + " " : ""}right now.</div>`}
       ${list}${benchHTML}
       <p class="hint mv-hint">${hasYTTV() ? "Only games on YouTube TV, so they all fit in its Multiview. " : ""}Tap a game for the full page. The pin keeps a game in its spot.</p></div>`;
   }
@@ -4116,7 +4131,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (!isToday()) return "";
     const { tiles } = mvPick(false), live = tiles.filter(g => g && g.state === "in");
     if (live.length < 2) return "";
-    const sp = mvSport && mvSport !== "all" ? (MV_SPORTS.find(x => x[0] === mvSport) || [])[1] : "";
+    const sp = mvCur[0] !== "all" ? mvCur[1] : "";
     return block("mv", "Your Multiview", sp || (hasYTTV() ? "YouTube TV" : ""),
       `<div class="mv-grid mv-mini">${tiles.map((g, i) => mvTile(g, i, true)).join("")}</div>
       <div class="mv-foot"><button class="chip on mv-cta" data-mv>${MV_ICON}Make This Your Multiview</button><small>YouTube TV add list, swaps and pins</small></div>`);
@@ -4135,7 +4150,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (lk) { e.preventDefault(); e.stopPropagation(); const k = lk.dataset.mvLock; if (mvLocks.has(k)) mvLocks.delete(k); else mvLocks.add(k); paintMv(); return; }
     if (t.closest("[data-mv-shuffle]")) { e.stopPropagation(); mvPick(true); paintMv(); return; }
     const sp = t.closest("[data-mv-sport]");
-    if (sp) { e.stopPropagation(); mvSport = sp.dataset.mvSport; mvPick(true); paintMv(); return; }
+    if (sp) { e.stopPropagation(); mvSport = sp.dataset.mvSport; mvPick(true); paintMv(); render(); return; }
     const sw = t.closest("[data-mv-swap]");
     if (sw) { e.stopPropagation(); const k = sw.dataset.mvSwap; const { tiles } = mvPick(false); const by = new Map(tiles.filter(Boolean).map(g => [mvKey(g), g]));
       const open = mvSlots.map((x, i) => ({ x, i })).filter(o => !o.x || !mvLocks.has(o.x)).sort((p, q) => (p.x ? mvScore(by.get(p.x)) : -1e9) - (q.x ? mvScore(by.get(q.x)) : -1e9))[0];
