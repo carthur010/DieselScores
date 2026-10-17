@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 16, 2026: Live (8:40 PM)
+- Delayed games just say Delayed (not "Delayed, Top 1st"), so the label fits on cards and Simple rows. Rain delays too; suspended games say Suspended. Also in beta and Beta 3.0.
+
 ## Oct 16, 2026: Live (1:35 PM)
 - English channels first: when a game is on both a Spanish feed (ESPN Deportes, TUDN, Telemundo, Universo) and an English one, the row label and Watch button use the English one (Levante vs. Deportivo now says ESPN+ and Watch On ESPN, not YouTube TV for ESPN Deportes). Spanish feeds lead only when they're the only option, or if you picked a Spanish service in TV Settings. ESPN Deportes shortens to ESPN Dep. so it fits under the time. Also in beta and Beta 3.0.
 
