@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261017123003">
+<meta name="build" content="20261017123310">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -513,6 +513,8 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .mv-li > span { flex: 1; min-width: 0; }
 .mv-li b { display: block; font-weight: 700; }
 .mv-li small { color: var(--muted); font-size: 13px; }
+.mv-li b small.mv-rk { color: var(--muted); font-size: 13px; font-weight: 600; }
+.mv-li > i.mv-bn { background: transparent; color: var(--muted); border: 1.5px solid var(--line); }
 @media (min-width: 900px) { .mv-tile { min-height: 270px; padding: 14px; } .mv-tm { font-size: 22px; } .mv-tm b { font-size: 34px; } .mv-tm img, .mv-tm i { width: 36px; height: 36px; } .mv-st { font-size: 15px; } }
 .blk-f small { color: var(--muted); font-weight: 700; margin-left: 5px; }
 .lp-filter { margin: -4px 0 12px; }
@@ -3806,6 +3808,8 @@ button.brand, button.brand span { color: var(--accent); }
     }
     return s;
   }
+  // Same names with the AP / CFP rank in front ("Florida at 7 Texas")
+  const mvNameHTML = g => { const [a, h] = g.teams, col = !!CONFS[g.lg.id]; const nm = t => (t.rank ? `<small class="mv-rk">${esc(t.rank)}</small> ` : "") + esc(col ? (t.name || t.abbr) : (t.full || t.name || t.abbr)); return `${nm(a)} at ${nm(h)}`; };
   const mvName = g => { const [a, h] = g.teams, col = !!CONFS[g.lg.id]; const nm = t => col ? (t.name || t.abbr) : (t.full || t.name || t.abbr); return `${nm(a)} at ${nm(h)}`; };
   function mvWhy(g) {
     if (g.state === "pre") return "Starts " + timeLabel(g.date);
@@ -3884,8 +3888,8 @@ button.brand, button.brand span { color: var(--accent); }
     const yt = hasYTTV() ? shown.filter(onYTTV) : [];
     const chips = mvFilt.length > 2 ? `<div class="lp-chips mv-chips">${mvFilt.map(([id, label, , n]) => `<button class="${mvCur[0] === id ? "on" : ""}" data-mv-sport="${id}">${esc(label)}${id !== "all" ? ` <small>${n}</small>` : ""}</button>`).join("")}</div>` : "";
     const list = yt.length ? `<div class="gc-c mv-list"><h3>Add These In YouTube TV</h3>
-        ${yt.map(g => `<div class="mv-li" data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><i>${tiles.indexOf(g) + 1}</i><span><b>${esc(mvName(g))}</b><small>${esc([netLabel(g), g.state === "in" ? g.status : "Starts " + timeLabel(g.date)].filter(Boolean).join(" · "))}</small></span></div>`).join("")}</div>` : "";
-    const benchHTML = bench.length ? `<div class="gc-c mv-list"><h3>Also Worth A Look</h3>${bench.map(g => `<div class="mv-li"><span data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><b>${esc(mvName(g))}</b><small>${esc([netLabel(g), g.status, mvWhy(g)].filter(Boolean).join(" · "))}</small></span><button class="chip" data-mv-swap="${esc(mvKey(g))}">Swap In</button></div>`).join("")}</div>` : "";
+        ${yt.map(g => `<div class="mv-li" data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><i>${tiles.indexOf(g) + 1}</i><span><b>${mvNameHTML(g)}</b><small>${esc([netLabel(g), g.state === "in" ? g.status : "Starts " + timeLabel(g.date)].filter(Boolean).join(" · "))}</small></span></div>`).join("")}</div>` : "";
+    const benchHTML = bench.length ? `<div class="gc-c mv-list"><h3>Also Worth A Look</h3>${bench.map((g, i) => `<div class="mv-li"><i class="mv-bn">${i + 5}</i><span data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><b>${mvNameHTML(g)}</b><small>${esc([netLabel(g), g.status, mvWhy(g)].filter(Boolean).join(" · "))}</small></span><button class="chip" data-mv-swap="${esc(mvKey(g))}">Swap In</button></div>`).join("")}</div>` : "";
     el.innerHTML = `<div class="gc-wrap mv-wrap"><div class="mv-head"><button class="circ" data-gclose aria-label="Close">${XIC}</button><div><b>Your Multiview</b><small>${liveN ? `${liveN} live · reshuffles as games end or tighten` : "Nothing live yet"}</small></div><button class="chip" data-mv-shuffle>Reshuffle</button></div>
       ${chips}
       ${shown.length ? `<div class="mv-grid">${tiles.map((g, i) => mvTile(g, i)).join("")}</div>` : `<div class="block empty">Nothing live ${mvCur[0] !== "all" ? "in " + esc(mvCur[1]) + " " : ""}right now.</div>`}
