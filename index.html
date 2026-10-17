@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores</title>
-<meta name="build" content="20261017125337">
+<meta name="build" content="20261017130506">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores">
@@ -1163,7 +1163,7 @@ button.brand, button.brand span { color: var(--accent); }
 
   // Where to watch. Your setup: YouTube TV + every streaming app. First match wins.
   // ---- Where to watch: what each service carries, filtered by the services you pick in TV Settings
-  const NATIONAL = /^(ABC|CBS|NBC|FOX|CW|The CW|ESPN|ESPN2|ESPNU|ESPNEWS|SECN|SEC Network|ACCN|ACC Network|BTN|Big Ten Network|FS1|FS2|TNT|TBS|truTV|NFL ?Net(work)?|NFLN|MLB ?Net(work)?|MLBN|NBA ?TV|NHL ?Net(work)?|NHLN|CBSSN|CBS Sports Network|USA|USA Net(work)?|Golf|Golf Channel|Telemundo|Universo|Univision|UniMás|TUDN|Galavisión|ION|ESPN Deportes|FOX Deportes|beIN SPORTS|beIN Sports|beIN SPORTS en Español|beIN Sports en Espanol|NFL RedZone)$/i;
+  const NATIONAL = /^(ABC|CBS|NBC|FOX|CW|The CW|ESPN|ESPN2|ESPNU|ESPNEWS|SECN|SEC Network|ACCN|ACC Network|BTN|Big Ten Network|FS1|FS2|TNT|TBS|truTV|NFL ?Net(work)?|NFLN|MLB ?Net(work)?|MLBN|NBA ?TV|NHL ?Net(work)?|NHLN|CBSSN|CBS Sports Network|USA|USA Net(work)?|Golf|Golf Channel|Telemundo|Universo|Univision|UniMás|TUDN|Galavisión|ION|NBCSN|NBC Sports Network|ESPN Deportes|FOX Deportes|beIN SPORTS|beIN Sports|beIN SPORTS en Español|beIN Sports en Espanol|NFL RedZone)$/i;
   // Home markets and their regional sports networks
   const MARKETS = {
     nyc: { name: "New York", rsn: /^(MSG|MSG ?2|MSGSN|MSG Sportsnet|MSG\+|YES|YES Network|SNY|SportsNet NY)$/i },
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
   // Normalize team-sport games
   // =====================================================================
   // Network shorthand → the names the TV matching knows. NBC Sports Chicago became CHSN (2024),
-  // NBC Sports Washington became Monumental (2023); NBCSN shut down in 2021.
+  // NBC Sports Washington became Monumental (2023). NBCSN shut down in 2021 and came back in Nov 2025 as NBC Sports Network (on YouTube TV).
   var NET_ALIAS = { NBCSBA: "NBCS-BA", NBCSCA: "NBCS-CA", NBCSP: "NBCS-PHI", NBCSPHI: "NBCS-PHI", NBCP: "NBCS-PHI",
     NBCSB: "NBCS-BOS", NBCSBOS: "NBCS-BOS", NBCC: "CHSN", NBCSC: "CHSN", NBCW: "Monumental", NBCSW: "Monumental", NBCS: "NBC",
     MNMT: "Monumental", MARQ: "Marquee", SPECSN: "Spectrum SportsNet", SNLA: "Spectrum SportsNet LA", FDSW: "FDSN West", NFLREDZONE: "NFL RedZone", REDZONE: "NFL RedZone", GOLF: "Golf Channel", FOX: "FOX", ABC: "ABC", CBS: "CBS", NBC: "NBC", ESPN: "ESPN", ESPN2: "ESPN2", FS1: "FS1", FS2: "FS2", TNT: "TNT", TBS: "TBS" };
@@ -1423,6 +1423,8 @@ button.brand, button.brand span { color: var(--accent); }
     (comp.broadcasts || []).forEach(b => (b.names || []).map(netName).forEach(name => {
       if (name && !RADIO_NAME.test(name) && !nets.some(n => n.name === name)) nets.push({ name, market: (b.market || "national").toLowerCase() });
     }));
+    // Peacock college games are simulcast on NBC Sports Network, which YouTube TV carries; ESPN only lists Peacock
+    if (CONFS[lg.id] && nets.some(n => /^Peacock$/i.test(n.name)) && !nets.some(n => /^(NBC|NBCSN|NBC Sports Network)$/i.test(n.name))) nets.push({ name: "NBCSN", market: "national" });
     const broadcast = nets.map(n => n.name).filter((v, i, a) => a.indexOf(v) === i).slice(0, 2).join(" / ");
     const odds = comp.odds?.[0];
     let status;
