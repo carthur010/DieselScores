@@ -2,6 +2,12 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 16, 2026: Live (11:05 PM)
+- Make This Your Multiview: a button at the top of Worth A Watch (or You Are Looking Live) when 2+ of your games are live. Scores picks the four best games on right now and lays them out as a quad box with the network, score, clock, down and distance, and why each made it (Field Goal Game, One-Score Game, Red Zone, Tied, Upset Watch, Your Team). Football ranking boosts one-score games in the second half and 4th quarter, red zone and field goal games, and drops blowouts.
+- Multiview is built for YouTube TV: only games YouTube TV carries make it (no Peacock, Paramount+ or Prime-only games), and an Add These In YouTube TV list names them the way YouTube TV does ("Washington at Purdue · FOX"). Also Worth A Look lists the next best games with Swap In.
+- Multiview filter: All Sports, Football, NFL, College Football. Opens on Football on Saturdays and Sundays or when 4+ football games are live. Reshuffles as games end or tighten; the pin keeps a game in place; Reshuffle starts fresh.
+- ESPN+ (ESPN Unlimited) counts as YouTube TV now that it's in YouTube TV's base plan: ESPN+, ACC Network Extra, SEC Network+ and Big 12 Now games show Watch On YouTube TV first and can go in Multiview. Also in beta and Beta 3.0.
+
 ## Oct 16, 2026: Live (8:40 PM)
 - Delayed games just say Delayed (not "Delayed, Top 1st"), so the label fits on cards and Simple rows. Rain delays too; suspended games say Suspended. Also in beta and Beta 3.0.
 
