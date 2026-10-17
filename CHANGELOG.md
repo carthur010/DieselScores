@@ -2,6 +2,10 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 16, 2026: Live (11:20 PM)
+- Your Multiview is its own section above Worth A Watch on Live and All (For You in Beta 3.0): the four picks as a small quad (network, score, clock, down and distance, why it made it), with a Make This Your Multiview button for the full view. Shows when 2+ YouTube TV games are live. The button inside Worth A Watch and Today is gone.
+- Section Order in Settings › Layout & Display: move Your Multiview, Worth A Watch and You Are Looking Live up or down (plus Your Teams on For You in Beta 3.0). Saved on each device. Also in beta and Beta 3.0.
+
 ## Oct 16, 2026: Live (11:10 PM)
 - Multiview header sits below the iPhone status bar, and the reason tags (One-Score Game · Red Zone) wrap instead of cutting off.
 - Postponed and canceled games show no 0-0 score, just Postponed or Canceled, and never land in Multiview.
