@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261017124633">
+<meta name="build" content="20261017125152">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -3892,11 +3892,10 @@ button.brand, button.brand span { color: var(--accent); }
     const list = yt.length ? `<div class="gc-c mv-list"><h3>Add These In YouTube TV</h3>
         ${yt.map(g => `<div class="mv-li" data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><i>${tiles.indexOf(g) + 1}</i><span><b>${mvNameHTML(g)}</b><small>${esc([netLabel(g), g.state === "in" ? g.status : "Starts " + timeLabel(g.date)].filter(Boolean).join(" · "))}</small></span></div>`).join("")}</div>` : "";
     const benchHTML = bench.length ? `<div class="gc-c mv-list"><h3>Also Worth A Look</h3>${bench.map((g, i) => `<div class="mv-li"><i class="mv-bn">${i + 5}</i><span data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><b>${mvNameHTML(g)}</b><small>${esc([netLabel(g), g.status, mvWhy(g)].filter(Boolean).join(" · "))}</small></span><button class="chip" data-mv-swap="${esc(mvKey(g))}">Swap In</button></div>`).join("")}</div>` : "";
-    el.innerHTML = `<div class="gc-wrap mv-wrap"><div class="mv-head"><button class="circ" data-gclose aria-label="Close">${XIC}</button><div><b>Your Multiview</b><small>${liveN ? `${liveN} live · reshuffles as games end or tighten` : "Nothing live yet"}</small></div><button class="chip" data-mv-shuffle>Reshuffle</button></div>
+    el.innerHTML = `<div class="gc-wrap mv-wrap"><div class="mv-head"><button class="circ" data-gclose aria-label="Close">${XIC}</button><div><b>Your Multiview</b></div><button class="chip" data-mv-shuffle>Reshuffle</button></div>
       ${chips}
       ${shown.length ? `<div class="mv-grid">${tiles.map((g, i) => mvTile(g, i)).join("")}</div>` : `<div class="block empty">Nothing live ${mvCur[0] !== "all" ? "in " + esc(mvCur[1]) + " " : ""}right now.</div>`}
-      ${list}${benchHTML}
-      <p class="hint mv-hint">${hasYTTV() ? "Only games on YouTube TV, so they all fit in its Multiview. " : ""}Tap a game for the full page. The pin keeps a game in its spot.</p></div>`;
+      ${list}${benchHTML}</div>`;
   }
   // Home section: the same four picks as a small quad, with a button into the full Multiview
   function mvSection() {
