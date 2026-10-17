@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores</title>
-<meta name="build" content="20261017130506">
+<meta name="build" content="20261017131125">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores">
@@ -1423,8 +1423,6 @@ button.brand, button.brand span { color: var(--accent); }
     (comp.broadcasts || []).forEach(b => (b.names || []).map(netName).forEach(name => {
       if (name && !RADIO_NAME.test(name) && !nets.some(n => n.name === name)) nets.push({ name, market: (b.market || "national").toLowerCase() });
     }));
-    // Peacock college games are simulcast on NBC Sports Network, which YouTube TV carries; ESPN only lists Peacock
-    if (CONFS[lg.id] && nets.some(n => /^Peacock$/i.test(n.name)) && !nets.some(n => /^(NBC|NBCSN|NBC Sports Network)$/i.test(n.name))) nets.push({ name: "NBCSN", market: "national" });
     const broadcast = nets.map(n => n.name).filter((v, i, a) => a.indexOf(v) === i).slice(0, 2).join(" / ");
     const odds = comp.odds?.[0];
     let status;
@@ -3797,6 +3795,9 @@ button.brand, button.brand span { color: var(--accent); }
   let mvCur = ["all", "All Sports", () => true, 0], mvFilt = [];
   const hasYTTV = () => (state.tv || DEFAULT_TV).services.includes("youtubetv");
   const onYTTV = g => !!g.watch?.some(w => w.app === "YouTube TV");
+  // Peacock college games sometimes also air on NBC Sports Network (on YouTube TV), but ESPN never says which.
+  // They never take a tile on their own: they wait in Also Worth A Look as "may be on NBCSN" until you swap one in.
+  const mvMaybe = g => hasYTTV() && !onYTTV(g) && !!CONFS[g.lg.id] && (g.nets || []).some(n => /^Peacock$/i.test(n.name));
   const mvMargin = g => Math.abs((parseInt(g.teams[0]?.score) || 0) - (parseInt(g.teams[1]?.score) || 0));
   function mvScore(g) {
     let s = g.hype || 0;
@@ -3838,7 +3839,7 @@ button.brand, button.brand span { color: var(--accent); }
   function mvPool() {
     // YouTube TV Multiview only takes channels YouTube TV carries, so Peacock, Paramount+, Prime
     // and other streaming-only games are left out (CBS games still count, and so do ESPN+ games)
-    const pool = allGames().filter(g => inMyWorld(g) && (!hasYTTV() || onYTTV(g)));
+    const pool = allGames().filter(g => inMyWorld(g) && (!hasYTTV() || onYTTV(g) || mvMaybe(g)));
     const anyFb = pool.some(g => g.state === "in" && g.lg.sport === "Football");
     // Opens on All Sports: football still ranks high on its own, and your other teams (a Newcastle match) can get in
     if (!mvSport) mvSport = "all";
@@ -3855,7 +3856,7 @@ button.brand, button.brand span { color: var(--accent); }
     const byKey = new Map(live.concat(soon).map(g => [mvKey(g), g]));
     let slots = (reset ? mvSlots.map(k => mvLocks.has(k) ? k : null) : mvSlots.slice()).slice(0, 4).map(k => k && byKey.has(k) ? k : null);
     while (slots.length < 4) slots.push(null);
-    const rest = live.filter(g => !slots.includes(mvKey(g)));
+    const rest = live.filter(g => !slots.includes(mvKey(g)) && !mvMaybe(g));
     // Empty spots, and spots holding a game that hasn't started, go to the best live games left
     slots = slots.map(k => { if (k && (byKey.get(k).state === "in" || mvLocks.has(k))) return k; const nx = rest.shift(); return nx ? mvKey(nx) : k; });
     // A game that tightens up bumps the weakest unpinned tile
@@ -3890,11 +3891,11 @@ button.brand, button.brand span { color: var(--accent); }
     const { tiles, bench } = mvPick(false), shown = tiles.filter(Boolean);
     const { anyFb } = mvPool();
     const liveN = shown.filter(g => g.state === "in").length;
-    const yt = hasYTTV() ? shown.filter(onYTTV) : [];
+    const yt = hasYTTV() ? shown.filter(g => onYTTV(g) || mvMaybe(g)) : [];
     const chips = mvFilt.length > 2 ? `<div class="lp-chips mv-chips">${mvFilt.map(([id, label, , n]) => `<button class="${mvCur[0] === id ? "on" : ""}" data-mv-sport="${id}">${esc(label)}${id !== "all" ? ` <small>${n}</small>` : ""}</button>`).join("")}</div>` : "";
     const list = yt.length ? `<div class="gc-c mv-list"><h3>Add These In YouTube TV</h3>
-        ${yt.map(g => `<div class="mv-li" data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><i>${tiles.indexOf(g) + 1}</i><span><b>${mvNameHTML(g)}</b><small>${esc([netLabel(g), g.state === "in" ? g.status : "Starts " + timeLabel(g.date)].filter(Boolean).join(" · "))}</small></span></div>`).join("")}</div>` : "";
-    const benchHTML = bench.length ? `<div class="gc-c mv-list"><h3>Also Worth A Look</h3>${bench.map((g, i) => `<div class="mv-li"><i class="mv-bn">${i + 5}</i><span data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><b>${mvNameHTML(g)}</b><small>${esc([netLabel(g), g.status, mvWhy(g)].filter(Boolean).join(" · "))}</small></span><button class="chip" data-mv-swap="${esc(mvKey(g))}">Swap In</button></div>`).join("")}</div>` : "";
+        ${yt.map(g => `<div class="mv-li" data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><i>${tiles.indexOf(g) + 1}</i><span><b>${mvNameHTML(g)}</b><small>${esc([mvMaybe(g) ? "Check NBCSN" : netLabel(g), g.state === "in" ? g.status : "Starts " + timeLabel(g.date)].filter(Boolean).join(" · "))}</small></span></div>`).join("")}</div>` : "";
+    const benchHTML = bench.length ? `<div class="gc-c mv-list"><h3>Also Worth A Look</h3>${bench.map((g, i) => `<div class="mv-li"><i class="mv-bn">${i + 5}</i><span data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><b>${mvNameHTML(g)}</b><small>${esc([mvMaybe(g) ? "Peacock · may be on NBCSN" : netLabel(g), g.status, mvWhy(g)].filter(Boolean).join(" · "))}</small></span><button class="chip" data-mv-swap="${esc(mvKey(g))}">Swap In</button></div>`).join("")}</div>` : "";
     el.innerHTML = `<div class="gc-wrap mv-wrap"><div class="mv-head"><button class="circ" data-gclose aria-label="Close">${XIC}</button><div><b>Your Multiview</b></div><button class="chip" data-mv-shuffle>Reshuffle</button></div>
       ${chips}
       ${shown.length ? `<div class="mv-grid">${tiles.map((g, i) => mvTile(g, i)).join("")}</div>` : `<div class="block empty">Nothing live ${mvCur[0] !== "all" ? "in " + esc(mvCur[1]) + " " : ""}right now.</div>`}
