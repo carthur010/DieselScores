@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261016203740">
+<meta name="build" content="20261016225722">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -450,6 +450,47 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .gc-top .circ + .circ { margin-left: 8px; }
 .lg-link { cursor: pointer; }
 .blk-bar { padding: 10px 16px; border-bottom: 1px solid var(--line); }
+/* Make This Your Multiview: a quad box of the best games on right now */
+.mv-cta { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+.mv-cta svg { width: 15px; height: 15px; }
+.mv-wrap { padding-bottom: 28px; }
+.mv-head { display: flex; align-items: center; gap: 12px; padding: 14px 2px 12px; }
+.mv-head > div { flex: 1; min-width: 0; }
+.mv-head b { display: block; font-size: 22px; font-weight: 800; line-height: 1.15; }
+.mv-head small { color: var(--muted); font-size: 13px; }
+.mv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: #0d0d0f; padding: 6px; border-radius: 18px; }
+.mv-tile { position: relative; min-height: 196px; border-radius: 12px; padding: 10px 10px 12px; color: #fff; display: flex; flex-direction: column; gap: 6px; cursor: pointer; overflow: hidden; min-width: 0;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--ca) 60%, #111) 0%, #161618 52%, color-mix(in srgb, var(--ch) 60%, #111) 100%); }
+.mv-top { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; min-width: 0; }
+.mv-lg { opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.mv-net { background: rgba(255,255,255,.15); padding: 2px 6px; border-radius: 6px; letter-spacing: .02em; white-space: nowrap; flex: 0 0 auto; }
+.mv-lock { margin-left: auto; flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; border: 0; background: rgba(255,255,255,.12); color: rgba(255,255,255,.75); display: grid; place-items: center; padding: 0; cursor: pointer; }
+.mv-lock svg { width: 13px; height: 13px; }
+.mv-lock.on { background: var(--star); color: #111; }
+.mv-tm { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; opacity: .8; min-width: 0; }
+.mv-tm.lead { opacity: 1; }
+.mv-tm img, .mv-tm i { width: 26px; height: 26px; object-fit: contain; flex: 0 0 auto; }
+.mv-tm span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mv-tm small { opacity: .7; font-size: 12px; }
+.mv-tm b { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.mv-st { font-size: 13px; font-weight: 700; }
+.mv-st .live { color: #ff6b70; }
+.mv-tag { align-self: flex-start; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; background: var(--star); color: #111; padding: 2px 6px; border-radius: 5px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mv-watch { margin-top: auto; text-align: center; font-size: 12px; font-weight: 800; color: #fff; background: rgba(255,255,255,.15); border-radius: 999px; padding: 7px 8px; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mv-watch.none { opacity: .6; font-weight: 600; }
+.mv-empty { align-items: center; justify-content: center; color: rgba(255,255,255,.5); background: #18181b; font-size: 13px; text-align: center; cursor: default; }
+.mv-hint { margin: 12px 4px 0; font-size: 13px; }
+.mv-chips { margin: 0 0 10px; }
+.mv-n { width: 18px; height: 18px; border-radius: 50%; background: rgba(255,255,255,.9); color: #111; display: grid; place-items: center; font-size: 11px; letter-spacing: 0; flex: 0 0 auto; }
+.mv-st small { display: block; font-size: 12px; font-weight: 600; opacity: .8; margin-top: 2px; }
+.mv-list { margin-top: 12px; }
+.mv-list .hint { margin: -4px 0 8px; font-size: 13px; }
+.mv-li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); cursor: pointer; }
+.mv-li > i { font-style: normal; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 800; flex: 0 0 auto; }
+.mv-li > span { flex: 1; min-width: 0; }
+.mv-li b { display: block; font-weight: 700; }
+.mv-li small { color: var(--muted); font-size: 13px; }
+@media (min-width: 900px) { .mv-tile { min-height: 270px; padding: 14px; } .mv-tm { font-size: 22px; } .mv-tm b { font-size: 34px; } .mv-tm img, .mv-tm i { width: 36px; height: 36px; } .mv-st { font-size: 15px; } }
 .blk-f small { color: var(--muted); font-weight: 700; margin-left: 5px; }
 .lp-filter { margin: -4px 0 12px; }
 .sv-filter { margin: 0 0 12px; }
@@ -2890,6 +2931,7 @@ button.brand, button.brand span { color: var(--accent); }
   // "8 Games", or "8 Matches" when every game in the list is soccer
   function countLabel(n, games) { const m = games?.length && games.every(g => g.lg?.soccer); return `${n} ${m ? (n === 1 ? "Match" : "Matches") : (n === 1 ? "Game" : "Games")}`; }
   function block(id, title, meta, body, icon, tool) {
+    if (!tool && !mvShownR && ["worth", "fy-live", "feed"].includes(id) && isToday() && allGames().filter(g => g.state === "in" && inMyWorld(g)).length >= 2) { tool = MV_BTN; mvShownR = true; }
     const closed = state.closed.has(id);
     const lgId = LG[id] ? id : (String(id).startsWith("m-") && LG[id.slice(2)] ? id.slice(2) : null);
     const lgPage = lgId && !LG[lgId].kind;
@@ -3158,6 +3200,7 @@ button.brand, button.brand span { color: var(--accent); }
   }
 
   function render() {
+    mvShownR = false; if (mvOpen) setTimeout(paintMv, 0);
     { const gs = allGames(); rememberOdds(gs); applySeeds(Object.values(state.data).flatMap(d => d.events || [])); loadSeeds(gs); setTimeout(() => fillClosingLines(allGames()), 0); }
     document.querySelectorAll("[data-view]").forEach(b => { const on = b.dataset.view === state.view; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
     renderDates();
@@ -3689,8 +3732,144 @@ button.brand, button.brand span { color: var(--accent); }
   function otName(lg, n, post) { const x = n - (lg.reg || 4); if (x <= 0) return null; if (lg.sport === "Hockey" && !post && x === 2) return "SO"; return (x > 1 ? x : "") + "OT"; }
   function perName(lg, n, post) { return (!lg.soccer && lg.sport !== "Baseball" && otName(lg, n, post)) || ord(n); }
   function ord(n) { const s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+  // ---- Make This Your Multiview: building one in YouTube TV means searching game by game with no idea
+  // which are good. Scores ranks what's on (close, late, upsets, red zone, your teams), lays the best four
+  // out as a quad box, and lists them the way YouTube TV names them ("Washington at Purdue · FOX") so you
+  // can add them in a few taps. Built for football Saturdays and Sundays: Football is the default filter
+  // whenever football is on. Tiles stay put while their game is on; a finished game's spot goes to the next
+  // best, and a game that heats up bumps the weakest tile. The pin keeps a game in place.
+  const MV_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>';
+  const MV_BTN = `<button class="chip on mv-cta" data-mv>${MV_ICON}Make This Your Multiview</button>`;
+  const PIN_IC = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 3l5 5-2.5.8-3.6 3.6.6 4.6-1.8 1.8-4.2-4.2L4.6 20.5l-1.1-1.1 5.9-5.9-4.2-4.2L7 7.5l4.6.6 3.6-3.6z"/></svg>';
+  let mvOpen = false, mvSlots = [], mvShownR = false, mvSport = null;
+  const mvLocks = new Set();
+  const mvKey = g => g.lg.id + ":" + g.id;
+  const MV_SPORTS = [["all", "All Sports", () => true], ["football", "Football", g => g.lg.sport === "Football"], ["nfl", "NFL", g => g.lg.id === "nfl"], ["ncaaf", "College Football", g => g.lg.id === "ncaaf"]];
+  const hasYTTV = () => (state.tv || DEFAULT_TV).services.includes("youtubetv");
+  const onYTTV = g => !!g.watch?.some(w => w.app === "YouTube TV");
+  const mvMargin = g => Math.abs((parseInt(g.teams[0]?.score) || 0) - (parseInt(g.teams[1]?.score) || 0));
+  function mvScore(g) {
+    let s = g.hype || 0;
+    if (isMine(g)) s += 45;
+    if (g.pin || state.watched?.[mvKey(g)]) s += 20;
+    if (g.state === "in" && g.lg.sport === "Football") {
+      const m = mvMargin(g), p = g.period || 0;
+      if (m <= 8 && p >= 3) s += 20;                     // one-score game in the second half
+      if (m <= 8 && p >= 4) s += 15;                     // ...and in the 4th or overtime
+      if (m <= 3 && p >= 4) s += 10;                     // a field goal decides it
+      if (g.sit?.isRedZone && m <= 8) s += 10;
+      if (m >= 22 && p >= 3) s -= 25;                    // blowout
+      if (g.teams.some(t => t.rank)) s += 5;
+    }
+    // YouTube TV Multiview only takes channels YouTube TV carries; ESPN+ or Peacock-only games drop back
+    if (hasYTTV() && !onYTTV(g)) s -= 200;
+    return s;
+  }
+  const mvName = g => { const [a, h] = g.teams, col = !!CONFS[g.lg.id]; const nm = t => col ? (t.name || t.abbr) : (t.full || t.name || t.abbr); return `${nm(a)} at ${nm(h)}`; };
+  function mvWhy(g) {
+    if (g.state === "pre") return "Starts " + timeLabel(g.date);
+    const m = mvMargin(g), p = g.period || 0, out = [];
+    if (isMine(g)) out.push("Your team");
+    const up = (g.reasons || []).find(r => /^Upset/.test(r)); if (up) out.push(up.replace("Upset Alert: ", "Upset watch: "));
+    if (g.lg.sport === "Football") {
+      if (p > (g.lg.reg || 4)) out.push("Overtime");
+      else if (m === 0) out.push("Tied");
+      else if (m <= 8) out.push(m <= 3 ? "Field goal game" : "One-score game");
+      else if (m >= 22) out.push("Blowout");
+      if (g.sit?.isRedZone) out.push("Red zone");
+    } else {
+      (g.reasons || []).filter(r => !/^Upset|Starting Soon|Playoffs/.test(r)).slice(0, 1).forEach(r => out.push(r));
+      if (!out.length && m === 0) out.push("Tied");
+    }
+    if (g.playoff) out.push("Playoffs");
+    return out.slice(0, 2).join(" · ");
+  }
+  function mvPool() {
+    const pool = allGames().filter(inMyWorld);
+    const anyFb = pool.some(g => g.state === "in" && g.lg.sport === "Football");
+    if (!mvSport) { const d = new Date().getDay(); mvSport = anyFb && (d === 0 || d === 6 || pool.filter(g => g.state === "in" && g.lg.sport === "Football").length >= 4) ? "football" : "all"; }
+    const f = (MV_SPORTS.find(x => x[0] === mvSport) || MV_SPORTS[0])[2];
+    const live = pool.filter(g => g.state === "in" && f(g)).sort((a, b) => mvScore(b) - mvScore(a));
+    const soon = pool.filter(g => g.state === "pre" && f(g) && new Date(g.date) - Date.now() < 60 * 60e3).sort((a, b) => new Date(a.date) - new Date(b.date));
+    return { live, soon, anyFb, all: pool };
+  }
+  function mvPick(reset) {
+    const { live, soon } = mvPool();
+    const byKey = new Map(live.concat(soon).map(g => [mvKey(g), g]));
+    let slots = (reset ? mvSlots.map(k => mvLocks.has(k) ? k : null) : mvSlots.slice()).slice(0, 4).map(k => k && byKey.has(k) ? k : null);
+    while (slots.length < 4) slots.push(null);
+    const rest = live.filter(g => !slots.includes(mvKey(g)));
+    // Empty spots, and spots holding a game that hasn't started, go to the best live games left
+    slots = slots.map(k => { if (k && (byKey.get(k).state === "in" || mvLocks.has(k))) return k; const nx = rest.shift(); return nx ? mvKey(nx) : k; });
+    // A game that tightens up bumps the weakest unpinned tile
+    while (rest.length) {
+      const weak = slots.map((k, i) => ({ k, i })).filter(x => x.k && !mvLocks.has(x.k)).sort((a, b) => mvScore(byKey.get(a.k)) - mvScore(byKey.get(b.k)))[0];
+      if (!weak || mvScore(rest[0]) < mvScore(byKey.get(weak.k)) + 25) break;
+      slots[weak.i] = mvKey(rest.shift());
+    }
+    const later = soon.filter(g => !slots.includes(mvKey(g)));
+    slots = slots.map(k => k || (later.length ? mvKey(later.shift()) : null));
+    mvSlots = slots;
+    return { tiles: slots.map(k => k ? byKey.get(k) : null), bench: live.filter(g => !slots.includes(mvKey(g))).slice(0, 6) };
+  }
+  function mvTile(g, i) {
+    if (!g) return `<div class="mv-tile mv-empty"><span>Nothing else on right now</span></div>`;
+    const [a, h] = g.teams, k = mvKey(g), pinned = mvLocks.has(k);
+    const w = g.watch?.find(x => x.url);
+    const net = netLabel(g), why = mvWhy(g);
+    const lead = (t, o) => g.state === "in" && (+t.score) > (+o.score);
+    const row = (t, o) => `<div class="mv-tm ${lead(t, o) ? "lead" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="">` : "<i></i>"}<span>${t.seed ? `<small>(${t.seed})</small> ` : t.rank ? `<small>${esc(t.rank)}</small> ` : ""}${esc(t.abbr || t.name)}</span>${g.state === "pre" ? "" : `<b>${esc(t.score)}</b>`}</div>`;
+    const dd = g.state === "in" && g.lg.sport === "Football" && g.sit?.downDistanceText ? g.sit.downDistanceText : "";
+    return `<div class="mv-tile" style="--ca:${readable(a.color)};--ch:${readable(h.color)}" data-mv-tile="${esc(k)}" role="button" tabindex="0" aria-label="${esc(mvName(g))}: game details">
+      <div class="mv-top"><span class="mv-n">${i + 1}</span><span class="mv-lg">${esc(g.lg.short || g.lg.name)}</span>${net ? `<span class="mv-net">${esc(net)}</span>` : ""}<button class="mv-lock ${pinned ? "on" : ""}" data-mv-lock="${esc(k)}" aria-pressed="${pinned}" aria-label="${pinned ? "Let this spot reshuffle" : "Keep this game in place"}">${PIN_IC}</button></div>
+      ${row(a, h)}${row(h, a)}
+      <div class="mv-st"><span class="${statusClass(g)}">${esc(g.state === "pre" ? "Starts " + timeLabel(g.date) : g.status)}</span>${dd ? `<small>${esc(dd)}</small>` : ""}</div>
+      ${why && g.state === "in" ? `<div class="mv-tag">${esc(why)}</div>` : ""}
+      ${hasYTTV() && !onYTTV(g) && w ? `<a class="mv-watch none" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">${esc(w.app)} only, not in YouTube TV</a>` : w ? `<a class="mv-watch" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">Watch On ${esc(w.app)}</a>` : g.broadcast ? `<span class="mv-watch none">Not on your services</span>` : ""}
+    </div>`;
+  }
+  function paintMv() {
+    if (!mvOpen) return;
+    const el = document.getElementById("gsheet");
+    const { tiles, bench } = mvPick(false), shown = tiles.filter(Boolean);
+    const { anyFb } = mvPool();
+    const liveN = shown.filter(g => g.state === "in").length;
+    const yt = hasYTTV() ? shown.filter(onYTTV) : [];
+    const chips = anyFb ? `<div class="lp-chips mv-chips">${MV_SPORTS.map(([id, label]) => `<button class="${mvSport === id ? "on" : ""}" data-mv-sport="${id}">${label}</button>`).join("")}</div>` : "";
+    const list = yt.length ? `<div class="gc-c mv-list"><h3>Add These In YouTube TV</h3><p class="hint">In YouTube TV, open Multiview, then Sports, and add these. Same names YouTube TV uses.</p>
+        ${yt.map(g => `<div class="mv-li" data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><i>${tiles.indexOf(g) + 1}</i><span><b>${esc(mvName(g))}</b><small>${esc([netLabel(g), g.state === "in" ? g.status : "Starts " + timeLabel(g.date)].filter(Boolean).join(" · "))}</small></span></div>`).join("")}</div>` : "";
+    const benchHTML = bench.length ? `<div class="gc-c mv-list"><h3>Also Worth A Look</h3>${bench.map(g => `<div class="mv-li"><span data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><b>${esc(mvName(g))}</b><small>${esc([netLabel(g), g.status, mvWhy(g)].filter(Boolean).join(" · "))}</small></span><button class="chip" data-mv-swap="${esc(mvKey(g))}">Swap In</button></div>`).join("")}</div>` : "";
+    el.innerHTML = `<div class="gc-wrap mv-wrap"><div class="mv-head"><button class="circ" data-gclose aria-label="Close">${XIC}</button><div><b>Your Multiview</b><small>${liveN ? `${liveN} live · reshuffles as games end or tighten` : "Nothing live yet"}</small></div><button class="chip" data-mv-shuffle>Reshuffle</button></div>
+      ${chips}
+      ${shown.length ? `<div class="mv-grid">${tiles.map(mvTile).join("")}</div>` : `<div class="block empty">Nothing live ${mvSport !== "all" ? "in " + esc((MV_SPORTS.find(x => x[0] === mvSport) || [])[1] || "") + " " : ""}right now.</div>`}
+      ${list}${benchHTML}
+      <p class="hint mv-hint">Tap a game for the full page. The pin keeps a game in its spot.</p></div>`;
+  }
+  function openMultiview() {
+    closeGame(); mvOpen = true;
+    const el = document.getElementById("gsheet");
+    el.hidden = false; el.scrollTop = 0;
+    paintMv();
+  }
+  document.addEventListener("click", e => {
+    const t = e.target;
+    if (t.closest("[data-mv]")) { e.preventDefault(); e.stopPropagation(); navStack = []; openMultiview(); return; }
+    if (!mvOpen) return;
+    const lk = t.closest("[data-mv-lock]");
+    if (lk) { e.preventDefault(); e.stopPropagation(); const k = lk.dataset.mvLock; if (mvLocks.has(k)) mvLocks.delete(k); else mvLocks.add(k); paintMv(); return; }
+    if (t.closest("[data-mv-shuffle]")) { e.stopPropagation(); mvPick(true); paintMv(); return; }
+    const sp = t.closest("[data-mv-sport]");
+    if (sp) { e.stopPropagation(); mvSport = sp.dataset.mvSport; mvPick(true); paintMv(); return; }
+    const sw = t.closest("[data-mv-swap]");
+    if (sw) { e.stopPropagation(); const k = sw.dataset.mvSwap; const { tiles } = mvPick(false); const by = new Map(tiles.filter(Boolean).map(g => [mvKey(g), g]));
+      const open = mvSlots.map((x, i) => ({ x, i })).filter(o => !o.x || !mvLocks.has(o.x)).sort((p, q) => (p.x ? mvScore(by.get(p.x)) : -1e9) - (q.x ? mvScore(by.get(q.x)) : -1e9))[0];
+      if (open) { mvSlots[open.i] = k; mvLocks.add(k); } paintMv(); return; }
+    if (t.closest("a")) return;
+    const tile = t.closest("[data-mv-tile]");
+    if (tile) { e.stopPropagation(); const k = tile.dataset.mvTile; mvOpen = false; navStack = [() => openMultiview()]; openGame(k); }
+  }, true);
   function closeGame() {
-    document.getElementById("gsheet").hidden = true;
+    document.getElementById("gsheet").hidden = true; mvOpen = false;
     clearTimeout(gameTimer); openGameKey = null; lastSummary = null; tennisKey = null; teamView = null; leagueView = null;
   }
   function repaintGame() {
