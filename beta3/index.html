@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta 3.0</title>
-<meta name="build" content="20261016225722">
+<meta name="build" content="20261016225909">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -3995,8 +3995,6 @@ button.brand, button.brand span { color: var(--accent); }
       if (m >= 22 && p >= 3) s -= 25;                    // blowout
       if (g.teams.some(t => t.rank)) s += 5;
     }
-    // YouTube TV Multiview only takes channels YouTube TV carries; ESPN+ or Peacock-only games drop back
-    if (hasYTTV() && !onYTTV(g)) s -= 200;
     return s;
   }
   const mvName = g => { const [a, h] = g.teams, col = !!CONFS[g.lg.id]; const nm = t => col ? (t.name || t.abbr) : (t.full || t.name || t.abbr); return `${nm(a)} at ${nm(h)}`; };
@@ -4019,7 +4017,9 @@ button.brand, button.brand span { color: var(--accent); }
     return out.slice(0, 2).join(" · ");
   }
   function mvPool() {
-    const pool = allGames().filter(inMyWorld);
+    // YouTube TV Multiview only takes channels YouTube TV carries, so Peacock, Paramount+, Prime
+    // and other streaming-only games are left out (CBS games still count: YouTube TV has CBS)
+    const pool = allGames().filter(g => inMyWorld(g) && (!hasYTTV() || onYTTV(g)));
     const anyFb = pool.some(g => g.state === "in" && g.lg.sport === "Football");
     if (!mvSport) { const d = new Date().getDay(); mvSport = anyFb && (d === 0 || d === 6 || pool.filter(g => g.state === "in" && g.lg.sport === "Football").length >= 4) ? "football" : "all"; }
     const f = (MV_SPORTS.find(x => x[0] === mvSport) || MV_SPORTS[0])[2];
@@ -4077,7 +4077,7 @@ button.brand, button.brand span { color: var(--accent); }
       ${chips}
       ${shown.length ? `<div class="mv-grid">${tiles.map(mvTile).join("")}</div>` : `<div class="block empty">Nothing live ${mvSport !== "all" ? "in " + esc((MV_SPORTS.find(x => x[0] === mvSport) || [])[1] || "") + " " : ""}right now.</div>`}
       ${list}${benchHTML}
-      <p class="hint mv-hint">Tap a game for the full page. The pin keeps a game in its spot.</p></div>`;
+      <p class="hint mv-hint">${hasYTTV() ? "Only games on YouTube TV, so they all fit in its Multiview. " : ""}Tap a game for the full page. The pin keeps a game in its spot.</p></div>`;
   }
   function openMultiview() {
     closeGame(); mvOpen = true;
