@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta 3.0</title>
-<meta name="build" content="20261017154216">
+<meta name="build" content="20261017163930">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -395,6 +395,7 @@ section.closed .bhead { border-bottom: 0; }
 .mc-row img, .mc-row > i { width: 20px; height: 20px; object-fit: contain; flex: 0 0 auto; }
 .mc-row b { font-family: var(--display); font-stretch: condensed; font-size: 18px; font-weight: 700; }
 .mc-row small { font-size: 12px; color: var(--muted); }
+.mc-row b .mc-rk { font-family: var(--body, inherit); font-stretch: normal; font-size: 12px; font-weight: 500; margin-right: 4px; }
 .mc-row em { font-style: normal; font-family: var(--display); font-stretch: condensed; font-size: 19px; font-weight: 700; margin-left: auto; padding-left: 12px; }
 .mc-row.lose b, .mc-row.lose em { color: var(--muted); }
 .mc-fav { color: var(--star); font-size: 11px; }
@@ -2457,14 +2458,14 @@ button.brand, button.brand span { color: var(--accent); }
       <span class="mcg-top mcg-foot"><span class="st ${statusClass(g)}">${esc(g.status)}</span>${miniDD(g)}</span></article>`;
   }
   // Top strip: mini versions of the game cards
-  function miniRow(logo, abbr, rec, score, lose, fav) {
-    return `<span class="mc-row ${lose ? "lose" : ""}">${logo ? `<img src="${esc(logo)}" alt="">` : "<i></i>"}<b>${esc(abbr)}</b>${rec ? `<small>${esc(rec)}</small>` : ""}${fav ? '<span class="mc-fav" aria-label="Your team">★</span>' : ""}${score != null ? `<em>${esc(score)}</em>` : ""}</span>`;
+  function miniRow(logo, abbr, rec, score, lose, fav, rank) {
+    return `<span class="mc-row ${lose ? "lose" : ""}">${logo ? `<img src="${esc(logo)}" alt="">` : "<i></i>"}<b>${rank ? `<small class="mc-rk">${esc(rank)}</small>` : ""}${esc(abbr)}</b>${rec ? `<small>${esc(rec)}</small>` : ""}${fav ? '<span class="mc-fav" aria-label="Your team">★</span>' : ""}${score != null ? `<em>${esc(score)}</em>` : ""}</span>`;
   }
   function stripChip(g) {
     const [a, h] = g.teams;
     if (!a || !h) return "";
     const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
-    const row = (t, o) => miniRow(t.logo, seedTag(t) + t.abbr, g.state === "pre" ? recText(t) : "", g.state === "pre" ? null : t.score, lose(t, o), isFavTeam(g.lg, t.abbr));
+    const row = (t, o) => miniRow(t.logo, seedTag(t) + t.abbr, g.state === "pre" ? recText(t) : "", g.state === "pre" ? null : t.score, lose(t, o), isFavTeam(g.lg, t.abbr), t.seed ? "" : t.rank);
     const sit = g.state === "in" ? (g.sit?.downDistanceText || (g.lg.sport === "Baseball" && g.sit?.outs != null ? `${g.sit.outs} out${g.sit.outs === 1 ? "" : "s"}` : "")) : "";
     const foot = sit || (g.state !== "post" ? netLabel(g) : (g.series || ""));
     return `<button class="ms mc ${g.state === "in" ? "live" : ""}" data-game="${g.lg.id}:${g.id}" title="${esc(a.full + " at " + h.full)}">
