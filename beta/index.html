@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scores Beta</title>
-<meta name="build" content="20261017123310">
+<meta name="build" content="20261017123813">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Scores Beta">
@@ -486,8 +486,8 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .mv-tm span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mv-tm small { opacity: .7; font-size: 12px; }
 .mv-tm b { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
-.mv-st { font-size: 13px; font-weight: 700; }
-.mv-st .live { color: #ff6b70; }
+.mv-st { font-size: 15px; font-weight: 700; color: #fff; }
+.mv-st .live { color: #fff; }
 .mv-tag { align-self: flex-start; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; line-height: 1.35; background: var(--star); color: #111; padding: 2px 6px; border-radius: 5px; max-width: 100%; }
 .mv-watch { margin-top: auto; text-align: center; font-size: 12px; font-weight: 800; color: #fff; background: rgba(255,255,255,.15); border-radius: 999px; padding: 7px 8px; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mv-watch.none { opacity: .6; font-weight: 600; }
@@ -498,14 +498,14 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .mv-mini { margin: 12px 12px 0; border-radius: 14px; gap: 4px; padding: 4px; }
 .mv-tile.mv-sm { min-height: 0; padding: 8px 9px 9px; gap: 4px; border-radius: 10px; }
 .mv-sm .mv-tm { font-size: 15px; } .mv-sm .mv-tm b { font-size: 19px; } .mv-sm .mv-tm img, .mv-sm .mv-tm i { width: 20px; height: 20px; }
-.mv-sm .mv-st { font-size: 12px; } .mv-sm .mv-st small { font-size: 11px; }
+.mv-sm .mv-st { font-size: 14px; } .mv-sm .mv-st small { font-size: 14px; }
 .mv-sm .mv-tag { font-size: 9px; } .mv-sm .mv-lock { width: 20px; height: 20px; } .mv-sm .mv-lock svg { width: 10px; height: 10px; }
 .mv-sm.mv-empty { min-height: 110px; }
 .mv-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px 14px; }
 .mv-foot small { color: var(--muted); font-size: 13px; }
 @media (min-width: 900px) { .mv-tile.mv-sm { min-height: 0; padding: 10px 12px; } .mv-sm .mv-tm { font-size: 18px; } .mv-sm .mv-tm b { font-size: 24px; } }
 .mv-n { width: 18px; height: 18px; border-radius: 50%; background: rgba(255,255,255,.9); color: #111; display: grid; place-items: center; font-size: 11px; letter-spacing: 0; flex: 0 0 auto; }
-.mv-st small { display: block; font-size: 12px; font-weight: 600; opacity: .8; margin-top: 2px; }
+.mv-st small { display: block; font-size: 15px; font-weight: 700; color: #fff; margin-top: 2px; }
 .mv-list { margin-top: 12px; }
 .mv-list .hint { margin: -4px 0 8px; font-size: 13px; }
 .mv-li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); cursor: pointer; }
@@ -3904,7 +3904,7 @@ button.brand, button.brand span { color: var(--accent); }
     const sp = mvCur[0] !== "all" ? mvCur[1] : "";
     return block("mv", "Your Multiview", sp || (hasYTTV() ? "YouTube TV" : ""),
       `<div class="mv-grid mv-mini">${tiles.map((g, i) => mvTile(g, i, true)).join("")}</div>
-      <div class="mv-foot"><button class="chip on mv-cta" data-mv>${MV_ICON}Make This Your Multiview</button><small>YouTube TV add list, swaps and pins</small></div>`);
+      <div class="mv-foot"><button class="chip on mv-cta" data-mv>${MV_ICON}Make This Your Multiview</button></div>`);
   }
   function openMultiview() {
     closeGame(); mvOpen = true;
