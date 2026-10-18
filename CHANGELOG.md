@@ -2,6 +2,11 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 18, 2026: Beta and Beta 3.0 (12:05 PM, not on live yet)
+- Your Game: when one of your teams is live, it gets a big card at the very top of Live, All and My Games (pinned games first, then your team order). Scroll past it and a slim bar under the header keeps the score and clock in view; tap it to open the game. Your other teams stay in the strip (Your Other Teams on My Games).
+- Your teams strip now really stays on top of Live and All, as the Section Order setting says (it was landing below Worth A Watch).
+- Worth A Watch in Expanded: the best game keeps the big card, the rest are quick rows with their tag, teams, score, clock and channel. Three games now fit where one used to. Compact is unchanged.
+
 ## Oct 18, 2026: Beta and Beta 3.0 (11:35 AM, not on live yet)
 - Worth A Watch counts one-score games in the second half, not just the last 5 minutes: football within 8 in the 3rd or 4th, basketball within 8 in the final period, hockey and soccer within one goal late, baseball within 2 from the 7th. A 21-20 game with 6:05 left now makes it. Multiview ranks with the same rule. The Close Games tab and Close Game alerts keep the last-5-minutes rule.
 - One tag per game, the same in Worth A Watch, Multiview and Also Worth A Look, in this order: Red Zone, Overtime, Upset Alert, Playoffs, Tied / Field Goal Game / One-Score Game (One-Goal Game, One-Goal Match, One-Run Game), Your Team, Top 25 Clash. Multiview tags are now Title Case ("Upset watch" is gone).

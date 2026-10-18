@@ -132,6 +132,24 @@ main { padding-block: 16px 48px; display: grid; gap: 18px; }
 #main > [data-block="fy-mine"] { order: var(--o-mine, 0); }
 #main > [data-block="mv"] { order: var(--o-mv, 1); }
 #main > [data-block="worth"] { order: var(--o-worth, 2); }
+/* Your Game: the hero card for your live team, plus a slim bar under the header once you scroll past it */
+#main > .pick-banner { order: -3; }
+#main > .my-hero { order: -2; }
+#main > .mystrip { order: -1; }
+.my-hero { border: 1px solid var(--accent); border-radius: 14px; background: linear-gradient(135deg, var(--accent-soft), var(--surface)); overflow: hidden; }
+.my-hero .hero-k { display: block; padding: 12px 16px 0; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.my-hero .feat { padding: 0 14px; }
+.my-hero .f { border-bottom: 0; padding-top: 6px; }
+.mybar { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 4px 0 8px; font-size: 15px; font-weight: 700; color: var(--fg); text-align: left; }
+.mybar .mb-t { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.mybar .mb-t b { font-family: var(--display); font-stretch: condensed; font-size: 18px; }
+.mybar .mb-t.lose { color: var(--muted); }
+.mybar .st { margin-left: auto; font-size: 13px; white-space: nowrap; }
+/* Worth A Watch, Expanded: one big card, then quick rows */
+.wrows { border-top: 1px solid var(--line); }
+.wr-tag { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin-bottom: -2px; }
+.wr-tag.hot { color: var(--live); }
+
 #main > .pick-banner { order: -1; }
 #main > [data-block="fy-next"], #main > [data-block="fy-else"], #main > .quiet, #main > .updated { order: 99; }
 .sec-list { display: grid; gap: 6px; }
@@ -1064,6 +1082,7 @@ button.brand, button.brand span { color: var(--accent); }
       </button>
     </div>
     <nav class="dates" id="dates" aria-label="Dates"></nav>
+    <div id="mybar" hidden></div>
   </div>
 </header>
 
@@ -2364,6 +2383,43 @@ button.brand, button.brand span { color: var(--accent); }
   }
 
 
+
+  // ---- Your Game: your top live team gets the hero card at the top of home, and a slim bar under the header
+  // once it scrolls away. Pinned games first, then your team order.
+  let heroGame = null, heroObs = null;
+  function myHero(games) {
+    if (!isToday()) { heroGame = null; return null; }
+    const live = games.filter(g => isMine(g) && g.state === "in").sort((a, b) => (b.pin - a.pin) || gameRank(a) - gameRank(b));
+    heroGame = live[0] || null;
+    return heroGame;
+  }
+  function heroHTML(g) {
+    if (!g) return "";
+    const card = featured(g).replace('<div class="f-why"><span class="why">Your Team</span></div>', "");
+    return `<div class="my-hero" data-block="hero"><span class="hero-k">Your Game</span><div class="feat">${card}</div></div>`;
+  }
+  function watchHero() {
+    const bar = document.getElementById("mybar"); if (!bar) return;
+    if (heroObs) { heroObs.disconnect(); heroObs = null; }
+    const el = document.querySelector("#main .my-hero"), g = heroGame;
+    if (!el || !g) { bar.hidden = true; bar.innerHTML = ""; return; }
+    const [a, h] = g.teams;
+    const lose = (t, o) => (+t.score) < (+o.score);
+    bar.innerHTML = `<button class="mybar" data-game="${g.lg.id}:${g.id}" aria-label="Your game: ${esc(a.name)} ${esc(a.score)}, ${esc(h.name)} ${esc(h.score)}, ${esc(g.status)}"><span class="lgtag">${esc(g.lg.short || g.lg.name)}</span><span class="mb-t ${lose(a, h) ? "lose" : ""}">${esc(a.abbr)} <b>${esc(a.score)}</b></span><span class="mb-t ${lose(h, a) ? "lose" : ""}">${esc(h.abbr)} <b>${esc(h.score)}</b></span><span class="st live">${esc(g.status)}</span></button>`;
+    const head = document.querySelector("header.top");
+    const set = () => { const r = el.getBoundingClientRect(), hb = head ? head.getBoundingClientRect().bottom - (bar.hidden ? 0 : bar.offsetHeight) : 0; bar.hidden = r.bottom > hb + 8; };
+    set();
+    if ("IntersectionObserver" in window) { heroObs = new IntersectionObserver(set, { threshold: [0, .05, .5, 1] }); heroObs.observe(el); }
+  }
+  window.addEventListener("scroll", () => { if (heroGame && document.querySelector("#main .my-hero")) { const bar = document.getElementById("mybar"), el = document.querySelector("#main .my-hero"), head = document.querySelector("header.top"); if (bar && el && head) { const hb = head.getBoundingClientRect().bottom - (bar.hidden ? 0 : bar.offsetHeight); bar.hidden = el.getBoundingClientRect().bottom > hb + 8; } } }, { passive: true });
+  // Worth A Watch quick rows: the Simple row with the game's one tag on top
+  function worthRow(g) {
+    const tag = gameTag(g);
+    const r = simpleRow(g, true);
+    return tag ? r.replace('<span class="sr-teams">', `<span class="sr-teams"><span class="wr-tag ${/Upset|Red Zone/.test(tag) ? "hot" : ""}">${esc(tag)}</span>`) : r;
+  }
+  const worthRows = picks => `<div class="feat">${featured(picks[0])}</div>${picks.length > 1 ? `<div class="wrows">${picks.slice(1).map(worthRow).join("")}</div>` : ""}`;
+
   // Worth Watching: Apple Sports-style rows
   function featured(g) {
     const [a, h] = g.teams;
@@ -3347,6 +3403,7 @@ button.brand, button.brand span { color: var(--accent); }
     }
 
     const tab = state.tab;
+    heroGame = null; setTimeout(watchHero, 0);
     const pool = poolFor(tab, games);
     let html = "";
 
@@ -3358,7 +3415,9 @@ button.brand, button.brand span { color: var(--accent); }
       const nexts = isToday() ? [...state.favs].filter(k => !playing.has(k) && state.next[k]?.date)
         .sort((a, b) => new Date(state.next[a].date) - new Date(state.next[b].date) || favRank(a) - favRank(b)) : [];
       if (pickedNothing()) html += `<div class="pick-banner"><div><b>You're seeing every league</b><span>Follow your teams and leagues and Scores fills in with yours.</span></div><button class="chip on" data-open-welcome>Pick Favorites</button></div>`;
-      html += `<div class="mystrip" aria-label="Your teams">${mine.map(stripChip).join("")}${nexts.map(nextChip).join("")}<button class="ms add" data-open-sheet>${state.favs.size ? "+ Teams" : "+ Follow Teams"}</button></div>`;
+      const hero = ["live", "all"].includes(tab) ? myHero(games) : null;
+      html += heroHTML(hero);
+      html += `<div class="mystrip" aria-label="Your teams">${mine.filter(g => g !== hero).map(stripChip).join("")}${nexts.map(nextChip).join("")}<button class="ms add" data-open-sheet>${state.favs.size ? "+ Teams" : "+ Follow Teams"}</button></div>`;
     }
 
     // Worth A Watch: always at the top of Live and All. Only games that earned it:
@@ -3376,7 +3435,7 @@ button.brand, button.brand span { color: var(--accent); }
         if (tab === "live") shown = new Set(picks.map(g => g.id));
         html += block("worth", "Worth A Watch", countLabel(picks.length, picks),
           // More than 4 picks: switch to the two-up compact cards so the section doesn't take over the page
-          state.density === "simple" ? `<div class="grid">${picks.map(g => card(g, true)).join("")}</div>` : (state.density === "compact" || picks.length > 4) ? `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>` : `<div class="feat">${picks.map(featured).join("")}</div>`);
+          state.density === "simple" ? `<div class="grid">${picks.map(g => card(g, true)).join("")}</div>` : state.density === "compact" ? `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>` : worthRows(picks));
       }
     }
 
@@ -3453,7 +3512,7 @@ button.brand, button.brand span { color: var(--accent); }
     // The feed
     const quiet = [];
     TEAM_LEAGUES.forEach(lg => { if (!pool.some(g => g.lg.id === lg.id) && !state.data[lg.id]?.error && !state.data[lg.id]?.events?.length) quiet.push(lg.short || lg.name); });
-    let feed = pool.filter(g => !shown.has(g.id) && !(tab === "live" && mvHome.has(mvKey(g))));
+    let feed = pool.filter(g => !shown.has(g.id) && !(tab === "live" && (mvHome.has(mvKey(g)) || g === heroGame)));
     if (feed.length && state.view === "league" && tab === "live") {
       // Live tab, By League: one "You Are Looking Live" section with a card grid per league inside.
       // Compact: one two-up grid in league order with a league tag on each card, so no half-empty rows or big league headers.
