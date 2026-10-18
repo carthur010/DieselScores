@@ -132,6 +132,24 @@ main { padding-block: 16px 48px; display: grid; gap: 18px; }
 #main > [data-block="fy-mine"] { order: var(--o-mine, 0); }
 #main > [data-block="mv"] { order: var(--o-mv, 1); }
 #main > [data-block="worth"] { order: var(--o-worth, 2); }
+/* Your Game: the hero card for your live team, plus a slim bar under the header once you scroll past it */
+#main > .pick-banner { order: -3; }
+#main > .my-hero { order: -2; }
+#main > .mystrip { order: -1; }
+.my-hero { border: 1px solid var(--accent); border-radius: 14px; background: linear-gradient(135deg, var(--accent-soft), var(--surface)); overflow: hidden; }
+.my-hero .hero-k { display: block; padding: 12px 16px 0; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.my-hero .feat { padding: 0 14px; }
+.my-hero .f { border-bottom: 0; padding-top: 6px; }
+.mybar { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 4px 0 8px; font-size: 15px; font-weight: 700; color: var(--fg); text-align: left; }
+.mybar .mb-t { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.mybar .mb-t b { font-family: var(--display); font-stretch: condensed; font-size: 18px; }
+.mybar .mb-t.lose { color: var(--muted); }
+.mybar .st { margin-left: auto; font-size: 13px; white-space: nowrap; }
+/* Worth A Watch, Expanded: one big card, then quick rows */
+.wrows { border-top: 1px solid var(--line); }
+.wr-tag { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin-bottom: -2px; }
+.wr-tag.hot { color: var(--live); }
+
 #main > .pick-banner { order: -1; }
 #main > [data-block="fy-next"], #main > [data-block="fy-else"], #main > .quiet, #main > .updated { order: 99; }
 .sec-list { display: grid; gap: 6px; }
@@ -181,6 +199,7 @@ section.closed .bhead { border-bottom: 0; }
 .f-team .nm { font-size: 14px; font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .f-team .nm { white-space: normal; text-overflow: clip; line-height: 1.15; }
 .f-team .nm.long { font-size: 12px; letter-spacing: -.01em; }
+.f-team .nm .f-rk { font-size: 11px; font-weight: 600; opacity: .75; }
 .f-team.fav .nm { color: var(--fg); }
 .f-sc { font-family: var(--display); font-weight: 700; font-size: 52px; line-height: 1; text-align: center; }
 .f-sc.lose { color: var(--dim); }
@@ -1063,6 +1082,7 @@ button.brand, button.brand span { color: var(--accent); }
       </button>
     </div>
     <nav class="dates" id="dates" aria-label="Dates"></nav>
+    <div id="mybar" hidden></div>
   </div>
 </header>
 
@@ -1483,6 +1503,7 @@ button.brand, button.brand span { color: var(--accent); }
     g.playoff = ev.season?.type === 3 || !!comp.series ||
       /playoff|postseason|wild card|division series|championship series|world series|\bALCS\b|\bNLCS\b|\bALDS\b|\bNLDS\b|conference (semi)?finals?|stanley cup|nba finals|super bowl|cfp|bowl\b/i.test(g.note);
     g.close = isClose(g);
+    g.tight = isTight(g);
     Object.assign(g, interest(g));
     return g;
   }
@@ -1497,6 +1518,40 @@ button.brand, button.brand span { color: var(--accent); }
     const last = g.lg.reg;
     if (p > last) return m <= r.margin; // overtime
     return p === last && clockSecs(g.clock) <= r.minsLeft * 60 && m <= r.margin;
+  }
+
+  // Tight = within one score in the second half (Worth A Watch and Multiview use the same rule).
+  // Close (the last 5 minutes) stays as-is for the Close Games tab and Close Game alerts.
+  function isTight(g) {
+    if (g.state !== "in" || g.teams.length !== 2) return false;
+    const m = Math.abs((parseInt(g.teams[0].score) || 0) - (parseInt(g.teams[1].score) || 0)), p = g.period || 0, reg = g.lg.reg || 4;
+    if (g.lg.soccer) return p >= 2 && m <= 1;
+    if (g.lg.sport === "Football") return p >= 3 && m <= 8;
+    if (g.lg.sport === "Basketball") return p >= reg && m <= 8;
+    if (g.lg.sport === "Hockey") return p >= 3 && m <= 1;
+    if (g.lg.sport === "Baseball") return p >= 7 && m <= 2;
+    return false;
+  }
+  // The words for a tight game, by sport: "Field Goal Game", "One-Goal Match", "Tied"
+  function closeLabel(g) {
+    const m = Math.abs((parseInt(g.teams[0]?.score) || 0) - (parseInt(g.teams[1]?.score) || 0));
+    if (m === 0) return "Tied";
+    if (g.lg.sport === "Football") return m <= 3 ? "Field Goal Game" : "One-Score Game";
+    if (g.lg.soccer) return "One-Goal Match";
+    if (g.lg.sport === "Hockey") return "One-Goal Game";
+    if (g.lg.sport === "Baseball" && m === 1) return "One-Run Game";
+    return "Close Game";
+  }
+  // One tag per game, the same everywhere (Worth A Watch, Multiview, Also Worth A Look)
+  function gameTag(g) {
+    if (g.state === "pre") return (g.reasons || []).find(r => /Starting Soon|Top 25/.test(r)) || "";
+    if (g.state !== "in") return "";
+    const rs = g.reasons || [], m = Math.abs((parseInt(g.teams[0]?.score) || 0) - (parseInt(g.teams[1]?.score) || 0));
+    if (g.lg.sport === "Football" && g.sit?.isRedZone) return "Red Zone";
+    return rs.find(r => /Overtime|Extra Innings/.test(r)) || rs.find(r => /^Upset/.test(r)) || (g.playoff ? "Playoffs" : "")
+      || (g.close || g.tight ? closeLabel(g) : "") || (typeof isMine === "function" && isMine(g) ? "Your Team" : "")
+      || (rs.includes("Top 25 Clash") ? "Top 25 Clash" : "")
+      || (g.lg.sport === "Football" && m >= 22 && (g.period || 0) >= 3 ? "Blowout" : "");
   }
 
   // Moneylines: "+240", "EVEN", -150 → numbers. Pregame lines are remembered so live odds can't move the goalposts.
@@ -1540,7 +1595,8 @@ button.brand, button.brand span { color: var(--accent); }
     const secondHalf = g.lg.soccer ? g.period >= 2 : g.lg.sport === "Baseball" ? g.period >= 5 : g.period > reg / 2;
     if (g.state === "in") {
       score += 10;
-      if (g.close) { score += 50; reasons.push("Close Game"); }
+      if (g.close) { score += 50; reasons.push(closeLabel(g)); }
+      else if (g.tight) { score += 35; reasons.push(closeLabel(g)); }
       if (reg && g.period > reg) { score += 30; reasons.push(g.lg.sport === "Baseball" ? "Extra Innings" : "Overtime"); }
       const leader = as > hs ? a : hs > as ? h : null;
       const ml = pregameML(g), leadML = leader && ml ? (leader === a ? ml.a : ml.h) : null;
@@ -1549,7 +1605,7 @@ button.brand, button.brand span { color: var(--accent); }
       }
       if (g.rankedClash) { score += 20; reasons.push("Top 25 Clash"); }
       if (g.playoff) { score += 25; reasons.push("Playoffs"); }
-      if (!g.close && !reasons.length) score += Math.max(0, 15 - margin);
+      if (!g.close && !g.tight && !reasons.length) score += Math.max(0, 15 - margin);
     } else if (g.state === "pre") {
       const mins = (new Date(g.date) - Date.now()) / 60000;
       if (mins <= 45 && mins > -15) { score += 8; reasons.push("Starting Soon"); }
@@ -2327,12 +2383,49 @@ button.brand, button.brand span { color: var(--accent); }
   }
 
 
+
+  // ---- Your Game: your top live team gets the hero card at the top of home, and a slim bar under the header
+  // once it scrolls away. Pinned games first, then your team order.
+  let heroGame = null, heroObs = null;
+  function myHero(games) {
+    if (!isToday()) { heroGame = null; return null; }
+    const live = games.filter(g => isMine(g) && g.state === "in").sort((a, b) => (b.pin - a.pin) || gameRank(a) - gameRank(b));
+    heroGame = live[0] || null;
+    return heroGame;
+  }
+  function heroHTML(g) {
+    if (!g) return "";
+    const card = featured(g).replace('<div class="f-why"><span class="why">Your Team</span></div>', "");
+    return `<div class="my-hero" data-block="hero"><span class="hero-k">Your Game</span><div class="feat">${card}</div></div>`;
+  }
+  function watchHero() {
+    const bar = document.getElementById("mybar"); if (!bar) return;
+    if (heroObs) { heroObs.disconnect(); heroObs = null; }
+    const el = document.querySelector("#main .my-hero"), g = heroGame;
+    if (!el || !g) { bar.hidden = true; bar.innerHTML = ""; return; }
+    const [a, h] = g.teams;
+    const lose = (t, o) => (+t.score) < (+o.score);
+    bar.innerHTML = `<button class="mybar" data-game="${g.lg.id}:${g.id}" aria-label="Your game: ${esc(a.name)} ${esc(a.score)}, ${esc(h.name)} ${esc(h.score)}, ${esc(g.status)}"><span class="lgtag">${esc(g.lg.short || g.lg.name)}</span><span class="mb-t ${lose(a, h) ? "lose" : ""}">${esc(a.abbr)} <b>${esc(a.score)}</b></span><span class="mb-t ${lose(h, a) ? "lose" : ""}">${esc(h.abbr)} <b>${esc(h.score)}</b></span><span class="st live">${esc(g.status)}</span></button>`;
+    const head = document.querySelector("header.top");
+    const set = () => { const r = el.getBoundingClientRect(), hb = head ? head.getBoundingClientRect().bottom - (bar.hidden ? 0 : bar.offsetHeight) : 0; bar.hidden = r.bottom > hb + 8; };
+    set();
+    if ("IntersectionObserver" in window) { heroObs = new IntersectionObserver(set, { threshold: [0, .05, .5, 1] }); heroObs.observe(el); }
+  }
+  window.addEventListener("scroll", () => { if (heroGame && document.querySelector("#main .my-hero")) { const bar = document.getElementById("mybar"), el = document.querySelector("#main .my-hero"), head = document.querySelector("header.top"); if (bar && el && head) { const hb = head.getBoundingClientRect().bottom - (bar.hidden ? 0 : bar.offsetHeight); bar.hidden = el.getBoundingClientRect().bottom > hb + 8; } } }, { passive: true });
+  // Worth A Watch quick rows: the Simple row with the game's one tag on top
+  function worthRow(g) {
+    const tag = gameTag(g);
+    const r = simpleRow(g, true);
+    return tag ? r.replace('<span class="sr-teams">', `<span class="sr-teams"><span class="wr-tag ${/Upset|Red Zone/.test(tag) ? "hot" : ""}">${esc(tag)}</span>`) : r;
+  }
+  const worthRows = picks => `<div class="feat">${featured(picks[0])}</div>${picks.length > 1 ? `<div class="wrows">${picks.slice(1).map(worthRow).join("")}</div>` : ""}`;
+
   // Worth Watching: Apple Sports-style rows
   function featured(g) {
     const [a, h] = g.teams;
     if (!a || !h) return "";
     const side = t => `<div class="f-team ${t.homeAway === "home" ? "home" : ""} ${isFavTeam(g.lg, t.abbr) ? "fav" : ""}">${starBtn(g.lg, t)}
-        ${t.logo ? `<img src="${esc(t.logo)}" alt="">` : ""}<span class="nm ${!/\s/.test(t.name) && t.name.length > 9 ? "long" : ""}">${esc(t.name)}</span></div>`;
+        ${t.logo ? `<img src="${esc(t.logo)}" alt="">` : ""}<span class="nm ${!/\s/.test(t.name) && t.name.length > 9 ? "long" : ""}">${t.seed ? `<small class="f-rk">(${esc(t.seed)})</small> ` : t.rank ? `<small class="f-rk">${esc(t.rank)}</small> ` : ""}${esc(t.name)}</span></div>`;
     const score = (t, o) => {
       if (g.state === "pre") return `<div class="f-sc rec">${esc(recText(t))}</div>`;
       const lose = (g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score));
@@ -2344,9 +2437,9 @@ button.brand, button.brand span { color: var(--accent); }
     if (g.series) sub = sub ? sub + "<br>" + esc(g.series) : esc(g.series);
     const pill = g.state !== "post" && g.watch?.length ? `<span>${watchPill(g)}</span>` : "";
     const lgLabel = (g.lg.short || g.lg.name) + (g.note ? " · " + g.note : "");
-    const why = g.reasons || [];
+    const why = gameTag(g);
     return `<div class="f tap" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0">
-      <div class="f-lg">${esc(lgLabel)}</div>${why.length ? `<div class="f-why">${why.map(r => `<span class="${/Upset/.test(r) ? "why hot" : /Playoff/.test(r) ? "why gold" : "why"}">${esc(r)}</span>`).join("")}</div>` : ""}
+      <div class="f-lg">${esc(lgLabel)}</div>${why ? `<div class="f-why"><span class="${/Upset|Red Zone/.test(why) ? "why hot" : /Playoff/.test(why) ? "why gold" : "why"}">${esc(why)}</span></div>` : ""}
       <div class="f-grid">
         ${side(a)}${score(a, h)}
         <div class="f-mid"><span class="s ${g.state === "in" ? "live" : ""}">${esc(g.status)}</span>${sub ? `<span class="sub">${sub}</span>` : ""}</div>
@@ -3310,6 +3403,7 @@ button.brand, button.brand span { color: var(--accent); }
     }
 
     const tab = state.tab;
+    heroGame = null; setTimeout(watchHero, 0);
     const pool = poolFor(tab, games);
     let html = "";
 
@@ -3321,16 +3415,19 @@ button.brand, button.brand span { color: var(--accent); }
       const nexts = isToday() ? [...state.favs].filter(k => !playing.has(k) && state.next[k]?.date)
         .sort((a, b) => new Date(state.next[a].date) - new Date(state.next[b].date) || favRank(a) - favRank(b)) : [];
       if (pickedNothing()) html += `<div class="pick-banner"><div><b>You're seeing every league</b><span>Follow your teams and leagues and Scores fills in with yours.</span></div><button class="chip on" data-open-welcome>Pick Favorites</button></div>`;
-      html += `<div class="mystrip" aria-label="Your teams">${mine.map(stripChip).join("")}${nexts.map(nextChip).join("")}<button class="ms add" data-open-sheet>${state.favs.size ? "+ Teams" : "+ Follow Teams"}</button></div>`;
+      const hero = ["live", "all"].includes(tab) ? myHero(games) : null;
+      html += heroHTML(hero);
+      html += `<div class="mystrip" aria-label="Your teams">${mine.filter(g => g !== hero).map(stripChip).join("")}${nexts.map(nextChip).join("")}<button class="ms add" data-open-sheet>${state.favs.size ? "+ Teams" : "+ Follow Teams"}</button></div>`;
     }
 
     // Worth A Watch: always at the top of Live and All. Only games that earned it:
     // playoffs, close and late, overtime/extra innings, an upset brewing, or a Top 25 clash in progress.
     // Every close game and every playoff game makes it. Your teams are skipped: they already show above. No filler.
     let shown = new Set();
+    mvHome = new Set();
     if (["live", "all"].includes(tab)) html += mvSection();
     if (["live", "all"].includes(tab)) {
-      const earned = g => g.state === "in" && !isMine(g) && !isBlowout(g) && (g.close || g.playoff || g.reasons.some(r => /Overtime|Extra|Upset|Top 25/.test(r)));
+      const earned = g => g.state === "in" && !isMine(g) && !isBlowout(g) && !mvHome.has(mvKey(g)) && (g.close || g.tight || g.playoff || g.reasons.some(r => /Overtime|Extra|Upset|Top 25/.test(r)));
       const must = games.filter(g => earned(g) && (g.close || g.playoff)).sort((x, y) => y.hype - x.hype);
       const other = games.filter(g => earned(g) && !g.close && !g.playoff).sort((x, y) => y.hype - x.hype);
       const picks = must.concat(other.slice(0, Math.max(0, 6 - must.length)));
@@ -3338,7 +3435,7 @@ button.brand, button.brand span { color: var(--accent); }
         if (tab === "live") shown = new Set(picks.map(g => g.id));
         html += block("worth", "Worth A Watch", countLabel(picks.length, picks),
           // More than 4 picks: switch to the two-up compact cards so the section doesn't take over the page
-          state.density === "simple" ? `<div class="grid">${picks.map(g => card(g, true)).join("")}</div>` : (state.density === "compact" || picks.length > 4) ? `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>` : `<div class="feat">${picks.map(featured).join("")}</div>`);
+          state.density === "simple" ? `<div class="grid">${picks.map(g => card(g, true)).join("")}</div>` : state.density === "compact" ? `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>` : worthRows(picks));
       }
     }
 
@@ -3415,7 +3512,7 @@ button.brand, button.brand span { color: var(--accent); }
     // The feed
     const quiet = [];
     TEAM_LEAGUES.forEach(lg => { if (!pool.some(g => g.lg.id === lg.id) && !state.data[lg.id]?.error && !state.data[lg.id]?.events?.length) quiet.push(lg.short || lg.name); });
-    let feed = pool.filter(g => !shown.has(g.id));
+    let feed = pool.filter(g => !shown.has(g.id) && !(tab === "live" && (mvHome.has(mvKey(g)) || g === heroGame)));
     if (feed.length && state.view === "league" && tab === "live") {
       // Live tab, By League: one "You Are Looking Live" section with a card grid per league inside.
       // Compact: one two-up grid in league order with a league tag on each card, so no half-empty rows or big league headers.
@@ -3902,6 +3999,7 @@ button.brand, button.brand span { color: var(--accent); }
     let s = g.hype || 0;
     if (isMine(g)) s += 80;   // your teams make the quad once they kick off
     if (g.pin || state.watched?.[mvKey(g)]) s += 20;
+    if (g.tight && g.lg.sport !== "Football") s += 20;
     if (g.state === "in" && g.lg.sport === "Football") {
       const m = mvMargin(g), p = g.period || 0;
       if (m <= 8 && p >= 3) s += 20;                     // one-score game in the second half
@@ -3918,22 +4016,7 @@ button.brand, button.brand span { color: var(--accent); }
   const mvName = g => { const [a, h] = g.teams, col = !!CONFS[g.lg.id]; const nm = t => col ? (t.name || t.abbr) : (t.full || t.name || t.abbr); return `${nm(a)} at ${nm(h)}`; };
   function mvWhy(g) {
     if (g.state === "pre") return "Starts " + timeLabel(g.date);
-    // One tag per game; the red zone beats everything while the ball is inside the 20
-    if (g.lg.sport === "Football" && g.sit?.isRedZone) return "Red zone";
-    const m = mvMargin(g), p = g.period || 0, out = [];
-    if (isMine(g)) out.push("Your team");
-    const up = (g.reasons || []).find(r => /^Upset/.test(r)); if (up) out.push(up.replace("Upset Alert: ", "Upset watch: "));
-    if (g.lg.sport === "Football") {
-      if (p > (g.lg.reg || 4)) out.push("Overtime");
-      else if (m === 0) out.push("Tied");
-      else if (m <= 8) out.push(m <= 3 ? "Field goal game" : "One-score game");
-      else if (m >= 22) out.push("Blowout");
-    } else {
-      (g.reasons || []).filter(r => !/^Upset|Starting Soon|Playoffs/.test(r)).slice(0, 1).forEach(r => out.push(r));
-      if (!out.length && m === 0) out.push("Tied");
-    }
-    if (g.playoff) out.push("Playoffs");
-    return out[0] || "";
+    return gameTag(g);
   }
   function mvPool() {
     // YouTube TV Multiview only takes channels YouTube TV carries, so Peacock, Paramount+, Prime
@@ -4001,10 +4084,16 @@ button.brand, button.brand span { color: var(--accent); }
       ${list}${benchHTML}</div>`;
   }
   // Home section: the same four picks as a small quad, with a button into the full Multiview
+  // Games showing in the home Multiview, so Worth A Watch and You Are Looking Live skip them
+  let mvHome = new Set();
   function mvSection() {
-    if (!isToday()) return "";
+    mvHome = new Set();
+    // Built around YouTube TV's Multiview, so it only shows for people who have YouTube TV
+    if (!isToday() || !hasYTTV()) return "";
     const { tiles } = mvPick(false), live = tiles.filter(g => g && g.state === "in");
     if (live.length < 2) return "";
+    // Only YouTube TV people can build this Multiview, so only they lose the repeats; everyone else keeps the full Worth A Watch
+    if (hasYTTV()) mvHome = new Set(tiles.filter(Boolean).map(mvKey));
     const sp = mvCur[0] !== "all" ? mvCur[1] : "";
     return block("mv", "Your Multiview", sp || (hasYTTV() ? "YouTube TV" : ""),
       `<div class="mv-grid mv-mini">${tiles.map((g, i) => mvTile(g, i, true)).join("")}</div>
