@@ -2,6 +2,13 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 18, 2026: Beta and Beta 3.0 (12:55 PM, not on live yet)
+- Multiview starts 15 minutes before kickoff (was 60): games about to start fill the quad, best matchups first, and the home section reads Preview My Multiview until a game is live.
+- Lock In My Teams (on by default): your teams' games always get a pinned spot. Turn it off and they're ranked like any other game. Un-pin one by hand and it stays un-pinned for the day.
+- NFL RedZone (off by default): takes the first tile during NFL windows (two or more NFL games live or about to start). The tile lists who's in the red zone right now, and the YouTube TV list adds NFL RedZone (Sports Plus add-on).
+- Build My Own: a second tab on the Multiview screen next to Suggested. It starts from the current picks; add or remove games (up to four, three with RedZone), live first then upcoming. Your picks are saved for the day and show on home as My Multiview.
+- Empty tiles say Open Spot (Title Case).
+
 ## Oct 18, 2026: Beta 3.0 (12:20 PM, Beta 3.0 only)
 - Bottom bar works like real tabs: Leagues, Search and Settings open full screen above the bar (no X, no Done), the bar highlights where you are, and one tap switches tabs (Leagues to Search took two taps before). Scores takes you back to where you were; tap it again to jump to the top, once more for your home tab. Edit Teams and Edit Order open inside the Settings tab with an X to go back.
 - Search finds games: type "Jets" or "Texas" and today's game shows first (tap to open it), then teams to follow. The tab is titled Search.

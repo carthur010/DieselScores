@@ -528,6 +528,17 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .mv-empty { align-items: center; justify-content: center; color: rgba(255,255,255,.5); background: #18181b; font-size: 13px; text-align: center; cursor: default; }
 .mv-hint { margin: 12px 4px 0; font-size: 13px; }
 .mv-chips { margin: 0 0 10px; }
+.mv-seg { display: grid; grid-template-columns: 1fr 1fr; margin: 0 0 10px; }
+.mv-seg button { min-height: 40px; }
+.mv-cnt { font-weight: 600; color: var(--muted); margin-left: 6px; text-transform: none; letter-spacing: 0; }
+.mv-li .chip[disabled] { opacity: .4; }
+.mv-opts { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 10px; }
+.mv-opts .chip { min-height: 36px; }
+.mv-tile.mv-rz { background: linear-gradient(160deg, #b3121b 0%, #2a0d10 55%, #111 100%); cursor: default; }
+.mv-rz-b { display: grid; gap: 4px; font-size: 15px; font-weight: 700; flex: 1; }
+.mv-rz-l b { font-family: var(--display); font-size: 18px; margin-right: 4px; }
+.mv-sm .mv-rz-b { font-size: 12px; } .mv-sm .mv-rz-l b { font-size: 14px; }
+
 .mv-chips button small { opacity: .6; font-weight: 700; margin-left: 2px; }
 .mv-mini { margin: 12px 12px 0; border-radius: 14px; gap: 4px; padding: 4px; }
 .mv-tile.mv-sm { min-height: 0; padding: 7px 8px 8px; gap: 2px; border-radius: 10px; }
@@ -4298,6 +4309,33 @@ button.brand, button.brand span { color: var(--accent); }
   const PIN_IC = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 3l5 5-2.5.8-3.6 3.6.6 4.6-1.8 1.8-4.2-4.2L4.6 20.5l-1.1-1.1 5.9-5.9-4.2-4.2L7 7.5l4.6.6 3.6-3.6z"/></svg>';
   let mvOpen = false, mvSlots = [], mvShownR = false, mvSport = null;
   const mvLocks = new Set();
+  // Options on the Multiview screen: lock in your teams (on by default) and an NFL RedZone tile (off by default)
+  const mvLockMine = () => store.get("mvLockMine", true);
+  const mvRZOn = () => store.get("mvRedZone", false);
+  const mvUnpinned = new Set();   // your teams you un-pinned by hand
+  let mvLockedNow = new Set();
+  const mvMode = () => store.get("mvMode", "auto") === "mine" ? "mine" : "auto";
+  function mvCustom() { const c = store.get("mvCustom", null); return c && c.day === ymd(new Date()) ? (c.keys || []) : []; }
+  function setMvCustom(keys) { store.set("mvCustom", { day: ymd(new Date()), keys }); }
+  // RedZone only makes sense with an NFL window on: two or more NFL games live (or kicking off within 15 minutes)
+  function mvRZ() {
+    if (!mvRZOn() || !isToday()) return false;
+    const nfl = allGames().filter(g => g.lg.id === "nfl" && inMyWorld(g));
+    const on = nfl.filter(g => g.state === "in" || (g.state === "pre" && new Date(g.date) - Date.now() < 15 * 60e3 && new Date(g.date) - Date.now() > -20 * 60e3));
+    return on.length >= 2;
+  }
+  function mvRZTile(mini) {
+    const nfl = allGames().filter(g => g.lg.id === "nfl" && g.state === "in");
+    const rz = nfl.filter(g => g.sit?.isRedZone);
+    const who = g => { const id = String(g.sit?.possession || ""); const t = g.teams.find(x => String(x.id) === id); return t ? t.abbr : ""; };
+    const lines = rz.slice(0, mini ? 2 : 3).map(g => `<div class="mv-rz-l"><b>${esc(who(g) || g.teams.map(t => t.abbr).join("/"))}</b> ${esc(g.sit.downDistanceText || g.sit.shortDownDistanceText || "")}</div>`).join("");
+    return `<div class="mv-tile mv-rz ${mini ? "mv-sm" : ""}">
+      <div class="mv-top"><span class="mv-n">1</span><span class="mv-lg">NFL</span><span class="mv-net">RedZone</span></div>
+      <div class="mv-rz-b">${lines || `<div class="mv-rz-l">Every touchdown from every game</div>`}</div>
+      <div class="mv-st"><span class="live">${nfl.length ? `${nfl.length} NFL ${nfl.length === 1 ? "Game" : "Games"} Live` : "Starts With Kickoff"}</span></div>
+      <div class="mv-tag ${rz.length ? "" : "mv-blank"}">${rz.length ? (rz.length > 1 ? rz.length + " In The Red Zone" : "Red Zone") : "&nbsp;"}</div>
+    </div>`;
+  }
   const mvKey = g => g.lg.id + ":" + g.id;
   // Filter chips: All Sports, Football (when NFL and college are both on), then one per league that has a live game
   const MV_SPORT_ORD = ["Football", "Basketball", "Baseball", "Hockey", "Soccer"];
@@ -4316,7 +4354,7 @@ button.brand, button.brand span { color: var(--accent); }
   const mvMargin = g => Math.abs((parseInt(g.teams[0]?.score) || 0) - (parseInt(g.teams[1]?.score) || 0));
   function mvScore(g) {
     let s = g.hype || 0;
-    if (isMine(g)) s += 80;   // your teams make the quad once they kick off
+    if (isMine(g) && mvLockMine()) s += 80;   // your teams make the quad once they kick off
     if (g.pin || state.watched?.[mvKey(g)]) s += 20;
     if (g.tight && g.lg.sport !== "Football") s += 20;
     if (g.state === "in" && g.lg.sport === "Football") {
@@ -4349,20 +4387,38 @@ button.brand, button.brand span { color: var(--accent); }
     mvCur = mvFilt.find(x => x[0] === mvSport) || (mvSport === "football" && mvFilt.find(x => x[0] === "lg:nfl" || x[0] === "lg:ncaaf")) || mvFilt[0];
     const f = mvCur[2];
     const live = pool.filter(g => g.state === "in" && f(g)).sort((a, b) => mvScore(b) - mvScore(a));
-    const soon = pool.filter(g => g.state === "pre" && f(g) && !/Postponed|Canceled/.test(g.status) && new Date(g.date) - Date.now() < 60 * 60e3 && new Date(g.date) - Date.now() > -20 * 60e3).sort((a, b) => new Date(a.date) - new Date(b.date));
+    const soon = pool.filter(g => g.state === "pre" && f(g) && !/Postponed|Canceled/.test(g.status) && new Date(g.date) - Date.now() < 15 * 60e3 && new Date(g.date) - Date.now() > -20 * 60e3).sort((a, b) => mvScore(b) - mvScore(a) || new Date(a.date) - new Date(b.date));
     return { live, soon, anyFb, all: pool };
   }
   function mvPick(reset) {
+    if (mvMode() === "mine") {
+      const N = mvRZ() ? 3 : 4, pool = allGames();
+      const tiles = mvCustom().slice(0, N).map(k => pool.find(g => mvKey(g) === k) || null);
+      while (tiles.length < N) tiles.push(null);
+      mvLockedNow = new Set();
+      return { tiles, bench: [] };
+    }
     const { live, soon } = mvPool();
     const byKey = new Map(live.concat(soon).map(g => [mvKey(g), g]));
-    let slots = (reset ? mvSlots.map(k => mvLocks.has(k) ? k : null) : mvSlots.slice()).slice(0, 4).map(k => k && byKey.has(k) ? k : null);
-    while (slots.length < 4) slots.push(null);
+    const N = mvRZ() ? 3 : 4;   // RedZone takes one of the four spots
+    const auto = mvLockMine() ? live.concat(soon).filter(g => isMine(g) && !mvUnpinned.has(mvKey(g)))
+      .sort((a, b) => (a.state === "in" ? 0 : 1) - (b.state === "in" ? 0 : 1) || gameRank(a) - gameRank(b)).slice(0, N).map(mvKey) : [];
+    const L = new Set([...mvLocks, ...auto]); mvLockedNow = L;
+    let slots = (reset ? mvSlots.map(k => L.has(k) ? k : null) : mvSlots.slice()).slice(0, N).map(k => k && byKey.has(k) ? k : null);
+    while (slots.length < N) slots.push(null);
+    // Locked-in teams always get a spot: an open one first, otherwise the weakest unlocked tile
+    auto.forEach(k => {
+      if (slots.includes(k)) return;
+      let i = slots.indexOf(null);
+      if (i < 0) { const c = slots.map((x, j) => ({ x, j })).filter(o => !L.has(o.x)).sort((p, q) => mvScore(byKey.get(p.x)) - mvScore(byKey.get(q.x)))[0]; i = c ? c.j : -1; }
+      if (i >= 0) slots[i] = k;
+    });
     const rest = live.filter(g => !slots.includes(mvKey(g)));
     // Empty spots, and spots holding a game that hasn't started, go to the best live games left
-    slots = slots.map(k => { if (k && (byKey.get(k).state === "in" || mvLocks.has(k))) return k; const nx = rest.shift(); return nx ? mvKey(nx) : k; });
+    slots = slots.map(k => { if (k && (byKey.get(k).state === "in" || L.has(k))) return k; const nx = rest.shift(); return nx ? mvKey(nx) : k; });
     // A game that tightens up bumps the weakest unpinned tile
     while (rest.length) {
-      const weak = slots.map((k, i) => ({ k, i })).filter(x => x.k && !mvLocks.has(x.k)).sort((a, b) => mvScore(byKey.get(a.k)) - mvScore(byKey.get(b.k)))[0];
+      const weak = slots.map((k, i) => ({ k, i })).filter(x => x.k && !L.has(x.k)).sort((a, b) => mvScore(byKey.get(a.k)) - mvScore(byKey.get(b.k)))[0];
       if (!weak || mvScore(rest[0]) < mvScore(byKey.get(weak.k)) + 25) break;
       slots[weak.i] = mvKey(rest.shift());
     }
@@ -4372,15 +4428,15 @@ button.brand, button.brand span { color: var(--accent); }
     return { tiles: slots.map(k => k ? byKey.get(k) : null), bench: live.filter(g => !slots.includes(mvKey(g))).slice(0, 6) };
   }
   function mvTile(g, i, mini) {
-    if (!g) return `<div class="mv-tile mv-empty ${mini ? "mv-sm" : ""}"><span>${mini ? "Open spot" : "Nothing else on right now"}</span></div>`;
-    const [a, h] = g.teams, k = mvKey(g), pinned = mvLocks.has(k);
+    if (!g) return `<div class="mv-tile mv-empty ${mini ? "mv-sm" : ""}"><span>${mini ? "Open Spot" : mvMode() === "mine" ? "Add A Game Below" : "Nothing Else On Right Now"}</span></div>`;
+    const [a, h] = g.teams, k = mvKey(g), pinned = mvLockedNow.has(k);
     const w = g.watch?.find(x => x.url);
     const net = netLabel(g), why = mvWhy(g);
     const lead = (t, o) => g.state === "in" && (+t.score) > (+o.score);
     const row = (t, o) => `<div class="mv-tm ${lead(t, o) ? "lead" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="">` : "<i></i>"}<span>${t.seed ? `<small>(${t.seed})</small> ` : t.rank ? `<small>${esc(t.rank)}</small> ` : ""}${esc(t.abbr || t.name)}</span>${g.state === "pre" ? "" : `<b>${esc(t.score)}</b>`}</div>`;
     const dd = g.state === "in" && g.lg.sport === "Football" && g.sit?.downDistanceText ? g.sit.downDistanceText : "";
     return `<div class="mv-tile ${mini ? "mv-sm" : ""}" style="--ca:${readable(a.color)};--ch:${readable(h.color)}" ${mini ? `data-game="${esc(k)}"` : `data-mv-tile="${esc(k)}"`} role="button" tabindex="0" aria-label="${esc(mvName(g))}: game details">
-      <div class="mv-top"><span class="mv-n">${i + 1}</span><span class="mv-lg">${esc(g.lg.short || g.lg.name)}</span>${net ? `<span class="mv-net">${esc(net)}</span>` : ""}${mini ? (pinned ? `<span class="mv-lock on" aria-label="Pinned">${PIN_IC}</span>` : "") : `<button class="mv-lock ${pinned ? "on" : ""}" data-mv-lock="${esc(k)}" aria-pressed="${pinned}" aria-label="${pinned ? "Let this spot reshuffle" : "Keep this game in place"}">${PIN_IC}</button>`}</div>
+      <div class="mv-top"><span class="mv-n">${i + 1}</span><span class="mv-lg">${esc(g.lg.short || g.lg.name)}</span>${net ? `<span class="mv-net">${esc(net)}</span>` : ""}${mini ? (pinned ? `<span class="mv-lock on" aria-label="Pinned">${PIN_IC}</span>` : "") : mvMode() === "mine" ? `<button class="mv-lock" data-mv-rm="${esc(k)}" aria-label="Remove from your Multiview">${XIC}</button>` : `<button class="mv-lock ${pinned ? "on" : ""}" data-mv-lock="${esc(k)}" aria-pressed="${pinned}" aria-label="${pinned ? "Let this spot reshuffle" : "Keep this game in place"}">${PIN_IC}</button>`}</div>
       ${row(a, h)}${row(h, a)}
       <div class="mv-st"><span class="${statusClass(g)}">${esc(g.state === "pre" ? "Starts " + timeLabel(g.date) : g.status)}</span><small class="${dd ? "" : "mv-blank"}">${dd ? esc(dd) : "&nbsp;"}</small></div>
       <div class="mv-tag ${why && g.state === "in" ? "" : "mv-blank"}">${why && g.state === "in" ? esc(why) : "&nbsp;"}</div>
@@ -4393,14 +4449,24 @@ button.brand, button.brand span { color: var(--accent); }
     const { anyFb } = mvPool();
     const liveN = shown.filter(g => g.state === "in").length;
     const yt = hasYTTV() ? shown.filter(onYTTV) : [];
+    const rzRow = mvRZ() ? `<div class="mv-li"><i>1</i><span><b>NFL RedZone</b><small>RedZone channel · needs the YouTube TV Sports Plus add-on</small></span></div>` : "";
     const chips = mvFilt.length > 2 ? `<div class="lp-chips mv-chips">${mvFilt.map(([id, label, , n]) => `<button class="${mvCur[0] === id ? "on" : ""}" data-mv-sport="${id}">${esc(label)}${id !== "all" ? ` <small>${n}</small>` : ""}</button>`).join("")}</div>` : "";
-    const list = yt.length ? `<div class="gc-c mv-list"><h3>Add These In YouTube TV</h3>
-        ${yt.map(g => `<div class="mv-li" data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><i>${tiles.indexOf(g) + 1}</i><span><b>${mvNameHTML(g)}</b><small>${esc([netLabel(g), g.state === "in" ? g.status : "Starts " + timeLabel(g.date)].filter(Boolean).join(" · "))}</small></span></div>`).join("")}</div>` : "";
+    const list = yt.length || rzRow ? `<div class="gc-c mv-list"><h3>Add These In YouTube TV</h3>${rzRow}
+        ${yt.map(g => `<div class="mv-li" data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><i>${tiles.indexOf(g) + 1 + (mvRZ() ? 1 : 0)}</i><span><b>${mvNameHTML(g)}</b><small>${esc([netLabel(g), g.state === "in" ? g.status : "Starts " + timeLabel(g.date)].filter(Boolean).join(" · "))}</small></span></div>`).join("")}</div>` : "";
     const benchHTML = bench.length ? `<div class="gc-c mv-list"><h3>Also Worth A Look</h3>${bench.map((g, i) => `<div class="mv-li"><i class="mv-bn">${i + 5}</i><span data-mv-tile="${esc(mvKey(g))}" role="button" tabindex="0"><b>${mvNameHTML(g)}</b><small>${esc([netLabel(g), g.status, mvWhy(g)].filter(Boolean).join(" · "))}</small></span><button class="chip" data-mv-swap="${esc(mvKey(g))}">Swap In</button></div>`).join("")}</div>` : "";
-    el.innerHTML = `<div class="gc-wrap mv-wrap"><div class="mv-head"><button class="circ" data-gclose aria-label="Close">${XIC}</button><div><b>Your Multiview</b></div><button class="chip" data-mv-shuffle>Reshuffle</button></div>
+    const mine = mvMode() === "mine", N = mvRZ() ? 3 : 4, keys = mvCustom();
+    const title = mine ? "My Multiview" : liveN ? "Your Multiview" : "Preview My Multiview";
+    const modeSeg = `<div class="seg mv-seg"><button class="${mine ? "" : "on"}" data-mv-mode="auto" aria-pressed="${!mine}">Suggested</button><button class="${mine ? "on" : ""}" data-mv-mode="mine" aria-pressed="${mine}">Build My Own</button></div>`;
+    const cand = mine ? allGames().filter(g => inMyWorld(g) && g.state !== "post" && !/Postponed|Canceled/.test(g.status) && mvCur[2](g) && (!hasYTTV() || onYTTV(g)))
+      .sort((a, b) => (a.state === "in" ? 0 : 1) - (b.state === "in" ? 0 : 1) || new Date(a.date) - new Date(b.date)) : [];
+    const pickHTML = mine ? `<div class="gc-c mv-list"><h3>Pick Up To ${N} Games <small class="mv-cnt">${Math.min(keys.length, N)} Of ${N}</small></h3>${cand.map(g => { const k = mvKey(g), on = keys.includes(k);
+        return `<div class="mv-li"><span data-mv-tile="${esc(k)}" role="button" tabindex="0"><b>${mvNameHTML(g)}</b><small>${esc([netLabel(g), g.state === "in" ? g.status : "Starts " + timeLabel(g.date), g.state === "in" ? mvWhy(g) : ""].filter(Boolean).join(" · "))}</small></span><button class="chip ${on ? "on" : ""}" data-mv-add="${esc(k)}" ${!on && keys.length >= N ? "disabled" : ""} aria-pressed="${on}">${on ? "Added" : "Add"}</button></div>`; }).join("") || `<p class="hint" style="padding:10px 0">No more games today.</p>`}</div>` : "";
+    el.innerHTML = `<div class="gc-wrap mv-wrap"><div class="mv-head"><button class="circ" data-gclose aria-label="Close">${XIC}</button><div><b>${title}</b></div>${mine ? "<span></span>" : `<button class="chip" data-mv-shuffle>Reshuffle</button>`}</div>
+      ${modeSeg}
       ${chips}
-      ${shown.length ? `<div class="mv-grid">${tiles.map((g, i) => mvTile(g, i)).join("")}</div>` : `<div class="block empty">Nothing live ${mvCur[0] !== "all" ? "in " + esc(mvCur[1]) + " " : ""}right now.</div>`}
-      ${list}${benchHTML}</div>`;
+      <div class="mv-opts">${mine ? "" : `<button class="chip ${mvLockMine() ? "on" : ""}" data-mv-opt="mvLockMine" aria-pressed="${mvLockMine()}">Lock In My Teams</button>`}<button class="chip ${mvRZOn() ? "on" : ""}" data-mv-opt="mvRedZone" aria-pressed="${mvRZOn()}">NFL RedZone</button></div>
+      ${shown.length || mine || mvRZ() ? `<div class="mv-grid">${(mvRZ() ? [mvRZTile(false)] : []).concat(tiles.map((g, i) => mvTile(g, i + (mvRZ() ? 1 : 0)))).join("")}</div>` : `<div class="block empty">Nothing live ${mvCur[0] !== "all" ? "in " + esc(mvCur[1]) + " " : ""}right now.</div>`}
+      ${pickHTML}${list}${benchHTML}</div>`;
   }
   // Home section: the same four picks as a small quad, with a button into the full Multiview
   // Games showing in the home Multiview, so Worth A Watch and You Are Looking Live skip them (YouTube TV only)
@@ -4410,12 +4476,12 @@ button.brand, button.brand span { color: var(--accent); }
     // Built around YouTube TV's Multiview, so it only shows for people who have YouTube TV
     if (!isToday() || !hasYTTV()) return "";
     const { tiles } = mvPick(false), live = tiles.filter(g => g && g.state === "in");
-    if (live.length < 2) return "";
+    if (tiles.filter(Boolean).length + (mvRZ() ? 1 : 0) < (mvMode() === "mine" ? 1 : 2)) return "";
     // Only YouTube TV people can build this Multiview, so only they lose the repeats; everyone else keeps the full Worth A Watch
     if (hasYTTV()) mvHome = new Set(tiles.filter(Boolean).map(mvKey));
     const sp = mvCur[0] !== "all" ? mvCur[1] : "";
-    return block("mv", "Your Multiview", sp || (hasYTTV() ? "YouTube TV" : ""),
-      `<div class="mv-grid mv-mini">${tiles.map((g, i) => mvTile(g, i, true)).join("")}</div>
+    return block("mv", mvMode() === "mine" ? "My Multiview" : live.length ? "Your Multiview" : "Preview My Multiview", sp || (mvMode() === "mine" ? "Built By You" : hasYTTV() ? "YouTube TV" : ""),
+      `<div class="mv-grid mv-mini">${(mvRZ() ? [mvRZTile(true)] : []).concat(tiles.map((g, i) => mvTile(g, i + (mvRZ() ? 1 : 0), true))).join("")}</div>
       <div class="mv-foot"><button class="chip on mv-cta" data-mv>${MV_ICON}Make This Your Multiview</button></div>`);
   }
   function openMultiview() {
@@ -4429,13 +4495,21 @@ button.brand, button.brand span { color: var(--accent); }
     if (t.closest("[data-mv]")) { e.preventDefault(); e.stopPropagation(); navStack = []; openMultiview(); return; }
     if (!mvOpen) return;
     const lk = t.closest("[data-mv-lock]");
-    if (lk) { e.preventDefault(); e.stopPropagation(); const k = lk.dataset.mvLock; if (mvLocks.has(k)) mvLocks.delete(k); else mvLocks.add(k); paintMv(); return; }
+    if (lk) { e.preventDefault(); e.stopPropagation(); const k = lk.dataset.mvLock; if (mvLockedNow.has(k)) { mvLocks.delete(k); mvUnpinned.add(k); } else { mvLocks.add(k); mvUnpinned.delete(k); } mvPick(false); paintMv(); render(); return; }
+    const md = t.closest("[data-mv-mode]");
+    if (md) { e.stopPropagation(); if (md.dataset.mvMode === "mine" && !mvCustom().length) setMvCustom(mvSlots.filter(Boolean)); store.set("mvMode", md.dataset.mvMode); if (md.dataset.mvMode === "auto") mvPick(true); paintMv(); render(); return; }
+    const ad = t.closest("[data-mv-add]");
+    if (ad) { e.stopPropagation(); const k = ad.dataset.mvAdd, ks = mvCustom(), n = mvRZ() ? 3 : 4; setMvCustom(ks.includes(k) ? ks.filter(x => x !== k) : ks.length < n ? [...ks, k] : ks); paintMv(); render(); return; }
+    const rmv = t.closest("[data-mv-rm]");
+    if (rmv) { e.stopPropagation(); setMvCustom(mvCustom().filter(x => x !== rmv.dataset.mvRm)); paintMv(); render(); return; }
+    const op = t.closest("[data-mv-opt]");
+    if (op) { e.stopPropagation(); const k = op.dataset.mvOpt; store.set(k, !store.get(k, k === "mvLockMine")); mvUnpinned.clear(); mvPick(true); paintMv(); render(); return; }
     if (t.closest("[data-mv-shuffle]")) { e.stopPropagation(); mvPick(true); paintMv(); return; }
     const sp = t.closest("[data-mv-sport]");
     if (sp) { e.stopPropagation(); mvSport = sp.dataset.mvSport; mvPick(true); paintMv(); render(); return; }
     const sw = t.closest("[data-mv-swap]");
     if (sw) { e.stopPropagation(); const k = sw.dataset.mvSwap; const { tiles } = mvPick(false); const by = new Map(tiles.filter(Boolean).map(g => [mvKey(g), g]));
-      const open = mvSlots.map((x, i) => ({ x, i })).filter(o => !o.x || !mvLocks.has(o.x)).sort((p, q) => (p.x ? mvScore(by.get(p.x)) : -1e9) - (q.x ? mvScore(by.get(q.x)) : -1e9))[0];
+      const open = mvSlots.map((x, i) => ({ x, i })).filter(o => !o.x || !mvLockedNow.has(o.x)).sort((p, q) => (p.x ? mvScore(by.get(p.x)) : -1e9) - (q.x ? mvScore(by.get(q.x)) : -1e9))[0];
       if (open) { mvSlots[open.i] = k; mvLocks.add(k); } paintMv(); return; }
     if (t.closest("a")) return;
     const tile = t.closest("[data-mv-tile]");
