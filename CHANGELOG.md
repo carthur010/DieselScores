@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 18, 2026: Beta and Beta 3.0 (12:55 PM)
+- NFL RedZone tile redone to match the other tiles: a big RedZone title where the teams go, then who's in the red zone or "Every Touchdown, Every Game", the status in the same spot as the other tiles ("Starts 1:00 PM" or "3 Games On"), and a tag like "NYJ In The Red Zone". It only counts the 1 PM and 4 PM window games (the London game no longer shows as "1 NFL Game Live"), and the colors match the rest of the quad.
+
 ## Oct 18, 2026: Beta and Beta 3.0 (12:55 PM, not on live yet)
 - Multiview starts 15 minutes before kickoff (was 60): games about to start fill the quad, best matchups first, and the home section reads Preview My Multiview until a game is live.
 - Lock In My Teams (on by default): your teams' games always get a pinned spot. Turn it off and they're ranked like any other game. Un-pin one by hand and it stays un-pinned for the day.

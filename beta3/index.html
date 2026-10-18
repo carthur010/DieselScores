@@ -534,10 +534,13 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .mv-li .chip[disabled] { opacity: .4; }
 .mv-opts { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 10px; }
 .mv-opts .chip { min-height: 36px; }
-.mv-tile.mv-rz { background: linear-gradient(160deg, #b3121b 0%, #2a0d10 55%, #111 100%); cursor: default; }
-.mv-rz-b { display: grid; gap: 4px; font-size: 15px; font-weight: 700; flex: 1; }
+.mv-tile.mv-rz { background: linear-gradient(160deg, color-mix(in srgb, #d50a0a 60%, #111) 0%, #161618 52%, color-mix(in srgb, #013369 60%, #111) 100%); cursor: default; }
+.mv-rz-b { display: grid; gap: 4px; align-content: start; font-size: 15px; font-weight: 700; min-height: 76px; }
+.mv-rz-name { font-family: var(--display); font-size: 24px; font-weight: 800; line-height: 1.05; }
+.mv-rz-sub { font-size: 13px; font-weight: 600; opacity: .75; }
+.mv-sm .mv-rz-b { min-height: 44px; } .mv-sm .mv-rz-name { font-size: 18px; } .mv-sm .mv-rz-sub { font-size: 11px; }
 .mv-rz-l b { font-family: var(--display); font-size: 18px; margin-right: 4px; }
-.mv-sm .mv-rz-b { font-size: 12px; } .mv-sm .mv-rz-l b { font-size: 14px; }
+.mv-sm .mv-rz-b { font-size: 12px; min-height: 44px; } .mv-sm .mv-rz-l b { font-size: 14px; }
 
 .mv-chips button small { opacity: .6; font-weight: 700; margin-left: 2px; }
 .mv-mini { margin: 12px 12px 0; border-radius: 14px; gap: 4px; padding: 4px; }
@@ -4318,24 +4321,31 @@ button.brand, button.brand span { color: var(--accent); }
   function mvCustom() { const c = store.get("mvCustom", null); return c && c.day === ymd(new Date()) ? (c.keys || []) : []; }
   function setMvCustom(keys) { store.set("mvCustom", { day: ymd(new Date()), keys }); }
   // RedZone only makes sense with an NFL window on: two or more NFL games live (or kicking off within 15 minutes)
+  // RedZone airs during the Sunday afternoon windows (1 PM and 4 PM ET), not London morning or night games
+  function etMins(d) { const p = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "numeric", hourCycle: "h23" }).formatToParts(new Date(d)); return (+p.find(x => x.type === "hour").value) * 60 + (+p.find(x => x.type === "minute").value); }
+  const rzWindow = () => allGames().filter(g => g.lg.id === "nfl" && inMyWorld(g) && etMins(g.date) >= 12 * 60 + 30 && etMins(g.date) < 17 * 60);
+  // On when two or more window games are live or kick off within 15 minutes
   function mvRZ() {
     if (!mvRZOn() || !isToday()) return false;
-    const nfl = allGames().filter(g => g.lg.id === "nfl" && inMyWorld(g));
-    const on = nfl.filter(g => g.state === "in" || (g.state === "pre" && new Date(g.date) - Date.now() < 15 * 60e3 && new Date(g.date) - Date.now() > -20 * 60e3));
+    const on = rzWindow().filter(g => g.state === "in" || (g.state === "pre" && new Date(g.date) - Date.now() < 15 * 60e3 && new Date(g.date) - Date.now() > -20 * 60e3));
     return on.length >= 2;
   }
   function mvRZTile(mini) {
-    const nfl = allGames().filter(g => g.lg.id === "nfl" && g.state === "in");
-    const rz = nfl.filter(g => g.sit?.isRedZone);
-    const who = g => { const id = String(g.sit?.possession || ""); const t = g.teams.find(x => String(x.id) === id); return t ? t.abbr : ""; };
-    const lines = rz.slice(0, mini ? 2 : 3).map(g => `<div class="mv-rz-l"><b>${esc(who(g) || g.teams.map(t => t.abbr).join("/"))}</b> ${esc(g.sit.downDistanceText || g.sit.shortDownDistanceText || "")}</div>`).join("");
+    const win = rzWindow(), live = win.filter(g => g.state === "in");
+    const next = win.filter(g => g.state === "pre").sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+    const rz = live.filter(g => g.sit?.isRedZone);
+    const who = g => { const id = String(g.sit?.possession || ""); const t = g.teams.find(x => String(x.id) === id); return t ? t.abbr : g.teams.map(x => x.abbr).join("/"); };
+    const lines = rz.slice(0, mini ? 1 : 2).map(g => `<div class="mv-rz-l"><b>${esc(who(g))}</b> ${esc((g.sit.downDistanceText || g.sit.shortDownDistanceText || "").replace(/ at /, " · "))}</div>`).join("");
+    const status = live.length ? `${live.length} ${live.length === 1 ? "Game" : "Games"} On` : next ? "Starts " + timeLabel(next.date) : "";
+    const tag = rz.length === 1 ? `${who(rz[0])} In The Red Zone` : rz.length > 1 ? `${rz.length} In The Red Zone` : "";
     return `<div class="mv-tile mv-rz ${mini ? "mv-sm" : ""}">
       <div class="mv-top"><span class="mv-n">1</span><span class="mv-lg">NFL</span><span class="mv-net">RedZone</span></div>
-      <div class="mv-rz-b">${lines || `<div class="mv-rz-l">Every touchdown from every game</div>`}</div>
-      <div class="mv-st"><span class="live">${nfl.length ? `${nfl.length} NFL ${nfl.length === 1 ? "Game" : "Games"} Live` : "Starts With Kickoff"}</span></div>
-      <div class="mv-tag ${rz.length ? "" : "mv-blank"}">${rz.length ? (rz.length > 1 ? rz.length + " In The Red Zone" : "Red Zone") : "&nbsp;"}</div>
+      <div class="mv-rz-b"><div class="mv-rz-name">RedZone</div>${lines || `<div class="mv-rz-sub">Every Touchdown, Every Game</div>`}</div>
+      <div class="mv-st"><span class="live">${esc(status)}</span><small class="mv-blank">&nbsp;</small></div>
+      <div class="mv-tag ${tag ? "" : "mv-blank"}">${tag ? esc(tag) : "&nbsp;"}</div>
     </div>`;
   }
+
   const mvKey = g => g.lg.id + ":" + g.id;
   // Filter chips: All Sports, Football (when NFL and college are both on), then one per league that has a live game
   const MV_SPORT_ORD = ["Football", "Basketball", "Baseball", "Hockey", "Soccer"];
