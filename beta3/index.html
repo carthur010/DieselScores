@@ -4263,14 +4263,15 @@ button.brand, button.brand span { color: var(--accent); }
       ${list}${benchHTML}</div>`;
   }
   // Home section: the same four picks as a small quad, with a button into the full Multiview
-  // Games showing in the home Multiview, so Worth A Watch and You Are Looking Live skip them
+  // Games showing in the home Multiview, so Worth A Watch and You Are Looking Live skip them (YouTube TV only)
   let mvHome = new Set();
   function mvSection() {
     mvHome = new Set();
     if (!isToday()) return "";
     const { tiles } = mvPick(false), live = tiles.filter(g => g && g.state === "in");
     if (live.length < 2) return "";
-    mvHome = new Set(tiles.filter(Boolean).map(mvKey));
+    // Only YouTube TV people can build this Multiview, so only they lose the repeats; everyone else keeps the full Worth A Watch
+    if (hasYTTV()) mvHome = new Set(tiles.filter(Boolean).map(mvKey));
     const sp = mvCur[0] !== "all" ? mvCur[1] : "";
     return block("mv", "Your Multiview", sp || (hasYTTV() ? "YouTube TV" : ""),
       `<div class="mv-grid mv-mini">${tiles.map((g, i) => mvTile(g, i, true)).join("")}</div>
