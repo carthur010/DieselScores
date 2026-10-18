@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 18, 2026: Live (6:40 PM)
+- Shipped from beta: Multiview builds 15 minutes before kickoff (Preview My Multiview), Lock In My Teams, NFL RedZone tile (1 PM and 4 PM windows only), Build My Own with Swap In, Red Zone only counts with a ball spot, Multiview drops blowouts in every sport, and the Live tab strip only shows live games.
+
 ## Oct 18, 2026: Beta and Beta 3.0 (2:20 PM, from the live 1 PM pass)
 - Red Zone only counts when ESPN gives a down and distance. ESPN leaves its red zone flag on after a score or during breaks (Titans-Colts and Saints-Giants showed Red Zone with no ball spot), which made the RedZone tile say "3 In The Red Zone" with one real drive.
 - Multiview drops blowouts in every sport, not just football (Real Sociedad 5, Málaga 2 in the 81st minute had a tile).
