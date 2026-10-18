@@ -2,11 +2,15 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 18, 2026: Live (11:10 AM)
+- Shipped from beta: new people see just the channel (FOX, ESPN, Peacock) instead of "Not On Your Services" until they pick TV & Streaming.
+- Shipped from beta: three-step Welcome (Teams, Leagues by sport, How Do You Watch? with one-tap presets and Fine-Tune for the full list).
+
 ## Oct 17, 2026: Live (7:45 PM)
 - League pages open on what's on now: tap College Football (or any league) and the Scores tab jumps straight to today's live games instead of the top of the week (Tuesday's finals). No live games? It lands on today, or the next day with games. Picking another week still starts at the top.
 - Today's section on league pages reads "Today · Saturday, Oct 17" and lists live games first, then upcoming, then finals. Also in beta and Beta 3.0.
 
-## Oct 17, 2026: Beta and Beta 3.0 (6:00 PM, not on live yet)
+## Oct 17, 2026: Beta and Beta 3.0 (6:00 PM). Shipped to Live Oct 18, 11:10 AM
 - New people no longer see "Not On Your Services" on every game. Until they pick TV & Streaming, games just show the channel (FOX, ESPN, Peacock). Once services are picked, the note comes back for games they can't watch.
 - Welcome is now three short steps with progress dots and Back / Next: 1) Follow your teams (setup code still here), 2) Your Leagues, grouped by sport, 3) How Do You Watch? with one-tap presets: YouTube TV, Cable Or Satellite, Another Live TV App, Streaming Apps Only, Antenna And Free Channels. Fine-Tune opens the full service list and Home Market. Free picks (Fandango, YouTube) come with every preset. League and service chips in Welcome are bigger and easier to tap.
 - Beta 3.0: sheets (Welcome, Your Teams, Settings, Leagues) sit above the bottom bar, so their last row and the Done button are no longer hidden behind it.

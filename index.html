@@ -526,6 +526,23 @@ body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .rk-row.me { background: color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 10px; }
 .rk-row.me b { font-weight: 800; }
 #sheet-tv { margin-top: 18px; }
+/* Welcome: three steps */
+.wz-steps { display: flex; gap: 6px; justify-content: center; margin: -4px 0 0; }
+.wz-steps i { width: 28px; height: 4px; border-radius: 2px; background: var(--line); }
+.wz-steps i.on { background: var(--accent); }
+.wz-presets { display: grid; gap: 8px; }
+.wz-p { display: grid; gap: 2px; text-align: left; padding: 12px 16px; min-height: 60px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.wz-p b { font-size: 16px; color: var(--fg); }
+.wz-p span { font-size: 13px; color: var(--muted); }
+.wz-p.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
+.wz-more { justify-self: start; min-height: 44px; padding: 0; margin-top: 4px; font-size: 14px; font-weight: 600; color: var(--accent); background: none; }
+#sheet-tvlist { margin-top: 6px; }
+#sheet-lgs .chip, #sheet-tvlist .chip { padding: 10px 14px; font-size: 14px; }
+.wz-nav { position: sticky; bottom: -14px; display: grid; grid-template-columns: auto 1fr; gap: 10px; padding: 10px 0 14px; margin-bottom: -14px; background: var(--surface); border-top: 1px solid var(--line); }
+.wz-nav .set-done { margin-top: 0; }
+.wz-back { height: 46px; padding: 0 20px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font-weight: 600; font-size: 16px; }
+#sheet-tv { margin-top: 0; }
+
 .lm-list .pk-row { grid-template-columns: 1fr auto 14px; }
 .sr-tv { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lm-go { font-style: normal; color: var(--muted); text-align: right; }
@@ -1062,17 +1079,22 @@ button.brand, button.brand span { color: var(--accent); }
     <div class="bhead"><h2 id="sheet-h">Your Teams</h2>
       <button class="tog" id="sheet-x" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="sheet-body">
-      <p class="hint" id="sheet-intro" hidden>Follow a few teams and pick your leagues to get started. You can change these anytime in Settings. <button class="chip" data-welcome-code style="margin-top:8px">Have A Setup Code?</button></p>
-      <input type="search" id="q" placeholder="Search teams and leagues: Mets, NFL, Tennis…" autocomplete="off" aria-label="Search teams and leagues">
+      <div class="wz-steps" id="wz-steps" hidden aria-hidden="true"><i></i><i></i><i></i></div>
+      <p class="hint" id="sheet-intro" hidden>Step 1 Of 3 · Follow your teams. You can change everything later in Settings. <button class="chip" data-welcome-code style="margin-top:8px">Have A Setup Code?</button></p>
+      <div id="sheet-teams">
+      <input type="search" id="q" placeholder="Search teams and leagues" autocomplete="off" aria-label="Search teams and leagues">
       <div class="res" id="results"></div>
       <div id="suggest"></div>
       <h3>Following <span class="h3-note">drag ☰ to set your order</span></h3>
       <div class="res" id="following"></div>
-      <div id="sheet-lgs" hidden><h3>Your Leagues <span class="h3-note">tap to add or remove</span></h3>
-        <div class="toggles" id="sheet-lglist"></div></div>
-      <div id="sheet-tv" hidden><h3>Your TV &amp; Streaming <span class="h3-note">tap what you have</span></h3>
-        <p class="hint" style="margin:0 0 8px">Watch buttons open the right app for each game.</p>
-        <div id="sheet-tvlist"></div></div>
+      </div>
+      <div id="sheet-lgs" hidden><p class="hint" style="margin:0 0 10px">Step 2 Of 3 · Tap the leagues you want on your home screen.</p>
+        <div id="sheet-lglist"></div></div>
+      <div id="sheet-tv" hidden><p class="hint" style="margin:0 0 10px">Step 3 Of 3 · Pick the closest match. Watch buttons open the right app for each game.</p>
+        <div class="wz-presets" id="wz-presets"></div>
+        <button class="wz-more" id="wz-more" aria-expanded="false">Fine-Tune Services And Home Market</button>
+        <div id="sheet-tvlist" hidden></div></div>
+      <div class="wz-nav" id="wz-nav" hidden><button class="wz-back" id="wz-back">Back</button><button class="set-done" id="wz-next">Next</button></div>
       <button class="set-done" id="sheet-done">Done</button>
     </div>
   </div>
@@ -1588,7 +1610,12 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function watchPill(g) {
     if (g.state === "post") return "";
-    if (!g.watch?.length) return g.broadcast ? `<span class="net none" title="None of your TV Settings services carry ${esc(g.broadcast)}">Not on your services · ${esc(g.broadcast)}</span>` : "";
+    if (!g.watch?.length) {
+      if (!g.broadcast) return "";
+      // Nothing picked in TV & Streaming yet: show the channel, not a "no" (FOX and ESPN are on almost everything)
+      if (!(state.tv?.services || []).length) return `<span class="net none" title="Pick your TV &amp; Streaming in Settings to get Watch buttons">${esc(netLabel(g))}</span>`;
+      return `<span class="net none" title="None of your TV Settings services carry ${esc(g.broadcast)}">Not on your services · ${esc(g.broadcast)}</span>`;
+    }
     const [w, ...rest] = g.watch;
     const title = `${w.app}: ${w.nets.join(", ")}` + (rest.length ? ` · Also on ${rest.map(x => `${x.app} (${x.nets.join(", ")})`).join(", ")}` : "");
     const inner = `${PLAY}<b>${esc(w.app)}</b>${w.nets[0].toLowerCase() === w.app.toLowerCase() ? "" : `<span>${esc(w.nets[0])}</span>`}${rest.length ? `<i>+${rest.length}</i>` : ""}`;
@@ -3438,10 +3465,8 @@ button.brand, button.brand span { color: var(--accent); }
   const LG_BY_SLUG = Object.fromEntries(TEAM_LEAGUES.map(l => [l.path, l.id]));
   function openSheet(welcome) {
     document.getElementById("sheet-h").textContent = welcome === true ? "Welcome To Scores" : "Your Teams";
-    document.getElementById("sheet-intro").hidden = welcome !== true;
-    document.getElementById("sheet-lgs").hidden = welcome !== true;
-    document.getElementById("sheet-tv").hidden = welcome !== true;
-    renderSheetLeagues(); renderSheetTV();
+    wzPreset = ""; wzShow(welcome === true ? 1 : 0);
+    renderSheetLeagues(); renderSheetTV(); renderPresets();
     document.getElementById("sheet").hidden = false;
     setTimeout(() => document.getElementById("q").focus(), 50);
     renderSheet();
@@ -3682,8 +3707,59 @@ button.brand, button.brand span { color: var(--accent); }
   // Welcome screen: pick leagues alongside teams
   function renderSheetLeagues() {
     const el = document.getElementById("sheet-lglist"); if (!el) return;
-    el.innerHTML = LEAGUES.map(l => { const on = state.favLeagues.includes(l.id); return `<button class="chip ${on ? "on" : ""}" data-sheet-lg="${l.id}" aria-pressed="${on}">${esc(l.name)}</button>`; }).join("");
+    const order = ["Football", "Basketball", "Baseball", "Hockey", "Soccer", "Golf", "Tennis"];
+    const sports = [...order.filter(sp => LEAGUES.some(l => l.sport === sp)), ...new Set(LEAGUES.map(l => l.sport).filter(sp => !order.includes(sp)))];
+    el.innerHTML = sports.map(sp => `<div class="tv-grp"><b>${esc(sp)}</b><div class="toggles">${LEAGUES.filter(l => l.sport === sp).map(l => { const on = state.favLeagues.includes(l.id); return `<button class="chip ${on ? "on" : ""}" data-sheet-lg="${l.id}" aria-pressed="${on}">${esc(l.name)}</button>`; }).join("")}</div></div>`).join("");
   }
+  // Welcome: three short steps (teams, leagues, how you watch). wzStep 0 = the normal Your Teams sheet.
+  let wzStep = 0, wzPreset = "";
+  const WZ_TITLES = ["Welcome To Scores", "Your Leagues", "How Do You Watch?"];
+  function wzShow(step) {
+    wzStep = step;
+    const $ = id => document.getElementById(id), w = step > 0;
+    $("sheet-h").textContent = w ? WZ_TITLES[step - 1] : "Your Teams";
+    $("sheet-intro").hidden = step !== 1;
+    $("sheet-teams").hidden = w && step !== 1;
+    $("sheet-lgs").hidden = step !== 2;
+    $("sheet-tv").hidden = step !== 3;
+    $("wz-steps").hidden = !w;
+    [...$("wz-steps").children].forEach((d, i) => d.classList.toggle("on", i < step));
+    $("wz-nav").hidden = !w;
+    $("sheet-done").hidden = w;
+    $("wz-back").style.visibility = step > 1 ? "visible" : "hidden";
+    $("wz-next").textContent = step === 3 ? "Done" : "Next";
+    const body = document.querySelector("#sheet .sheet-body"); if (body) body.scrollTop = 0;
+  }
+  // Presets cover most people in one tap; Fine-Tune opens the full list. Free picks ride along with every preset.
+  const WZ_FREE = ["fandango", "youtube"];
+  const WZ_PRESETS = [
+    { id: "yttv", name: "YouTube TV", note: "ESPN and its apps included", svcs: ["youtubetv"] },
+    { id: "cable", name: "Cable Or Satellite", note: "Spectrum, Xfinity, DirecTV and the rest", svcs: ["cable"] },
+    { id: "live", name: "Another Live TV App", note: "Hulu + Live TV, Sling, Fubo, DirecTV Stream", svcs: [], open: true },
+    { id: "stream", name: "Streaming Apps Only", note: "Peacock, Paramount+, Prime Video and more", svcs: [], open: true },
+    { id: "antenna", name: "Antenna And Free Channels", note: "ABC, CBS, NBC and FOX over the air", svcs: ["antenna", "freesports", "tubi"] },
+  ];
+  function renderPresets() {
+    const el = document.getElementById("wz-presets"); if (!el) return;
+    el.innerHTML = WZ_PRESETS.map(p => `<button class="wz-p ${wzPreset === p.id ? "on" : ""}" data-wz-preset="${p.id}" aria-pressed="${wzPreset === p.id}"><b>${esc(p.name)}</b><span>${esc(p.note)}</span></button>`).join("");
+  }
+  function wzMore(open) {
+    const list = document.getElementById("sheet-tvlist"), b = document.getElementById("wz-more");
+    list.hidden = !open; b.setAttribute("aria-expanded", String(open));
+    b.textContent = open ? "Hide The Full List" : "Fine-Tune Services And Home Market";
+  }
+  document.getElementById("wz-presets").addEventListener("click", e => {
+    const b = e.target.closest("[data-wz-preset]"); if (!b) return;
+    const p = WZ_PRESETS.find(x => x.id === b.dataset.wzPreset); if (!p) return;
+    wzPreset = p.id;
+    state.tv.services = [...new Set([...p.svcs, ...WZ_FREE])];
+    store.set("tv", state.tv);
+    refreshWatch(); renderPresets(); renderSheetTV(); render();
+    if (p.open) wzMore(true);
+  });
+  document.getElementById("wz-more").onclick = () => wzMore(document.getElementById("sheet-tvlist").hidden);
+  document.getElementById("wz-back").onclick = () => { if (wzStep > 1) wzShow(wzStep - 1); };
+  document.getElementById("wz-next").onclick = () => { if (wzStep && wzStep < 3) wzShow(wzStep + 1); else { wzMore(false); closeSheet(); } };
   // Welcome screen: home market and the services you have (same choices as Settings > TV & Streaming)
   function renderSheetTV() {
     const el = document.getElementById("sheet-tvlist"); if (!el) return;
@@ -3696,6 +3772,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (tvs) { const id = tvs.dataset.tvSvc; state.tv.services = state.tv.services.includes(id) ? state.tv.services.filter(x => x !== id) : [...state.tv.services, id]; }
     if (tvm) state.tv.market = tvm.dataset.tvMarket;
     store.set("tv", state.tv);
+    if (tvs) { wzPreset = ""; renderPresets(); }
     refreshWatch(); renderSheetTV(); render();
   });
   document.getElementById("sheet-lglist").addEventListener("click", e => {
