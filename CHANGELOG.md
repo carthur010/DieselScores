@@ -2,6 +2,13 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 18, 2026: Beta and Beta 3.0 (2:20 PM, from the live 1 PM pass)
+- Red Zone only counts when ESPN gives a down and distance. ESPN leaves its red zone flag on after a score or during breaks (Titans-Colts and Saints-Giants showed Red Zone with no ball spot), which made the RedZone tile say "3 In The Red Zone" with one real drive.
+- Multiview drops blowouts in every sport, not just football (Real Sociedad 5, Málaga 2 in the 81st minute had a tile).
+- Build My Own: when all spots are full, Add becomes Swap In and replaces your latest pick.
+- Beta: the Live tab strip only shows your other live games, like Beta 3.0 (it was showing finals).
+- Beta 3.0: more room above Games Today in Search.
+
 ## Oct 18, 2026: Live, Beta and Beta 3.0 (1:05 PM)
 - Multiview tiles line up: the time or score status sits at the same height on every tile in a row (RedZone too), and the empty band at the bottom of each tile is gone, so the quad is shorter. Down and distance and the tag only take room when there's something to show.
 - Before kickoff both teams show at full brightness with their records, and the time reads "1:00 PM". Once live, only the trailing team dims.

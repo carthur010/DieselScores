@@ -468,7 +468,7 @@ section.closed .bhead { border-bottom: 0; }
 :root[data-home="bar"] .sheet.as-tab.sub .bhead .tog, :root[data-home="bar"] .sheet.as-tab.sub #sheet-done { display: grid; }
 :root[data-home="bar"] .sheet.as-tab.sub #sheet-done { display: block; }
 :root[data-home="bar"].bb-fold #dates { display: none; }
-#sgames h3 { margin-top: 2px; }
+#sgames h3 { margin-top: 10px; }
 #sgames .sg-list { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; margin-bottom: 4px; }
 
 html.locked, html.locked body { overflow: hidden; }
@@ -1621,7 +1621,7 @@ button.brand, button.brand span { color: var(--accent); }
         ml: { a: mlNum(odds.moneyline?.away?.close?.odds ?? odds.moneyline?.away?.open?.odds ?? odds.awayTeamOdds?.moneyLine),
               h: mlNum(odds.moneyline?.home?.close?.odds ?? odds.moneyline?.home?.open?.odds ?? odds.homeTeamOdds?.moneyLine) } } : null,
       seasonYear: ev.season?.year || null,
-      sit: comp.situation || {}, period: st.period || 0, clock: st.displayClock || "",
+      sit: (sit => sit.isRedZone && !sit.downDistanceText ? { ...sit, isRedZone: false } : sit)(comp.situation || {}), period: st.period || 0, clock: st.displayClock || "",
       series: seriesText(comp.series?.summary),
     };
     // Playoff game: postseason per ESPN, a series attached, or a playoff round in the game note
@@ -4377,6 +4377,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (isMine(g) && mvLockMine()) s += 80;   // your teams make the quad once they kick off
     if (g.pin || state.watched?.[mvKey(g)]) s += 20;
     if (g.tight && g.lg.sport !== "Football") s += 20;
+    if (g.state === "in" && g.lg.sport !== "Football" && isBlowout(g)) s -= 40;
     if (g.state === "in" && g.lg.sport === "Football") {
       const m = mvMargin(g), p = g.period || 0;
       if (m <= 8 && p >= 3) s += 20;                     // one-score game in the second half
@@ -4480,7 +4481,7 @@ button.brand, button.brand span { color: var(--accent); }
     const cand = mine ? allGames().filter(g => inMyWorld(g) && g.state !== "post" && !/Postponed|Canceled/.test(g.status) && mvCur[2](g) && (!hasYTTV() || onYTTV(g)))
       .sort((a, b) => (a.state === "in" ? 0 : 1) - (b.state === "in" ? 0 : 1) || new Date(a.date) - new Date(b.date)) : [];
     const pickHTML = mine ? `<div class="gc-c mv-list"><h3>Pick Up To ${N} Games <small class="mv-cnt">${Math.min(keys.length, N)} Of ${N}</small></h3>${cand.map(g => { const k = mvKey(g), on = keys.includes(k);
-        return `<div class="mv-li"><span data-mv-tile="${esc(k)}" role="button" tabindex="0"><b>${mvNameHTML(g)}</b><small>${esc([netLabel(g), g.state === "in" ? g.status : "Starts " + timeLabel(g.date), g.state === "in" ? mvWhy(g) : ""].filter(Boolean).join(" · "))}</small></span><button class="chip ${on ? "on" : ""}" data-mv-add="${esc(k)}" ${!on && keys.length >= N ? "disabled" : ""} aria-pressed="${on}">${on ? "Added" : "Add"}</button></div>`; }).join("") || `<p class="hint" style="padding:10px 0">No more games today.</p>`}</div>` : "";
+        return `<div class="mv-li"><span data-mv-tile="${esc(k)}" role="button" tabindex="0"><b>${mvNameHTML(g)}</b><small>${esc([netLabel(g), g.state === "in" ? g.status : "Starts " + timeLabel(g.date), g.state === "in" ? mvWhy(g) : ""].filter(Boolean).join(" · "))}</small></span><button class="chip ${on ? "on" : ""}" data-mv-add="${esc(k)}" aria-pressed="${on}">${on ? "Added" : keys.length >= N ? "Swap In" : "Add"}</button></div>`; }).join("") || `<p class="hint" style="padding:10px 0">No more games today.</p>`}</div>` : "";
     el.innerHTML = `<div class="gc-wrap mv-wrap"><div class="mv-head"><button class="circ" data-gclose aria-label="Close">${XIC}</button><div><b>${title}</b></div>${mine ? "<span></span>" : `<button class="chip" data-mv-shuffle>Reshuffle</button>`}</div>
       ${modeSeg}
       ${chips}
@@ -4519,7 +4520,7 @@ button.brand, button.brand span { color: var(--accent); }
     const md = t.closest("[data-mv-mode]");
     if (md) { e.stopPropagation(); if (md.dataset.mvMode === "mine" && !mvCustom().length) setMvCustom(mvSlots.filter(Boolean)); store.set("mvMode", md.dataset.mvMode); if (md.dataset.mvMode === "auto") mvPick(true); paintMv(); render(); return; }
     const ad = t.closest("[data-mv-add]");
-    if (ad) { e.stopPropagation(); const k = ad.dataset.mvAdd, ks = mvCustom(), n = mvRZ() ? 3 : 4; setMvCustom(ks.includes(k) ? ks.filter(x => x !== k) : ks.length < n ? [...ks, k] : ks); paintMv(); render(); return; }
+    if (ad) { e.stopPropagation(); const k = ad.dataset.mvAdd, ks = mvCustom(), n = mvRZ() ? 3 : 4; setMvCustom(ks.includes(k) ? ks.filter(x => x !== k) : ks.length < n ? [...ks, k] : [...ks.slice(0, n - 1), k]); paintMv(); render(); return; }
     const rmv = t.closest("[data-mv-rm]");
     if (rmv) { e.stopPropagation(); setMvCustom(mvCustom().filter(x => x !== rmv.dataset.mvRm)); paintMv(); render(); return; }
     const op = t.closest("[data-mv-opt]");
