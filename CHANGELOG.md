@@ -2,6 +2,12 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 18, 2026: Beta and Beta 3.0 (11:35 AM, not on live yet)
+- Worth A Watch counts one-score games in the second half, not just the last 5 minutes: football within 8 in the 3rd or 4th, basketball within 8 in the final period, hockey and soccer within one goal late, baseball within 2 from the 7th. A 21-20 game with 6:05 left now makes it. Multiview ranks with the same rule. The Close Games tab and Close Game alerts keep the last-5-minutes rule.
+- One tag per game, the same in Worth A Watch, Multiview and Also Worth A Look, in this order: Red Zone, Overtime, Upset Alert, Playoffs, Tied / Field Goal Game / One-Score Game (One-Goal Game, One-Goal Match, One-Run Game), Your Team, Top 25 Clash. Multiview tags are now Title Case ("Upset watch" is gone).
+- Worth A Watch big cards show AP and CFP ranks.
+- One home per game: a game in Your Multiview isn't repeated in Worth A Watch or You Are Looking Live below it.
+
 ## Oct 18, 2026: Live (11:10 AM)
 - Shipped from beta: new people see just the channel (FOX, ESPN, Peacock) instead of "Not On Your Services" until they pick TV & Streaming.
 - Shipped from beta: three-step Welcome (Teams, Leagues by sport, How Do You Watch? with one-tap presets and Fine-Tune for the full list).

@@ -181,6 +181,7 @@ section.closed .bhead { border-bottom: 0; }
 .f-team .nm { font-size: 14px; font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .f-team .nm { white-space: normal; text-overflow: clip; line-height: 1.15; }
 .f-team .nm.long { font-size: 12px; letter-spacing: -.01em; }
+.f-team .nm .f-rk { font-size: 11px; font-weight: 600; opacity: .75; }
 .f-team.fav .nm { color: var(--fg); }
 .f-sc { font-family: var(--display); font-weight: 700; font-size: 52px; line-height: 1; text-align: center; }
 .f-sc.lose { color: var(--dim); }
@@ -1571,6 +1572,7 @@ button.brand, button.brand span { color: var(--accent); }
     g.playoff = ev.season?.type === 3 || !!comp.series ||
       /playoff|postseason|wild card|division series|championship series|world series|\bALCS\b|\bNLCS\b|\bALDS\b|\bNLDS\b|conference (semi)?finals?|stanley cup|nba finals|super bowl|cfp|bowl\b/i.test(g.note);
     g.close = isClose(g);
+    g.tight = isTight(g);
     Object.assign(g, interest(g));
     return g;
   }
@@ -1585,6 +1587,40 @@ button.brand, button.brand span { color: var(--accent); }
     const last = g.lg.reg;
     if (p > last) return m <= r.margin; // overtime
     return p === last && clockSecs(g.clock) <= r.minsLeft * 60 && m <= r.margin;
+  }
+
+  // Tight = within one score in the second half (Worth A Watch and Multiview use the same rule).
+  // Close (the last 5 minutes) stays as-is for the Close Games tab and Close Game alerts.
+  function isTight(g) {
+    if (g.state !== "in" || g.teams.length !== 2) return false;
+    const m = Math.abs((parseInt(g.teams[0].score) || 0) - (parseInt(g.teams[1].score) || 0)), p = g.period || 0, reg = g.lg.reg || 4;
+    if (g.lg.soccer) return p >= 2 && m <= 1;
+    if (g.lg.sport === "Football") return p >= 3 && m <= 8;
+    if (g.lg.sport === "Basketball") return p >= reg && m <= 8;
+    if (g.lg.sport === "Hockey") return p >= 3 && m <= 1;
+    if (g.lg.sport === "Baseball") return p >= 7 && m <= 2;
+    return false;
+  }
+  // The words for a tight game, by sport: "Field Goal Game", "One-Goal Match", "Tied"
+  function closeLabel(g) {
+    const m = Math.abs((parseInt(g.teams[0]?.score) || 0) - (parseInt(g.teams[1]?.score) || 0));
+    if (m === 0) return "Tied";
+    if (g.lg.sport === "Football") return m <= 3 ? "Field Goal Game" : "One-Score Game";
+    if (g.lg.soccer) return "One-Goal Match";
+    if (g.lg.sport === "Hockey") return "One-Goal Game";
+    if (g.lg.sport === "Baseball" && m === 1) return "One-Run Game";
+    return "Close Game";
+  }
+  // One tag per game, the same everywhere (Worth A Watch, Multiview, Also Worth A Look)
+  function gameTag(g) {
+    if (g.state === "pre") return (g.reasons || []).find(r => /Starting Soon|Top 25/.test(r)) || "";
+    if (g.state !== "in") return "";
+    const rs = g.reasons || [], m = Math.abs((parseInt(g.teams[0]?.score) || 0) - (parseInt(g.teams[1]?.score) || 0));
+    if (g.lg.sport === "Football" && g.sit?.isRedZone) return "Red Zone";
+    return rs.find(r => /Overtime|Extra Innings/.test(r)) || rs.find(r => /^Upset/.test(r)) || (g.playoff ? "Playoffs" : "")
+      || (g.close || g.tight ? closeLabel(g) : "") || (typeof isMine === "function" && isMine(g) ? "Your Team" : "")
+      || (rs.includes("Top 25 Clash") ? "Top 25 Clash" : "")
+      || (g.lg.sport === "Football" && m >= 22 && (g.period || 0) >= 3 ? "Blowout" : "");
   }
 
   // Moneylines: "+240", "EVEN", -150 → numbers. Pregame lines are remembered so live odds can't move the goalposts.
@@ -1628,7 +1664,8 @@ button.brand, button.brand span { color: var(--accent); }
     const secondHalf = g.lg.soccer ? g.period >= 2 : g.lg.sport === "Baseball" ? g.period >= 5 : g.period > reg / 2;
     if (g.state === "in") {
       score += 10;
-      if (g.close) { score += 50; reasons.push("Close Game"); }
+      if (g.close) { score += 50; reasons.push(closeLabel(g)); }
+      else if (g.tight) { score += 35; reasons.push(closeLabel(g)); }
       if (reg && g.period > reg) { score += 30; reasons.push(g.lg.sport === "Baseball" ? "Extra Innings" : "Overtime"); }
       const leader = as > hs ? a : hs > as ? h : null;
       const ml = pregameML(g), leadML = leader && ml ? (leader === a ? ml.a : ml.h) : null;
@@ -1637,7 +1674,7 @@ button.brand, button.brand span { color: var(--accent); }
       }
       if (g.rankedClash) { score += 20; reasons.push("Top 25 Clash"); }
       if (g.playoff) { score += 25; reasons.push("Playoffs"); }
-      if (!g.close && !reasons.length) score += Math.max(0, 15 - margin);
+      if (!g.close && !g.tight && !reasons.length) score += Math.max(0, 15 - margin);
     } else if (g.state === "pre") {
       const mins = (new Date(g.date) - Date.now()) / 60000;
       if (mins <= 45 && mins > -15) { score += 8; reasons.push("Starting Soon"); }
@@ -2420,7 +2457,7 @@ button.brand, button.brand span { color: var(--accent); }
     const [a, h] = g.teams;
     if (!a || !h) return "";
     const side = t => `<div class="f-team ${t.homeAway === "home" ? "home" : ""} ${isFavTeam(g.lg, t.abbr) ? "fav" : ""}">${starBtn(g.lg, t)}
-        ${t.logo ? `<img src="${esc(t.logo)}" alt="">` : ""}<span class="nm ${!/\s/.test(t.name) && t.name.length > 9 ? "long" : ""}">${esc(t.name)}</span></div>`;
+        ${t.logo ? `<img src="${esc(t.logo)}" alt="">` : ""}<span class="nm ${!/\s/.test(t.name) && t.name.length > 9 ? "long" : ""}">${t.seed ? `<small class="f-rk">(${esc(t.seed)})</small> ` : t.rank ? `<small class="f-rk">${esc(t.rank)}</small> ` : ""}${esc(t.name)}</span></div>`;
     const score = (t, o) => {
       if (g.state === "pre") return `<div class="f-sc rec">${esc(recText(t))}</div>`;
       const lose = (g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score));
@@ -2432,9 +2469,9 @@ button.brand, button.brand span { color: var(--accent); }
     if (g.series) sub = sub ? sub + "<br>" + esc(g.series) : esc(g.series);
     const pill = g.state !== "post" && g.watch?.length ? `<span>${watchPill(g)}</span>` : "";
     const lgLabel = (g.lg.short || g.lg.name) + (g.note ? " · " + g.note : "");
-    const why = g.reasons || [];
+    const why = gameTag(g);
     return `<div class="f tap" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0">
-      <div class="f-lg">${esc(lgLabel)}</div>${why.length ? `<div class="f-why">${why.map(r => `<span class="${/Upset/.test(r) ? "why hot" : /Playoff/.test(r) ? "why gold" : "why"}">${esc(r)}</span>`).join("")}</div>` : ""}
+      <div class="f-lg">${esc(lgLabel)}</div>${why ? `<div class="f-why"><span class="${/Upset|Red Zone/.test(why) ? "why hot" : /Playoff/.test(why) ? "why gold" : "why"}">${esc(why)}</span></div>` : ""}
       <div class="f-grid">
         ${side(a)}${score(a, h)}
         <div class="f-mid"><span class="s ${g.state === "in" ? "live" : ""}">${esc(g.status)}</span>${sub ? `<span class="sub">${sub}</span>` : ""}</div>
@@ -3384,7 +3421,7 @@ button.brand, button.brand span { color: var(--accent); }
   const ORD3 = { in: 0, pre: 1, post: 2 };
   // Worth A Watch: only games that earned it (playoffs, close and late, OT, upsets, Top 25 clashes in progress)
   function worthPicks(games) {
-    const earned = g => g.state === "in" && !isMine(g) && !isBlowout(g) && (g.close || g.playoff || g.reasons.some(r => /Overtime|Extra|Upset|Top 25/.test(r)));
+    const earned = g => g.state === "in" && !isMine(g) && !isBlowout(g) && !mvHome.has(mvKey(g)) && (g.close || g.tight || g.playoff || g.reasons.some(r => /Overtime|Extra|Upset|Top 25/.test(r)));
     const must = games.filter(g => earned(g) && (g.close || g.playoff)).sort((x, y) => y.hype - x.hype);
     const other = games.filter(g => earned(g) && !g.close && !g.playoff).sort((x, y) => y.hype - x.hype);
     return must.concat(other.slice(0, Math.max(0, 6 - must.length)));
@@ -3420,17 +3457,18 @@ button.brand, button.brand span { color: var(--accent); }
     let html = "";
     if (pickedNothing()) html += `<div class="pick-banner"><div><b>You're seeing every league</b><span>Follow your teams and leagues and Scores fills in with yours.</span></div><button class="chip on" data-open-welcome>Pick Favorites</button></div>`;
     const mine = games.filter(isMine).sort(byState);
+    const mvHTML = mvSection();
     const picks = isToday() ? worthPicks(games) : [];
     const pickIds = new Set(picks.map(g => g.id));
     const mineIds = new Set(mine.map(g => g.id));
     // Rail has no Your Teams section, so your live games stay in this list there
-    const live = games.filter(g => g.state === "in" && !pickIds.has(g.id) && (L === "rail" || !mineIds.has(g.id))).sort(byState);
+    const live = games.filter(g => g.state === "in" && !pickIds.has(g.id) && !mvHome.has(mvKey(g)) && (L === "rail" || !mineIds.has(g.id))).sort(byState);
     const liveMine = mine.filter(g => g.state === "in").length;
     if (L !== "rail") {
       if (mine.length) html += block("fy-mine", "Your Teams", liveMine ? `${liveMine} Live · ${mine.length} Total` : countLabel(mine.length, mine) + (isToday() ? " Today" : ""), gridOf(mine));
       else html += `<div class="block empty">None of your teams play ${isToday() ? "today" : "on " + esc(dayLabel(state.date))}.${state.favs.size ? "" : `<div class="find-more"><button class="chip" data-open-sheet>Follow Teams</button></div>`}</div>`;
     }
-    html += mvSection();
+    html += mvHTML;
     if (picks.length) html += block("worth", "Worth A Watch", countLabel(picks.length, picks), worthHTML(picks));
     if (live.length) html += block("fy-live", "You Are Looking Live", countLabel(live.length, live), gridOf(live));
     if (L === "rail") {
@@ -3568,6 +3606,7 @@ button.brand, button.brand span { color: var(--accent); }
     // playoffs, close and late, overtime/extra innings, an upset brewing, or a Top 25 clash in progress.
     // Every close game and every playoff game makes it. Your teams are skipped: they already show above. No filler.
     let shown = new Set();
+    mvHome = new Set();
     if (["live", "all"].includes(tab)) html += mvSection();
     if (["live", "all"].includes(tab)) {
       const picks = worthPicks(games);
@@ -3652,7 +3691,7 @@ button.brand, button.brand span { color: var(--accent); }
     // The feed
     const quiet = [];
     TEAM_LEAGUES.forEach(lg => { if (!pool.some(g => g.lg.id === lg.id) && !state.data[lg.id]?.error && !state.data[lg.id]?.events?.length) quiet.push(lg.short || lg.name); });
-    let feed = pool.filter(g => !shown.has(g.id));
+    let feed = pool.filter(g => !shown.has(g.id) && !(tab === "live" && mvHome.has(mvKey(g))));
     if (feed.length && state.view === "league" && tab === "live") {
       // Live tab, By League: one "You Are Looking Live" section with a card grid per league inside.
       // Compact: one two-up grid in league order with a league tag on each card, so no half-empty rows or big league headers.
@@ -4139,6 +4178,7 @@ button.brand, button.brand span { color: var(--accent); }
     let s = g.hype || 0;
     if (isMine(g)) s += 80;   // your teams make the quad once they kick off
     if (g.pin || state.watched?.[mvKey(g)]) s += 20;
+    if (g.tight && g.lg.sport !== "Football") s += 20;
     if (g.state === "in" && g.lg.sport === "Football") {
       const m = mvMargin(g), p = g.period || 0;
       if (m <= 8 && p >= 3) s += 20;                     // one-score game in the second half
@@ -4155,22 +4195,7 @@ button.brand, button.brand span { color: var(--accent); }
   const mvName = g => { const [a, h] = g.teams, col = !!CONFS[g.lg.id]; const nm = t => col ? (t.name || t.abbr) : (t.full || t.name || t.abbr); return `${nm(a)} at ${nm(h)}`; };
   function mvWhy(g) {
     if (g.state === "pre") return "Starts " + timeLabel(g.date);
-    // One tag per game; the red zone beats everything while the ball is inside the 20
-    if (g.lg.sport === "Football" && g.sit?.isRedZone) return "Red zone";
-    const m = mvMargin(g), p = g.period || 0, out = [];
-    if (isMine(g)) out.push("Your team");
-    const up = (g.reasons || []).find(r => /^Upset/.test(r)); if (up) out.push(up.replace("Upset Alert: ", "Upset watch: "));
-    if (g.lg.sport === "Football") {
-      if (p > (g.lg.reg || 4)) out.push("Overtime");
-      else if (m === 0) out.push("Tied");
-      else if (m <= 8) out.push(m <= 3 ? "Field goal game" : "One-score game");
-      else if (m >= 22) out.push("Blowout");
-    } else {
-      (g.reasons || []).filter(r => !/^Upset|Starting Soon|Playoffs/.test(r)).slice(0, 1).forEach(r => out.push(r));
-      if (!out.length && m === 0) out.push("Tied");
-    }
-    if (g.playoff) out.push("Playoffs");
-    return out[0] || "";
+    return gameTag(g);
   }
   function mvPool() {
     // YouTube TV Multiview only takes channels YouTube TV carries, so Peacock, Paramount+, Prime
@@ -4238,10 +4263,14 @@ button.brand, button.brand span { color: var(--accent); }
       ${list}${benchHTML}</div>`;
   }
   // Home section: the same four picks as a small quad, with a button into the full Multiview
+  // Games showing in the home Multiview, so Worth A Watch and You Are Looking Live skip them
+  let mvHome = new Set();
   function mvSection() {
+    mvHome = new Set();
     if (!isToday()) return "";
     const { tiles } = mvPick(false), live = tiles.filter(g => g && g.state === "in");
     if (live.length < 2) return "";
+    mvHome = new Set(tiles.filter(Boolean).map(mvKey));
     const sp = mvCur[0] !== "all" ? mvCur[1] : "";
     return block("mv", "Your Multiview", sp || (hasYTTV() ? "YouTube TV" : ""),
       `<div class="mv-grid mv-mini">${tiles.map((g, i) => mvTile(g, i, true)).join("")}</div>
