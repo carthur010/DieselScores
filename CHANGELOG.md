@@ -2,6 +2,13 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 18, 2026: Beta 3.0 (12:20 PM, Beta 3.0 only)
+- Bottom bar works like real tabs: Leagues, Search and Settings open full screen above the bar (no X, no Done), the bar highlights where you are, and one tap switches tabs (Leagues to Search took two taps before). Scores takes you back to where you were; tap it again to jump to the top, once more for your home tab. Edit Teams and Edit Order open inside the Settings tab with an X to go back.
+- Search finds games: type "Jets" or "Texas" and today's game shows first (tap to open it), then teams to follow. The tab is titled Search.
+- Live only shows live games: the strip on Live drops your teams' upcoming games and next-game chips.
+- Simple stays simple: your teams' games are small rows too. Always Expand My Teams now only applies to Compact.
+- Header: the date strip folds away once you scroll down and comes back at the top, and the "4 Live" pill is gone (the Live tab shows the count).
+
 ## Oct 18, 2026: Live (12:10 PM)
 - Shipped from beta: one-score rule for Worth A Watch and Multiview; one tag per game everywhere, in Title Case; ranks on Worth A Watch big cards; no repeats under Your Multiview (YouTube TV only); Your Multiview only shows with YouTube TV; Your Game card on top with a slim score bar when you scroll; your teams strip back on top; Worth A Watch quick rows in Expanded.
 
