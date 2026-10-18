@@ -7,6 +7,7 @@ Newest first. Beta changes move to Live when shipped.
 - One tag per game, the same in Worth A Watch, Multiview and Also Worth A Look, in this order: Red Zone, Overtime, Upset Alert, Playoffs, Tied / Field Goal Game / One-Score Game (One-Goal Game, One-Goal Match, One-Run Game), Your Team, Top 25 Clash. Multiview tags are now Title Case ("Upset watch" is gone).
 - Worth A Watch big cards show AP and CFP ranks.
 - One home per game, for YouTube TV people: a game in Your Multiview isn't repeated in Worth A Watch or You Are Looking Live below it. Without YouTube TV, Worth A Watch and You Are Looking Live keep every game.
+- Your Multiview only shows for people with YouTube TV. Everyone else's home leads with Worth A Watch.
 
 ## Oct 18, 2026: Live (11:10 AM)
 - Shipped from beta: new people see just the channel (FOX, ESPN, Peacock) instead of "Not On Your Services" until they pick TV & Streaming.

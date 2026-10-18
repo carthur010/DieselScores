@@ -4029,7 +4029,8 @@ button.brand, button.brand span { color: var(--accent); }
   let mvHome = new Set();
   function mvSection() {
     mvHome = new Set();
-    if (!isToday()) return "";
+    // Built around YouTube TV's Multiview, so it only shows for people who have YouTube TV
+    if (!isToday() || !hasYTTV()) return "";
     const { tiles } = mvPick(false), live = tiles.filter(g => g && g.state === "in");
     if (live.length < 2) return "";
     // Only YouTube TV people can build this Multiview, so only they lose the repeats; everyone else keeps the full Worth A Watch
