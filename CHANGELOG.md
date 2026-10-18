@@ -2,6 +2,14 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 18, 2026: Live, Beta and Beta 3.0 (1:05 PM)
+- Multiview tiles line up: the time or score status sits at the same height on every tile in a row (RedZone too), and the empty band at the bottom of each tile is gone, so the quad is shorter. Down and distance and the tag only take room when there's something to show.
+- Before kickoff both teams show at full brightness with their records, and the time reads "1:00 PM". Once live, only the trailing team dims.
+- RedZone tile (Beta and Beta 3.0): no extra REDZONE pill, subtitle "Every Touchdown", status "1:00 PM · 13 Games".
+- Lock In My Teams and NFL RedZone toggles show a check mark when on (Beta and Beta 3.0).
+- League names no longer cut off in the tile header on phones ("LaLiga").
+- Strip cards show AP / CFP rankings ("6 ALA", "14 TENN"), styled like the list.
+
 ## Oct 18, 2026: Beta and Beta 3.0 (12:55 PM)
 - NFL RedZone tile redone to match the other tiles: a big RedZone title where the teams go, then who's in the red zone or "Every Touchdown, Every Game", the status in the same spot as the other tiles ("Starts 1:00 PM" or "3 Games On"), and a tag like "NYJ In The Red Zone". It only counts the 1 PM and 4 PM window games (the London game no longer shows as "1 NFL Game Live"), and the colors match the rest of the quad.
 
