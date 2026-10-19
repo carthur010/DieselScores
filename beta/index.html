@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Scores Beta</title>
-<meta name="build" content="20261018130238">
+<title>The Lineup Beta</title>
+<meta name="build" content="20261019112509">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Scores Beta">
+<meta name="apple-mobile-web-app-title" content="Lineup Beta">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#fdf8e9" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e0c0b" media="(prefers-color-scheme: dark)">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=4">
-<link rel="icon" type="image/png" href="icon-192.png?v=4">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=5">
+<link rel="icon" type="image/png" href="icon-192.png?v=5">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1079,7 +1079,7 @@ button.brand, button.brand span { color: var(--accent); }
 <header class="top">
   <div class="wrap">
     <div class="bar">
-      <button class="brand" id="brandbtn" aria-label="Home" title="Home">Score<span>s</span><em class="betatag">Beta</em></button>
+      <button class="brand" id="brandbtn" aria-label="Home" title="Home">The <span>Lineup</span><em class="betatag">Beta</em></button>
       <span class="livecount" id="livebug" hidden><span class="dot"></span><span id="liven">0</span><span class="lv-w"> live</span></span>
       <div class="spacer"></div>
       <div class="viewrow">
@@ -2199,8 +2199,8 @@ button.brand, button.brand span { color: var(--accent); }
     } catch {}
   }
   function notifyStatus() {
-    if (LN) return nativePerm === "granted" ? "Notifications allowed" : nativePerm === "denied" ? "Notifications are off for Scores in your iPhone's Settings" : "Notifications not allowed yet";
-    if (!("Notification" in window)) return /iPhone|iPad/.test(navigator.userAgent) ? "Add Scores to your home screen to allow notifications" : "This browser doesn't support notifications";
+    if (LN) return nativePerm === "granted" ? "Notifications allowed" : nativePerm === "denied" ? "Notifications are off for The Lineup in your iPhone's Settings" : "Notifications not allowed yet";
+    if (!("Notification" in window)) return /iPhone|iPad/.test(navigator.userAgent) ? "Add The Lineup to your home screen to allow notifications" : "This browser doesn't support notifications";
     if (Notification.permission === "granted") return "Notifications allowed";
     if (Notification.permission === "denied") return "Notifications are blocked in your phone's settings";
     return "Notifications not allowed yet";
@@ -3438,7 +3438,7 @@ button.brand, button.brand span { color: var(--accent); }
       const playing = new Set(mine.flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
       const nexts = isToday() ? [...state.favs].filter(k => !playing.has(k) && state.next[k]?.date)
         .sort((a, b) => new Date(state.next[a].date) - new Date(state.next[b].date) || favRank(a) - favRank(b)) : [];
-      if (pickedNothing()) html += `<div class="pick-banner"><div><b>You're seeing every league</b><span>Follow your teams and leagues and Scores fills in with yours.</span></div><button class="chip on" data-open-welcome>Pick Favorites</button></div>`;
+      if (pickedNothing()) html += `<div class="pick-banner"><div><b>You're seeing every league</b><span>Follow your teams and leagues and The Lineup fills in with yours.</span></div><button class="chip on" data-open-welcome>Pick Favorites</button></div>`;
       const hero = ["live", "all"].includes(tab) ? myHero(games) : null;
       html += heroHTML(hero);
       const stripGames = mine.filter(g => g !== hero && (tab !== "live" || g.state === "in"));
@@ -3587,7 +3587,7 @@ button.brand, button.brand span { color: var(--accent); }
   let results = [], searchTimer = null, searchSeq = 0;
   const LG_BY_SLUG = Object.fromEntries(TEAM_LEAGUES.map(l => [l.path, l.id]));
   function openSheet(welcome) {
-    document.getElementById("sheet-h").textContent = welcome === true ? "Welcome To Scores" : "Your Teams";
+    document.getElementById("sheet-h").textContent = welcome === true ? "Welcome To The Lineup" : "Your Teams";
     wzPreset = ""; wzShow(welcome === true ? 1 : 0);
     renderSheetLeagues(); renderSheetTV(); renderPresets();
     document.getElementById("sheet").hidden = false;
@@ -3836,7 +3836,7 @@ button.brand, button.brand span { color: var(--accent); }
   }
   // Welcome: three short steps (teams, leagues, how you watch). wzStep 0 = the normal Your Teams sheet.
   let wzStep = 0, wzPreset = "";
-  const WZ_TITLES = ["Welcome To Scores", "Your Leagues", "How Do You Watch?"];
+  const WZ_TITLES = ["Welcome To The Lineup", "Your Leagues", "How Do You Watch?"];
   function wzShow(step) {
     wzStep = step;
     const $ = id => document.getElementById(id), w = step > 0;
@@ -4902,10 +4902,10 @@ button.brand, button.brand span { color: var(--accent); }
       if (e.target.closest("[data-lp-f]")) { openCustomPicker(LG[lv.id].name, colOpts(lv.id, lv.data.board || []), lv.filt || "", key => { lv.filt = key; lv.paint(); }); return; }
       const pl = e.target.closest("[data-lp-poll]"); if (pl) { lv.poll = pl.dataset.lpPoll; lv.paint(); return; }
       if (e.target.closest("[data-lp-follow]")) { const id = lv.id; state.favLeagues = toggleLeague(id); store.set("favLeagues", state.favLeagues); render(); lv.paint(); return; }
-      const sl = e.target.closest("[data-share-lg]"); if (sl) { const lg = LG[sl.dataset.shareLg]; shareLink(lg.name, `${lg.name} scores and standings on Scores`, "league=" + lg.id); return; }
+      const sl = e.target.closest("[data-share-lg]"); if (sl) { const lg = LG[sl.dataset.shareLg]; shareLink(lg.name, `${lg.name} scores and standings on The Lineup`, "league=" + lg.id); return; }
       const lg2 = e.target.closest("[data-game]"); if (lg2) { e.stopPropagation(); pushView(); openGame(lg2.dataset.game); return; }
     }
-    if (e.target.closest("[data-share-tm]") && teamView) { const t = teamView; shareLink(t.name, `${t.name} on Scores`, "team=" + encodeURIComponent(t.lg + ":" + t.id)); return; }
+    if (e.target.closest("[data-share-tm]") && teamView) { const t = teamView; shareLink(t.name, `${t.name} on The Lineup`, "team=" + encodeURIComponent(t.lg + ":" + t.id)); return; }
     if (e.target.closest("[data-team-follow]") && teamView) { const tm = teamView; toggleFav(keyFor(tm), { lg: tm.lg, id: tm.id, name: tm.name, logo: tm.logo, color: tm.color, abbr: tm.abbr }); tm.paint ? tm.paint() : openTeamRepaint(); return; }
     const sv = e.target.closest("[data-stand-view]");
     if (sv && (teamView || leagueView)) { const v = teamView || leagueView; v.standView = sv.dataset.standView; v.paint(); return; }
@@ -5012,7 +5012,7 @@ button.brand, button.brand span { color: var(--accent); }
     store.set("alerts", on);
     if (on) {
       await askPermission();
-      toast("Alerts On", "You'll get a heads-up when a game turns close, goes to overtime, or an upset starts brewing.", "Works while Scores is open");
+      toast("Alerts On", "You'll get a heads-up when a game turns close, goes to overtime, or an upset starts brewing.", "Works while The Lineup is open");
     }
   }
   // ---- Home section order: Your Multiview, Worth A Watch, You Are Looking Live (and Your Teams in Beta 3.0)
@@ -5070,7 +5070,7 @@ button.brand, button.brand span { color: var(--accent); }
         alertGroup("team", "My Teams", "Games with teams you follow") +
         alertGroup("watched", "Games You're Watching", "Tap the bell on any game to add it") +
         alertGroup("all", "All Games", "Anything that turns interesting, any team") +
-        `<div class="set-row"><div class="set-lbl">Test Alerts<small>${esc(notifyStatus())}. ${LN ? "Start reminders arrive even when Scores is closed. Live alerts need it open." : "Alerts work while Scores is open."}</small></div><button class="chip" data-test-alert>Send Test</button></div>`) +
+        `<div class="set-row"><div class="set-lbl">Test Alerts<small>${esc(notifyStatus())}. ${LN ? "Start reminders arrive even when The Lineup is closed. Live alerts need it open." : "Alerts work while The Lineup is open."}</small></div><button class="chip" data-test-alert>Send Test</button></div>`) +
       `<button class="set-done" data-set-done>Done</button>` +
       `<p class="hint set-foot">${location.pathname.includes("/beta") ? `You're on the beta. <a href="../">Open The Live App</a>` : `Want to try new features early? <a href="beta/">Open The Beta</a>`}</p>`;
   }

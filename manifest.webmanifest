@@ -1,6 +1,6 @@
 {
-  "name": "Scores",
-  "short_name": "Scores",
+  "name": "The Lineup",
+  "short_name": "The Lineup",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

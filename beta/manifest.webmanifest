@@ -1,6 +1,6 @@
 {
-  "name": "Scores Beta",
-  "short_name": "Scores Beta",
+  "name": "The Lineup Beta",
+  "short_name": "Lineup Beta",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
