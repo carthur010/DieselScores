@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup</title>
-<meta name="build" content="20261019112509">
+<meta name="build" content="20261019115013">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="The Lineup">
@@ -459,6 +459,18 @@ section.closed .bhead { border-bottom: 0; }
 .sheet-body { padding: 14px 16px; display: grid; gap: 12px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .sheet { overscroll-behavior: contain; }
 #pksheet { z-index: 65; }
+/* Bottom Bar tabs: full screens above the bar, not pop-ups */
+:root[data-home="bar"] #pksheet { z-index: 55; }
+:root[data-home="bar"] .sheet.as-tab { background: var(--bg); padding: env(safe-area-inset-top, 0px) 0 calc(60px + env(safe-area-inset-bottom, 0px)); place-items: stretch; }
+:root[data-home="bar"] .sheet.as-tab .sheet-card { width: 100%; max-width: 760px; margin-inline: auto; max-height: none; height: 100%; border: 0; border-radius: 0; background: var(--bg); }
+:root[data-home="bar"] .sheet.as-tab .bhead .tog, :root[data-home="bar"] .sheet.as-tab #sheet-done, :root[data-home="bar"] .sheet.as-tab [data-set-done] { display: none; }
+:root[data-home="bar"] .sheet.as-tab .bhead h2 { font-size: 28px; }
+:root[data-home="bar"] .sheet.as-tab.sub .bhead .tog, :root[data-home="bar"] .sheet.as-tab.sub #sheet-done { display: grid; }
+:root[data-home="bar"] .sheet.as-tab.sub #sheet-done { display: block; }
+:root[data-home="bar"].bb-fold #dates { display: none; }
+#sgames h3 { margin-top: 10px; }
+#sgames .sg-list { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; margin-bottom: 4px; }
+
 html.locked, html.locked body { overflow: hidden; }
 body.locked { position: fixed; left: 0; right: 0; width: 100%; }
 .sheet input[type=search] { width: 100%; padding: 11px 12px; font: inherit; font-size: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); }
@@ -1068,6 +1080,66 @@ button.brand span { color: var(--accent); }
   --bg: #110c08; --surface: #1c140e; --surface-2: #231912; --line: #33251a; --fg: #faf3ec; --muted: #ad9c8b; --dim: #5a4a3b; --accent: #ff8a3d; --accent-soft: #3a2212; --live: #ff5468; --star: #5aa9e6; --gold: #5aa9e6; --gold-soft: #13253a;
 }
 .betatag { background: var(--fg) !important; color: var(--bg) !important; }
+/* ---------- Beta 3.0: Home Layouts (Bottom Bar, Your Day, League Rail) ---------- */
+.h3head { display: none; }
+:root:not([data-home="classic"]) header.top .bar { display: none; }
+:root:not([data-home="classic"]) .h3head { display: block; }
+.h3row { display: flex; align-items: center; gap: 8px; padding-block: 14px 8px; }
+.h3row .brand { font-size: 32px; }
+.h3pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--muted); border: 1px solid var(--line); background: var(--surface); padding: 6px 11px; border-radius: 99px; white-space: nowrap; }
+.h3pill.live { color: var(--live); border-color: color-mix(in srgb, var(--live) 40%, transparent); }
+.h3pill.live i { width: 7px; height: 7px; border-radius: 50%; background: var(--live); animation: pulse 1.6s infinite; }
+.h3btn { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); }
+.h3btn.on { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.h3btn svg { width: 20px; height: 20px; }
+/* A: Bottom Bar */
+.h3seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); flex: 1 1 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 3px; }
+.h3seg button { padding: 9px 4px; border-radius: 9px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.h3seg button.on { background: var(--accent); color: #fff; font-weight: 700; }
+.h3seg button .n { font-size: 12px; opacity: .8; margin-left: 4px; }
+:root[data-home="bar"] .leagues#tabs { flex-wrap: wrap; overflow: visible; }
+.botbar { display: none; }
+:root[data-home="bar"] .botbar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--line); padding: 6px 0 calc(8px + env(safe-area-inset-bottom, 0px)); }
+.botbar button { display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 44px; font-size: 11px; font-weight: 700; color: var(--muted); }
+.botbar button.on { color: var(--accent); }
+.botbar svg { width: 22px; height: 22px; }
+:root[data-home="bar"] .botbar { z-index: 62; }
+:root[data-home="bar"] .gcard { padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+/* Sheets (Welcome, Your Teams, Settings, Leagues) sit above the bottom bar so their last row and Done stay tappable */
+:root[data-home="bar"] .sheet { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
+.circ.gc-home svg { width: 20px; height: 20px; }
+:root[data-home="bar"] main { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+/* B: Your Day */
+.h3day { display: flex; align-items: center; gap: 6px; padding-block: 12px 0; }
+.d3 { display: block; font-family: var(--display); font-size: 34px; font-weight: 700; line-height: 1.05; text-align: left; padding: 2px 0 10px; }
+.h3day .k { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.h3day .k .lv { color: var(--live); }
+.h3day .d { display: block; font-family: var(--display); font-size: 32px; font-weight: 700; line-height: 1.05; text-align: left; }
+.h3day .grow { flex: 1; min-width: 0; }
+.ee-list { display: grid; }
+.ee-row { display: grid; grid-template-columns: 1fr auto 14px; align-items: center; gap: 10px; padding: 13px 16px; border-top: 1px solid var(--line); text-align: left; font-size: 15px; font-weight: 700; }
+.ee-row:first-child { border-top: 0; }
+.ee-row small { font-size: 13px; font-weight: 500; color: var(--muted); }
+.ee-row small.hot { color: var(--live); font-weight: 700; }
+.ee-row i { font-style: normal; color: var(--muted); }
+.feat.hero .f { background: linear-gradient(135deg, var(--accent-soft), var(--surface)); border-color: var(--accent); }
+.h3back { display: flex; align-items: center; gap: 8px; }
+/* C: League Rail */
+.h3search { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); font-size: 15px; text-align: left; }
+.h3search svg { width: 16px; height: 16px; flex: none; }
+.h3search span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.h3row .brand.sm { font-size: 28px; }
+:root[data-home="rail"] .leagues#tabs { gap: 10px; padding-block: 12px 6px; }
+.rl { flex: none; width: 60px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.rl b { position: relative; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; font-size: 12.5px; font-weight: 800; background: var(--surface); border: 2px solid var(--line); color: var(--fg); }
+.rl b img { width: 30px; height: 30px; object-fit: contain; }
+.rl b i { position: absolute; top: 1px; right: 1px; width: 11px; height: 11px; border-radius: 50%; background: var(--live); border: 2px solid var(--bg); }
+.rl span { font-size: 11.5px; font-weight: 700; color: var(--muted); max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rl.on b { background: var(--accent); border-color: var(--accent); color: #fff; }
+.rl.on span { color: var(--accent); }
+.tgrp-h { margin: 4px 2px -8px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.tgrp-h.live { color: var(--live); }
+
 button.brand, button.brand span { color: var(--accent); }
 .dates button.d.on { border-color: var(--gold); }
 .lb .lead td { background: var(--gold-soft); }
@@ -1078,6 +1150,7 @@ button.brand, button.brand span { color: var(--accent); }
 <body>
 <header class="top">
   <div class="wrap">
+    <div class="h3head" id="h3head"></div>
     <div class="bar">
       <button class="brand" id="brandbtn" aria-label="Home" title="Home">The <span>Lineup</span></button>
       <span class="livecount" id="livebug" hidden><span class="dot"></span><span id="liven">0</span><span class="lv-w"> live</span></span>
@@ -1127,6 +1200,7 @@ button.brand, button.brand span { color: var(--accent); }
       <p class="hint" id="sheet-intro" hidden>Step 1 Of 3 · Follow your teams. You can change everything later in Settings. <button class="chip" data-welcome-code style="margin-top:8px">Have A Setup Code?</button></p>
       <div id="sheet-teams">
       <input type="search" id="q" placeholder="Search teams and leagues" autocomplete="off" aria-label="Search teams and leagues">
+      <div id="sgames"></div>
       <div class="res" id="results"></div>
       <div id="suggest"></div>
       <h3>Following <span class="h3-note">drag ☰ to set your order</span></h3>
@@ -1170,6 +1244,12 @@ button.brand, button.brand span { color: var(--accent); }
     </div>
   </div>
 </div>
+<nav class="botbar" id="botbar" aria-label="Main">
+  <button class="on" data-bb="home" aria-label="Scores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Scores</button>
+  <button data-bb="leagues" aria-label="Leagues"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>Leagues</button>
+  <button data-bb="search" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Search</button>
+  <button data-bb="settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>Settings</button>
+</nav>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
 <script>
@@ -1318,7 +1398,7 @@ button.brand, button.brand span { color: var(--accent); }
       const code = q.has("me") ? "me" : (q.get("setup") || "").toLowerCase();
       const s = SETUPS[code];
       if (!s) return;
-      const P = location.pathname.includes("/beta") ? "scoreline:" : "scoreline:";
+      const P = "scoreline-b3:";
       localStorage.setItem("scoreline-shared:favs", JSON.stringify(s.favs));
       localStorage.setItem("scoreline-shared:favMeta", JSON.stringify(s.favMeta));
       localStorage.setItem("scoreline-shared:favLeagues", JSON.stringify(s.favLeagues));
@@ -1344,14 +1424,29 @@ button.brand, button.brand span { color: var(--accent); }
     get(k, d) {
       try {
         if (SHARED.has(k)) { const s = localStorage.getItem("scoreline-shared:" + k); if (s) return JSON.parse(s); }
-        const v = localStorage.getItem("scoreline:" + k); return v ? JSON.parse(v) : d;
+        const v = localStorage.getItem("scoreline-b3:" + k); return v ? JSON.parse(v) : d;
       } catch { return d; }
     },
-    set(k, v) { try { localStorage.setItem((SHARED.has(k) ? "scoreline-shared:" : "scoreline:") + k, JSON.stringify(v)); } catch {} }
+    set(k, v) { try { localStorage.setItem((SHARED.has(k) ? "scoreline-shared:" : "scoreline-b3:") + k, JSON.stringify(v)); } catch {} }
   };
 
+  // Beta 3.0: bring over your TV, streaming, alert and display picks from beta (or live) once, so nothing needs redoing.
+  // An empty TV pick (left by an earlier Beta 3.0 visit) gets replaced too.
+  try {
+    const CARRY = ["tv", "svcTab", "alerts", "alertPrefs", "palette", "theme", "showOdds", "view3", "expandFavs", "favGames", "watched", "conf", "blkF", "setOpen"];
+    const emptyTv = v => { try { const t = JSON.parse(v); return !t || !(t.services || []).length; } catch { return true; } };
+    if (!localStorage.getItem("scoreline-b3:carried")) {
+      CARRY.forEach(k => {
+        const mine = localStorage.getItem("scoreline-b3:" + k);
+        if (mine != null && !(k === "tv" && emptyTv(mine))) return;
+        const src = [localStorage.getItem("scoreline-beta:" + k), localStorage.getItem("scoreline:" + k)].find(v => v != null && !(k === "tv" && emptyTv(v)));
+        if (src != null) localStorage.setItem("scoreline-b3:" + k, src);
+      });
+      localStorage.setItem("scoreline-b3:carried", "true");
+    }
+  } catch {}
   // First run with shared storage: the beta's saved setup becomes the shared one
-  try { if (location.pathname.includes("/beta") && !localStorage.getItem("scoreline-shared:favs")) ["favs", "favMeta", "favLeagues"].forEach(k => { const v = localStorage.getItem("scoreline:" + k); if (v) localStorage.setItem("scoreline-shared:" + k, v); }); } catch {}
+  try { if (location.pathname.includes("/beta") && !localStorage.getItem("scoreline-shared:favs")) ["favs", "favMeta", "favLeagues"].forEach(k => { const v = localStorage.getItem("scoreline-b3:" + k); if (v) localStorage.setItem("scoreline-shared:" + k, v); }); } catch {}
   const state = {
     date: startOfDay(new Date()),
     tab: store.get("home", "live") === "auto" ? "teams" : store.get("home", "live"),
@@ -1388,13 +1483,19 @@ button.brand, button.brand span { color: var(--accent); }
       if (!store.get("onboarded", false) && !store.get("favs", []).length) { const t = { services: [], market: "" }; store.set("tv", t); return t; }   // new people pick their own
       return { ...DEFAULT_TV, services: [...DEFAULT_TV.services] }; })(),
     density: store.get("density", "expanded"),       // "compact" | "expanded"
-    expandFavs: store.get("expandFavs", true),       // in Compact, keep your teams' games full size
+    expandFavs: store.get("expandFavs", true),       // in Compact, keep your teams' games full size (Simple ignores it)
+    homeLayout: ["bar", "day", "rail", "classic"].includes(store.get("homeLayout", "bar")) ? store.get("homeLayout", "bar") : "bar",
+    showCal: false,                                  // Your Day: date strip opens from the calendar button
     upcoming: { key: "", at: 0, days: [], loading: false },
     data: {},
     loading: false,
     updatedAt: null,
     timer: null,
   };
+
+  // Beta 3.0: the new home layouts open on For You
+  if (state.homeLayout !== "classic") { const h3 = store.get("home3", "foryou"); state.tab = h3 === "auto" ? "foryou" : h3; state.autoPending = h3 === "auto"; }
+  document.documentElement.dataset.home = state.homeLayout;
 
   // =====================================================================
   // Helpers
@@ -2368,7 +2469,7 @@ button.brand, button.brand span { color: var(--accent); }
     </div>`;
   }
   function card(g, showLg) {
-    if (state.density === "simple" && !(state.expandFavs && g.fav)) return simpleRow(g, showLg === true);
+    if (state.density === "simple") return simpleRow(g, showLg === true);   // Simple stays simple, your teams too
     if (state.density === "compact" && !(state.expandFavs && g.fav)) return miniCard(g, showLg === true);
     return `<article class="g tap" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(g.teams.map(x => x.name).join(" vs "))}: game details">
       <div class="g-top">${showLg === true ? `<span class="lgtag">${esc(g.lg.short || g.lg.name)}</span>` : ""}<span class="st ${statusClass(g)}">${esc(g.status)}</span><span class="wslot">${watchPill(g)}</span></div>
@@ -2770,7 +2871,7 @@ button.brand, button.brand span { color: var(--accent); }
       else { const cur = polls.find(p => p.name === lv.poll) || polls[0]; body = lpMenu(lv, "poll:" + cur.name, confList(lv.data.standings, lg), polls) + pollCard(cur, lv.id); }
     }
     el.innerHTML = `<div class="gc-wrap"><div class="gc-hero lp-hero"><div class="gc-bg" style="--ca:var(--accent);--ch:var(--accent)"></div>
-      <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span><button class="circ" data-share-lg="${lg.id}" aria-label="Share">${SHAREIC}</button><button class="circ tm-star ${on ? "on" : ""}" data-lp-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(lg.name)}">${on ? STAR : STAR_O}</button></div>
+      <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button>${gcHomeBtn()}<span class="sp"></span><button class="circ" data-share-lg="${lg.id}" aria-label="Share">${SHAREIC}</button><button class="circ tm-star ${on ? "on" : ""}" data-lp-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(lg.name)}">${on ? STAR : STAR_O}</button></div>
       <div class="tm-hero">${lv.logo ? `<img src="${esc(lv.logo)}" alt="" class="lp-logo-big">` : ""}<b>${esc(lg.name)}</b><small>${esc(lv.season || lg.sport)}</small></div></div>
       <div class="tm-tabs" role="tablist">${LP_TABS(lg).map(([id, label]) => `<button role="tab" class="${lv.tab === id ? "on" : ""}" data-lp-tab="${id}" aria-selected="${lv.tab === id}">${label}</button>`).join("")}</div>
       ${body}</div>`;
@@ -3046,7 +3147,7 @@ button.brand, button.brand span { color: var(--accent); }
         <span class="l5-r">${g.state === "post" ? `<small>Final</small><span><b class="${g.res === "W" ? "w" : g.res === "L" ? "l" : ""}">${esc(g.res || "")}</b> ${esc(g.score)}</span>` : `<small>${esc(g.state === "in" ? "Live" : g.tv || "")}</small><span>${esc(g.state === "in" ? g.score : timeLabel(g.date))}</span>`}</span></div>`;
       const keepLeft = el.querySelector(".tm-tabs")?.scrollLeft || 0;
       el.innerHTML = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:${readable(tm.color)};--ch:${readable(tm.color)}"></div>
-        <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span><button class="circ" data-share-tm aria-label="Share">${SHAREIC}</button><button class="circ tm-star ${on ? "on" : ""}" data-team-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(tm.name)}" title="${on ? "Following" : "Follow"}">${on ? STAR : STAR_O}</button></div>
+        <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button>${gcHomeBtn()}<span class="sp"></span><button class="circ" data-share-tm aria-label="Share">${SHAREIC}</button><button class="circ tm-star ${on ? "on" : ""}" data-team-follow aria-pressed="${on}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(tm.name)}" title="${on ? "Following" : "Follow"}">${on ? STAR : STAR_O}</button></div>
         <div class="tm-hero">${tm.logo ? `<img src="${esc(tm.logo)}" alt="">` : ""}<b>${esc(tm.name)}</b><small>${esc([lg.name, sched?.record, sched?.standing].filter(Boolean).join(" · "))}</small></div></div>
         <div class="tm-tabs" role="tablist">${tmTabsFor(lg).map(([id, label]) => `<button role="tab" class="${tab === id ? "on" : ""}" data-tm-tab="${id}" aria-selected="${tab === id}">${label}</button>`).join("")}</div>
         ${tab !== "schedule" ? teamTabBody(tm, lg, tab) : `
@@ -3100,7 +3201,7 @@ button.brand, button.brand span { color: var(--accent); }
     const n = Math.max(m.a.sets.length, m.b.sets.length);
     const cell = (x, o, i) => { const v = x.sets[i]; if (v == null) return "<td>-</td>"; const won = v > (o.sets[i] ?? -1); return `<td class="${won ? "tot" : ""}">${v}${x.tb?.[i] != null && !won ? `<sup>${x.tb[i]}</sup>` : ""}</td>`; };
     let html = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:#1f4e79;--ch:#163a5c"></div>
-      <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span></div>
+      <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button>${gcHomeBtn()}<span class="sp"></span></div>
       <div class="gc-grid">${face(m.a)}<div class="gc-mid"><div class="gc-lbl">${esc(e.name)}</div>
         <div class="gc-when"><b>${m.state === "in" ? '<i class="livedot"></i>' : ""}${esc(status)}</b>${m.round ? `<small>${esc(m.round)}</small>` : ""}</div>
         ${m.court ? `<div class="gc-info"><span>${esc(m.court)}</span></div>` : ""}</div>${face(m.b)}</div>`;
@@ -3299,7 +3400,9 @@ button.brand, button.brand span { color: var(--accent); }
   }
   // "Smart" Open To: Live when any of your games or leagues are on right now, otherwise My Teams
   function homeTab() {
-    const h = store.get("home", "live");
+    const h = state.homeLayout !== "classic" ? store.get("home3", "foryou") : store.get("home", "live");
+    if (state.homeLayout !== "classic" && h === "auto") return allGames().some(g => g.state === "in" && inMyWorld(g)) || specialsFor("live").some(e => e.state === "in") ? "live" : "foryou";
+    if (state.homeLayout !== "classic") return ["foryou", "live", "all"].includes(h) ? h : "foryou";
     if (h !== "auto") return h;
     const live = allGames().some(g => g.state === "in" && inMyWorld(g)) || specialsFor("live").some(e => e.state === "in");
     return live ? "live" : "teams";
@@ -3327,6 +3430,7 @@ button.brand, button.brand span { color: var(--accent); }
   function inMyWorld(g) { return pickedNothing() || state.favLeagues.includes(g.lg.id) || isMine(g) || isWatched(g) || !!state.favGames?.[gameKey(g)]; }
   function renderTabs(games, everything = games) {
     const el = document.getElementById("tabs");
+    if (state.homeLayout !== "classic") { renderTabsV3(el, games, everything); return; }
     const counts = {};
     games.forEach(g => counts[g.lg.id] = (counts[g.lg.id] || 0) + 1);
     allSpecial().forEach(e => counts[e.lg.id] = (counts[e.lg.id] || 0) + 1);
@@ -3403,6 +3507,202 @@ button.brand, button.brand span { color: var(--accent); }
     return html;
   }
 
+
+  // =====================================================================
+  // Beta 3.0: Home Layouts. Bottom Bar, Your Day and League Rail share one For You feed.
+  // =====================================================================
+  const ORD3 = { in: 0, pre: 1, post: 2 };
+  // Worth A Watch: only games that earned it (playoffs, close and late, OT, upsets, Top 25 clashes in progress)
+  function worthPicks(games) {
+    const earned = g => g.state === "in" && !isMine(g) && !isBlowout(g) && !mvHome.has(mvKey(g)) && (g.close || g.tight || g.playoff || g.reasons.some(r => /Overtime|Extra|Upset|Top 25/.test(r)));
+    const must = games.filter(g => earned(g) && (g.close || g.playoff)).sort((x, y) => y.hype - x.hype);
+    const other = games.filter(g => earned(g) && !g.close && !g.playoff).sort((x, y) => y.hype - x.hype);
+    return must.concat(other.slice(0, Math.max(0, 6 - must.length)));
+  }
+  const datesShown = () => state.homeLayout !== "day" || state.showCal || !isToday();
+  const gridOf = list => `<div class="grid">${list.map(g => card(g, true)).join("")}</div>`;
+  const byState = (a, b) => (ORD3[a.state] - ORD3[b.state]) || new Date(a.date) - new Date(b.date) || (b.pin - a.pin) || gameRank(a) - gameRank(b);
+  function worthHTML(picks) {
+    if (state.density === "simple") return gridOf(picks);
+    if (state.density === "compact") return `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>`;
+    if (state.homeLayout === "day") return `<div class="feat hero">${featured(picks[0])}</div>${picks.length > 1 ? `<div class="wrows">${picks.slice(1).map(worthRow).join("")}</div>` : ""}`;
+    return worthRows(picks);
+  }
+  // Teams with no game today: their next one
+  function upNextHTML(mine) {
+    const playing = new Set(mine.flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
+    const ups = [...state.favs].filter(k => !playing.has(k)).map(k => ({ k, m: state.favMeta[k], n: state.next[k] }))
+      .filter(x => x.m).sort((a, b) => favRank(a.k) - favRank(b.k));
+    if (!ups.length) return "";
+    return block("fy-next", "Up Next", "", `<div class="nxt">${ups.map(({ k, m, n }) => `<div class="nxt-row" ${n?.id ? `data-game="${esc(m.lg)}:${esc(n.id)}" role="button" tabindex="0"` : ""}>
+        ${m.logo ? `<img src="${esc(m.logo)}" alt="">` : "<span></span>"}
+        <span class="nm">${esc(m.name || m.abbr)}<small>${esc(LG[m.lg]?.short || LG[m.lg]?.name || "")}</small></span>
+        <span class="when">${n?.date ? `${esc(n.opp)}<small>${esc(whenLabel(n.date))}${n.place ? " · " + esc(n.place) : ""}</small>` : n?.none ? "<small>No games scheduled</small>" : "<small>Checking…</small>"}</span>
+      </div>`).join("")}</div>`);
+  }
+  function forYouHTML(games) {
+    // Your Teams has its own section here, so the "keep my teams big" setting would just undo Simple and Compact
+    const ef = state.expandFavs; state.expandFavs = false;
+    try { return forYouBody(games); } finally { state.expandFavs = ef; }
+  }
+  function forYouBody(games) {
+    const L = state.homeLayout;
+    let html = "";
+    if (pickedNothing()) html += `<div class="pick-banner"><div><b>You're seeing every league</b><span>Follow your teams and leagues and The Lineup fills in with yours.</span></div><button class="chip on" data-open-welcome>Pick Favorites</button></div>`;
+    const mine = games.filter(isMine).sort(byState);
+    const hero = myHero(games);
+    html += heroHTML(hero);
+    const rest = mine.filter(g => g !== hero);
+    const mvHTML = mvSection();
+    const picks = isToday() ? worthPicks(games) : [];
+    const pickIds = new Set(picks.map(g => g.id));
+    const mineIds = new Set(mine.map(g => g.id));
+    // Rail has no Your Teams section, so your live games stay in this list there
+    const live = games.filter(g => g.state === "in" && g !== hero && !pickIds.has(g.id) && !mvHome.has(mvKey(g)) && (L === "rail" || !mineIds.has(g.id))).sort(byState);
+    const liveMine = rest.filter(g => g.state === "in").length;
+    if (L !== "rail") {
+      if (rest.length) html += block("fy-mine", hero ? "Your Other Teams" : "Your Teams", liveMine ? `${liveMine} Live · ${rest.length} Total` : countLabel(rest.length, rest) + (isToday() ? " Today" : ""), gridOf(rest));
+      else if (hero) { /* the hero is your only game today */ }
+      else html += `<div class="block empty">None of your teams play ${isToday() ? "today" : "on " + esc(dayLabel(state.date))}.${state.favs.size ? "" : `<div class="find-more"><button class="chip" data-open-sheet>Follow Teams</button></div>`}</div>`;
+    }
+    html += mvHTML;
+    if (picks.length) html += block("worth", "Worth A Watch", countLabel(picks.length, picks), worthHTML(picks));
+    if (live.length) html += block("fy-live", "You Are Looking Live", countLabel(live.length, live), gridOf(live));
+    if (L === "rail") {
+      // Everything else today in your world, grouped by start time; finals at the bottom
+      const shown = new Set([...pickIds, ...live.map(g => g.id)]);
+      const rest = games.filter(g => !shown.has(g.id) && g.state !== "in");
+      const pre = rest.filter(g => g.state === "pre").sort((a, b) => new Date(a.date) - new Date(b.date));
+      const groups = [];
+      pre.forEach(g => { const t = timeLabel(g.date), last = groups.at(-1); if (last && last.t === t) last.list.push(g); else groups.push({ t, list: [g] }); });
+      const fin = rest.filter(g => g.state === "post").sort((a, b) => (isMine(b) - isMine(a)) || new Date(b.date) - new Date(a.date));
+      if (fin.length) groups.push({ t: "Final", list: fin });
+      groups.forEach(({ t, list }) => { html += `<h3 class="tgrp-h">${esc(t)}</h3>${gridOf(list)}`; });
+      if (!games.length) html += `<div class="block empty">No games ${pickedNothing() ? "" : "in your leagues "}on ${esc(dayLabel(state.date))}.${findMore()}</div>`;
+    } else if (!live.length && !picks.length && mine.length && L === "bar") {
+      // nothing else is on: point to what's next
+    }
+    if (L !== "rail") html += upNextHTML(mine);
+    if (L === "day") html += everythingElse();
+    specialsFor("live").forEach(e => { html += BLOCK[e.kind](e); });
+    if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}${isToday() ? " · refreshes automatically" : ""}</p>`;
+    return html;
+  }
+  // Your Day: every league with games this day, yours first, one tap in
+  function everythingElse() {
+    const cnt = {}, live = {};
+    allGames().forEach(g => { cnt[g.lg.id] = (cnt[g.lg.id] || 0) + 1; if (g.state === "in") live[g.lg.id] = (live[g.lg.id] || 0) + 1; });
+    allSpecial().forEach(e => { cnt[e.lg.id] = (cnt[e.lg.id] || 0) + 1; if (e.state === "in") live[e.lg.id] = (live[e.lg.id] || 0) + 1; });
+    const ids = state.favLeagues.filter(id => LG[id] && cnt[id]).concat(LEAGUES.map(l => l.id).filter(id => cnt[id] && !state.favLeagues.includes(id)));
+    const rows = ids.map(id => { const lg = LG[id]; const n = cnt[id];
+      return `<button class="ee-row" data-go-tab="${id}"><span>${esc(lg.name)}</span><small class="${live[id] ? "hot" : ""}">${live[id] ? live[id] + " Live · " : ""}${n} ${lg.kind ? (n === 1 ? "Event" : "Events") : lg.soccer ? (n === 1 ? "Match" : "Matches") : (n === 1 ? "Game" : "Games")}</small><i>›</i></button>`; }).join("");
+    return block("fy-else", "Everything Else", "Tap to open", `<div class="ee-list">${rows || `<p class="hint" style="padding:14px 16px">Nothing else on this day.</p>`}</div><div class="find-more" style="margin:10px 16px 14px"><button class="chip" data-open-picker>All Leagues</button></div>`);
+  }
+  const IC3 = {
+    cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>',
+    gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>',
+  };
+  function renderHeadV3(games) {
+    const el = document.getElementById("h3head"), L = state.homeLayout;
+    if (L === "classic") { el.innerHTML = ""; return; }
+    const liveN = games.filter(g => g.state === "in").length + allSpecial().filter(e => e.state === "in" && state.favLeagues.includes(e.lg.id)).length;
+    const dens = `<button class="h3pill" data-h3="dens" aria-label="${DENS_NAME[state.density]} scoreboard. Tap to switch">${DENS_NAME[state.density]}</button>`;
+    const livePill = liveN ? `<span class="h3pill live"><i></i>${liveN} Live</span>` : "";
+    const brand = cls => `<button class="brand ${cls || ""}" data-h3="home" aria-label="Home">The <span>Lineup</span></button>`;
+    if (L === "bar") el.innerHTML = `<div class="h3row">${brand()}<span class="spacer"></span>${dens}</div>`;   // the Live tab already shows the count
+    else if (L === "day") {
+      const d = state.date.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
+      el.innerHTML = `<div class="h3day"><button class="grow" data-h3="home" aria-label="Home" style="text-align:left"><span class="k">The Lineup${liveN ? ` · <span class="lv">${liveN} Live</span>` : ""}</span></button>
+        ${dens}<button class="h3btn ${state.showCal ? "on" : ""}" data-h3="cal" aria-label="Pick a day" aria-pressed="${state.showCal}">${IC3.cal}</button><button class="h3btn" data-h3="search" aria-label="Search teams and leagues">${IC3.search}</button><button class="h3btn" data-h3="settings" aria-label="Settings">${IC3.gear}</button></div><button class="d3" data-h3="home" aria-label="Today">${esc(d)}</button>`;
+    } else el.innerHTML = `<div class="h3row">${brand("sm")}<button class="h3search" data-h3="search" aria-label="Search teams and leagues">${IC3.search}<span>Teams, leagues</span></button><button class="h3btn" data-h3="settings" aria-label="Settings">${IC3.gear}</button></div>
+      <div class="h3row" style="padding-block:0 4px">${dens}<span class="spacer"></span>${livePill}</div>`;
+  }
+  function renderTabsV3(el, games, everything) {
+    const L = state.homeLayout, tab = state.tab;
+    const liveN = games.filter(g => g.state === "in").length + allSpecial().filter(e => e.state === "in" && state.favLeagues.includes(e.lg.id)).length;
+    const lgName = LG[confLg(tab) || tab]?.name;
+    const other = !["foryou", "live", "all"].includes(tab);
+    const backChip = label => `<button class="chip on" data-id="foryou" aria-label="Back to ${esc(label)}">‹ ${esc(label)}</button>`;
+    if (L === "bar") {
+      el.innerHTML = `<div class="h3seg" role="tablist">${[["foryou", "My Games"], ["live", "Live", liveN], ["all", "All"]].map(([id, l, n]) => `<button role="tab" data-id="${id}" class="${tab === id ? "on" : ""}" aria-selected="${tab === id}">${l}${n ? `<span class="n">${n}</span>` : ""}</button>`).join("")}</div>`
+        + (other ? `<div class="h3back">${backChip("My Games")}<b>${esc(lgName || "")}</b></div>` : "");
+    } else if (L === "day") {
+      el.hidden = tab === "foryou";
+      el.innerHTML = tab === "foryou" ? "" : `<div class="h3back">${backChip("Your Day")}<b>${esc(lgName || (tab === "live" ? "Live" : tab === "all" ? "All Games" : ""))}</b></div>`;
+    } else {
+      const cnt = {}, live = {};
+      everything.forEach(g => { cnt[g.lg.id] = (cnt[g.lg.id] || 0) + 1; if (g.state === "in") live[g.lg.id] = 1; });
+      allSpecial().forEach(e => { cnt[e.lg.id] = (cnt[e.lg.id] || 0) + 1; if (e.state === "in") live[e.lg.id] = 1; });
+      const ids = state.favLeagues.filter(id => LG[id]).concat(LEAGUES.map(l => l.id).filter(id => cnt[id] && !state.favLeagues.includes(id)));
+      const cur = confLg(tab) || tab;
+      const circ = (id, short, name, on, isLive) => `<button class="rl ${on ? "on" : ""}" data-id="${id}" aria-pressed="${on}" aria-label="${esc(name)}"><b>${esc(short)}${isLive ? "<i></i>" : ""}</b><span>${esc(name)}</span></button>`;
+      el.innerHTML = circ("foryou", "★", "For You", tab === "foryou", false)
+        + ids.map(id => circ(id, LG[id].short || LG[id].name.slice(0, 4), LG[id].name.length <= 10 ? LG[id].name : (LG[id].sport && !TEAM_LEAGUES.some(l => l.id !== id && l.sport === LG[id].sport && state.favLeagues.includes(l.id)) ? LG[id].sport : LG[id].short || LG[id].name), cur === id, live[id])).join("")
+        + `<button class="rl" data-h3="more" aria-label="All leagues"><b>•••</b><span>More</span></button>`;
+    }
+    el.querySelectorAll("[data-id]").forEach(b => b.onclick = () => { state.tab = b.dataset.id; store.set("tab2", state.tab); render(); window.scrollTo({ top: 0, behavior: "smooth" }); });
+  }
+  // Home button on game, team and league pages (Bottom Bar has the bar instead)
+  function gcHomeBtn() { return ["day", "rail"].includes(state.homeLayout) ? `<button class="circ gc-home" data-h3="home" aria-label="Home" title="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg></button>` : ""; }
+  document.addEventListener("click", e => {
+    const h = e.target.closest("[data-h3]"), bb = e.target.closest("[data-bb]");
+    if (bb && state.homeLayout === "bar") { e.preventDefault(); e.stopPropagation(); bbGo(bb.dataset.bb); return; }
+    const act = h?.dataset.h3 || bb?.dataset.bb;
+    if (!act) return;
+    // Search and Settings sit under game pages, so leave the page first
+    if (act === "search" || act === "settings") { navStack = []; closeGame(); syncLock(); }
+    if (act === "home") { navStack = []; goHome(); }
+    if (act === "dens") { setDensity(nextDensity()); render(); }
+    if (act === "cal") { state.showCal = !state.showCal; render(); }
+    if (act === "search") openSheet();
+    if (act === "settings") openSettings();
+    if (act === "more" || act === "leagues") openLeagueMenu();
+  });
+
+  // ---- Bottom Bar tabs: Leagues, Search and Settings open as full screens above the bar (no X, no Done),
+  // the bar highlights where you are, one tap switches tabs, and Scores brings you back to where you were.
+  // Tap Scores again to jump to the top; once more from the top goes to your home tab.
+  const BB_SHEETS = { leagues: "pksheet", search: "sheet", settings: "ssheet" };
+  function bbCurrent() {
+    if (fromSettings && (!document.getElementById("sheet").hidden || !document.getElementById("lsheet").hidden)) return "settings";
+    for (const [k, id] of Object.entries(BB_SHEETS)) { const el = document.getElementById(id); if (!el.hidden && el.classList.contains("as-tab")) return k; }
+    return "home";
+  }
+  function bbSync() {
+    const cur = bbCurrent();
+    document.querySelectorAll("#botbar [data-bb]").forEach(b => { const on = b.dataset.bb === cur; b.classList.toggle("on", on); if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  }
+  function bbHideAll() {
+    fromSettings = false;
+    ["sheet", "ssheet", "pksheet", "lsheet"].forEach(id => { const el = document.getElementById(id); el.hidden = true; el.classList.remove("as-tab"); });
+    if (!document.getElementById("gsheet").hidden) { navStack = []; closeGame(); }
+  }
+  function bbGo(act) {
+    const cur = bbCurrent(), gameOpen = !document.getElementById("gsheet").hidden;
+    if (act === "home") {
+      if (cur !== "home" || gameOpen || !document.getElementById("lsheet").hidden || !document.getElementById("sheet").hidden) { bbHideAll(); syncLock(); bbSync(); return; }
+      if (window.scrollY > 10) window.scrollTo({ top: 0, behavior: "smooth" }); else goHome();
+      return;
+    }
+    if (act === cur && !gameOpen) return;
+    bbHideAll();
+    if (act === "leagues") openLeagueMenu();
+    if (act === "search") { openSheet(); document.getElementById("sheet-h").textContent = "Search"; }
+    if (act === "settings") openSettings();
+    document.getElementById(BB_SHEETS[act]).classList.add("as-tab");
+    syncLock(); bbSync();
+  }
+  // Closing a tab screen any other way (Escape, a link inside it) puts the highlight back on Scores
+  ["sheet", "ssheet", "pksheet", "lsheet"].forEach(id => new MutationObserver(() => { const el = document.getElementById(id); if (el.hidden) el.classList.remove("as-tab", "sub"); bbSync(); }).observe(document.getElementById(id), { attributes: true, attributeFilter: ["hidden"] }));
+  // Date strip folds away once you scroll down the Bottom Bar home (comes back at the top)
+  let bbFold = false;
+  window.addEventListener("scroll", () => {
+    if (state.homeLayout !== "bar" || document.body.classList.contains("locked")) return;
+    const y = window.scrollY, want = bbFold ? y > 20 : y > 140;
+    if (want !== bbFold) { bbFold = want; document.documentElement.classList.toggle("bb-fold", want); }
+  }, { passive: true });
+
   function render() {
     applySecOrder();
     mvShownR = false; if (mvOpen) setTimeout(paintMv, 0);
@@ -3428,6 +3728,8 @@ button.brand, button.brand span { color: var(--accent); }
 
     const tab = state.tab;
     heroGame = null; setTimeout(watchHero, 0);
+    renderHeadV3(games);
+    if (tab === "foryou") { document.getElementById("dates").hidden = !datesShown(); main.innerHTML = forYouHTML(games); return; }
     const pool = poolFor(tab, games);
     let html = "";
 
@@ -3453,19 +3755,16 @@ button.brand, button.brand span { color: var(--accent); }
     mvHome = new Set();
     if (["live", "all"].includes(tab)) html += mvSection();
     if (["live", "all"].includes(tab)) {
-      const earned = g => g.state === "in" && !isMine(g) && !isBlowout(g) && !mvHome.has(mvKey(g)) && (g.close || g.tight || g.playoff || g.reasons.some(r => /Overtime|Extra|Upset|Top 25/.test(r)));
-      const must = games.filter(g => earned(g) && (g.close || g.playoff)).sort((x, y) => y.hype - x.hype);
-      const other = games.filter(g => earned(g) && !g.close && !g.playoff).sort((x, y) => y.hype - x.hype);
-      const picks = must.concat(other.slice(0, Math.max(0, 6 - must.length)));
+      const picks = worthPicks(games);
       if (picks.length) {
         if (tab === "live") shown = new Set(picks.map(g => g.id));
         html += block("worth", "Worth A Watch", countLabel(picks.length, picks),
           // More than 4 picks: switch to the two-up compact cards so the section doesn't take over the page
-          state.density === "simple" ? `<div class="grid">${picks.map(g => card(g, true)).join("")}</div>` : state.density === "compact" ? `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>` : worthRows(picks));
+          state.density === "simple" ? gridOf(picks) : state.density === "compact" ? `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>` : worthRows(picks));
       }
     }
 
-    document.getElementById("dates").hidden = tab === "upcoming";
+    document.getElementById("dates").hidden = tab === "upcoming" || !datesShown();
     if (tab === "upcoming") {
       main.innerHTML = upcomingHTML();
       loadUpcoming();
@@ -3684,9 +3983,27 @@ button.brand, button.brand span { color: var(--accent); }
       : lgs.length ? "" : '<p class="hint">No teams or leagues match that.</p>';
     el.innerHTML = lgHtml + teamHtml;
   }
+  // Games matching the search, so "Jets" finds today's Jets game before the team list
+  function drawGameHits(q) {
+    const el = document.getElementById("sgames"); if (!el) return;
+    const n = q.toLowerCase();
+    if (n.length < 2) { el.innerHTML = ""; return; }
+    const hit = t => [t.full, t.name, t.abbr, t.location].some(x => { const v = String(x || "").toLowerCase(); return v === n || v.startsWith(n) || v.includes(" " + n); });
+    const ORD = { in: 0, pre: 1, post: 2 };
+    const list = allGames().filter(g => g.teams.some(hit)).sort((a, b) => (ORD[a.state] - ORD[b.state]) || new Date(a.date) - new Date(b.date)).slice(0, 6);
+    el.innerHTML = list.length ? `<h3>Games ${isToday() ? "Today" : esc(dayLabel(state.date))}</h3><div class="sg-list">${list.map(g => simpleRow(g, true)).join("")}</div>` : "";
+  }
+  document.getElementById("sgames").addEventListener("click", e => {
+    const r = e.target.closest("[data-game]"); if (!r) return;
+    if (e.target.closest("button, a") && !e.target.closest("button, a").hasAttribute("data-game")) return;   // heart and bell do their own thing
+    e.preventDefault(); e.stopPropagation();
+    fromSettings = false; document.getElementById("sheet").hidden = true; syncLock();
+    navStack = []; openGame(r.dataset.game);
+  });
   function search() {
     clearTimeout(searchTimer);
     const q = document.getElementById("q").value.trim();
+    drawGameHits(q);
     drawSuggest();
     if (!q) { results = []; drawResults(); return; }
     searchTimer = setTimeout(async () => {
@@ -4173,7 +4490,7 @@ button.brand, button.brand span { color: var(--accent); }
       ${pickHTML}${list}${benchHTML}</div>`;
   }
   // Home section: the same four picks as a small quad, with a button into the full Multiview
-  // Games showing in the home Multiview, so Worth A Watch and You Are Looking Live skip them
+  // Games showing in the home Multiview, so Worth A Watch and You Are Looking Live skip them (YouTube TV only)
   let mvHome = new Set();
   function mvSection() {
     mvHome = new Set();
@@ -4249,7 +4566,7 @@ button.brand, button.brand span { color: var(--accent); }
     } catch {}
     if (openGameKey !== key) return;
     if (!j && !quiet && g?.link) { window.open(g.link, "_blank", "noopener"); closeGame(); return; }
-    if (!j && !lastSummary) { el.innerHTML = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:var(--accent);--ch:var(--accent)"></div><div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button></div><div class="gc-lbl">Couldn't load this game. Try again in a bit.</div></div></div>`; return; }
+    if (!j && !lastSummary) { el.innerHTML = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:var(--accent);--ch:var(--accent)"></div><div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button>${gcHomeBtn()}</div><div class="gc-lbl">Couldn't load this game. Try again in a bit.</div></div></div>`; return; }
     if (j) lastSummary = j;
     repaintGame();
     const st = lastSummary?.header?.competitions?.[0]?.status?.type?.state || g?.state;
@@ -4279,7 +4596,7 @@ button.brand, button.brand span { color: var(--accent); }
     // ESPN sometimes tacks the city onto the stadium: "Memorial Stadium (Bloomington, IN)". The city already has its own line.
     const lines = [g?.broadcast?.replace(" / ", ", "), (vn?.fullName || "").replace(/\s*\([^)]*\)\s*$/, ""), placeName(vn)].filter(Boolean);
     let html = `<div class="gc-wrap"><div class="gc-hero"><div class="gc-bg" style="--ca:${readable(a.color)};--ch:${readable(h.color)}"></div>
-      <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button><span class="sp"></span>${g ? `<button class="circ" data-share="${g.lg.id}:${g.id}" aria-label="Share">${SHAREIC}</button>` : ""}</div>
+      <div class="gc-top"><button class="circ" data-gclose aria-label="Close">${XIC}</button>${gcHomeBtn()}<span class="sp"></span>${g ? `<button class="circ" data-share="${g.lg.id}:${g.id}" aria-label="Share">${SHAREIC}</button>` : ""}</div>
       <div class="gc-grid">${fmtTeam(a, h, ta)}<div class="gc-mid">
         <div class="gc-lbl">${esc(label)}</div>
         <div class="gc-when"><b>${gs === "in" ? '<i class="livedot"></i>' : ""}${esc(gs === "pre" && (g || comp.date) ? whenLabel(g?.date || comp.date) : status)}</b>${sub ? `<small>${esc(sub)}</small>` : ""}</div>
@@ -5049,13 +5366,14 @@ button.brand, button.brand span { color: var(--accent); }
     document.getElementById("settings-body").innerHTML =
       `<div class="set-row"><div class="set-lbl">My Teams<small>Following ${teams} team${teams === 1 ? "" : "s"}</small></div><button class="chip" data-set-open="teams">Edit</button></div>` +
       `<div class="set-row"><div class="set-lbl">My Leagues<small>${leagues} league${leagues === 1 ? "" : "s"} in your order</small></div><button class="chip" data-set-open="leagues">Edit Order</button></div>` +
+      segRow("Home Layout", "homeLayout", state.homeLayout, [["bar", "Bottom Bar"], ["day", "Your Day"], ["rail", "League Rail"], ["classic", "Classic"]], "Try each one. Classic is the original layout.") +
       (store.get("owner", "") ? `<div class="set-row"><div class="set-lbl">Reset To My Setup<small>Puts back your saved teams and leagues, in order</small></div><button class="chip" data-reset-setup>Reset</button></div>` : "") +
       `<div class="set-row"><div class="set-lbl">Load A Setup<small>Have a setup code? Enter it to load those teams and leagues</small></div><button class="chip" data-load-setup>Enter Code</button></div>` +
       setSection("display", "Layout & Display", "Open to, layout, color, appearance, odds",
-        segRow("Open To", "home", store.get("home", "live"), [["auto", "Smart"], ["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens. Smart picks Live when your games are on, and My Teams when nothing is.") +
+        (state.homeLayout !== "classic" ? segRow("Open To", "home3", store.get("home3", "foryou"), [["auto", "Smart"], ["foryou", { bar: "My Games", day: "Your Day", rail: "For You" }[state.homeLayout]], ["live", "Live"], ["all", "All"]], "What you see when the app opens. Smart opens on Live when any of your games or leagues are on, otherwise " + { bar: "My Games", day: "Your Day", rail: "For You" }[state.homeLayout] + ".") : segRow("Open To", "home", store.get("home", "live"), [["auto", "Smart"], ["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens. Smart picks Live when your games are on, and My Teams when nothing is.")) +
         segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
         segRow("Scoreboard", "density", state.density, [["simple", "Simple"], ["compact", "Compact"], ["expanded", "Expanded"]], "Or pinch the scores: in for smaller, out for bigger") +
-        segRow("Always Expand My Teams", "expandFavs", state.expandFavs ? "on" : "off", [["on", "On"], ["off", "Off"]], "In Compact and Simple, your teams' games stay full size") +
+        segRow("Always Expand My Teams", "expandFavs", state.expandFavs ? "on" : "off", [["on", "On"], ["off", "Off"]], "In Compact, your teams' games stay full size. Simple keeps every game small.") +
         segRow("Color", "palette", store.get("palette", "red"), [["red", "Red"], ["navy", "Navy"], ["green", "Green"], ["purple", "Purple"], ["orange", "Orange"]]) +
         segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
         segRow("Betting Odds", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "Lines on game cards and in Gamecast") + secRow()) +
@@ -5074,7 +5392,7 @@ button.brand, button.brand span { color: var(--accent); }
       `<button class="set-done" data-set-done>Done</button>` +
       `<p class="hint set-foot">${location.pathname.includes("/beta") ? `You're on the beta. <a href="../">Open The Live App</a>` : `Want to try new features early? <a href="beta/">Open The Beta</a>`}</p>`;
   }
-  function openSettings() { renderSettings(); document.getElementById("ssheet").hidden = false; }
+  function openSettings() { renderSettings(); const el = document.getElementById("ssheet"); el.hidden = false; if (state.homeLayout === "bar") { el.classList.add("as-tab"); if (typeof bbSync === "function") bbSync(); } }
   document.getElementById("settingsbtn").onclick = openSettings;
   document.getElementById("ssheet-x").onclick = () => { document.getElementById("ssheet").hidden = true; };
   document.getElementById("ssheet").addEventListener("click", async e => {
@@ -5085,6 +5403,8 @@ button.brand, button.brand span { color: var(--accent); }
     if (b) {
       const key = b.dataset.set, val = b.dataset.val;
       if (key === "home") { store.set("home", val); state.tab = homeTab(); }
+      if (key === "home3") { store.set("home3", val); state.tab = homeTab(); }
+      if (key === "homeLayout") { state.homeLayout = val; store.set("homeLayout", val); document.documentElement.dataset.home = val; state.showCal = false; state.tab = homeTab(); }
       if (key === "view") { state.view = val; store.set("view3", val); }
       if (key === "theme") { store.set("theme", val); applyTheme(); }
       if (key === "palette") { store.set("palette", val); applyTheme(); }
@@ -5156,6 +5476,8 @@ button.brand, button.brand span { color: var(--accent); }
       fromSettings = true;
       if (o.dataset.setOpen === "teams") openSheet();
       else { renderLeagueSheet(); document.getElementById("lsheet").hidden = false; }
+      // Bottom Bar: the editors open full screen inside the Settings tab, with X to go back
+      if (state.homeLayout === "bar") { document.getElementById(o.dataset.setOpen === "teams" ? "sheet" : "lsheet").classList.add("as-tab", "sub"); syncLock(); bbSync(); }
     }
   });
   // Home Screen apps on iPhone start with empty storage, so the welcome screen takes a setup code too

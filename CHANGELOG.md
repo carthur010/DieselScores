@@ -2,6 +2,11 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 19, 2026: Live (11:55 AM)
+- Beta 3.0 is now the live app: the bottom bar (Scores, Leagues, Search, Settings), For You home with Your Game, the strip, Your Multiview, Worth A Watch and You Are Looking Live, the Simple / Compact / Expanded switch, and the Home Layout choice in Settings (Bottom Bar, Your Day, League Rail, Classic).
+- No beta tag on live. Live and Beta 3.0 now share the same saved settings on a device, and anyone coming from the old live app gets their TV, streaming, alert and display picks carried over once.
+- Beta 3.0 stays up at /beta3/ for testing new things first.
+
 ## Oct 19, 2026: Live, Beta and Beta 3.0 (11:27 AM)
 - Scores is now The Lineup: new name in the header, browser tab, home screen label ("The Lineup", "Lineup Beta", "Lineup 3.0"), Welcome screen, alerts and share text.
 - New app icon: the stacked football, basketball, baseball and soccer ball "L" with The Lineup wordmark. Remove the old home screen app and add it again from Safari to see the new icon and name.
