@@ -2,6 +2,11 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 19, 2026: Live, Beta and Beta 3.0 (11:27 AM)
+- Scores is now The Lineup: new name in the header, browser tab, home screen label ("The Lineup", "Lineup Beta", "Lineup 3.0"), Welcome screen, alerts and share text.
+- New app icon: the stacked football, basketball, baseball and soccer ball "L" with The Lineup wordmark. Remove the old home screen app and add it again from Safari to see the new icon and name.
+- The web address stays carthur010.github.io/DieselScores so saved links keep working.
+
 ## Oct 18, 2026: Live (6:40 PM)
 - Shipped from beta: Multiview builds 15 minutes before kickoff (Preview My Multiview), Lock In My Teams, NFL RedZone tile (1 PM and 4 PM windows only), Build My Own with Swap In, Red Zone only counts with a ball spot, Multiview drops blowouts in every sport, and the Live tab strip only shows live games.
 
