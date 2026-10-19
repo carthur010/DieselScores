@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta</title>
-<meta name="build" content="20261019112509">
+<meta name="build" content="20261019124121">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup Beta">
@@ -971,14 +971,15 @@ button.brand span { color: var(--accent); }
 .bhead .meta { flex: 1 1 0; }
 @media (max-width: 480px) {
   .bar { gap: 6px 2px; flex-wrap: wrap; }
-  .brand { font-size: 28px; }
-  .bar .iconbtn { width: 32px; }
+  .brand { font-size: 25px; }
+  .bar .iconbtn { width: 31px; }
+  .lv-w { display: none; }
   .bar .livecount { margin-left: 6px; }
   .bar .spacer { flex: 1 1 0; min-width: 0; }
 }
 @media (max-width: 420px) {
   .lv-w { display: none; }
-  .bar .iconbtn { width: 30px; }
+  .bar .iconbtn { width: 28px; }
   .lb td, .lb th { padding-inline: 7px; }
   .lb .pos { width: 32px; }
   .sheet { place-items: end center; padding: 0; }
@@ -1959,7 +1960,7 @@ button.brand, button.brand span { color: var(--accent); }
     };
     let found = null;
     try {
-      found = parse(await (await fetch(API + lg.path + "/teams/" + m.id + "/schedule")).json());
+      found = parse(await (await fetch(API + lg.path + "/teams/" + m.id + "/schedule" + (lg.soccer ? "?fixture=true" : ""))).json());
       if (!found && !lg.soccer) found = parse(await (await fetch(API + lg.path + "/teams/" + m.id + "/schedule?seasontype=3")).json());
     } catch {}
     // The team schedule feed can lag. Confirm time and arena against that day's scoreboard.
@@ -2604,7 +2605,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (navStack.length > 10) navStack.shift();
   }
   // ---- Share links that open right to a game, team or league
-  const APP_URL = "https://carthur010.github.io/DieselScores/" + (location.pathname.includes("/beta") ? "beta/" : "");
+  const APP_URL = "https://carthur010.github.io/DieselScores/" + (location.pathname.includes("/beta3") ? "beta3/" : location.pathname.includes("/beta") ? "beta/" : "");
   async function shareLink(title, text, param) {
     const url = APP_URL + "?" + param;
     try {
@@ -3074,6 +3075,7 @@ button.brand, button.brand span { color: var(--accent); }
     let sched = { games: [] };
     try {
       const urls = [API + lg.path + "/teams/" + tm.id + "/schedule"]; if (!lg.soccer && !lg.kind) urls.push(API + lg.path + "/teams/" + tm.id + "/schedule?seasontype=3");
+      if (lg.soccer) urls.push(API + lg.path + "/teams/" + tm.id + "/schedule?fixture=true");
       const js = await Promise.all(urls.map(u => fetch(u).then(r => r.ok ? r.json() : {}).catch(() => ({}))));
       const seen = new Set();
       sched.games = js.flatMap(parse).filter(g => !seen.has(g.id) && seen.add(g.id)).sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -5072,7 +5074,7 @@ button.brand, button.brand span { color: var(--accent); }
         alertGroup("all", "All Games", "Anything that turns interesting, any team") +
         `<div class="set-row"><div class="set-lbl">Test Alerts<small>${esc(notifyStatus())}. ${LN ? "Start reminders arrive even when The Lineup is closed. Live alerts need it open." : "Alerts work while The Lineup is open."}</small></div><button class="chip" data-test-alert>Send Test</button></div>`) +
       `<button class="set-done" data-set-done>Done</button>` +
-      `<p class="hint set-foot">${location.pathname.includes("/beta") ? `You're on the beta. <a href="../">Open The Live App</a>` : `Want to try new features early? <a href="beta/">Open The Beta</a>`}</p>`;
+      `<p class="hint set-foot">${location.pathname.includes("/beta") ? `You're on the beta. <a href="../">Open The Live App</a>` : `Want to try new features early? <a href="beta3/">Open The Beta</a>`}</p>`;
   }
   function openSettings() { renderSettings(); document.getElementById("ssheet").hidden = false; }
   document.getElementById("settingsbtn").onclick = openSettings;
