@@ -3,7 +3,7 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## Oct 21, 2026: Live and Beta 3.0 (9:15 AM)
-- Leagues tab is all tiles: Your Leagues on top in your order, then every other league as tiles grouped by sport (Football, Basketball, Baseball, Hockey, Soccer...). Leagues you follow only show once, up top. Each tile has its logo, today's count and a red live badge.
+- Leagues tab is all tiles: Your Leagues on top in your order, then every other league as tiles grouped by sport (Football, Basketball, Baseball, Hockey, Soccer...). Leagues you follow only show once, up top. Each tile has its logo (or a short badge like EFL, WSL, ATP), a name that fits (EFL Cup, Shield, ATP, WTA), today's count and a red live badge.
 
 ## Oct 21, 2026: Live and Beta 3.0 (9:10 AM)
 - Removed the "Off today: ..." and "Updated 9:04 AM · Refreshes automatically" lines from the bottom of every tab in Bottom Bar, Your Day and League Rail. Scores still refresh on their own. Classic keeps its Updated line.
