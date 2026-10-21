@@ -41,18 +41,35 @@
 #b4-add-heading { font-size: 17px; color: var(--fg); text-transform: none; letter-spacing: -.02em; margin: 0 0 10px; }
 :root[data-home="bar"] #dates, :root[data-home="bar"] #mybar { display: none !important; }
 :root[data-home="bar"] .wrap > main { padding-top: 15px; display: block; }
-.b4-feature { border: 1px solid color-mix(in srgb,var(--accent) 24%,var(--line)); background: var(--accent-soft); border-radius: 14px; padding: 4px 12px 12px; margin-bottom: 17px; }
-.b4-feature-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.b4-feature-head span { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
-.b4-link { min-height: 44px; padding-inline: 5px; color: var(--accent); font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
-.b4-match { width: 100%; display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 8px; padding: 1px 0 6px; text-align: left; min-height: 44px; }
-.b4-club { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 650; min-width: 0; overflow-wrap: anywhere; }
-.b4-club:last-child { justify-content: flex-end; text-align: right; }
-.b4-club img { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
-.b4-score { font-size: 30px; line-height: 1.2; font-weight: 750; letter-spacing: .02em; white-space: nowrap; }
-.b4-feature-foot { display: flex; gap: 8px; align-items: center; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.b4-feature { border: 1px solid var(--accent); background: linear-gradient(120deg,var(--accent-soft),var(--surface)); border-radius: 14px; padding: 12px 14px 14px; margin-bottom: 17px; }
+.b4-feature-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 16px; }
+.b4-feature-head > span { font-size: 10px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.b4-link { min-height: 24px; padding-inline: 5px; color: var(--accent); font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+.b4-feature-league { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-align: center; margin: 6px 0; }
+.b4-feature-standing { text-align: center; }
+.b4-feature-standing > span { display: inline-block; padding: 4px 8px; border-radius: 6px; color: var(--accent); background: var(--accent-soft); font-size: 10px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; max-width: 80%; overflow-wrap: anywhere; }
+.b4-feature-matchup { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.7fr) minmax(0,1fr); align-items: center; gap: 3px; margin: 8px 0 10px; }
+.b4-feature-club { position: relative; min-width: 0; text-align: center; }
+.b4-feature-club > button[data-game] { display: flex; flex-direction: column; align-items: center; width: 100%; gap: 5px; }
+.b4-feature-club img, .b4-feature-crest { width: 38px; height: 38px; object-fit: contain; }
+.b4-feature-club b { color: var(--muted); font-size: 13px; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+.b4-feature-club.b4-followed b { color: var(--fg); }
+.b4-feature-club .star { position: absolute; top: -8px; left: -12px; display: grid; place-items: center; width: 32px; height: 32px; margin: 0; border: 0; background: transparent; color: var(--muted); z-index: 1; }
+.b4-feature-home .star { left: auto; right: -12px; }
+.b4-feature-club .star.on { color: var(--star); }
+.b4-feature-club .star svg { width: 15px; height: 15px; }
+.b4-feature-scoreline { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr); align-items: center; width: 100%; gap: 4px; min-height: 58px; font-variant-numeric: tabular-nums; }
+.b4-feature-scoreline b { font-size: 36px; font-weight: 750; line-height: 1.1; }
+.b4-feature-scoreline .b4-status { font-size: 16px; line-height: 1.15; overflow-wrap: anywhere; }
+.b4-feature-foot { display: flex; gap: 10px; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); }
 .b4-status { color: var(--live); font-weight: 600; }
-.b4-watch { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 40px; padding: 6px 11px; border-radius: 8px; background: var(--accent); color: var(--bg); font-size: 11px; font-weight: 600; text-align: center; max-width: 60%; }
+.b4-watch { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 30px; padding: 4px 11px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; text-align: center; max-width: 65%; }
+.b4-watch::after { content: ""; position: absolute; inset: -7px 0; }
+.b4-watch > span { font-size: 9px; }
+.b4-feature-foot .bellbtn { position: relative; display: grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--muted); }
+.b4-feature-foot .bellbtn::after { content: ""; position: absolute; inset: -6px; }
+.b4-feature-foot .bellbtn svg { width: 18px; height: 18px; }
+.b4-feature-foot .bellbtn.on { color: var(--accent); }
 .b4-section { margin-bottom: 17px; }
 .b4-section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 0 2px 8px; }
 .b4-section-head h2 { font-size: 17px; font-weight: 750; letter-spacing: -.02em; margin: 0; }
@@ -83,7 +100,9 @@
 .b4-card-name { font-size: 16px; font-weight: 700; line-height: 1.15; overflow-wrap: anywhere; min-width: 0; }
 .b4-card-score { margin-left: auto; padding-left: 3px; flex-shrink: 0; font-size: 26px; line-height: 1; font-weight: 750; font-variant-numeric: tabular-nums; }
 .b4-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-top: auto; min-height: 32px; }
-.b4-card-tv { font-size: 12px; font-weight: 650; min-width: 0; overflow-wrap: anywhere; }
+.b4-card-tv { margin-left: auto; max-width: 72%; text-align: right; font-size: 11px; font-weight: 650; color: var(--muted); min-width: 0; overflow-wrap: anywhere; }
+.b4-card-clock { font-size: 12px; font-weight: 650; color: var(--muted); }
+.b4-card-clock.b4-status { color: var(--live); }
 .b4-card-actions { display: flex; flex-shrink: 0; gap: 0; }
 .b4-card-actions .bellbtn { display: grid; place-items: center; width: 30px; height: 36px; border: 0; background: transparent; color: var(--muted); position: relative; }
 .b4-card-actions .bellbtn::after { content: ""; position: absolute; inset: -4px 0; }

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021201124">
+<meta name="build" content="20261021201428">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=8">
+<link rel="stylesheet" href="beta4.css?v=9">
 </head>
 <body>
 <header class="top">
@@ -6184,7 +6184,7 @@ button.brand, button.brand span { color: var(--accent); }
     const channel = String(netLabel(g) || "").replace(/^(W?NBA) League Pass$/i, "League Pass");
     const watch = expanded && !final ? g.watch?.find(w => w.url) : null;
     const save = `<button class="bellbtn heartbtn ${on ? "on" : ""}" data-favgame="${esc(key)}" aria-pressed="${on}" aria-label="${on ? "Unsave" : "Save"} ${esc(a.name)} game">${on ? HEART_ON : HEART}</button>`;
-    return `<article class="b4-scorecard b4-card-${expanded ? "expanded" : "compact"} tap" data-game="${esc(key)}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name + ": game details")}"><div class="b4-card-top"><b>${esc(b4Short(g.lg))}</b><span class="${g.state === "in" ? "b4-status" : ""}">${esc(g.status || timeLabel(g.date))}</span></div>${team(a)}${team(h)}<div class="b4-card-foot"><span class="b4-card-tv">${esc(channel)}</span><span class="b4-card-actions">${save}${bellBtn(g)}</span></div>${watch ? `<a class="b4-card-watch" href="${esc(watch.url)}" ${watch.scheme ? `data-app="${esc(watch.scheme)}"` : ""} target="_blank" rel="noopener">Watch On ${esc(watch.app)}</a>` : ""}</article>`;
+    return `<article class="b4-scorecard b4-card-${expanded ? "expanded" : "compact"} tap" data-game="${esc(key)}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name + ": game details")}"><div class="b4-card-top"><b>${esc(b4Short(g.lg))}</b><span class="b4-card-tv">${esc(channel)}</span></div>${team(a)}${team(h)}<div class="b4-card-foot"><span class="b4-card-clock ${g.state === "in" ? "b4-status" : ""}">${esc(g.status || timeLabel(g.date))}</span><span class="b4-card-actions">${save}${bellBtn(g)}</span></div>${watch ? `<a class="b4-card-watch" href="${esc(watch.url)}" ${watch.scheme ? `data-app="${esc(watch.scheme)}"` : ""} target="_blank" rel="noopener">Watch On ${esc(watch.app)}</a>` : ""}</article>`;
   }
   function beta4Rows(games) {
     if (state.view === "league") games = games.slice().sort((a, b) => leagueRank(a.lg.id) - leagueRank(b.lg.id) || byState(a, b));
@@ -6199,12 +6199,17 @@ button.brand, button.brand span { color: var(--accent); }
     const g = live.find(g => gameKey(g) === b4Feature) || live[0];
     if (!g || !isToday()) return { html: "", key: "" };
     const [a, h] = g.teams;
-    const me = g.teams.find(t => isFavTeam(g.lg, t.abbr));
-    const logo = t => t.logo ? `<img src="${esc(t.logo)}" alt="">` : "";
+    const key = gameKey(g), saved = !!state.favGames[key];
+    const label = esc(a.name + " " + a.score + ", " + h.name + " " + h.score + ", " + g.status + ": game details");
+    const club = (t, side) => `<div class="b4-feature-club b4-feature-${side}${isFavTeam(g.lg, t.abbr) ? " b4-followed" : ""}">${starBtn(g.lg, t)}<button data-game="${esc(key)}" aria-label="${label}">${t.logo ? `<img src="${esc(t.logo)}" alt="">` : `<span class="b4-feature-crest"></span>`}<b>${esc(b4Name(g, t))}</b></button></div>`;
+    const scoresKnown = a.score !== "" && h.score !== "" && a.score != null && h.score != null && Number.isFinite(+a.score) && Number.isFinite(+h.score);
+    const leader = scoresKnown ? (+a.score === +h.score ? "Tied" : b4Name(g, +a.score > +h.score ? a : h) + " leads") : "Live";
     const w = g.watch?.find(x => x.url);
-    const watch = w ? `<a class="b4-watch" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">Watch · ${esc(w.app)}</a>` : `<span>${esc(netLabel(g) || "TV unavailable")}</span>`;
-    return { key: gameKey(g), html: `<section class="b4-feature" aria-label="Your featured match"><div class="b4-feature-head"><span>Your match${me ? " · Following " + esc(me.name) : " · Saved game"}</span>${live.length > 1 ? `<button class="b4-link" data-b4-change>Change</button>` : `<button class="b4-link" data-bb="teams">My Teams</button>`}</div><button class="b4-match" data-game="${esc(gameKey(g))}" aria-label="${esc(a.name + " " + a.score + ", " + h.name + " " + h.score + ", " + g.status + ": game details")}"><span class="b4-club">${logo(a)}${esc(b4Name(g, a))}</span><b class="b4-score">${esc(a.score)}–${esc(h.score)}</b><span class="b4-club">${esc(b4Name(g, h))}${logo(h)}</span></button><div class="b4-feature-foot"><span class="b4-status">● ${esc(g.status)} · ${esc(b4Short(g.lg))}</span>${watch}</div></section>` };
+    const watch = w ? `<a class="b4-watch" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener"><span aria-hidden="true">▶</span> ${esc(w.app)}</a>` : `<span class="b4-feature-channel">${esc(netLabel(g) || "TV unavailable")}</span>`;
+    const save = `<button class="bellbtn heartbtn ${saved ? "on" : ""}" data-favgame="${esc(key)}" aria-pressed="${saved}" aria-label="${saved ? "Unsave" : "Save"} ${esc(a.name)} game">${saved ? HEART_ON : HEART}</button>`;
+    return { key, html: `<section class="b4-feature" aria-label="Your featured match"><div class="b4-feature-head"><span>Your Game</span>${live.length > 1 ? `<button class="b4-link" data-b4-change>Change</button>` : ""}</div><div class="b4-feature-league">${esc(b4Short(g.lg))}</div><div class="b4-feature-standing"><span>${esc(leader)}</span></div><div class="b4-feature-matchup">${club(a, "away")}<button class="b4-feature-scoreline" data-game="${esc(key)}" aria-label="${label}"><b>${esc(a.score)}</b><span class="b4-status">${esc(g.status)}</span><b>${esc(h.score)}</b></button>${club(h, "home")}</div><div class="b4-feature-foot">${watch}${save}${bellBtn(g)}</div></section>` };
   }
+
   function beta4Home(games) {
     const source = b4League === "all" ? games : allGames().filter(g => g.lg.id === b4League);
     const scoped = source.slice().sort(byState);

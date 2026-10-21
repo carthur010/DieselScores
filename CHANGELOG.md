@@ -2,6 +2,12 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — Game card network alignment
+- Right-aligned TV networks in Compact and Expanded headers, with the clock at bottom left and heart/alert controls at bottom right. Scorecards have no team-favorite stars.
+
+## Oct 21, 2026: Beta 4.0 — Your Game reference card
+- Restyled the featured live game with large crests, follow stars, separate scores, centered league/status/clock, and a bottom watch/save/alerts row. The lead badge reflects the current score.
+
 ## Oct 21, 2026: Beta 4.0 — Settings reference screens
 - Rebuilt Settings with grouped cards and dedicated Layout & Display, TV & Streaming and three alert-preference pages. Added back/close navigation, selected pill controls, Done and live-app actions.
 - Restyled team and league editors, retaining drag ordering, follow controls, Add/Remove and Save Order.

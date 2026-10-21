@@ -29,6 +29,7 @@ function fixture() {
     esc: s => String(s ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'),
     netLabel: () => 'NBA League Pass', isToday: () => true,
     HEART: '<svg></svg>', HEART_ON: '<svg></svg>', IC3: {},
+    starBtn: (lg, t) => '<button data-fav="' + lg.id + ':' + t.abbr + '">Follow</button>',
     bellBtn: g => g.state === 'post' ? '' : '<button data-watchgame="' + g.lg.id + ':' + g.id + '">Alerts</button>',
     mvSection: () => '', timeLabel: () => '7:00 PM', BLOCK: {}, API: 'https://example.test/',
     normalize: (event, league) => ({ ...event, lg: league, teams: event.competitions[0].competitors.map(c => ({ name: c.team.name, abbr: c.team.abbreviation, score: c.score })), status: 'Final', state: 'post' }),
@@ -206,4 +207,35 @@ test('Alert pages retain independent event and reminder selections', () => {
   assert.match(game, /data-remind-group="watched" data-remind="5" aria-pressed="true"/);
   assert.doesNotMatch(team, /Phone Notifications Allowed/);
   assert.doesNotMatch(game, /Phone Notifications Allowed/);
+});
+
+
+test('Featured game separates scores and clock and retains follow, save, alert and watch actions', () => {
+  const { ctx, games } = fixture();
+  const g = games[0]; g.watch = [{ app: 'Paramount+', url: 'https://www.paramountplus.com/live-tv/', scheme: 'paramountplus://' }];
+  let result = ctx.beta4Feature(games).html;
+  assert.match(result, /Your Game/);
+  assert.match(result, /Away live leads|Home live leads/);
+  assert.match(result, /b4-feature-scoreline/);
+  assert.match(result, /data-fav="nba:A"/);
+  assert.match(result, /data-favgame="nba:live"/);
+  assert.match(result, /data-watchgame="nba:live"/);
+  assert.match(result, /href="https:\/\/www.paramountplus.com\/live-tv\/"/);
+  assert.match(result, /data-app="paramountplus:\/\/"/);
+  g.teams[0].score = 2;
+  result = ctx.beta4Feature(games).html;
+  assert.match(result, />Tied</);
+});
+
+
+test('Game cards put the network in the header and use game actions instead of team stars', () => {
+  const { ctx, games } = fixture();
+  for (const density of ['compact', 'expanded']) {
+    const result = ctx.beta4Card(games[0], density);
+    assert.match(result, /b4-card-top[^]*b4-card-tv/);
+    assert.match(result, /b4-card-foot"><span class="b4-card-clock b4-status">6:12 3rd/);
+    assert.match(result, /data-favgame="nba:live"/);
+    assert.match(result, /data-watchgame="nba:live"/);
+    assert.doesNotMatch(result, /data-fav="|class="star/);
+  }
 });
