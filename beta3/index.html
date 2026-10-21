@@ -1352,6 +1352,19 @@ button.brand, button.brand span { color: var(--accent); }
 .ln-lg + .ln-lg { border-top: 1px solid var(--line); }
 .ln-lg span { display: grid; gap: 3px; } .ln-lg b { font-size: 17px; } .ln-lg small { font-size: 13px; font-weight: 600; color: var(--muted); }
 :root:not([data-home="classic"]) main .updated { text-align: left; font-size: 13px; font-weight: 600; color: var(--muted); margin: 4px 2px 0; }
+/* Your Day header (Oct 21 PDF): "Your Day" with search and settings, then ‹ Today, Oct 21 ⌄ › */
+:root[data-home="day"] .h3row.yd { padding-block: 12px 0; gap: 4px; }
+:root[data-home="day"] .h3row.yd .brand { font-size: 30px; }
+.yd-ic { width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: transparent; color: var(--fg); cursor: pointer; flex: none; }
+.yd-ic svg { width: 22px; height: 22px; }
+.yd-date { display: flex; align-items: center; justify-content: space-between; margin: 0 -10px; padding-bottom: 4px; }
+.yd-date .yd-ic svg { width: 18px; height: 18px; color: var(--muted); }
+:root[data-home="day"] main { padding-top: 0; }
+/* Simple cards: the channel wraps to a second line instead of cutting off */
+.ln-simple { grid-template-columns: 84px minmax(0, 1fr) auto; }
+.ln-meta small { white-space: normal; overflow: visible; line-height: 1.2; }
+/* Up Next: the date and place wrap instead of cutting off */
+.ln-nx-t small { white-space: normal; overflow: visible; line-height: 1.3; }
 </style>
 </head>
 <body>
@@ -2261,7 +2274,8 @@ button.brand, button.brand span { color: var(--accent); }
 
   function placeName(v) {
     const a = v?.address || {};
-    const city = a.city || "", region = a.state ? a.state : (a.country && !/^(USA|United States)$/i.test(a.country) ? a.country : "");
+    // Abroad, just the city ("Bournemouth", not "Bournemouth, England"); the US and Canada keep the state or province
+    const city = a.city || "", region = a.state ? a.state : (!city && a.country && !/^(USA|United States)$/i.test(a.country) ? a.country : "");
     return [city, region].filter(Boolean).join(", ");
   }
   async function fetchNext(k) {
@@ -2297,14 +2311,14 @@ button.brand, button.brand span { color: var(--accent); }
         if (ev) { found.date = ev.date || found.date; const pl = placeName(ev.competitions?.[0]?.venue); if (pl) found.place = pl; found.v = 2; }
       } catch {}
     }
-    state.next[k] = found ? { t: Date.now(), fx: 1, ...found } : { t: Date.now(), fx: 1, none: true };
+    state.next[k] = found ? { t: Date.now(), fx: 2, ...found } : { t: Date.now(), fx: 2, none: true };
   }
 
   async function refreshNext() {
     if (!isToday()) return;
     const playing = new Set(allGames().flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
     const todo = [...state.favs].filter(k => !playing.has(k))
-      .filter(k => { const c = state.next[k]; return !c || !c.fx || (c.date && c.v !== 2) || Date.now() - c.t > 3 * 3600e3 || (c.date && new Date(c.date) < Date.now() - 4 * 3600e3); });
+      .filter(k => { const c = state.next[k]; return !c || c.fx !== 2 || (c.date && c.v !== 2) || Date.now() - c.t > 3 * 3600e3 || (c.date && new Date(c.date) < Date.now() - 4 * 3600e3); });
     if (!todo.length) return;
     await ensureMeta(todo);
     await Promise.allSettled(todo.map(fetchNext));
@@ -2706,7 +2720,8 @@ button.brand, button.brand span { color: var(--accent); }
     const lose = (t, o) => !pre && ((fin && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
     const st = pre ? (g.status && g.status !== timeLabel(g.date) && !/^\d/.test(g.status) ? g.status : timeLabel(g.date)) : g.status;
     const net = !fin ? netLabel(g) : "";
-    const sub = fin ? (g.series || netLabel(g) || "") : net;
+    const shortSvc = n => String(n || "").replace(/^(W?NBA) League Pass$/i, "League Pass").replace(/^NFL Sunday Ticket$/i, "Sunday Ticket").replace(/^Gotham Sports$/i, "Gotham").replace(/^Paramount\+$/i, "Paramount+").replace(/^ESPN Deportes$/i, "ESPN Dep.");
+    const sub = shortSvc(fin ? (g.series || netLabel(g) || "") : net);
     const tag = showTag ? gameTag(g) : "";
     const lg = (g.lg.short || g.lg.name) + (tag ? " · " + tag : "");
     const nm = t => `${t.seed ? `<small>(${esc(t.seed)})</small> ` : t.rank ? `<small>${esc(t.rank)}</small> ` : ""}${esc(t.name || t.abbr)}`;
@@ -4008,8 +4023,13 @@ button.brand, button.brand span { color: var(--accent); }
     if (L === "bar") el.innerHTML = `<div class="h3row bb">${brand()}${dateBtn}<span class="spacer"></span>${dens}</div>`;
     else if (L === "day") {
       const d = state.date.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
-      el.innerHTML = `<div class="h3day"><button class="grow" data-h3="home" aria-label="Home" style="text-align:left"><span class="k">Beta 3.0${liveN ? ` · <span class="lv">${liveN} Live</span>` : ""}</span></button>
-        ${dens}<button class="h3btn ${state.showCal ? "on" : ""}" data-h3="cal" aria-label="Pick a day" aria-pressed="${state.showCal}">${IC3.cal}</button><button class="h3btn" data-h3="search" aria-label="Search teams and leagues">${IC3.search}</button><button class="h3btn" data-h3="settings" aria-label="Settings">${IC3.gear}</button></div><button class="d3" data-h3="home" aria-label="Today">${esc(d)}</button>`;
+      const dTxt = (isToday() ? "Today, " : state.date.toLocaleDateString(undefined, { weekday: "short" }) + ", ") + state.date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      const chev = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
+      el.innerHTML = `<div class="h3row yd"><button class="brand" data-h3="home" aria-label="Your Day, home">Your Day</button><span class="spacer"></span>
+        <button class="yd-ic" data-h3="search" aria-label="Search teams and leagues">${IC3.search}</button><button class="yd-ic" data-h3="settings" aria-label="Settings">${IC3.gear}</button></div>
+        <div class="yd-date"><button class="yd-ic" data-h3="prev" aria-label="Previous day">${chev("M15 6l-6 6 6 6")}</button>
+        <button class="h3date ${state.showCal ? "on" : ""}" data-h3="cal" aria-label="Pick a day" aria-expanded="${!!state.showCal}">${esc(dTxt)}${chev("M6 9l6 6 6-6")}</button>
+        <button class="yd-ic" data-h3="next" aria-label="Next day">${chev("M9 6l6 6-6 6")}</button></div>`;
     } else el.innerHTML = `<div class="h3row">${brand("sm")}<button class="h3search" data-h3="search" aria-label="Search teams and leagues">${IC3.search}<span>Teams, leagues</span></button><button class="h3btn" data-h3="settings" aria-label="Settings">${IC3.gear}</button></div>
       <div class="h3row" style="padding-block:0 4px">${dens}<span class="spacer"></span>${livePill}</div>`;
   }
@@ -4050,6 +4070,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (act === "home") { navStack = []; goHome(); }
     if (act === "dens") { setDensity(nextDensity()); render(); }
     if (act === "cal") { state.showCal = !state.showCal; render(); }
+    if (act === "prev" || act === "next") { setDate(addDays(state.date, act === "prev" ? -1 : 1)); return; }
     if (act === "search") openSheet();
     if (act === "settings") openSettings();
     if (act === "more" || act === "leagues") openLeagueMenu();

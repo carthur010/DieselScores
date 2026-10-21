@@ -2,6 +2,11 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 3.0 (12:55 AM, not on live yet)
+- Simple cards: the channel no longer cuts off ("NBA Leag..." is now "League Pass", and long names wrap to a second line).
+- Up Next: matches abroad show just the city ("Bournemouth", "München"), and the date line wraps instead of cutting off.
+- Your Day header matches the PDF: "Your Day" with search and settings, then ‹ Today, Oct 21 ⌄ › to step a day or open the date strip.
+
 ## Oct 21, 2026: Beta 3.0 (12:45 AM, not on live yet)
 - Something On is gone from the header. The top row is now The Lineup, Today ▾ and the size icon.
 - The title and the first bottom bar tab say The Lineup instead of Scores.
