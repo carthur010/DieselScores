@@ -363,3 +363,7 @@ body:has(#sheet:not([hidden]).b4-team-editor) #botbar, body:has(#sheet:not([hidd
 /* Keep All, the first five followed leagues and More on one swipeable row. */
 .b4-league-shortcuts { display: flex; align-items: center; gap: 6px; width: 100%; min-width: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 .b4-league-shortcuts::-webkit-scrollbar { display: none; }
+
+/* Auto margins center fitting shortcuts and collapse safely when scrolling is needed. */
+.b4-league-shortcuts > .b4-league:first-child { margin-inline-start: auto; }
+.b4-league-shortcuts > .b4-league:last-child { margin-inline-end: auto; }
