@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 3.0</title>
-<meta name="build" content="20261021013000">
+<meta name="build" content="20261021091000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 3.0">
@@ -1364,6 +1364,8 @@ button.brand, button.brand span { color: var(--accent); }
 .ln-lg-drop + .ln-lg { border-top: 1px solid var(--line); }
 .ln-lg-drop .grid { gap: 0; }
 .ln-lg-go { display: block; width: 100%; min-height: 44px; padding: 10px 16px; border: 0; border-top: 1px solid var(--line); background: transparent; color: var(--accent); font: inherit; font-size: 14px; font-weight: 700; text-align: left; cursor: pointer; }
+/* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
+:root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
 </head>
 <body>
@@ -3980,7 +3982,6 @@ button.brand, button.brand span { color: var(--accent); }
     html += upNextHTML(L === "rail" ? games.filter(isMine) : mine);
     if (L !== "rail") html += yourLeagues();   // Your Day and My Games (Bottom Bar)
     specialsFor("live").forEach(e => { html += BLOCK[e.kind](e); });
-    html += offToday();
     if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}${isToday() ? " · Refreshes automatically" : ""}</p>`;
     return html;
   }

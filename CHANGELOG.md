@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Live and Beta 3.0 (9:10 AM)
+- Removed the "Off today: ..." and "Updated 9:04 AM · Refreshes automatically" lines from the bottom of every tab in Bottom Bar, Your Day and League Rail. Scores still refresh on their own. Classic keeps its Updated line.
+
 ## Oct 21, 2026: Live and Beta 3.0 (1:30 AM)
 - My Games (Bottom Bar) now has Your Leagues at the bottom, like Your Day: one row per league with today's count, tap to drop its games down, "All NHL Scores ›" to open the league page, and Edit Order. The "Off today" and "Updated" lines stay last.
 
