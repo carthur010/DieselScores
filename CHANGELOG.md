@@ -2,6 +2,11 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — score row alignment
+- Restored the live layout for Simple score rows: time, league and TV stacked in the left column, alongside the teams. Removed the redundant Live label beside the league.
+- Centered the league filter tabs, including More, as one group.
+- Updated the build and stylesheet version so existing Beta 4 sessions pick up the change.
+
 ## Oct 21, 2026: Beta 4.0 — iPhone Compact Match home
 - New standalone beta at /beta4/, based on the current Beta 3 app and real scores feeds.
 - Compact featured match with a direct Watch action and Change control when multiple followed teams are live.

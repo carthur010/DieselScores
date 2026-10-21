@@ -16,10 +16,10 @@
 .b4-date-label input { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; }
 .b4-date-label svg { width: 13px; height: 13px; }
 .b4-zone { font-size: 11px; color: var(--muted); font-weight: 400; }
-:root[data-home="bar"] #tabs.leagues { display: flex; align-items: center; gap: 6px; margin: 0; padding: 0 0 10px; flex-wrap: wrap; overflow: visible; }
+:root[data-home="bar"] #tabs.leagues { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0; padding: 0 0 10px; flex-wrap: wrap; overflow: visible; }
 .b4-league { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 5px 12px; min-height: 44px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
 .b4-league[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
-.b4-more { margin-left: auto; }
+.b4-more { margin-left: 0; }
 :root[data-home="bar"] #dates, :root[data-home="bar"] #mybar { display: none !important; }
 :root[data-home="bar"] .wrap > main { padding-top: 15px; display: block; }
 .b4-feature { border: 1px solid color-mix(in srgb,var(--accent) 24%,var(--line)); background: var(--accent-soft); border-radius: 14px; padding: 4px 12px 12px; margin-bottom: 17px; }
@@ -41,9 +41,9 @@
 .b4-rows { border: 1px solid var(--line); border-radius: 13px; background: var(--surface); overflow: hidden; }
 .b4-row { display: grid; grid-template-columns: minmax(0,1fr) 44px; gap: 0; padding: 7px 4px 7px 10px; border-bottom: 1px solid var(--line); }
 .b4-row:last-child { border-bottom: 0; }
-.b4-game { min-width: 0; display: grid; grid-template-columns: 61px minmax(0,1fr); align-items: center; gap: 8px; text-align: left; min-height: 52px; }
-.b4-time { font-size: 11px; font-weight: 600; overflow-wrap: anywhere; }
-.b4-time small { display: block; margin-top: 3px; font-size: 11px; font-weight: 400; color: var(--muted); }
+.b4-game { min-width: 0; display: grid; grid-template-columns: 72px minmax(0,1fr); align-items: center; gap: 8px; text-align: left; min-height: 52px; }
+.b4-time { display: grid; gap: 0; color: var(--muted); font-size: 12px; line-height: 1.25; font-weight: 600; overflow-wrap: anywhere; }
+.b4-time small { display: block; margin-top: 0; font-size: 11px; font-weight: 400; color: var(--muted); }
 .b4-team { display: flex; align-items: center; gap: 6px; min-height: 25px; font-size: 13px; }
 .b4-team img { width: 21px; height: 21px; object-fit: contain; flex-shrink: 0; }
 .b4-team .name { overflow-wrap: anywhere; min-width: 0; }
@@ -51,7 +51,7 @@
 .b4-team i { font-style: normal; font-size: 10px; color: var(--star); }
 .b4-row .heartbtn { min-width: 44px; min-height: 44px; width: 44px; height: 44px; align-self: center; border: 0; background: transparent; }
 .b4-row .heartbtn svg { width: 18px; height: 18px; }
-.b4-channel { display: block; color: var(--muted); font-size: 11px; padding: 2px 0 0 27px; overflow-wrap: anywhere; }
+.b4-channel { display: block; color: var(--muted); font-size: 11px; padding: 0; overflow-wrap: anywhere; }
 .b4-empty { padding: 23px 17px; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; font-size: 14px; text-align: center; color: var(--muted); }
 .b4-empty p { margin: 0 0 12px; }
 .b4-empty .chip { min-height: 44px; }
@@ -77,7 +77,7 @@
 @media(max-width:360px) {
   .b4-head .brand { font-size: 26px; }
   .b4-league { padding-inline: 10px; }
-  .b4-game { grid-template-columns: 53px minmax(0,1fr); gap: 5px; }
+  .b4-game { grid-template-columns: 64px minmax(0,1fr); gap: 5px; }
   .b4-team { font-size: 12px; }
   .b4-team img { width: 18px; height: 18px; }
   .b4-score { font-size: 27px; }

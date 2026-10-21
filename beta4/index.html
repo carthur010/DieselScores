@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021193238">
+<meta name="build" content="20261021194830">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=1">
+<link rel="stylesheet" href="beta4.css?v=2">
 </head>
 <body>
 <header class="top">
@@ -6080,7 +6080,7 @@ button.brand, button.brand span { color: var(--accent); }
     const team = t => `<span class="b4-team">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ""}<span class="name">${esc(b4Name(g, t))}</span>${isFavTeam(g.lg, t.abbr) ? `<i aria-label="Followed team">★</i>` : ""}<b>${g.state === "pre" ? "" : esc(t.score)}</b></span>`;
     const tv = g.state === "post" ? "" : String(netLabel(g) || "").replace(/^(W?NBA) League Pass$/i, "League Pass");
     const on = !!state.favGames[key];
-    return `<div class="b4-row"><button class="b4-game" data-game="${esc(key)}" aria-label="${esc(g.teams.map(t => b4Name(g, t)).join(" vs ") + ", " + g.status + ": game details")}"><span class="b4-time ${g.state === "in" ? "b4-status" : ""}">${esc(g.state === "pre" ? g.status || timeLabel(g.date) : g.status)}<small>${esc(b4Short(g.lg))}${g.state === "in" ? " · Live" : ""}</small></span><span>${team(a)}${team(h)}${tv ? `<span class="b4-channel">${esc(tv)}</span>` : ""}</span></button><button class="bellbtn heartbtn ${on ? "on" : ""}" data-favgame="${esc(key)}" aria-pressed="${on}" aria-label="${on ? "Unsave" : "Save"} ${esc(a.name)} game">${on ? HEART_ON : HEART}</button></div>`;
+    return `<div class="b4-row"><button class="b4-game" data-game="${esc(key)}" aria-label="${esc(g.teams.map(t => b4Name(g, t)).join(" vs ") + ", " + g.status + ": game details")}"><span class="b4-time"><span class="${g.state === "in" ? "b4-status" : ""}">${esc(g.state === "pre" ? g.status || timeLabel(g.date) : g.status)}</span><small>${esc(b4Short(g.lg))}</small>${tv ? `<small class="b4-channel">${esc(tv)}</small>` : ""}</span><span>${team(a)}${team(h)}</span></button><button class="bellbtn heartbtn ${on ? "on" : ""}" data-favgame="${esc(key)}" aria-pressed="${on}" aria-label="${on ? "Unsave" : "Save"} ${esc(a.name)} game">${on ? HEART_ON : HEART}</button></div>`;
   }
   function beta4Rows(games) {
     return state.density === "simple" ? `<div class="b4-rows">${games.map(beta4Row).join("")}</div>` : gridOf(games);
