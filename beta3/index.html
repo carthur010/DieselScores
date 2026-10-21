@@ -1190,9 +1190,9 @@ button.brand, button.brand span { color: var(--accent); }
 .h3pill.live { font-weight: 700; letter-spacing: .02em; text-transform: uppercase; font-size: 12px; }
 
 /* Date strip: short days, red underline on the day you're on */
-:root:not([data-home="classic"]) .dates { gap: 0; justify-content: space-between; }
-:root:not([data-home="classic"]) .dates button { padding: 10px 10px 9px; font-size: 15px; font-weight: 500; border-bottom-width: 2px; }
-:root:not([data-home="classic"]) .dates button.d.on { font-weight: 700; border-color: var(--accent); }
+:root:not([data-home="classic"]):not([data-home="bar"]) .dates { gap: 0; justify-content: space-between; }
+:root:not([data-home="classic"]):not([data-home="bar"]) .dates button { padding: 10px 10px 9px; font-size: 15px; font-weight: 500; border-bottom-width: 2px; }
+:root:not([data-home="classic"]):not([data-home="bar"]) .dates button.d.on { font-weight: 700; border-color: var(--accent); }
 
 /* Segmented My Games / Live / All */
 .h3seg { border-radius: 14px; padding: 3px; }
@@ -3529,7 +3529,7 @@ button.brand, button.brand span { color: var(--accent); }
     const nav = document.getElementById("dates");
     const days = [];
     for (let i = -3; i <= 3; i++) days.push(addDays(state.date, i));
-    const dLbl = d => state.homeLayout === "classic" ? dayLabel(d) : sameDay(d, new Date()) ? "Today" : d.toLocaleDateString(undefined, { weekday: "short" });
+    const dLbl = d => ["classic", "bar"].includes(state.homeLayout) ? dayLabel(d) : sameDay(d, new Date()) ? "Today" : d.toLocaleDateString(undefined, { weekday: "short" });
     nav.innerHTML = days.map(d => `<button class="d ${sameDay(d, state.date) ? "on" : ""}" aria-label="${esc(dayLabel(d))}">${esc(dLbl(d))}</button>`).join("") +
       `<label class="iconbtn" title="Pick a date"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><input type="date" id="datepick" aria-label="Pick a date" value="${isoDate(state.date)}"></label>`;
     nav.querySelectorAll("button.d").forEach((b, i) => b.onclick = () => setDate(days[i]));
