@@ -3709,7 +3709,8 @@ button.brand, button.brand span { color: var(--accent); }
   // "Smart" Open To: Live when any of your games or leagues are on right now, otherwise My Teams
   function homeTab() {
     const h = state.homeLayout !== "classic" ? store.get("home3", "foryou") : store.get("home", "live");
-    if (state.homeLayout !== "classic" && h === "auto") return allGames().some(g => g.state === "in" && inMyWorld(g)) || specialsFor("live").some(e => e.state === "in") ? "live" : "foryou";
+    // Smart: My Games already leads with your live teams and lists what else is on, so Live only wins on a busy slate
+    if (state.homeLayout !== "classic" && h === "auto") return allGames().filter(g => g.state === "in" && inMyWorld(g)).length + specialsFor("live").filter(e => e.state === "in").length >= 3 ? "live" : "foryou";
     if (state.homeLayout !== "classic") return ["foryou", "live", "all"].includes(h) ? h : "foryou";
     if (h !== "auto") return h;
     const live = allGames().some(g => g.state === "in" && inMyWorld(g)) || specialsFor("live").some(e => e.state === "in");
@@ -4049,6 +4050,7 @@ button.brand, button.brand span { color: var(--accent); }
     const lgName = LG[confLg(tab) || tab]?.name;
     const other = !["foryou", "live", "all"].includes(tab);
     const backChip = label => `<button class="chip on" data-id="foryou" aria-label="Back to ${esc(label)}">‹ ${esc(label)}</button>`;
+    if (L !== "day") el.hidden = false;   // Your Day hides the row on its home; switching layouts shouldn't leave it hidden
     if (L === "bar") {
       el.innerHTML = `<div class="h3seg" role="tablist">${[["foryou", "My Games"], ["live", "Live", liveN], ["all", "All"]].map(([id, l, n]) => `<button role="tab" data-id="${id}" class="${tab === id ? "on" : ""}" aria-selected="${tab === id}">${l}${n ? `<span class="n">${n}</span>` : ""}</button>`).join("")}</div>`
         + (other ? `<div class="h3back">${backChip("My Games")}<b>${esc(lgName || "")}</b></div>` : "");
@@ -4223,7 +4225,7 @@ button.brand, button.brand span { color: var(--accent); }
       if (ups.length) {
         { const body = upNextRows(ups); if (body) html += block("upnextteams", "Up Next", "", body); }
       }
-      if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}${isToday() ? " · refreshes automatically" : ""}</p>`;
+      if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, isV3() ? { hour: "numeric", minute: "2-digit" } : { hour: "numeric", minute: "2-digit", second: "2-digit" })}${isToday() ? (isV3() ? " · Refreshes automatically" : " · refreshes automatically") : ""}</p>`;
       main.innerHTML = html;
       return;
     }
@@ -4254,7 +4256,7 @@ button.brand, button.brand span { color: var(--accent); }
         html += section;
       });
       if (off.length) html += `<p class="quiet">No games ${isToday() ? "today" : "this day"}: ${esc(off.join(", "))}</p>`;
-      if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}${isToday() ? " · refreshes automatically" : ""}</p>`;
+      if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, isV3() ? { hour: "numeric", minute: "2-digit" } : { hour: "numeric", minute: "2-digit", second: "2-digit" })}${isToday() ? (isV3() ? " · Refreshes automatically" : " · refreshes automatically") : ""}</p>`;
       main.innerHTML = html;
       return;
     }
@@ -4275,7 +4277,7 @@ button.brand, button.brand span { color: var(--accent); }
         : TEAM_LEAGUES.map(lg => {
         const list = feed.filter(g => g.lg.id === lg.id).sort((x, y) => new Date(x.date) - new Date(y.date));
         if (!list.length) return "";
-        return `<div class="tl-group"><div class="tl-head"><span class="crumb">${esc(lg.name)}</span></div>
+        return `<div class="tl-group">${isV3() ? "" : `<div class="tl-head"><span class="crumb">${esc(lg.name)}</span></div>`}
           <div class="grid">${list.map(card).join("")}</div></div>`;
       }).join("");
       html += block("feed", "You Are Looking Live", countLabel(feed.length, feed), parts);
@@ -4305,7 +4307,7 @@ button.brand, button.brand span { color: var(--accent); }
 
     if (golfBelow) specialsFor(tab).forEach(e => { html += BLOCK[e.kind](e); });
     if (tab === "all" && quiet.length) html += `<p class="quiet">Off ${isToday() ? "today" : "this day"}: ${esc(quiet.join(", "))}</p>`;
-    if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}${isToday() ? " · refreshes automatically" : ""}</p>`;
+    if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, isV3() ? { hour: "numeric", minute: "2-digit" } : { hour: "numeric", minute: "2-digit", second: "2-digit" })}${isToday() ? (isV3() ? " · Refreshes automatically" : " · refreshes automatically") : ""}</p>`;
     main.innerHTML = html;
   }
 
@@ -5821,7 +5823,7 @@ button.brand, button.brand span { color: var(--accent); }
       (store.get("owner", "") ? `<div class="set-row"><div class="set-lbl">Reset To My Setup<small>Puts back your saved teams and leagues, in order</small></div><button class="chip" data-reset-setup>Reset</button></div>` : "") +
       `<div class="set-row"><div class="set-lbl">Load A Setup<small>Have a setup code? Enter it to load those teams and leagues</small></div><button class="chip" data-load-setup>Enter Code</button></div>` +
       setSection("display", "Layout & Display", "Open to, layout, color, appearance, odds",
-        (state.homeLayout !== "classic" ? segRow("Open To", "home3", store.get("home3", "foryou"), [["auto", "Smart"], ["foryou", { bar: "My Games", day: "Your Day", rail: "For You" }[state.homeLayout]], ["live", "Live"], ["all", "All"]], "What you see when the app opens. Smart opens on Live when any of your games or leagues are on, otherwise " + { bar: "My Games", day: "Your Day", rail: "For You" }[state.homeLayout] + ".") : segRow("Open To", "home", store.get("home", "live"), [["auto", "Smart"], ["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens. Smart picks Live when your games are on, and My Teams when nothing is.")) +
+        (state.homeLayout !== "classic" ? segRow("Open To", "home3", store.get("home3", "foryou"), [["auto", "Smart"], ["foryou", { bar: "My Games", day: "Your Day", rail: "For You" }[state.homeLayout]], ["live", "Live"], ["all", "All"]], "What you see when the app opens. Smart opens on Live when 3 or more games are on in your leagues, otherwise " + { bar: "My Games", day: "Your Day", rail: "For You" }[state.homeLayout] + ".") : segRow("Open To", "home", store.get("home", "live"), [["auto", "Smart"], ["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens. Smart picks Live when your games are on, and My Teams when nothing is.")) +
         segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
         segRow("Scoreboard", "density", state.density, [["simple", "Simple"], ["compact", "Compact"], ["expanded", "Expanded"]], "Or pinch the scores: in for smaller, out for bigger") +
         segRow("Always Expand My Teams", "expandFavs", state.expandFavs ? "on" : "off", [["on", "On"], ["off", "Off"]], "In Compact, your teams' games stay full size. Simple keeps every game small.") +

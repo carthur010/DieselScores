@@ -2,6 +2,11 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 3.0 (1:05 AM, not on live yet)
+- Smart Open To opens on Live only when 3 or more games are on in your leagues. Otherwise it opens on My Games, which already shows your live teams first and everything else that's on. One late game no longer drops you on a nearly empty Live tab.
+- Fixed: after switching from Your Day to Bottom Bar, the My Games / Live / All row could stay hidden.
+- Live tab: no extra league label above cards that already show it, and the footer reads "Updated 12:48 AM · Refreshes automatically" like My Games.
+
 ## Oct 21, 2026: Beta 3.0 (1:00 AM, not on live yet)
 - Simple cards are tighter: less padding above and below the teams, rows closer together, and a little less space between cards.
 
