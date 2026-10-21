@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Live and Beta 3.0 (3:25 PM)
+- New app icon: the redrawn stacked-ball "L" with The Lineup wordmark, on the website (Live, Beta, Beta 3.0) and the iPhone app. Remove and re-add the home screen app to see it; the iPhone app picks it up on the next Xcode Run.
+
 ## Oct 21, 2026: Live and Beta 3.0 (1:55 PM)
 - Leagues tab: real logos on every tile. NCAA (NCAAF, NCAAM, NCAAW), WSL, EFL Cup, Community Shield, Women's FA Cup, WSL Players Cup, Ligue 1, Conference League, Women's Champions League, NWSL, PGA Tour, LPGA, ATP and WTA. Wide logos get a little more room. If a logo fails to load, the tile falls back to its short badge.
 - Leagues with no games that day leave the line under the name blank instead of showing a dash.
