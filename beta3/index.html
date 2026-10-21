@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 3.0</title>
-<meta name="build" content="20261020232000">
+<meta name="build" content="20261021012500">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 3.0">
@@ -5937,7 +5937,7 @@ button.brand, button.brand span { color: var(--accent); }
       store.set("favs", [...state.favs]); store.set("favMeta", state.favMeta); store.set("favLeagues", state.favLeagues);
       state.next = {}; store.set("next", {});
       toast("Setup Restored", "Your teams, leagues and display settings are back", "", "", false);
-      if (S.display) { writeDisplay(S, location.pathname.includes("/beta") ? "scoreline-b3:" : "scoreline:"); setTimeout(() => location.reload(), 600); return; }
+      if (S.display) { writeDisplay(S, "scoreline-b3:"); setTimeout(() => location.reload(), 600); return; }
       renderSettings(); render(); refreshNext();
       return;
     }
@@ -5964,7 +5964,7 @@ button.brand, button.brand span { color: var(--accent); }
     store.set("favs", [...state.favs]); store.set("favMeta", state.favMeta); store.set("favLeagues", state.favLeagues);
     if (["me", "ca"].includes(code) && !state.tv.services.length) { state.tv = { ...DEFAULT_TV, services: [...DEFAULT_TV.services] }; store.set("tv", state.tv); }
     state.next = {}; store.set("next", {});
-    if (S.display) { writeDisplay(S, location.pathname.includes("/beta") ? "scoreline-b3:" : "scoreline:"); setTimeout(() => location.reload(), 300); }
+    if (S.display) { writeDisplay(S, "scoreline-b3:"); setTimeout(() => location.reload(), 300); }
     toast("Setup Loaded", "Your teams, leagues and display settings are on this device", "", "", false);
     return true;
   }
