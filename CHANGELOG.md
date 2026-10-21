@@ -2,6 +2,21 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 20, 2026: Beta 3.0 (11:55 PM, not on live yet)
+From the Oct 20 audit, checked on tonight's NHL and NBA games at iPhone width.
+- Soccer teams show their real next match. Arsenal and Newcastle said "No games scheduled"; the app now reads ESPN's fixtures feed, which covers the league, Champions League and cups. Up Next and team pages both use it.
+- Smarter refresh: a full sweep on open, on a new day and every 10 minutes. In between, only leagues with a game live, starting within 20 minutes or open on screen. Tonight that was 5 scoreboards a refresh instead of about 29.
+- Multiview pins and the quad order are saved on the phone for the day, so a reload or Safari waking the tab keeps them. Finished games drop out; a new day starts fresh.
+- Tonight card: when your teams are done and other games are on, My Games opens with one line of results ("Sharks Won 4-3 OT", "Knicks Lost 106-100") and the best game still on with a Watch button. Live games come before your finals.
+- Something On: a red button in the header whenever games are live. One tap picks the best game you can watch right now (close, late, on your services, no blowouts) with a Watch button and Something Else for the next pick. It takes the live pill's spot; the Live tab still shows the count.
+- Live tab: Multiview is one slim bar at the top (Open ›), so every live game stays in one list below it.
+- The Multiview button reads Open Full Screen.
+- No 0-0 records before a team has played.
+- Up Next: short names (Kings, Rangers, USC), "vs" or "at" with the opponent, a UCL / UEL tag for European and cup games, and off-season teams at the bottom with "Season Over · Back In March".
+- The scoreboard size pill is an icon (rows, grid, cards) instead of the word Expanded.
+- Tap targets: stars, hearts, bells, collapse arrows, Watch chips and the My Games / Live / All switch all take a 44-point tap.
+- Back To Today: a floating button whenever you're looking at another day.
+
 ## Oct 20, 2026: Beta 3.0 (11:30 PM, not on live yet)
 - The Lineup brand board, applied: Warm Cream background (#FFF7EC), Charcoal text (#262626), Primary Red (#A93439) and Accent Gold (#AC9841), in SF Pro (Apple's system font, Barlow on other devices). Dark mode moves to charcoal.
 - Home header: a big red Scores title with the view pill and a live pill ("2 Live") on the right, like the board.
