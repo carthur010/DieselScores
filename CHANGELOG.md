@@ -2,6 +2,16 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — iPhone Compact Match home
+- New standalone beta at /beta4/, based on the current Beta 3 app and real scores feeds.
+- Compact featured match with a direct Watch action and Change control when multiple followed teams are live.
+- For You / Live / All scope switch, one full date with native calendar and previous/next controls, local timezone, and compact league filters with an All Leagues directory.
+- Thumb-friendly Scores / My Teams / Saved / Alerts bottom navigation. Search and Settings remain available in the top bar.
+- Saved games has a dedicated screen and reloads matches from other dates. Hearts save games; alerts remain a separate action in game details and alert preferences.
+- Real team logos, explicit women's soccer labels, readable score rows, dark mode, safe-area spacing, and 44-point actions. Existing density options and game/team/league detail screens remain available.
+- Beta 4 display, TV, saved-game and alert settings use their own storage namespace, initially copied from Beta 3 or live. Followed teams/leagues continue to use the existing shared setup.
+- Live, Beta, Beta 3 and the native iOS project's configuration are unchanged.
+
 ## Oct 21, 2026: Live and Beta 3.0 (3:25 PM)
 - New app icon: the redrawn stacked-ball "L" with The Lineup wordmark, on the website (Live, Beta, Beta 3.0) and the iPhone app. Remove and re-add the home screen app to see it; the iPhone app picks it up on the next Xcode Run.
 

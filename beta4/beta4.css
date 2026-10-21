@@ -1,0 +1,88 @@
+/* Beta 4.0 — iPhone Compact Match home. Existing game, team and league pages stay intact. */
+:root[data-home="bar"] header.top { top: 0; padding-top: env(safe-area-inset-top, 0px); background: var(--bg); }
+:root[data-home="bar"] header.top > .wrap { padding-inline: 17px; }
+:root[data-home="bar"] #h3head { display: block; }
+.b4-head { display: flex; align-items: center; gap: 3px; padding: 10px 0 5px; }
+.b4-head .brand { font-size: 28px; font-weight: 800; letter-spacing: -.04em; margin-right: auto; min-width: 0; text-align: left; }
+.b4-head .brand .betatag { display: block; width: fit-content; margin: 5px 0 0; padding: 0; font: 600 10px var(--body); letter-spacing: .07em; color: var(--muted) !important; background: transparent !important; }
+.b4-icon { display: inline-grid; place-items: center; min-width: 44px; min-height: 44px; border-radius: 10px; color: var(--muted); flex-shrink: 0; }
+.b4-icon svg { width: 20px; height: 20px; }
+.b4-scope { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); background: var(--accent-soft); border-radius: 12px; padding: 3px; margin: 9px 0 0; gap: 3px; }
+.b4-scope button { min-height: 44px; padding: 6px; border-radius: 9px; font-size: 14px; font-weight: 600; }
+.b4-scope button[aria-pressed="true"] { background: var(--surface); color: var(--accent); box-shadow: 0 1px 4px #00000010; }
+.b4-scope .n { font-size: 11px; margin-left: 4px; }
+.b4-date { display: flex; align-items: center; justify-content: space-between; gap: 4px; padding-top: 3px; }
+.b4-date-label { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; font-weight: 600; font-size: 13px; position: relative; min-height: 44px; }
+.b4-date-label input { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; }
+.b4-date-label svg { width: 13px; height: 13px; }
+.b4-zone { font-size: 11px; color: var(--muted); font-weight: 400; }
+:root[data-home="bar"] #tabs.leagues { display: flex; align-items: center; gap: 6px; margin: 0; padding: 0 0 10px; flex-wrap: wrap; overflow: visible; }
+.b4-league { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 5px 12px; min-height: 44px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+.b4-league[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.b4-more { margin-left: auto; }
+:root[data-home="bar"] #dates, :root[data-home="bar"] #mybar { display: none !important; }
+:root[data-home="bar"] .wrap > main { padding-top: 15px; display: block; }
+.b4-feature { border: 1px solid color-mix(in srgb,var(--accent) 24%,var(--line)); background: var(--accent-soft); border-radius: 14px; padding: 4px 12px 12px; margin-bottom: 17px; }
+.b4-feature-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.b4-feature-head span { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.b4-link { min-height: 44px; padding-inline: 5px; color: var(--accent); font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
+.b4-match { width: 100%; display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 8px; padding: 1px 0 6px; text-align: left; min-height: 44px; }
+.b4-club { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 650; min-width: 0; overflow-wrap: anywhere; }
+.b4-club:last-child { justify-content: flex-end; text-align: right; }
+.b4-club img { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
+.b4-score { font-size: 30px; line-height: 1.2; font-weight: 750; letter-spacing: .02em; white-space: nowrap; }
+.b4-feature-foot { display: flex; gap: 8px; align-items: center; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.b4-status { color: var(--live); font-weight: 600; }
+.b4-watch { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 40px; padding: 6px 11px; border-radius: 8px; background: var(--accent); color: var(--bg); font-size: 11px; font-weight: 600; text-align: center; max-width: 60%; }
+.b4-section { margin-bottom: 17px; }
+.b4-section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 0 2px 8px; }
+.b4-section-head h2 { font-size: 17px; font-weight: 750; letter-spacing: -.02em; margin: 0; }
+.b4-section-head small { font-size: 11px; color: var(--muted); text-align: right; }
+.b4-rows { border: 1px solid var(--line); border-radius: 13px; background: var(--surface); overflow: hidden; }
+.b4-row { display: grid; grid-template-columns: minmax(0,1fr) 44px; gap: 0; padding: 7px 4px 7px 10px; border-bottom: 1px solid var(--line); }
+.b4-row:last-child { border-bottom: 0; }
+.b4-game { min-width: 0; display: grid; grid-template-columns: 61px minmax(0,1fr); align-items: center; gap: 8px; text-align: left; min-height: 52px; }
+.b4-time { font-size: 11px; font-weight: 600; overflow-wrap: anywhere; }
+.b4-time small { display: block; margin-top: 3px; font-size: 11px; font-weight: 400; color: var(--muted); }
+.b4-team { display: flex; align-items: center; gap: 6px; min-height: 25px; font-size: 13px; }
+.b4-team img { width: 21px; height: 21px; object-fit: contain; flex-shrink: 0; }
+.b4-team .name { overflow-wrap: anywhere; min-width: 0; }
+.b4-team b { margin-left: auto; padding-left: 5px; flex-shrink: 0; font-size: 14px; }
+.b4-team i { font-style: normal; font-size: 10px; color: var(--star); }
+.b4-row .heartbtn { min-width: 44px; min-height: 44px; width: 44px; height: 44px; align-self: center; border: 0; background: transparent; }
+.b4-row .heartbtn svg { width: 18px; height: 18px; }
+.b4-channel { display: block; color: var(--muted); font-size: 11px; padding: 2px 0 0 27px; overflow-wrap: anywhere; }
+.b4-empty { padding: 23px 17px; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; font-size: 14px; text-align: center; color: var(--muted); }
+.b4-empty p { margin: 0 0 12px; }
+.b4-empty .chip { min-height: 44px; }
+.b4-upnext { margin-top: 19px; border-top: 1px solid var(--line); padding-top: 12px; }
+.b4-upnext h2 { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 0 0 6px; }
+.b4-upnext .ln-nx { padding: 9px 0; }
+.b4-upnext .ln-nx-t b { font-size: 14px; white-space: normal; }
+.b4-upnext .ln-nx-t small { font-size: 12px; font-weight: 400; }
+.b4-upnext .ln-next { font-size: 10px; }
+.b4-updated { font-size: 11px; color: var(--muted); padding: 12px 0 0; text-align: center; }
+.b4-help { font-size: 11px; color: var(--muted); text-align: center; margin: 8px 0; }
+.b4-help button { min-height: 44px; padding: 6px; text-decoration: underline; text-underline-offset: 3px; }
+:root[data-home="bar"] .botbar { background: var(--bg); padding-top: 7px; }
+.botbar button { min-height: 49px; gap: 5px; font-size: 11px; }
+:root[data-home="bar"] .sheet.as-tab .sheet-card { max-width: 760px; }
+#ssheet.b4-alerts .set-sec:not(:has([data-set-sec="alerts"])), #ssheet.b4-alerts .sheet-body > .set-row, #ssheet.b4-alerts .set-foot { display: none; }
+#ssheet.b4-alerts .set-sec:has([data-set-sec="alerts"]) { border: 0; margin: 0; }
+#ssheet.b4-alerts [data-set-sec="alerts"] { display: none; }
+#b4saved .sheet-body { padding-top: 15px; }
+.b4-load-note { font-size: 13px; color: var(--muted); padding: 14px 0; text-align: center; }
+.b4-load-note button { min-height: 44px; color: var(--accent); text-decoration: underline; }
+:root[data-home="bar"] #main > .block { margin-bottom: 15px; }
+@media(max-width:360px) {
+  .b4-head .brand { font-size: 26px; }
+  .b4-league { padding-inline: 10px; }
+  .b4-game { grid-template-columns: 53px minmax(0,1fr); gap: 5px; }
+  .b4-team { font-size: 12px; }
+  .b4-team img { width: 18px; height: 18px; }
+  .b4-score { font-size: 27px; }
+  .b4-club { font-size: 11px; gap: 4px; }
+  .b4-club img { width: 23px; height: 23px; }
+}
+@media(min-width:700px) { .b4-match { max-width: 560px; margin-inline: auto; } .b4-row { padding-block: 10px; } }
+@media(prefers-reduced-motion:reduce) { *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; } }

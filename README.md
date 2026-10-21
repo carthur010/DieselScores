@@ -4,12 +4,13 @@ Live scores, what to flip to, and where to watch.
 
 - Live: https://carthur010.github.io/TheLineup/
 - Beta: https://carthur010.github.io/TheLineup/beta/
+- Beta 4.0 (iPhone Compact Match redesign): https://carthur010.github.io/TheLineup/beta4/
 - Beta 3.0 (new home layouts: Bottom Bar, Your Day, League Rail): https://carthur010.github.io/TheLineup/beta3/
 - Beta 2.0 (snapshot of beta, Oct 14 1:57 PM): https://carthur010.github.io/TheLineup/beta2/
 - Old Apple Sports redesign (archived): https://carthur010.github.io/TheLineup/beta2-apple/
 
 ## How releases work
-1. New changes go to `beta/` only.
+1. Routine changes go to `beta/`. Numbered experiments live in their own directory; Beta 4.0 is in `beta4/`.
 2. Test on the beta link (it keeps its own saved settings, separate from live).
 3. To ship, copy `beta/index.html` to the root `index.html` (swapping the beta name, storage prefix and badge back to live). Every ship is its own commit, so rolling back is one revert.
 
