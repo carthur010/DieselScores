@@ -1,6 +1,6 @@
 {
 	"appId": "com.carthur.scores",
-	"appName": "Scores",
+	"appName": "The Lineup",
 	"webDir": "www",
 	"server": {
 		"url": "https://carthur010.github.io/DieselScores/",
