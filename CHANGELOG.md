@@ -2,6 +2,16 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 3.0 (12:40 AM, homepage redesign from Charles's PDF, not on live yet)
+- Keeps the slim header (Scores, Today ▾, Something On, size icon) and the text tabs.
+- Sections read like the mockups: bold Title Case names with a note on the right ("2 Live", "Close Game", "3 Games Today").
+- One rounded card per game in every size. Simple: league, clock and channel in a left column, then teams, scores, heart and bell. Compact: two-up cards with league and clock on top, channel and heart/bell underneath. Expanded: full width with a Watch On button.
+- My Games order: Your Teams, Your Multiview, Worth A Watch, You Are Looking Live, Final, Up Next. Your finished games move to Final (playoff finals in your leagues too, with the series). The Your Game hero and Tonight card are gone from My Games.
+- Up Next: "Rangers @ Maple Leafs", "Tomorrow · 7:00 PM · Toronto, ON", soonest first and marked NEXT. Off-season teams drop out.
+- Footer: "Off today: MLB, NFL..." for your leagues with nothing on, then "Updated 12:33 AM · Refreshes automatically".
+- Your Day ends with Your Leagues ("NBA · 12 games, Open league scores ›") with Edit order. League Rail's For You follows the same order without Your Teams.
+- Live, All and league pages use the same cards.
+
 ## Oct 21, 2026: Beta 3.0 (12:15 AM, Bottom Bar header, not on live yet)
 - One slim row on top: Scores, a Today ▾ button, Something On and the size icon. About half the height it was.
 - The date strip tucks away. Tap Today ▾ to open it; it stays open while you're on another day and folds back when you return to Today.
