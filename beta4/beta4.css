@@ -20,6 +20,13 @@
 .b4-league { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 5px 12px; min-height: 44px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
 .b4-league[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
 .b4-more { margin-left: 0; }
+:root[data-home="bar"] #tabs.leagues { position: relative; }
+.b4-league-picker { position: absolute; top: calc(100% - 4px); right: 0; left: 0; z-index: 30; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 13px; box-shadow: 0 10px 30px #00000020; padding: 12px; max-height: min(55vh, 360px); overflow-y: auto; overscroll-behavior: contain; }
+.b4-league-picker[hidden] { display: none; }
+.b4-picker-title { font-size: 12px; font-weight: 700; color: var(--muted); padding: 2px 8px 8px; }
+.b4-picker-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px; }
+.b4-picker-options button { min-height: 44px; padding: 8px; border-radius: 8px; text-align: left; font-size: 13px; overflow-wrap: anywhere; }
+.b4-picker-options button:hover, .b4-picker-options button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
 :root[data-home="bar"] #dates, :root[data-home="bar"] #mybar { display: none !important; }
 :root[data-home="bar"] .wrap > main { padding-top: 15px; display: block; }
 .b4-feature { border: 1px solid color-mix(in srgb,var(--accent) 24%,var(--line)); background: var(--accent-soft); border-radius: 14px; padding: 4px 12px 12px; margin-bottom: 17px; }

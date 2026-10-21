@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — More leagues dropdown
+- More + opens a dropdown beneath the league tabs. Choosing a league updates the score feed in place. Escape and tapping outside close the dropdown.
+
 ## Oct 21, 2026: Beta 4.0 — section title
 - Renamed Around your leagues back to You Are Looking Live.
 

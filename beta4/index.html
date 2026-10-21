@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021195130">
+<meta name="build" content="20261021195321">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=3">
+<link rel="stylesheet" href="beta4.css?v=4">
 </head>
 <body>
 <header class="top">
@@ -6071,7 +6071,7 @@ button.brand, button.brand span { color: var(--accent); }
     const available = [...state.favLeagues.filter(id => LG[id] && !LG[id].kind), ...TEAM_LEAGUES.map(lg => lg.id)];
     const chosen = [...new Set(available)].slice(0, 3);
     if (b4League !== "all" && !chosen.includes(b4League) && LG[b4League]) chosen[chosen.length ? chosen.length - 1 : 0] = b4League;
-    el.innerHTML = `<button class="b4-league" data-b4-league="all" aria-pressed="${b4League === "all"}">All</button>` + chosen.map(id => `<button class="b4-league" data-b4-league="${id}" aria-pressed="${b4League === id}">${esc(b4Short(LG[id]))}</button>`).join("") + `<button class="b4-league b4-more" data-b4-more aria-label="Browse all leagues">More +</button>`;
+    el.innerHTML = `<button class="b4-league" data-b4-league="all" aria-pressed="${b4League === "all"}">All</button>` + chosen.map(id => `<button class="b4-league" data-b4-league="${id}" aria-pressed="${b4League === id}">${esc(b4Short(LG[id]))}</button>`).join("") + `<button class="b4-league b4-more" data-b4-more aria-label="More leagues" aria-expanded="false" aria-controls="b4-league-picker">More +</button><div class="b4-league-picker" id="b4-league-picker" role="group" aria-label="Choose a league" hidden><div class="b4-picker-title">Choose a league</div><div class="b4-picker-options">${LEAGUES.map(lg => `<button data-b4-option="${lg.id}" aria-pressed="${(b4HomeScope() ? b4League : state.tab) === lg.id}">${esc(lg.name)}</button>`).join("")}</div></div>`;
   }
   function beta4Row(g) {
     const key = gameKey(g), [a, h] = g.teams;
@@ -6158,7 +6158,17 @@ button.brand, button.brand span { color: var(--accent); }
     if (scope) { state.tab = scope.dataset.b4Scope; render(); window.scrollTo({ top: 0, behavior: "smooth" }); return; }
     const league = e.target.closest("[data-b4-league]");
     if (league) { b4League = league.dataset.b4League; if (!b4HomeScope()) state.tab = "all"; render(); return; }
-    if (e.target.closest("[data-b4-more]")) { bbGo("leagues"); return; }
+    const more = e.target.closest("[data-b4-more]");
+    if (more) { const picker = document.getElementById("b4-league-picker"); picker.hidden = !picker.hidden; more.setAttribute("aria-expanded", String(!picker.hidden)); return; }
+    const option = e.target.closest("[data-b4-option]");
+    if (option) {
+      const id = option.dataset.b4Option;
+      if (!LG[id]) return;
+      if (LG[id].kind) { b4League = "all"; state.tab = id; }
+      else { b4League = id; if (!b4HomeScope()) state.tab = "all"; }
+      render(); document.querySelector("[data-b4-more]")?.focus(); return;
+    }
+    if (!e.target.closest("#b4-league-picker")) { const picker = document.getElementById("b4-league-picker"); if (picker) { picker.hidden = true; document.querySelector("[data-b4-more]")?.setAttribute("aria-expanded", "false"); } }
     if (e.target.closest("[data-b4-search]")) { bbGo("search"); document.getElementById("sheet-h").textContent = "Search teams and leagues"; return; }
     if (e.target.closest("[data-b4-settings]")) { bbGo("settings"); return; }
     if (e.target.closest("[data-b4-change]")) {
@@ -6172,6 +6182,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (e.target.closest("[data-b4-retry-saved]")) beta4LoadSaved();
   });
   document.addEventListener("keydown", e => {
+    if (e.key === "Escape") { const picker = document.getElementById("b4-league-picker"); if (picker && !picker.hidden) { picker.hidden = true; const more = document.querySelector("[data-b4-more]"); more?.setAttribute("aria-expanded", "false"); more?.focus(); } }
     if (e.key === "Escape" && !document.getElementById("b4saved").hidden) { document.getElementById("b4saved").hidden = true; syncLock(); bbSync(); }
   });
 
