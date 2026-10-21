@@ -2190,7 +2190,7 @@ button.brand, button.brand span { color: var(--accent); }
       const me = cs.find(c => String(c.team?.id || c.id) === String(m.id));
       const opp = cs.find(c => c !== me);
       return { date: ev.date, myShort: me?.team?.shortDisplayName || "", opp: opp?.team?.abbreviation || opp?.team?.shortDisplayName || "TBD", oppName: opp?.team?.shortDisplayName || opp?.team?.displayName || "",
-        comp: lg.soccer && ev.league?.abbreviation && !/^(ENG\.1|ESP\.1|ITA\.1|GER\.1|FRA\.1|USA\.1)$/i.test(ev.league?.slug || "") ? (ev.league?.abbreviation || "") : "",
+        comp: lg.soccer ? (ev.league?.name || ev.league?.abbreviation || "") : "",
         oppLogo: opp?.team?.logos?.[0]?.href || opp?.team?.logo || "", at: me?.homeAway === "away" ? "@" : "vs",
         place: placeName(ev.competitions?.[0]?.venue), id: String(ev.id || "") };
     };
@@ -3684,6 +3684,13 @@ button.brand, button.brand span { color: var(--accent); }
   }
   // Up Next rows (shared by For You and My Teams): short names, "vs" / "at", off-season teams at the bottom
   const BACK_IN = [[/baseball/, "March"], [/college-football/, "August"], [/football\/nfl/, "September"], [/wnba/, "May"], [/mens-college-basketball|womens-college-basketball/, "November"], [/basketball|hockey/, "October"]];
+  // Cup and European games get a small tag (UCL, UEL); the team's own league doesn't
+  function compShort(c) {
+    c = String(c || "");
+    if (!c) return "";
+    for (const [re, t] of [[/Champions League/i, "UCL"], [/Europa League/i, "UEL"], [/Conference League/i, "UECL"], [/FA Cup/i, "FA Cup"], [/League Cup|Carabao|EFL Cup/i, "EFL Cup"], [/Copa del Rey/i, "Copa"], [/Coppa Italia/i, "Coppa"], [/DFB/i, "DFB-Pokal"], [/Coupe de France/i, "Coupe"]]) if (re.test(c)) return t;
+    return "";
+  }
   function teamShort(m, n) {
     if (n?.myShort && n.myShort.length <= 14) return n.myShort;
     return m.name || m.abbr;
@@ -3693,7 +3700,8 @@ button.brand, button.brand span { color: var(--accent); }
     return `<div class="nxt">${ups.slice().sort((a, b) => off(a) - off(b)).map(({ m, n }) => {
       const lg = LG[m.lg] || {};
       let when;
-      if (n?.date) when = `${n.at === "@" ? "at" : "vs"} ${esc(n.opp)}${n.comp ? ` <i class="nxt-comp">${esc(n.comp)}</i>` : ""}<small>${esc(whenLabel(n.date))}</small>${n.place ? `<small class="pl">${esc(n.place)}</small>` : ""}`;
+      const comp = compShort(n?.comp), opp = lg.soccer && n?.oppName && n.oppName.length <= 14 ? n.oppName : n?.opp;
+      if (n?.date) when = `${comp ? `<i class="nxt-comp">${esc(comp)}</i> ` : ""}${n.at === "@" ? "at" : "vs"} ${esc(opp)}<small>${esc(whenLabel(n.date))}</small>${n.place ? `<small class="pl">${esc(n.place)}</small>` : ""}`;
       else if (n?.none) { const b = BACK_IN.find(([re]) => re.test(lg.path || "")); when = lg.soccer ? "<small>No Fixtures Posted</small>" : `<small>Season Over${b ? " · Back In " + b[1] : ""}</small>`; }
       else when = "<small>Checking…</small>";
       return `<div class="nxt-row${n?.none ? " off" : ""}" ${n?.id ? `data-game="${esc(m.lg)}:${esc(n.id)}" role="button" tabindex="0"` : ""}>
