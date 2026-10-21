@@ -2,6 +2,13 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — Home Sections And Tracking
+- Restored Your Teams, Worth A Watch, You Are Looking Live and Your Multiview across home layouts. All sections show by default; Settings → Home Sections supports show/hide, move, reset and rule explanations. Your Game follows Your Teams; Final stays at the bottom.
+- Section order now controls first claim, with each game appearing once. Hidden sections release candidates to later sections. Worth A Watch uses live sport thresholds, overtime, cached pregame upset lines, Top 25 and playoffs, excludes owned games and blowouts, prioritizes close late games/playoffs and caps picks at six. Each pick displays one reason tag.
+- Preserved separate stable Multiview slots, team locks, excitement weighting and the replacement threshold. Only eligible YouTube TV games live or within 15 minutes qualify; blowouts drop out. RedZone retains its afternoon-window rules.
+- Removed Saved from bottom navigation. Hearts now track games in Your Teams and a dated Tracked Games area under My Teams; existing tracked games are preserved.
+- Fixed Settings event delegation so page metadata cannot intercept order or preference controls.
+
 ## Oct 21, 2026: Beta 4.0 — UX Review Fixes
 - Saved games are grouped under dated Today, Tomorrow, Upcoming Games and Previous Games sections.
 - Search hides unrelated followed teams during a query and separates team, league and game results.

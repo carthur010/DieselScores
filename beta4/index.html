@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021203914">
+<meta name="build" content="20261021205922">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=13">
+<link rel="stylesheet" href="beta4.css?v=14">
 </head>
 <body>
 <header class="top">
@@ -1423,7 +1423,7 @@ button.brand, button.brand span { color: var(--accent); }
       <div class="wl-brand" id="wl-brand" hidden><img class="red" src="brand/mark-red.png" alt=""><img class="cream" src="brand/mark-cream.png" alt=""><b>The Lineup</b><span>Live scores. Where to watch.<br>Your teams. All in one place.</span></div>
       <p class="hint" id="sheet-intro" hidden>Step 1 Of 3 · Follow your teams. You can change everything later in Settings. <button class="chip" data-welcome-code style="margin-top:8px">Have A Setup Code?</button></p>
       <div id="sheet-teams"><p class="b4-team-edit-hint">Drag the handle to set your order.</p>
-      <div id="b4-team-upcoming" hidden></div>
+      <div id="b4-team-upcoming" hidden></div><div id="b4-tracked-games" hidden></div>
       <h3 id="b4-add-heading" hidden>Add Teams</h3>
       <input type="search" id="q" placeholder="Search teams and leagues" autocomplete="off" aria-label="Search teams and leagues">
       <div id="sgames"></div>
@@ -1470,11 +1470,10 @@ button.brand, button.brand span { color: var(--accent); }
     </div>
   </div>
 </div>
-<div class="sheet" id="b4saved" hidden role="dialog" aria-modal="true" aria-labelledby="b4saved-h"><div class="sheet-card"><div class="bhead"><h2 id="b4saved-h">Saved Games</h2></div><div class="sheet-body" id="b4saved-body"></div></div></div>
+<div class="sheet" id="b4saved" hidden role="dialog" aria-modal="true" aria-labelledby="b4saved-h"><div class="sheet-card"><div class="bhead"><h2 id="b4saved-h">Tracked Games</h2></div><div class="sheet-body" id="b4saved-body"></div></div></div>
 <nav class="botbar" id="botbar" aria-label="Main navigation">
 <button class="on" data-bb="home" aria-label="Scores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h1M3 12h1M3 18h1"/></svg>Scores</button>
 <button data-bb="teams" aria-label="My Teams"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/></svg>My Teams</button>
-<button data-bb="saved" aria-label="Saved Games"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20s-7-4.4-9-9.2C1.6 7.3 4 4 7.3 4c2 0 3.4 1.1 4.7 2.7C13.3 5.1 14.7 4 16.7 4 20 4 22.4 7.3 21 10.8 19 15.6 12 20 12 20z"/></svg>Saved</button>
 </nav>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
@@ -2604,7 +2603,7 @@ button.brand, button.brand span { color: var(--accent); }
   function heartBtn(g) {
     if (g.state === "post") return "";   // nothing left to follow once it's final
     const k = g.lg.id + ":" + g.id, on = !!state.favGames[k];
-    return `<button class="bellbtn heartbtn ${on ? "on" : ""}" data-favgame="${k}" aria-pressed="${on}" title="${on ? "Favorite Game" : "Favorite this game"}" aria-label="${on ? "Remove this game from favorites" : "Favorite this game"}">${on ? HEART_ON : HEART}</button>`;
+    return `<button class="bellbtn heartbtn ${on ? "on" : ""}" data-favgame="${k}" aria-pressed="${on}" title="${on ? "Favorite Game" : "Favorite this game"}" aria-label="${on ? "Stop Tracking This Game" : "Track This Game"}">${on ? HEART_ON : HEART}</button>`;
   }
   const recText = t => t.seriesRec ? `${t.record} Series` : t.record;
   function statusClass(g) { return g.state === "in" ? "live" : g.state === "post" ? "final" : ""; }
@@ -3852,11 +3851,11 @@ button.brand, button.brand span { color: var(--accent); }
   // =====================================================================
   const ORD3 = { in: 0, pre: 1, post: 2 };
   // Worth A Watch: only games that earned it (playoffs, close and late, OT, upsets, Top 25 clashes in progress)
-  function worthPicks(games) {
-    const earned = g => g.state === "in" && !isMine(g) && !isBlowout(g) && !mvHome.has(mvKey(g)) && (g.close || g.tight || g.playoff || g.reasons.some(r => /Overtime|Extra|Upset|Top 25/.test(r)));
+  function worthPicks(games, excluded = mvHome) {
+    const earned = g => g.state === "in" && !isMine(g) && !state.favGames?.[gameKey(g)] && !isBlowout(g) && !excluded.has(mvKey(g)) && (g.close || g.tight || g.playoff || (g.reasons || []).some(r => /Overtime|Extra|Upset|Top 25/.test(r)));
     const must = games.filter(g => earned(g) && (g.close || g.playoff)).sort((x, y) => y.hype - x.hype);
     const other = games.filter(g => earned(g) && !g.close && !g.playoff).sort((x, y) => y.hype - x.hype);
-    return must.concat(other.slice(0, Math.max(0, 6 - must.length)));
+    return must.concat(other).slice(0, 6);
   }
   // Your Day and Bottom Bar keep the date strip tucked away until you tap the date (or pick another day)
   const datesShown = () => state.homeLayout !== "bar" && (state.homeLayout !== "day" || state.showCal || !isToday());
@@ -4155,6 +4154,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (!document.getElementById("gsheet").hidden) { navStack = []; closeGame(); }
   }
   function bbGo(act) {
+    if (act === "saved") act = "teams";
     const cur = bbCurrent(), gameOpen = !document.getElementById("gsheet").hidden;
     if (act === "home") {
       if (cur !== "home" || gameOpen || !document.getElementById("lsheet").hidden || !document.getElementById("sheet").hidden) { bbHideAll(); syncLock(); bbSync(); return; }
@@ -4164,7 +4164,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (act === cur && !gameOpen) return;
     bbHideAll();
     if (act === "saved") { beta4SavedPaint(); document.getElementById("b4saved").hidden = false; beta4LoadSaved(); }
-    if (act === "teams") { openSheet(); document.getElementById("sheet-h").textContent = "My Teams"; document.getElementById("sheet").classList.add("b4-team-schedule-mode"); beta4SearchVisibility(); document.getElementById("q").blur(); document.getElementById("b4-team-upcoming").hidden = false; document.getElementById("b4-add-heading").hidden = false; beta4TeamUpcomingPaint(); beta4LoadTeamUpcoming(); }
+    if (act === "teams") { openSheet(); document.getElementById("sheet-h").textContent = "My Teams"; document.getElementById("sheet").classList.add("b4-team-schedule-mode"); beta4SearchVisibility(); document.getElementById("q").blur(); document.getElementById("b4-team-upcoming").hidden = false; document.getElementById("b4-add-heading").hidden = false; document.getElementById("b4-tracked-games").hidden = false; beta4TeamUpcomingPaint(); beta4LoadTeamUpcoming(); beta4SavedPaint(); beta4LoadSaved(); }
     if (act === "alerts") { openSettings(); b4SettingsPage = "alerts"; renderSettings(); }
     if (act === "leagues") openLeagueMenu();
     if (act === "search") { openSheet(); document.getElementById("sheet-h").textContent = "Search"; }
@@ -4199,10 +4199,11 @@ button.brand, button.brand span { color: var(--accent); }
     // Picking a league from the Leagues picker still shows that league, followed or not.
     const everything = allGames();
     const pickedLg = confLg(state.tab) || (LG[state.tab] ? state.tab : null);
-    const games = pickedLg ? everything : everything.filter(inMyWorld);
+    const games = pickedLg ? everything : everything.filter(beta4Eligible);
     renderTabs(games, everything);
     renderConfs(everything);
     const main = document.getElementById("main");
+    main.classList.remove("b4-home-feed");
     const liveN = games.filter(g => g.state === "in").length;
     document.getElementById("livebug").hidden = liveN === 0;
     document.getElementById("liven").textContent = liveN;
@@ -4216,7 +4217,7 @@ button.brand, button.brand span { color: var(--accent); }
     const tab = state.tab;
     heroGame = null; setTimeout(watchHero, 0);
     renderHeadV3(games);
-    if (state.homeLayout === "bar" && ["foryou", "live", "all"].includes(tab)) { document.getElementById("dates").hidden = true; main.innerHTML = beta4Home(games); beta4SavedPaint(); return; }
+    if (["foryou", "teams", "live", "all"].includes(tab)) { main.classList.add("b4-home-feed"); document.getElementById("dates").hidden = state.homeLayout === "bar" || !datesShown(); main.innerHTML = beta4Home(games); beta4SavedPaint(); return; }
     if (tab === "foryou") { document.getElementById("dates").hidden = !datesShown(); main.innerHTML = forYouHTML(games); return; }
     const pool = poolFor(tab, games);
     let html = "";
@@ -4372,7 +4373,7 @@ button.brand, button.brand span { color: var(--accent); }
   const LG_BY_SLUG = Object.fromEntries(TEAM_LEAGUES.map(l => [l.path, l.id]));
   function openSheet(welcome) {
     document.getElementById("sheet").classList.remove("b4-team-editor", "b4-team-finder", "b4-team-schedule-mode");
-    document.getElementById("b4-team-upcoming").hidden = true; document.getElementById("b4-add-heading").hidden = true;
+    document.getElementById("b4-team-upcoming").hidden = true; document.getElementById("b4-add-heading").hidden = true; document.getElementById("b4-tracked-games").hidden = true;
     document.getElementById("sheet-h").textContent = welcome === true ? "Welcome To The Lineup" : "Your Teams";
     wzPreset = ""; wzShow(welcome === true ? 1 : 0);
     renderSheetLeagues(); renderSheetTV(); renderPresets();
@@ -4833,7 +4834,7 @@ button.brand, button.brand span { color: var(--accent); }
   // RedZone only makes sense with an NFL window on: two or more NFL games live (or kicking off within 15 minutes)
   // RedZone airs during the Sunday afternoon windows (1 PM and 4 PM ET), not London morning or night games
   function etMins(d) { const p = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "numeric", hourCycle: "h23" }).formatToParts(new Date(d)); return (+p.find(x => x.type === "hour").value) * 60 + (+p.find(x => x.type === "minute").value); }
-  const rzWindow = () => allGames().filter(g => g.lg.id === "nfl" && inMyWorld(g) && etMins(g.date) >= 12 * 60 + 30 && etMins(g.date) < 17 * 60);
+  const rzWindow = () => allGames().filter(g => g.lg.id === "nfl" && beta4Eligible(g) && etMins(g.date) >= 12 * 60 + 30 && etMins(g.date) < 17 * 60);
   // On when two or more window games are live or kick off within 15 minutes
   function mvRZ() {
     if (!mvRZOn() || !isToday()) return false;
@@ -4896,10 +4897,10 @@ button.brand, button.brand span { color: var(--accent); }
     if (g.state === "pre") return "Starts " + timeLabel(g.date);
     return gameTag(g);
   }
-  function mvPool() {
+  function mvPool(allowed = null) {
     // YouTube TV Multiview only takes channels YouTube TV carries, so Peacock, Paramount+, Prime
     // and other streaming-only games are left out (CBS games still count, and so do ESPN+ games)
-    const pool = allGames().filter(g => inMyWorld(g) && (!hasYTTV() || onYTTV(g)));
+    const pool = allGames().filter(g => beta4Eligible(g) && (!hasYTTV() || onYTTV(g)) && !isBlowout(g) && (!allowed || allowed.has(mvKey(g))));
     const anyFb = pool.some(g => g.state === "in" && g.lg.sport === "Football");
     // Opens on All Sports: football still ranks high on its own, and your other teams (a Newcastle match) can get in
     if (!mvSport) mvSport = "all";
@@ -4908,12 +4909,12 @@ button.brand, button.brand span { color: var(--accent); }
     mvCur = mvFilt.find(x => x[0] === mvSport) || (mvSport === "football" && mvFilt.find(x => x[0] === "lg:nfl" || x[0] === "lg:ncaaf")) || mvFilt[0];
     const f = mvCur[2];
     const live = pool.filter(g => g.state === "in" && f(g)).sort((a, b) => mvScore(b) - mvScore(a));
-    const soon = pool.filter(g => g.state === "pre" && f(g) && !/Postponed|Canceled/.test(g.status) && new Date(g.date) - Date.now() < 15 * 60e3 && new Date(g.date) - Date.now() > -20 * 60e3).sort((a, b) => mvScore(b) - mvScore(a) || new Date(a.date) - new Date(b.date));
+    const soon = pool.filter(g => g.state === "pre" && f(g) && !/Postponed|Canceled/.test(g.status) && new Date(g.date) - Date.now() <= 15 * 60e3 && new Date(g.date) - Date.now() >= 0).sort((a, b) => mvScore(b) - mvScore(a) || new Date(a.date) - new Date(b.date));
     return { live, soon, anyFb, all: pool };
   }
-  function mvPick(reset) {
+  function mvPick(reset, allowed = null) {
     if (mvMode() === "mine") {
-      const N = mvRZ() ? 3 : 4, pool = allGames();
+      const N = mvRZ() ? 3 : 4, pool = allGames().filter(g => beta4Eligible(g) && (!hasYTTV() || onYTTV(g)) && !isBlowout(g) && (!allowed || allowed.has(mvKey(g))) && (g.state === "in" || g.state === "pre" && new Date(g.date) - Date.now() >= 0 && new Date(g.date) - Date.now() <= 15 * 60e3));
       const tiles = mvCustom().slice(0, N).map(k => pool.find(g => mvKey(g) === k) || null);
       while (tiles.length < N) tiles.push(null);
       mvLockedNow = new Set();
@@ -4921,7 +4922,7 @@ button.brand, button.brand span { color: var(--accent); }
     }
     // Before the first scores load, keep the saved quad untouched
     if (!state.updatedAt) { mvLockedNow = new Set(); return { tiles: Array(mvRZ() ? 3 : 4).fill(null), bench: [] }; }
-    const { live, soon } = mvPool();
+    const { live, soon } = mvPool(allowed);
     const byKey = new Map(live.concat(soon).map(g => [mvKey(g), g]));
     const N = mvRZ() ? 3 : 4;   // RedZone takes one of the four spots
     const auto = mvLockMine() ? live.concat(soon).filter(g => isMine(g) && !mvUnpinned.has(mvKey(g)))
@@ -4948,7 +4949,7 @@ button.brand, button.brand span { color: var(--accent); }
     const later = soon.filter(g => !slots.includes(mvKey(g)));
     slots = slots.map(k => k || (later.length ? mvKey(later.shift()) : null));
     mvSlots = slots;
-    mvSave(new Set([...byKey.keys()]));
+    if (!allowed) mvSave(new Set([...byKey.keys()]));
     return { tiles: slots.map(k => k ? byKey.get(k) : null), bench: live.filter(g => !slots.includes(mvKey(g))).slice(0, 6) };
   }
   function mvTile(g, i, mini) {
@@ -5131,7 +5132,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (g && gs !== "post") {   // finals: no watch, heart or bell, so no empty action row
       const w = gs !== "post" && g.watch?.find(x => x.url);
       html += `<div class="gc-actions">${w ? `<a class="watchbig" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">${PLAY_BIG} Watch On ${esc(w.app)}</a>` : g.link && gs !== "post" ? `<a class="watchbig" href="${esc(g.link)}" target="_blank" rel="noopener">Open On ESPN</a>` : ""}
-        ${gs !== "post" ? `<button class="belbig ${state.favGames[g.lg.id + ":" + g.id] ? "on" : ""}" data-favgame="${g.lg.id}:${g.id}" aria-label="${state.favGames[g.lg.id + ":" + g.id] ? "Remove this game from favorites" : "Favorite this game"}">${(state.favGames[g.lg.id + ":" + g.id] ? HEART_ON : HEART).replace(' width="15" height="15"', "")}</button>` : ""}
+        ${gs !== "post" ? `<button class="belbig ${state.favGames[g.lg.id + ":" + g.id] ? "on" : ""}" data-favgame="${g.lg.id}:${g.id}" aria-label="${state.favGames[g.lg.id + ":" + g.id] ? "Stop Tracking This Game" : "Track This Game"}">${(state.favGames[g.lg.id + ":" + g.id] ? HEART_ON : HEART).replace(' width="15" height="15"', "")}</button>` : ""}
         ${gs !== "post" ? `<button class="belbig ${state.watched[g.lg.id + ":" + g.id] ? "on" : ""}" data-watchgame="${g.lg.id}:${g.id}" aria-label="${state.watched[g.lg.id + ":" + g.id] ? "Turn off alerts for this game" : "Get alerts for this game"}">${BELL_BIG}</button>` : ""}</div>`;
     }
     if (!j) return html + `<div class="skel"></div><div class="skel"></div></div>`;
@@ -5877,7 +5878,15 @@ button.brand, button.brand span { color: var(--accent); }
   document.getElementById("settingsbtn").onclick = openSettings;
   document.getElementById("ssheet-x").onclick = beta4CloseSettings;
   document.getElementById("ssheet").addEventListener("click", async e => {
-    const page = e.target.closest("[data-b4-settings-page]");
+    const sectionToggle = e.target.closest("[data-b4-section-toggle]");
+    if (sectionToggle) {
+      const key = sectionToggle.dataset.b4SectionToggle, prefs = store.get("homeSections", {});
+      if (![...Object.keys(B4_HOME_SECTIONS), "feature", "final"].includes(key)) return;
+      prefs[key] = !beta4SectionShown(key); store.set("homeSections", prefs); renderSettings(); render(); document.getElementById("b4-show-" + key)?.focus(); return;
+    }
+    if (e.target.closest("[data-b4-reset-sections]")) { store.set("secOrder", Object.keys(B4_HOME_SECTIONS)); store.set("homeSections", {}); renderSettings(); render(); return; }
+
+    const page = e.target.closest("button[data-b4-settings-page]");
     if (page) { b4SettingsPage = page.dataset.b4SettingsPage; renderSettings(); document.getElementById("settings-body").scrollTop = 0; return; }
     if (e.target.closest("[data-b4-settings-back]")) { if (b4SettingsPage === "root") beta4CloseSettings(); else { b4SettingsPage = ["team", "watched", "all"].includes(b4SettingsPage) ? "alerts" : "root"; renderSettings(); document.getElementById("settings-body").scrollTop = 0; } return; }
     if (e.target.closest("[data-b4-enable-notifications]")) { await askPermission(); renderSettings(); return; }
@@ -5889,11 +5898,12 @@ button.brand, button.brand span { color: var(--accent); }
       const key = b.dataset.set, val = b.dataset.val;
       if (key === "home") { store.set("home", val); state.tab = homeTab(); }
       if (key === "home3") { store.set("home3", val); state.tab = homeTab(); }
-      if (key === "homeLayout") { state.homeLayout = val; store.set("homeLayout", val); document.documentElement.dataset.home = val; state.showCal = false; state.tab = homeTab(); }
+      if (key === "homeLayout") { b4League = "all"; state.homeLayout = val; store.set("homeLayout", val); document.documentElement.dataset.home = val; state.showCal = false; state.tab = homeTab(); }
       if (key === "view") { state.view = val; store.set("view3", val); }
       if (key === "theme") { store.set("theme", val); applyTheme(); }
       if (key === "palette") { store.set("palette", val); applyTheme(); }
       if (key === "density") setDensity(val);
+      if (["mvLockMine", "mvRedZone"].includes(key)) { store.set(key, val === "on"); mvUnpinned.clear(); }
       if (key === "expandFavs") { state.expandFavs = val === "on"; store.set("expandFavs", state.expandFavs); }
       if (key === "odds") { state.showOdds = val === "on"; store.set("showOdds", state.showOdds); }
       if (key === "svcTab") { store.set("svcTab", val === "on"); if (val === "off" && state.tab === "onmine") { state.tab = homeTab(); store.set("tab2", state.tab); } }
@@ -6030,7 +6040,7 @@ button.brand, button.brand span { color: var(--accent); }
 
   // Beta 4.0: compact iPhone home, using the existing feeds and detail routes.
   let b4SettingsPage = "root", b4TeamEditorReturn = "";
-  const B4_SETTINGS_TITLES = { root: "Settings", display: "Layout & Display", tv: "TV & Streaming", alerts: "Alerts", team: "My Teams Alerts", watched: "Game Alerts", all: "All Games Alerts" };
+  const B4_SETTINGS_TITLES = { root: "Settings", sections: "Home Sections", display: "Layout & Display", tv: "TV & Streaming", alerts: "Alerts", team: "My Teams Alerts", watched: "Game Alerts", all: "All Games Alerts" };
   function beta4CloseSettings() { document.getElementById("ssheet").hidden = true; bbSync(); }
   function beta4SettingsBox(title, hint, body = "") {
     return `<section class="b4-settings-box"><h3>${esc(title)}</h3>${hint ? `<p>${esc(hint)}</p>` : ""}${body}</section>`;
@@ -6081,9 +6091,12 @@ button.brand, button.brand span { color: var(--accent); }
         beta4SettingsRow("Load A Setup", "Restore teams and leagues with a code", "data-load-setup", "Enter Code") + `</div>` +
         beta4SettingsChoice("Home Layout", "Try each layout. Your preferences stay the same.", "homeLayout", state.homeLayout, [["bar", "Bottom Bar"], ["day", "Your Day"], ["rail", "League Rail"], ["classic", "Classic"]]) +
         `<div class="b4-settings-box b4-settings-links">` +
+        beta4SettingsRow("Home Sections", "Show, hide and reorder your home", 'data-b4-settings-page="sections"', "›") +
         beta4SettingsRow("Layout & Display", "Open to, sorting, appearance and odds", 'data-b4-settings-page="display"', "›") +
         beta4SettingsRow("TV & Streaming", `Your services · ${market}`, 'data-b4-settings-page="tv"', "›") +
         beta4SettingsRow("Alerts", "Team, game and global alerts", 'data-b4-settings-page="alerts"', "›") + `</div><button class="b4-settings-primary" data-set-done>Done</button><p class="b4-settings-foot">You’re on the beta. <a href="../">Open The Live App ↗</a></p>`;
+    } else if (b4SettingsPage === "sections") {
+      html = beta4SectionSettings();
     } else if (b4SettingsPage === "display") {
       const openKey = state.homeLayout === "classic" ? "home" : "home3";
       html = `<p class="b4-settings-intro">Choose how The Lineup opens and how your games look.</p>` +
@@ -6093,7 +6106,7 @@ button.brand, button.brand span { color: var(--accent); }
         beta4SettingsChoice("Always Expand My Teams", "Keep followed teams’ games full size in Simple and Compact.", "expandFavs", state.expandFavs ? "on" : "off", [["on", "On"], ["off", "Off"]]) +
         beta4SettingsChoice("Color", "Choose an accent color.", "palette", store.get("palette", "red"), [["red", "Red"], ["navy", "Navy"], ["green", "Green"], ["purple", "Purple"], ["orange", "Orange"]]) +
         beta4SettingsChoice("Appearance", "Auto follows your device appearance.", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
-        beta4SettingsChoice("Betting Odds", "Show lines on game cards and in Game View.", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]]);
+        beta4SettingsChoice("Betting Odds", "Show lines on game cards and in Game View.", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]]) + beta4SettingsRow("Home Sections", "Show, hide and reorder", 'data-b4-settings-page="sections"');
     } else if (b4SettingsPage === "tv") {
       html = `<p class="b4-settings-intro">Watch options match your services and home market.</p>` +
         beta4SettingsChoice("On My Services", "Show a filter containing games you can watch.", "svcTab", store.get("svcTab", true) ? "on" : "off", [["on", "Show"], ["off", "Hide"]]) +
@@ -6162,7 +6175,7 @@ button.brand, button.brand span { color: var(--accent); }
   const b4Name = (g, t) => /eng\.w\.|wchampions|nwsl/.test(g.lg.path) && !/Women|\bW\b/i.test(t.name) ? t.name + " W" : t.name;
   const b4Chev = dir => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${dir === "left" ? "M15 6l-6 6 6 6" : "M9 6l6 6-6 6"}"/></svg>`;
   function beta4Head(games) {
-    const list = b4League === "all" ? games : allGames().filter(g => g.lg.id === b4League);
+    const list = (b4League === "all" ? games : allGames().filter(g => g.lg.id === b4League)).filter(beta4Eligible);
     const n = list.filter(g => g.state === "in").length + (b4League === "all" ? specialsFor("live").filter(e => e.state === "in").length : 0);
     const scope = b4HomeScope() ? state.tab : "all";
     const day = (isToday() ? "Today, " : state.date.toLocaleDateString(undefined, { weekday: "short" }) + ", ") + state.date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
@@ -6192,7 +6205,7 @@ button.brand, button.brand span { color: var(--accent); }
     const team = t => `<span class="b4-team">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ""}<span class="name">${esc(b4Name(g, t))}</span>${isFavTeam(g.lg, t.abbr) ? `<i aria-label="Followed team">★</i>` : ""}<b>${g.state === "pre" ? "" : esc(t.score)}</b></span>`;
     const tv = g.state === "post" ? "" : String(netLabel(g) || "").replace(/^(W?NBA) League Pass$/i, "League Pass");
     const on = !!state.favGames[key];
-    return `<div class="b4-row"><button class="b4-game" data-game="${esc(key)}" aria-label="${esc(g.teams.map(t => b4Name(g, t)).join(" vs ") + ", " + g.status + ": game details")}"><span class="b4-time"><span class="${g.state === "in" ? "b4-status" : ""}">${esc(g.state === "pre" ? g.status || timeLabel(g.date) : g.status)}</span><small>${esc(b4Short(g.lg))}</small>${tv ? `<small class="b4-channel">${esc(tv)}</small>` : ""}</span><span>${team(a)}${team(h)}</span></button><button class="bellbtn heartbtn ${on ? "on" : ""}" data-favgame="${esc(key)}" aria-pressed="${on}" aria-label="${on ? "Unsave" : "Save"} ${esc(a.name)} game">${on ? HEART_ON : HEART}</button></div>`;
+    return `<div class="b4-row"><button class="b4-game" data-game="${esc(key)}" aria-label="${esc(g.teams.map(t => b4Name(g, t)).join(" vs ") + ", " + g.status + ": game details")}"><span class="b4-time"><span class="${g.state === "in" ? "b4-status" : ""}">${esc(g.state === "pre" ? g.status || timeLabel(g.date) : g.status)}</span><small>${esc(b4Short(g.lg))}</small>${tv ? `<small class="b4-channel">${esc(tv)}</small>` : ""}</span><span>${team(a)}${team(h)}${g.b4Reason ? `<span class="b4-reason">${esc(g.b4Reason)}</span>` : ""}</span></button><button class="bellbtn heartbtn ${on ? "on" : ""}" data-favgame="${esc(key)}" aria-pressed="${on}" aria-label="${on ? "Stop Tracking" : "Track"} ${esc(a.name)} Game">${on ? HEART_ON : HEART}</button></div>`;
   }
   function beta4Card(g, density = state.density) {
     const [a, h] = g.teams;
@@ -6202,14 +6215,14 @@ button.brand, button.brand span { color: var(--accent); }
     const team = t => `<div class="b4-card-team">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : '<span class="b4-card-logo"></span>'}<span class="b4-card-team-label"><b class="b4-card-name">${esc(b4Name(g, t))}</b>${expanded && pre && (t.seasonRecord || t.record) ? `<small class="b4-card-record">${esc(t.seasonRecord || t.record)}</small>` : ""}</span>${pre ? "" : `<strong class="b4-card-score">${esc(t.score)}</strong>`}</div>`;
     const channel = String(netLabel(g) || "").replace(/^(W?NBA) League Pass$/i, "League Pass");
     const watch = expanded && !final ? g.watch?.find(w => w.url) : null;
-    const save = `<button class="bellbtn heartbtn ${on ? "on" : ""}" data-favgame="${esc(key)}" aria-pressed="${on}" aria-label="${on ? "Unsave" : "Save"} ${esc(a.name)} game">${on ? HEART_ON : HEART}</button>`;
+    const save = `<button class="bellbtn heartbtn ${on ? "on" : ""}" data-favgame="${esc(key)}" aria-pressed="${on}" aria-label="${on ? "Stop Tracking" : "Track"} ${esc(a.name)} Game">${on ? HEART_ON : HEART}</button>`;
     const clock = `<span class="b4-card-clock ${g.state === "in" ? "b4-status" : ""}">${esc(g.status || timeLabel(g.date))}</span>`;
     const watchLink = watch ? `<a class="b4-card-watch" href="${esc(watch.url)}" ${watch.scheme ? `data-app="${esc(watch.scheme)}"` : ""} target="_blank" rel="noopener"><span aria-hidden="true">▶</span> Watch On ${esc(watch.app)}</a>` : "";
     const actions = `<span class="b4-card-actions">${save}${bellBtn(g)}</span>`;
-    return `<article class="b4-scorecard b4-card-${expanded ? "expanded" : "compact"} tap" data-game="${esc(key)}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name + ": game details")}"><div class="b4-card-top"><span class="b4-card-heading"><b>${esc(b4Short(g.lg))}</b>${expanded ? clock : ""}</span><span class="b4-card-tv">${esc(channel)}</span></div><div class="b4-card-teams">${team(a)}${team(h)}</div><div class="b4-card-foot">${expanded ? watchLink : clock}${actions}</div></article>`;
+    return `<article class="b4-scorecard b4-card-${expanded ? "expanded" : "compact"} tap" data-game="${esc(key)}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name + ": game details")}"><div class="b4-card-top"><span class="b4-card-heading"><b>${esc(b4Short(g.lg))}</b>${expanded ? clock : ""}</span><span class="b4-card-tv">${esc(channel)}</span></div><div class="b4-card-teams">${team(a)}${team(h)}</div>${g.b4Reason ? `<span class="b4-reason">${esc(g.b4Reason)}</span>` : ""}<div class="b4-card-foot">${expanded ? watchLink : clock}${actions}</div></article>`;
   }
-  function beta4Rows(games) {
-    if (state.view === "league") games = games.slice().sort((a, b) => leagueRank(a.lg.id) - leagueRank(b.lg.id) || byState(a, b));
+  function beta4Rows(games, preserveOrder = false) {
+    if (state.view === "league" && !preserveOrder) games = games.slice().sort((a, b) => leagueRank(a.lg.id) - leagueRank(b.lg.id) || byState(a, b));
     if (state.expandFavs && state.density !== "expanded") return `<div class="b4-mixed b4-mixed-${state.density}">${games.map(g => isMine(g) ? beta4Card(g, "expanded") : state.density === "simple" ? `<div class="b4-rows">${beta4Row(g)}</div>` : beta4Card(g)).join("")}</div>`;
     return state.density === "simple" ? `<div class="b4-rows">${games.map(beta4Row).join("")}</div>` : `<div class="b4-card-grid b4-cards-${state.density}">${games.map(g => beta4Card(g)).join("")}</div>`;
   }
@@ -6228,39 +6241,106 @@ button.brand, button.brand span { color: var(--accent); }
     const leader = scoresKnown ? (+a.score === +h.score ? "Tied" : b4Name(g, +a.score > +h.score ? a : h) + " leads") : "Live";
     const w = g.watch?.find(x => x.url);
     const watch = w ? `<a class="b4-watch" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener"><span aria-hidden="true">▶</span> ${esc(w.app)}</a>` : `<span class="b4-feature-channel">${esc(netLabel(g) || "TV unavailable")}</span>`;
-    const save = `<button class="bellbtn heartbtn ${saved ? "on" : ""}" data-favgame="${esc(key)}" aria-pressed="${saved}" aria-label="${saved ? "Unsave" : "Save"} ${esc(a.name)} game">${saved ? HEART_ON : HEART}</button>`;
+    const save = `<button class="bellbtn heartbtn ${saved ? "on" : ""}" data-favgame="${esc(key)}" aria-pressed="${saved}" aria-label="${saved ? "Stop Tracking" : "Track"} ${esc(a.name)} Game">${saved ? HEART_ON : HEART}</button>`;
     return { key, html: `<section class="b4-feature${state.density === "expanded" ? "" : " b4-feature-slim"}" aria-label="Your featured match"><div class="b4-feature-head"><span>Your Game</span>${live.length > 1 ? `<button class="b4-link" data-b4-change>Change</button>` : ""}</div><div class="b4-feature-league">${esc(b4Short(g.lg))}</div><div class="b4-feature-standing"><span>${esc(leader)}</span></div><div class="b4-feature-matchup">${club(a, "away")}<button class="b4-feature-scoreline" data-game="${esc(key)}" aria-label="${label}"><b>${esc(a.score)}</b><span class="b4-status">${esc(g.status)}</span><b>${esc(h.score)}</b></button>${club(h, "home")}</div><div class="b4-feature-foot">${watch}${save}${bellBtn(g)}</div></section>` };
   }
 
-  function beta4Home(games) {
-    const source = b4League === "all" ? games : allGames().filter(g => g.lg.id === b4League);
-    const scoped = source.slice().sort(byState);
-    const fy = state.tab === "foryou", live = state.tab === "live";
-    const feature = fy ? beta4Feature(scoped) : { html: "", key: "" };
-    let html = feature.html;
-    const mine = scoped.filter(g => isMine(g) || !!state.favGames[gameKey(g)]);
-    const primary = (fy ? mine : live ? scoped.filter(g => g.state === "in") : scoped).filter(g => gameKey(g) !== feature.key);
-    const active = primary.filter(g => g.state !== "post"), final = primary.filter(g => g.state === "post");
-    if (active.length) html += beta4Section(fy ? "Your Games" : live ? "Live Now" : "All Games", `${active.length} ${active.length === 1 ? "game" : "games"}${b4League === "all" ? "" : " · " + b4Short(LG[b4League])}`, active);
-    else if (!feature.html && !final.length) html += `<div class="b4-empty"><p>${state.loading ? "Loading scores…" : live ? "No live games in this view right now." : fy ? "None of your followed teams or saved games play on this date." : "No games in this view on this date."}</p><button class="chip" data-b4-scope="all">See All Games</button> <button class="chip" data-bb="teams">Follow Teams</button></div>`;
-    if (fy) {
-      const extra = scoped.filter(g => g.state === "in" && !mine.some(m => gameKey(m) === gameKey(g))).slice(0, 8);
-      if (extra.length) html += beta4Section("You Are Looking Live", `${extra.length} live`, extra);
+  const B4_HOME_SECTIONS = { mine: "Your Teams", worth: "Worth A Watch", live: "You Are Looking Live", mv: "Your Multiview" };
+  function beta4HomeOrder() {
+    const keys = Object.keys(B4_HOME_SECTIONS);
+    const saved = store.get("secOrder", []);
+    return [...new Set((Array.isArray(saved) ? saved : []).filter(k => keys.includes(k)).concat(keys))];
+  }
+  function beta4SectionShown(key) { return store.get("homeSections", {})[key] !== false; }
+  function beta4Eligible(g) { return pickedNothing() || state.favLeagues.includes(g.lg.id) || isMine(g) || !!state.favGames[gameKey(g)]; }
+  function beta4SectionSettings() {
+    const descriptions = {
+      mine: "Starred teams and hearted games. Live first, then upcoming. Finished games move to Final.",
+      worth: "Earned live picks only. Tight finishes, overtime, upsets, ranked matchups and playoffs; no blowouts or your own teams.",
+      live: "Every other live game in your leagues, earliest start first.",
+      mv: "YouTube TV games live or starting within 15 minutes. Move this above other sections to give the quad first choice."
+    };
+    const toggle = key => `<button id="b4-show-${key}" class="b4-section-toggle ${beta4SectionShown(key) ? "on" : ""}" data-b4-section-toggle="${key}" aria-pressed="${beta4SectionShown(key)}" aria-label="${beta4SectionShown(key) ? "Hide" : "Show"} ${esc(B4_HOME_SECTIONS[key] || (key === "feature" ? "Your Game" : "Final"))}">${beta4SectionShown(key) ? "Shown" : "Hidden"}</button>`;
+    return `<p class="b4-settings-intro">Show, hide and move your home sections. Each game appears once: the first eligible section in your order gets it. Hidden sections release their games to the sections below.</p><div class="b4-section-controls">${beta4HomeOrder().map((key, i, order) => `<section class="b4-settings-box"><div class="b4-section-control-head"><b><span>${i + 1}</span> ${B4_HOME_SECTIONS[key]}</b>${toggle(key)}</div><p>${descriptions[key]}</p><div class="b4-section-movers"><button data-sec-mv="${key}" data-dir="-1" ${i === 0 ? "disabled" : ""} aria-label="Move ${B4_HOME_SECTIONS[key]} Up">↑ Move Up</button><button data-sec-mv="${key}" data-dir="1" ${i === order.length - 1 ? "disabled" : ""} aria-label="Move ${B4_HOME_SECTIONS[key]} Down">↓ Move Down</button></div></section>`).join("")}</div>` +
+      beta4SettingsBox("Your Game", "Feature one live game inside Your Teams. Its position follows Your Teams.", toggle("feature")) +
+      beta4SettingsBox("Final", "Finished games stay at the bottom of the home feed.", toggle("final")) +
+      beta4SettingsChoice("Lock In My Teams", "Pin your teams in eligible Multiview spots. Move Multiview above Your Teams to claim their games first.", "mvLockMine", store.get("mvLockMine", true) ? "on" : "off", [["on", "On"], ["off", "Off"]]) +
+      beta4SettingsChoice("NFL RedZone", "Use the first Multiview spot during active 1 PM and 4 PM NFL windows.", "mvRedZone", store.get("mvRedZone", false) ? "on" : "off", [["on", "On"], ["off", "Off"]]) +
+      `<details class="b4-settings-box b4-section-rules"><summary>How Games Are Chosen</summary><p>Sections use your followed leagues, starred teams and hearted games. Your order determines the first claim on each game.</p><p><b>Worth A Watch:</b> football within 8 from the 3rd quarter; basketball within 8 in the final regulation period; hockey within 1 in the 3rd; soccer within 1 in the second half; baseball within 2 from the 7th. Overtime, extra innings, a second-half leader that was +200 or longer before the game, live Top 25 clashes and playoffs also qualify.</p><p><b>No blowouts:</b> football up 17 in the second half, basketball up 20 in the second half, hockey up 3 in the 3rd, soccer up 3, or baseball up 6 from the 6th. Close late finishes and playoffs get priority, then excitement score; at most six picks. Each pick has one reason tag.</p><p><b>Multiview:</b> only your YouTube TV channels, live or starting in 15 minutes. Your teams are pinned by default when available. Other spots use excitement score with extra weight for tight second-half and fourth-quarter football. Blowouts drop out. A new game needs a clear score advantage to replace an existing tile. RedZone takes the first spot in active afternoon NFL windows when enabled.</p></details><button class="b4-settings-secondary" data-b4-reset-sections>Reset Home Sections</button>`;
+  }
+  function beta4HomeMultiview(games) {
+    if (!isToday() || !hasYTTV()) return { games: [], html: "", available: false };
+    const allowed = new Set(games.filter(beta4Eligible).map(gameKey));
+    const previousSlots = mvSlots, previousLocked = mvLockedNow;
+    const day = new Date().toDateString(), saved = store.get("b4HomeMv", {});
+    try {
+      mvSlots = saved.day === day ? (saved.slots || []).slice() : [];
+      const { tiles } = mvPick(false, allowed);
+      const selected = tiles.filter(Boolean);
+      store.set("b4HomeMv", { day, slots: mvSlots.slice() });
+      const rz = mvRZ();
+      const html = selected.length || rz ? `<div class="mv-grid mv-mini">${(rz ? [mvRZTile(true)] : []).concat(tiles.map((g, i) => mvTile(g, i + (rz ? 1 : 0), true))).join("")}</div><div class="mv-foot"><button class="chip on mv-cta" data-mv>${MV_ICON}Open Full Screen</button></div>` : "";
+      return { games: selected, html, available: true };
+    } finally { mvSlots = previousSlots; mvLockedNow = previousLocked; }
+  }
+  function beta4HomePlan(games, multiview = beta4HomeMultiview) {
+    const source = (b4League === "all" ? games : allGames().filter(g => g.lg.id === b4League)).filter(beta4Eligible);
+    const claimed = new Set(), sections = [];
+    const liveScope = state.tab === "live", forYou = ["foryou", "teams"].includes(state.tab);
+    for (const key of beta4HomeOrder()) {
+      if (!beta4SectionShown(key)) continue;
+      const available = source.filter(g => g.state !== "post" && !claimed.has(gameKey(g)));
+      let selected = [], html = "", availableService = true;
+      if (key === "mine") selected = available.filter(g => (isMine(g) || !!state.favGames[gameKey(g)]) && (!liveScope || g.state === "in")).sort(byState);
+      if (key === "worth" && isToday()) selected = worthPicks(available, new Set());
+      if (key === "live") selected = available.filter(g => g.state === "in").sort((a,b) => new Date(a.date) - new Date(b.date));
+      if (key === "mv") { const mv = multiview(available); selected = mv.games; html = mv.html; availableService = mv.available; }
+      selected.forEach(g => claimed.add(gameKey(g)));
+      if (key !== "mv" || availableService) sections.push({ key, games: selected, html });
     }
-    if (final.length) html += beta4Section("Final", `${final.length} ${final.length === 1 ? "game" : "games"}`, final);
-    if (fy && b4League === "all") html += mvSection();
-    if (b4League === "all") specialsFor(live ? "live" : "all").filter(e => !live || e.state === "in").forEach(e => { html += BLOCK[e.kind](e); });
-    if (fy && isToday()) {
-      const playing = new Set(scoped.filter(isMine).flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
-      const next = [...state.favs].filter(k => !playing.has(k)).map(k => ({ k, m: state.favMeta[k], n: state.next[k] })).filter(x => x.m && x.n?.date && (b4League === "all" || x.m.lg === b4League)).sort((a, b) => new Date(a.n.date) - new Date(b.n.date)).slice(0, 3);
+    const upcoming = !forYou && !liveScope ? source.filter(g => g.state === "pre" && !claimed.has(gameKey(g))).sort((a,b) => new Date(a.date) - new Date(b.date)) : [];
+    const finals = !liveScope && beta4SectionShown("final") ? source.filter(g => g.state === "post" && (!forYou || isMine(g) || !!state.favGames[gameKey(g)])).sort((a,b) => new Date(b.date) - new Date(a.date)) : [];
+    return { sections, upcoming, finals, source };
+  }
+  function beta4Home(games) {
+    const plan = beta4HomePlan(games), forYou = ["foryou", "teams"].includes(state.tab);
+    const empty = {
+      mine: "None of your teams or hearted games are on in this view.",
+      worth: "No qualifying live games right now. Tight finishes, overtime, upsets, Top 25 matchups and playoffs appear here.",
+      live: "No other live games in your followed leagues right now.",
+      mv: "No unclaimed YouTube TV games are live or starting within 15 minutes. Move this section higher to give it first choice."
+    };
+    let html = plan.sections.map(section => {
+      const { key } = section;
+      let contents = section.html, list = section.games;
+      if (key === "mine" && forYou && beta4SectionShown("feature")) {
+        const feature = beta4Feature(list);
+        contents = feature.html;
+        list = list.filter(g => gameKey(g) !== feature.key);
+      }
+      if (key !== "mv") contents += beta4Rows(key === "worth" ? list.map(g => ({ ...g, b4Reason: gameTag(g) || "Live Pick" })) : list, true);
+      if (!section.games.length && !contents) contents = `<p class="b4-section-empty">${empty[key]}</p>`;
+      // beta4Rows([]) has no content; show the section explanation instead of an empty grid.
+      if (!section.games.length && key !== "mv") contents = `<p class="b4-section-empty">${empty[key]}</p>`;
+      const count = section.games.length ? `${section.games.length} ${key === "mv" ? "games in the quad" : key === "worth" ? "picks" : "games"}` : "";
+      return `<section class="b4-section" data-home-section="${key}"><div class="b4-section-head"><h2>${B4_HOME_SECTIONS[key]}</h2><small>${esc(count)}</small></div>${contents}</section>`;
+    }).join("");
+    if (plan.upcoming.length) html += beta4Section("All Games", "Upcoming", plan.upcoming);
+    if (b4League === "all") specialsFor(state.tab === "live" ? "live" : "all").filter(e => state.tab !== "live" || e.state === "in").forEach(e => { html += BLOCK[e.kind](e); });
+    if (forYou && isToday()) {
+      const playing = new Set(plan.source.filter(isMine).flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
+      const next = [...state.favs].filter(k => !playing.has(k)).map(k => ({ k, m: state.favMeta[k], n: state.next[k] })).filter(x => x.m && x.n?.date && (b4League === "all" || x.m.lg === b4League)).sort((a,b) => new Date(a.n.date) - new Date(b.n.date)).slice(0,3);
       if (next.length) html += `<section class="b4-upnext"><h2>Next For Your Teams</h2>${upNextRows(next)}</section>`;
     }
+    if (plan.finals.length) html += beta4Section("Final", `${plan.finals.length} games`, plan.finals);
     const failed = LEAGUES.filter(lg => state.data[lg.id]?.error && (b4League === "all" ? state.favLeagues.includes(lg.id) : lg.id === b4League));
     if (failed.length) html += `<div class="b4-load-note">Some scores could not load (${failed.map(lg => esc(b4Short(lg))).join(", ")}). <button data-b4-refresh>Retry</button></div>`;
-    html += `<div class="b4-help"><button data-bb="teams">★ Follow Teams</button> · ♡ Save Games · <button data-bb="alerts">Manage Alerts</button></div>`;
+    if (!plan.source.length) html += `<div class="b4-empty"><p>${state.loading ? "Loading scores…" : "No games in your followed leagues on this date."}</p><button class="chip" data-bb="teams">Follow Teams</button></div>`;
+    html += `<div class="b4-help"><button data-b4-open-sections>Customize Home Sections</button> · <button data-bb="alerts">Manage Alerts</button></div>`;
     if (state.updatedAt) html += `<p class="b4-updated">Updated ${esc(timeLabel(state.updatedAt))} · Refreshes automatically</p>`;
     return html;
   }
+
   function beta4SavedSections(games, now = new Date()) {
     const midnight = d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
     const today = midnight(now), tomorrowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1), tomorrow = midnight(tomorrowDate);
@@ -6287,7 +6367,10 @@ button.brand, button.brand span { color: var(--accent); }
     const current = new Map([...b4SavedCache, ...allGames().map(g => [gameKey(g), g])]);
     const keys = Object.keys(state.favGames);
     const list = keys.map(k => current.get(k)).filter(Boolean).sort((a, b) => new Date(a.date) - new Date(b.date));
-    body.innerHTML = `<p class="hint">Games you save with ♡ appear here, including games on other dates. Saving a game does not enable alerts.</p>` + (list.length ? beta4SavedSections(list) : `<div class="b4-empty"><p>${keys.length ? (b4SavedErrors && !b4SavedLoading ? "Saved scores could not load." : "Loading your saved games…") : "No saved games yet."}</p>${keys.length ? "" : `<button class="chip" data-bb="home">Find A Game To Save</button>`}</div>`) + (b4SavedLoading ? `<p class="b4-load-note" role="status">Checking saved scores…</p>` : b4SavedErrors ? `<p class="b4-load-note">${b4SavedErrors} saved ${b4SavedErrors === 1 ? "game is" : "games are"} unavailable. <button data-b4-retry-saved>Retry</button></p>` : "");
+    body.innerHTML = `<p class="hint">Hearted games you are tracking. Tracking does not enable alerts.</p>` + (list.length ? beta4SavedSections(list) : `<div class="b4-empty"><p>${keys.length ? (b4SavedErrors && !b4SavedLoading ? "Tracked games could not load." : "Loading your tracked games…") : "No tracked games yet."}</p>${keys.length ? "" : `<button class="chip" data-bb="home">Find A Game To Save</button>`}</div>`) + (b4SavedLoading ? `<p class="b4-load-note" role="status">Checking tracked games…</p>` : b4SavedErrors ? `<p class="b4-load-note">${b4SavedErrors} tracked ${b4SavedErrors === 1 ? "game is" : "games are"} unavailable. <button data-b4-retry-saved>Retry</button></p>` : "");
+    const tracked = document.getElementById("b4-tracked-games");
+    if (tracked) { tracked.innerHTML = keys.length ? `<h2>Tracked Games</h2>` + body.innerHTML : ""; tracked.hidden = !keys.length || !document.getElementById("sheet").classList.contains("b4-team-schedule-mode"); }
+
   }
   async function beta4LoadSaved() {
     if (b4SavedLoading) return;
@@ -6311,6 +6394,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (e.target.matches("[data-b4-league-search]")) document.querySelector("[data-b4-league-options]").innerHTML = beta4LeagueMenu(e.target.value);
   });
   document.addEventListener("click", e => {
+    if (e.target.closest("[data-b4-open-sections]")) { bbGo("settings"); b4SettingsPage = "sections"; renderSettings(); return; }
     if (e.target.closest("[data-b4-add-team]")) { const q = document.getElementById("q"); q.focus({ preventScroll: true }); q.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
     if (e.target.closest("[data-b4-manage-teams]")) { b4TeamEditorReturn = "teams"; beta4OpenTeamEditor(); return; }
     if (e.target.closest("[data-b4-retry-teams]")) { beta4LoadTeamUpcoming(); return; }

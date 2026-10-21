@@ -23,7 +23,8 @@ function fixture() {
     allGames: () => games, specialsFor: () => [],
     gameKey: g => g.lg.id + ':' + g.id,
     favKey: (lg, abbr) => lg.id + ':' + abbr,
-    isMine: g => g.mine,
+    isMine: g => g.mine, pickedNothing: () => false, hasYTTV: () => false,
+    worthPicks: () => [], gameTag: () => "Close Game",
     isFavTeam: () => false,
     byState: (a, b) => ({ in: 0, pre: 1, post: 2 }[a.state] - { in: 0, pre: 1, post: 2 }[b.state]),
     esc: s => String(s ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'),
@@ -54,7 +55,7 @@ test('Live excludes upcoming games, finals and the featured card', () => {
   assert.doesNotMatch(result, /Away pre|Away final|Your featured match/);
 });
 test('league filter stays applied when changing scope', () => {
-  const { ctx, games } = fixture();
+  const { ctx, games } = fixture(); ctx.state.favLeagues.push("wlc");
   vm.runInContext('b4League = "wlc"', ctx); ctx.state.tab = 'all';
   let result = ctx.beta4Home(games);
   assert.match(result, /Away soccer W/);
@@ -73,13 +74,13 @@ test('Saved reloads a match that is absent from today’s feed', async () => {
   const { ctx, body } = fixture(); ctx.state.favGames['nba:yesterday'] = { date: '2026-10-20' };
   await ctx.beta4LoadSaved();
   assert.match(body.innerHTML, /Old Away/);
-  assert.doesNotMatch(body.innerHTML, /unavailable|Loading your saved games/);
+  assert.doesNotMatch(body.innerHTML, /unavailable|Loading your tracked games/);
 });
 test('failed saved requests keep a retry action', async () => {
   const { ctx, body } = fixture(); ctx.state.favGames['nba:missing'] = {};
   ctx.fetch = async () => { throw new Error('offline'); };
   await ctx.beta4LoadSaved();
-  assert.match(body.innerHTML, /1 saved game is unavailable/);
+  assert.match(body.innerHTML, /1 tracked game is unavailable/);
   assert.match(body.innerHTML, /data-b4-retry-saved/);
 });
 test('team names and attributes are escaped in score rows', () => {
@@ -310,4 +311,152 @@ test('Smart opens Live for a single relevant live game and For You when none are
   vm.runInContext(html.slice(html.indexOf('  function homeTab()'), html.indexOf('  function specialsFor(')), ctx);
   assert.equal(ctx.homeTab(), 'live');
   games[0].state = 'post'; assert.equal(ctx.homeTab(), 'foryou');
+});
+
+
+function selectionFixture() {
+  const f = fixture(), { ctx } = f;
+  ctx.CLOSE = { Basketball: { minsLeft: 5, margin: 6 }, Football: { minsLeft: 5, margin: 8 }, Hockey: { minsLeft: 5, margin: 1 }, Baseball: { fromInning: 7, margin: 2 }, Soccer: { fromMinute: 85, margin: 1 } };
+  ctx.clockSecs = s => { const [m, sec = 0] = String(s).split(':').map(Number); return m * 60 + sec; };
+  ctx.mvHome = new Set(); ctx.mvKey = ctx.gameKey;
+  vm.runInContext(html.slice(html.indexOf('  function isClose(g)'), html.indexOf('  // Which of YOUR services')), ctx);
+  vm.runInContext(html.slice(html.indexOf('  function worthPicks('), html.indexOf('  // Your Day and Bottom Bar keep')), ctx);
+  let nextId = 0;
+  const make = (sport, period, margin, extra = {}) => {
+    const lg = { id: sport.toLowerCase(), name: sport, sport, reg: sport === 'Hockey' ? 3 : sport === 'Baseball' ? 9 : 4, soccer: sport === 'Soccer' };
+    const g = { id: String(++nextId), lg, state: 'in', mine: false, date: new Date().toISOString(), period, clock: sport === 'Soccer' ? "65'" : '10:00', teams: [{ name: 'Away', abbr: 'A', score: margin }, { name: 'Home', abbr: 'H', score: 0 }], ...extra };
+    g.close = ctx.isClose(g); g.tight = ctx.isTight(g); Object.assign(g, ctx.interest(g)); return g;
+  };
+  return { ...f, make };
+}
+
+test('Worth A Watch applies tight-game boundaries for each sport', () => {
+  const { ctx, make } = selectionFixture();
+  for (const [sport, period, margin] of [['Football',3,8], ['Basketball',4,8], ['Hockey',3,1], ['Soccer',2,1], ['Baseball',7,2]]) {
+    assert.equal(ctx.worthPicks([make(sport,period,margin)]).length, 1, sport);
+    assert.equal(ctx.worthPicks([make(sport,period,margin+1)]).length, 0, sport + ' outside margin');
+    assert.equal(ctx.worthPicks([make(sport,period-1,margin)]).length, 0, sport + ' too early');
+  }
+});
+
+test('Overtime, extra innings, ranked clashes and playoffs qualify while blowouts never qualify', () => {
+  const { ctx, make } = selectionFixture();
+  for (const g of [make('Basketball',5,10), make('Baseball',10,3), make('Football',1,0,{rankedClash:true}), make('Football',1,0,{playoff:true})]) assert.equal(ctx.worthPicks([g]).length,1);
+  for (const [sport,period,margin] of [['Football',3,17], ['Basketball',4,20], ['Hockey',3,3], ['Soccer',2,3], ['Baseball',6,6]]) assert.equal(ctx.worthPicks([make(sport,period,margin,{playoff:true,rankedClash:true})]).length,0,sport);
+});
+
+test('Upset qualification uses the cached pregame +200 line and only a second-half leader', () => {
+  const { ctx, make } = selectionFixture();
+  const g = make('Football',1,10,{id:'upset',state:'pre',odds:{ml:{a:200,h:-250}}});
+  ctx.pregameML(g); g.state='in'; g.period=3; g.odds.ml.a=-500;
+  Object.assign(g,ctx.interest(g));
+  assert.match(g.reasons.join(),/Upset Alert/); assert.equal(ctx.worthPicks([g]).length,1);
+  g.period=2; Object.assign(g,ctx.interest(g)); assert.equal(ctx.worthPicks([g]).length,0);
+});
+
+test('Worth picks prioritize late close games and playoffs, cap at six and exclude owned games', () => {
+  const { ctx, make } = selectionFixture();
+  const priority = make('Football',4,3,{clock:'2:00'}), exciting = make('Football',3,7); exciting.hype=1000;
+  assert.equal(ctx.worthPicks([exciting,priority])[0].id,priority.id);
+  assert.equal(ctx.worthPicks(Array.from({length:9},()=>make('Football',3,7))).length,6);
+  const owned=make('Football',4,0,{mine:true}); assert.equal(ctx.worthPicks([owned]).length,0);
+  const hearted=make('Football',4,0); ctx.state.favGames[ctx.gameKey(hearted)]={}; assert.equal(ctx.worthPicks([hearted]).length,0);
+});
+
+test('Home sections are shown by default and first claim follows saved order with no duplicates', () => {
+  const { ctx, games } = fixture();
+  for (const key of ['mine','worth','live','mv','feature','final']) assert.equal(ctx.beta4SectionShown(key),true);
+  const candidate = { ...games[0], id:'worthy', mine:false }; games.push(candidate);
+  ctx.worthPicks = gs => gs.filter(g=>g.id==='worthy');
+  const mv = gs => ({games:gs.filter(g=>g.state==='in').slice(0,2),html:'quad',available:true});
+  let plan=ctx.beta4HomePlan(games,mv);
+  assert.equal(plan.sections[0].key,'mine'); assert.equal(plan.sections.find(s=>s.key==='worth').games[0].id,'worthy');
+  ctx.store.set('secOrder',['mv','worth','mine','live']); plan=ctx.beta4HomePlan(games,mv);
+  assert.equal(plan.sections[0].key,'mv'); assert.ok(plan.sections[0].games.some(g=>g.id==='live'));
+  const assigned=plan.sections.flatMap(s=>s.games).map(ctx.gameKey); assert.equal(new Set(assigned).size,assigned.length);
+  ctx.store.set('homeSections',{mv:false,worth:false}); plan=ctx.beta4HomePlan(games,mv);
+  assert.equal(plan.sections.some(s=>s.key==='mv'||s.key==='worth'),false);
+  assert.ok(plan.sections.find(s=>s.key==='live').games.some(g=>g.id==='worthy'));
+});
+
+test('Section eligibility excludes unrelated and watched-only leagues, and Live lists every remaining game', () => {
+  const { ctx, games } = fixture(); ctx.state.tab='live';
+  const live=Array.from({length:12},(_,i)=>({...games[0],id:'other'+i,mine:false,date:new Date(2026,9,21,10,i).toISOString()}));
+  const unrelated={...live[0],id:'unrelated',lg:{id:'other'}};
+  ctx.state.watched={'other:unrelated':true};
+  const plan=ctx.beta4HomePlan([...live,unrelated],()=>({games:[],html:'',available:false}));
+  const rest=plan.sections.find(s=>s.key==='live').games; assert.equal(rest.length,12);
+  assert.deepEqual(Array.from(rest,g=>g.id),live.map(g=>g.id));
+  ctx.state.favGames['other:unrelated']={}; assert.equal(ctx.beta4Eligible(unrelated),true);
+});
+
+test('Home section settings expose order, visibility and selection explanations', () => {
+  const {ctx}=settingsFixture(); const ui=ctx.beta4SectionSettings();
+  for(const key of ['mine','worth','live','mv']) { assert.match(ui,new RegExp('data-b4-section-toggle="'+key+'"')); assert.match(ui,new RegExp('data-sec-mv="'+key+'"')); }
+  assert.match(ui,/How Games Are Chosen/); assert.match(ui,/Reset Home Sections/); assert.match(ui,/Lock In My Teams/);
+});
+
+test('Worth A Watch renders exactly one reason tag for each card in every view', () => {
+  const {ctx,games}=fixture(); const g={...games[0],b4Reason:'Overtime'};
+  for(const density of ['simple','compact','expanded']) { ctx.state.density=density; assert.equal((ctx.beta4Rows([g]).match(/class="b4-reason"/g)||[]).length,1); }
+});
+
+function multiviewFixture() {
+  const f=selectionFixture(), {ctx}=f;
+  Object.assign(ctx,{mvSport:'all',mvSlots:[],mvLockedNow:new Set(),mvLocks:new Set(),mvUnpinned:new Set(),mvMode:()=> 'auto',mvLockMine:()=>true,mvRZ:()=>false,mvSave:()=>{},gameRank:()=>0,DEFAULT_TV:{services:[]}});
+  ctx.state.tv={services:['youtubetv']}; ctx.state.updatedAt=new Date();
+  vm.runInContext(html.slice(html.indexOf('  const mvKey ='),html.indexOf('  function mvTile(')),ctx);
+  return f;
+}
+
+test('Multiview admits only eligible YouTube TV games live or within 15 minutes and drops blowouts', () => {
+  const {ctx,games,make}=multiviewFixture();
+  const game=(id,minutes,watch='YouTube TV')=>make('Football',1,0,{id,state:minutes===null?'in':'pre',date:new Date(Date.now()+(minutes||0)*60000).toISOString(),watch:[{app:watch}]});
+  const live=game('live',null),soon=game('soon',14),later=game('later',16),stream=game('exclusive',null,'Peacock'),past=game('past',-1),blowout=make('Football',3,17,{watch:[{app:'YouTube TV'}]});
+  ctx.state.favLeagues=['football']; games.splice(0,games.length,live,soon,later,stream,past,blowout);
+  const pool=ctx.mvPool(); assert.deepEqual(Array.from(pool.live,g=>g.id),['live']); assert.deepEqual(Array.from(pool.soon,g=>g.id),['soon']);
+  const allowed=new Set([ctx.gameKey(soon)]); assert.equal(ctx.mvPool(allowed).live.length,0); assert.equal(ctx.mvPool(allowed).soon.length,1);
+});
+
+test('Multiview keeps tiles stable until a challenger is clearly better and pins owned games', () => {
+  const {ctx,games,make}=multiviewFixture(); ctx.state.favLeagues=['football'];
+  const choices=[100,90,80,70,60].map((hype,i)=>({...make('Football',1,0,{id:String(i),watch:[{app:'YouTube TV'}]}),hype}));
+  games.splice(0,games.length,...choices);
+  let selected=ctx.mvPick(false).tiles.filter(Boolean).map(g=>g.id); assert.deepEqual(Array.from(selected),['0','1','2','3']);
+  choices[4].hype=90; selected=ctx.mvPick(false).tiles.filter(Boolean).map(g=>g.id); assert.equal(selected.includes('4'),false);
+  choices[4].hype=100; selected=ctx.mvPick(false).tiles.filter(Boolean).map(g=>g.id); assert.equal(selected.includes('4'),true);
+  choices[3].mine=true; choices[3].hype=-200; selected=ctx.mvPick(false).tiles.filter(Boolean).map(g=>g.id); assert.equal(selected.includes('3'),true);
+});
+
+test('RedZone is restricted to active afternoon NFL windows', () => {
+  const {ctx,games,make}=multiviewFixture(); ctx.state.favLeagues=['nfl']; ctx.mvRZOn=()=>true;
+  vm.runInContext(html.slice(html.indexOf('  function etMins('),html.indexOf('  function mvRZTile(')),ctx);
+  const nfl=(id,date)=>({...make('Football',1,0,{id,date}),lg:{id:'nfl',sport:'Football'}});
+  games.splice(0,games.length,nfl('early','2026-10-25T13:30:00Z'),nfl('night','2026-10-26T00:20:00Z')); assert.equal(ctx.mvRZ(),false);
+  games.splice(0,games.length,nfl('one','2026-10-25T17:00:00Z'),nfl('two','2026-10-25T20:25:00Z')); assert.equal(ctx.mvRZ(),true);
+});
+
+test('Bottom navigation removes Saved while preserving tracked game storage and display', () => {
+  assert.doesNotMatch(html,/<button data-bb="saved"/);
+  const {ctx,games}=fixture(); ctx.state.favGames['nba:pre']={};
+  const body={innerHTML:''},tracked={innerHTML:'',hidden:true};
+  ctx.document.getElementById=id=>id==='b4saved-body'?body:id==='b4-tracked-games'?tracked:{classList:{contains:()=>true}};
+  ctx.beta4SavedPaint(); assert.match(tracked.innerHTML,/Tracked Games/); assert.match(tracked.innerHTML,/Away pre/); assert.equal(tracked.hidden,false);
+});
+
+test('Settings container page metadata does not intercept move or preference buttons', async () => {
+  const {ctx}=fixture(); let handler;
+  const node={addEventListener:(_,fn)=>{handler=fn;}};
+  ctx.document.getElementById=()=>node;
+  Object.assign(ctx,{secOrder:()=>ctx.beta4HomeOrder(),applySecOrder:()=>{},renderSettings:()=>{},render:()=>{},setDensity:val=>{ctx.state.density=val;}});
+  const start=html.indexOf('  document.getElementById("ssheet").addEventListener("click", async e => {');
+  const end=html.indexOf('  // Home Screen apps on iPhone',start);
+  vm.runInContext(html.slice(start,end),ctx);
+  const container={dataset:{b4SettingsPage:'sections'}};
+  const move={dataset:{secMv:'worth',dir:'-1'}};
+  await handler({target:{closest:selector=>selector==='[data-sec-mv]'?move:selector==='[data-b4-settings-page]'?container:null}});
+  assert.equal(ctx.beta4HomeOrder()[0],'worth');
+  const preference={dataset:{set:'density',val:'expanded'}};
+  await handler({target:{closest:selector=>selector==='[data-set]'?preference:selector==='[data-b4-settings-page]'?container:null}});
+  assert.equal(ctx.state.density,'expanded');
 });

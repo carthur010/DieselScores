@@ -304,3 +304,27 @@ body:has(#ssheet:not([hidden]).b4-settings) #botbar, body:has(#sheet:not([hidden
 #lsheet .follow { min-width: 44px; min-height: 44px; font-size: 12px; }
 .b4-card-compact .b4-card-foot { flex-wrap: wrap; row-gap: 2px; }
 .b4-card-compact .b4-card-clock { flex: 1 0 60px; }
+/* Home section controls and shared section ordering. */
+#main.b4-home-feed { display: block !important; }
+.b4-section-empty { margin: 0; padding: 13px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--muted); font-size: 13px; line-height: 1.45; }
+.b4-section-control-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 9px; }
+.b4-section-control-head > b { font-size: 15px; }
+.b4-section-control-head > b > span { color: var(--muted); margin-right: 5px; }
+.b4-section-toggle { min-width: 70px; min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); background: var(--surface); font-size: 13px; font-weight: 650; }
+.b4-section-toggle.on { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+.b4-section-movers { display: flex; gap: 8px; }
+.b4-section-movers button { flex: 1; min-height: 44px; padding: 8px; border: 1px solid var(--line); border-radius: 9px; font-size: 13px; color: var(--fg); }
+.b4-section-movers button:disabled { opacity: .35; }
+.b4-section-rules summary { font-weight: 700; font-size: 14px; min-height: 30px; cursor: pointer; }
+.b4-section-rules p { margin-top: 12px; }
+.b4-reason { display: inline-block; width: fit-content; max-width: 100%; padding: 4px 7px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 650; line-height: 1.25; overflow-wrap: anywhere; }
+.b4-row .b4-reason { margin-top: 4px; }
+.b4-home-feed .mv-mini { margin: 0; gap: 6px; }
+.b4-home-feed .mv-foot { padding: 10px 0 0; }
+.b4-home-feed .mv-sm .mv-tag { font-size: 12px; }
+.b4-home-feed .mv-sm .mv-net { font-size: 12px; }
+:root[data-home="bar"] .botbar { grid-template-columns: repeat(2,minmax(0,1fr)); }
+#b4-tracked-games[hidden] { display: none; }
+#b4-tracked-games { margin: 0 0 20px; }
+#b4-tracked-games > h2 { font-size: 18px; margin: 0 0 8px; }
+#b4-tracked-games > p { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
