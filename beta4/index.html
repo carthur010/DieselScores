@@ -6232,8 +6232,9 @@ button.brand, button.brand span { color: var(--accent); }
   function beta4Filters(el, games, everything) {
     el.hidden = false;
     const chosen = [...new Set(state.favLeagues.filter(id => LG[id]))].slice(0, 5);
-    const extra = b4League !== "all" && !chosen.includes(b4League) && LG[b4League];
-    el.innerHTML = `<div class="b4-league-shortcuts"><button class="b4-league" data-b4-league="all" aria-pressed="${b4League === "all"}">All</button>` + chosen.map(id => `<button class="b4-league" data-b4-league="${id}" aria-pressed="${b4League === id}">${esc(b4Short(LG[id]))}</button>`).join("") + `<button class="b4-league b4-more ${extra ? "b4-more-selected" : ""}" data-b4-more aria-label="More Leagues${extra ? ". Selected " + esc(extra.name) : ""}" aria-expanded="false" aria-controls="b4-league-picker">${extra ? esc(b4Short(extra)) + " ▾" : "More"}</button></div><div class="b4-league-picker" id="b4-league-picker" role="group" aria-label="Choose A League" hidden><label class="b4-picker-search">Find A League<input type="search" data-b4-league-search placeholder="Search Leagues" autocomplete="off"></label><div data-b4-league-options>${beta4LeagueMenu()}</div></div>`;
+    const selectedLeague = b4HomeScope() ? b4League : state.tab;
+    const extra = selectedLeague !== "all" && !chosen.includes(selectedLeague) && LG[selectedLeague];
+    el.innerHTML = `<div class="b4-league-shortcuts"><button class="b4-league" data-b4-league="all" aria-pressed="${selectedLeague === "all"}">All</button>` + chosen.map(id => `<button class="b4-league" data-b4-league="${id}" aria-pressed="${selectedLeague === id}">${esc(b4Short(LG[id]))}</button>`).join("") + `<button class="b4-league b4-more ${extra ? "b4-more-selected" : ""}" data-b4-more aria-label="More Leagues${extra ? ". Selected " + esc(extra.name) : ""}" aria-expanded="false" aria-controls="b4-league-picker">${extra ? esc(b4Short(extra)) + " ▾" : "More"}</button></div><div class="b4-league-picker" id="b4-league-picker" role="group" aria-label="Choose A League" hidden><label class="b4-picker-search">Find A League<input type="search" data-b4-league-search placeholder="Search Leagues" autocomplete="off"></label><div data-b4-league-options>${beta4LeagueMenu()}</div></div>`;
   }
   function beta4HasStarredTeam(g) { return g.teams.some(t => isFavTeam(g.lg, t.abbr)); }
   function beta4Heart(g) {
