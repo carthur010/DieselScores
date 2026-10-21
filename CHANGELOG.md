@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Live and Beta 3.0 (1:30 AM)
+- My Games (Bottom Bar) now has Your Leagues at the bottom, like Your Day: one row per league with today's count, tap to drop its games down, "All NHL Scores ›" to open the league page, and Edit Order. The "Off today" and "Updated" lines stay last.
+
 ## Oct 21, 2026: Live (1:25 AM)
 - Shipped everything from Beta 3.0 since the Oct 19 ship (see the Oct 20 and Oct 21 Beta 3.0 entries below): soccer next matches, smarter refresh, saved Multiview pins, cleaner Up Next, Final section and footer lines, Smart Open To on busy slates only, short channel names, 44-point taps, Back To Today, Your Day's new header and Your Leagues drop-downs, The Lineup name, and Charles's saved display defaults. The look stays live's: same header, date strip, tabs, section cards and game rows.
 - The previous live app is kept at /live-oct19/ (carthur010.github.io/DieselScores/live-oct19/) in case anything needs a quick comparison or rollback. It shares the same saved teams and settings.

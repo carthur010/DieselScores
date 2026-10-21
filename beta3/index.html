@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 3.0</title>
-<meta name="build" content="20261021012500">
+<meta name="build" content="20261021013000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 3.0">
@@ -1355,7 +1355,7 @@ button.brand, button.brand span { color: var(--accent); }
 .ln-lg i { font-size: 16px; }
 .lg-foot { padding: 8px 16px 12px; border-top: 1px solid var(--line); }
 #main > [data-block="fy-lgs"] { order: 100; }
-:root[data-home="day"] #main > .updated { order: 101; }
+#main > .updated { order: 101; }
 .ln-lg-x { display: grid; place-items: center; width: 16px; height: 16px; color: var(--muted); transition: transform .15s; transform: rotate(180deg); }
 .ln-lg-x svg { width: 14px; height: 14px; }
 .ln-lg.open .ln-lg-x { transform: none; }
@@ -3978,7 +3978,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (finals.length) html += block("fy-final", "Final", "", lnList(finals));
     if (L === "rail" && !games.length) html += `<div class="block empty">No games ${pickedNothing() ? "" : "in your leagues "}on ${esc(dayLabel(state.date))}.${findMore()}</div>`;
     html += upNextHTML(L === "rail" ? games.filter(isMine) : mine);
-    if (L === "day") html += yourLeagues();
+    if (L !== "rail") html += yourLeagues();   // Your Day and My Games (Bottom Bar)
     specialsFor("live").forEach(e => { html += BLOCK[e.kind](e); });
     html += offToday();
     if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}${isToday() ? " · Refreshes automatically" : ""}</p>`;
