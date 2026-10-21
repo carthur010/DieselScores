@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — Record Alignment
+- Right-aligned pregame team records in Expanded cards.
+
 ## Oct 21, 2026: Beta 4.0 — Consistent Title Case
 - Capitalized section headings and action labels consistently, including Your Games, All Games, Live Now, Upcoming Games and Saved Games.
 
