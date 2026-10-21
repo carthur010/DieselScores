@@ -103,7 +103,7 @@ function scheduleFixture() {
   const ctx = {
     state: { favMeta: { 'nba:A': { lg: 'nba', id: '1' } }, next: {} },
     LG: { nba: { path: 'basketball/nba' } }, API: 'https://example.test/',
-    Date, placeName: () => '', ymd: () => '20261022',
+    Date, placeName: () => '', ymd: () => '20261022', normalize: (ev, lg) => ({ id: ev.id, lg, teams: ev.competitions[0].competitors }),
     fetch: async () => ({ ok: true, json: async () => ({ events }) })
   };
   vm.createContext(ctx);
@@ -472,4 +472,48 @@ test('Empty home sections omit their headings and return automatically when popu
   assert.equal(ctx.beta4SectionShown('worth'),true);
   const pick={...games[0],id:'pick',mine:false}; games.push(pick); ctx.worthPicks=gs=>gs.filter(g=>g.id==='pick');
   result=ctx.beta4Home(games); assert.match(result,/<h2>Worth A Watch<\/h2>/);
+});
+
+
+test('Starred teams omit hearts in every density and featured games; tracked-only games keep untrack', () => {
+  const { ctx, games } = fixture();
+  ctx.isFavTeam = (_, abbr) => abbr === 'A';
+  for (const density of ['simple', 'compact', 'expanded']) {
+    ctx.state.density = density;
+    assert.doesNotMatch(ctx.beta4Rows([games[1]]), /data-favgame=/);
+    assert.doesNotMatch(ctx.beta4Rows([games[3]]), /data-favgame=/);
+  }
+  assert.doesNotMatch(ctx.beta4Feature(games).html, /data-favgame=/);
+  assert.doesNotMatch(ctx.beta4Card(games[3], 'expanded'), /b4-card-foot/);
+  ctx.isFavTeam = () => false;
+  ctx.state.favGames['nba:pre'] = true;
+  assert.match(ctx.beta4Card(games[1]), /Stop Tracking/);
+  assert.match(ctx.beta4Row(games[1]), /Stop Tracking/);
+});
+
+test('Next For Your Teams uses shared tiles, correct home/away order and future dates', () => {
+  const { ctx, games } = fixture();
+  ctx.nextWhen = () => 'Tomorrow · 7:00 PM';
+  ctx.state.favs = new Set(['nba:K']);
+  ctx.state.favMeta['nba:K'] = { lg: 'nba', id: '1', abbr: 'K', name: 'Kings', logo: 'kings.png' };
+  ctx.state.next['nba:K'] = { id: 'tomorrow', date: '2026-10-22T23:00:00Z', at: '@', opp: 'C', oppName: 'Clippers', oppLogo: 'clippers.png' };
+  ctx.isFavTeam = (_, abbr) => abbr === 'K';
+  const next = ctx.beta4NextGame({ m: ctx.state.favMeta['nba:K'], n: ctx.state.next['nba:K'] });
+  assert.equal(next.teams[0].name, 'Kings');
+  assert.equal(next.teams[1].logo, 'clippers.png');
+  assert.equal(next.state, 'pre');
+  assert.equal(next.teams[0].score, '');
+  ctx.state.next['nba:K'].at = 'vs';
+  assert.equal(ctx.beta4NextGame({ m: ctx.state.favMeta['nba:K'], n: ctx.state.next['nba:K'] }).teams[1].name, 'Kings');
+  for (const density of ['simple', 'compact', 'expanded']) {
+    ctx.state.density = density;
+    const result = ctx.beta4Home(games);
+    const section = result.split('<h2>Next For Your Teams</h2>')[1].split('</section>')[0];
+    assert.match(section, /Tomorrow · 7:00 PM/);
+    assert.match(section, /Kings/);
+    assert.match(section, /Clippers/);
+    assert.match(section, /data-game="nba:tomorrow"/);
+    assert.match(section, density === 'simple' ? /b4-rows/ : /b4-scorecard/);
+    assert.doesNotMatch(section, /data-favgame=|ln-nx/);
+  }
 });

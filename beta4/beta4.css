@@ -328,3 +328,6 @@ body:has(#ssheet:not([hidden]).b4-settings) #botbar, body:has(#sheet:not([hidden
 #b4-tracked-games { margin: 0 0 20px; }
 #b4-tracked-games > h2 { font-size: 18px; margin: 0 0 8px; }
 #b4-tracked-games > p { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+
+/* Starred teams are tracked automatically; reclaim the redundant heart column. */
+.b4-row.b4-row-no-heart { grid-template-columns: minmax(0,1fr); padding-right: 10px; }

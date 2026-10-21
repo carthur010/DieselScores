@@ -2,6 +2,11 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — Consistent Game Tiles
+- Next For Your Teams uses the shared Simple, Compact and Expanded game tiles, with both teams and the future date.
+- Games involving starred teams omit the redundant tracking heart. Other games keep their tracking control; finished expanded tiles omit empty action footers.
+- Game counts use singular and plural labels correctly.
+
 ## Oct 21, 2026: Beta 4.0 — Hide Empty Sections
 - Empty home sections omit their heading and placeholder message, while remaining enabled in Settings. They reappear automatically when qualifying content is available.
 
