@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 3.0 (1:00 AM, not on live yet)
+- Simple cards are tighter: less padding above and below the teams, rows closer together, and a little less space between cards.
+
 ## Oct 21, 2026: Beta 3.0 (12:55 AM, not on live yet)
 - Simple cards: the channel no longer cuts off ("NBA Leag..." is now "League Pass", and long names wrap to a second line).
 - Up Next: matches abroad show just the city ("Bournemouth", "München"), and the date line wraps instead of cutting off.
