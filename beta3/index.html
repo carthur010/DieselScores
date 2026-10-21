@@ -1256,23 +1256,12 @@ button.brand, button.brand span { color: var(--accent); }
 .h3pill.ago-btn svg { width: 11px; height: 11px; }
 #main > .fy-tonight { order: -1; }
 #main > .mv-bar { order: var(--o-mv, 1); }
-/* Bottom Bar header, slimmed (Oct 20): one row (The Lineup, date, size), text tabs with an underline, date strip on demand */
-:root[data-home="bar"] .h3row.bb { padding-block: 10px 4px; gap: 10px; }
-:root[data-home="bar"] .h3row.bb .brand { font-size: 24px; }
+/* Bottom Bar header: the title, size pill, date strip and filled My Games / Live / All switch, like live (Oct 21) */
 :root[data-home="bar"] .h3row.bb .brand .betatag { display: none; }
 .h3date { display: inline-flex; align-items: center; gap: 3px; min-height: 36px; padding: 0 4px; border: 0; background: transparent; color: var(--fg); font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; position: relative; }
 .h3date::after { content: ""; position: absolute; inset: -4px -6px; }
 .h3date svg { width: 14px; height: 14px; color: var(--muted); transition: transform .15s; }
 .h3date.on svg { transform: rotate(180deg); }
-:root[data-home="bar"] .h3pill.ago-btn { color: var(--fg); background: var(--surface); border: 1px solid var(--line); font-weight: 600; min-height: 34px; padding: 0 12px; }
-:root[data-home="bar"] .h3pill.ago-btn svg { color: var(--brand-red, #a93439); }
-:root[data-home="bar"] .h3pill.h3dens { width: 34px; height: 34px; }
-:root[data-home="bar"] #tabs { padding-block: 0; margin-bottom: 4px; }
-:root[data-home="bar"] main { padding-top: 6px; }
-:root[data-home="bar"] .h3seg { display: flex; gap: 22px; background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 0; }
-:root[data-home="bar"] .h3seg button { flex: none; min-height: 40px; padding: 0 0 2px; border-radius: 0; background: transparent; color: var(--muted); font-size: 15px; font-weight: 600; border-bottom: 2.5px solid transparent; margin-bottom: -1px; }
-:root[data-home="bar"] .h3seg button.on { background: transparent; color: var(--fg); font-weight: 700; border-bottom-color: var(--brand-red, #a93439); }
-:root[data-home="bar"] .h3seg button .n { color: var(--brand-red, #a93439); opacity: 1; font-weight: 700; }
 /* ===================== Homepage redesign (Oct 21 PDF) =====================
    Bold Title Case section names with a note on the right, then one rounded card per game. */
 .linkish { border: 0; background: transparent; font: inherit; cursor: pointer; padding: 6px 0; }
@@ -3824,7 +3813,7 @@ button.brand, button.brand span { color: var(--accent); }
     return must.concat(other.slice(0, Math.max(0, 6 - must.length)));
   }
   // Your Day and Bottom Bar keep the date strip tucked away until you tap the date (or pick another day)
-  const datesShown = () => !["day", "bar"].includes(state.homeLayout) || state.showCal || !isToday();
+  const datesShown = () => state.homeLayout !== "day" || state.showCal || !isToday();
   const gridOf = list => `<div class="grid">${list.map(g => card(g, true)).join("")}</div>`;
   const byState = (a, b) => (ORD3[a.state] - ORD3[b.state]) || new Date(a.date) - new Date(b.date) || (b.pin - a.pin) || gameRank(a) - gameRank(b);
   function worthHTML(picks) {
@@ -4020,6 +4009,7 @@ button.brand, button.brand span { color: var(--accent); }
     const el = document.getElementById("h3head"), L = state.homeLayout;
     if (L === "classic") { el.innerHTML = ""; return; }
     const liveN = games.filter(g => g.state === "in").length + allSpecial().filter(e => e.state === "in" && state.favLeagues.includes(e.lg.id)).length;
+    const densWord = `<button class="h3pill" data-h3="dens" aria-label="${DENS_NAME[state.density]} scoreboard. Tap to switch">${DENS_NAME[state.density]}</button>`;
     const dens = `<button class="h3pill h3dens" data-h3="dens" aria-label="${DENS_NAME[state.density]} scoreboard. Tap to switch" title="${DENS_NAME[state.density]}">${H3_DENS_IC[state.density] || DENS_NAME[state.density]}</button>`;
     const livePill = liveN ? `<span class="h3pill live"><i></i>${liveN} Live</span>` : "";
     const brand = cls => `<button class="brand ${cls || ""}" data-h3="home" aria-label="The Lineup, home">The Lineup<em class="betatag">Beta 3.0</em></button>`;
@@ -4027,7 +4017,7 @@ button.brand, button.brand span { color: var(--accent); }
     // Bottom Bar: one slim row. The date is a button that opens the strip, so the strip isn't always taking room
     const dayTxt = isToday() ? "Today" : state.date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
     const dateBtn = `<button class="h3date ${state.showCal ? "on" : ""}" data-h3="cal" aria-label="Pick a day" aria-expanded="${!!(state.showCal || !isToday())}">${esc(dayTxt)}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>`;
-    if (L === "bar") el.innerHTML = `<div class="h3row bb">${brand()}${dateBtn}<span class="spacer"></span>${dens}</div>`;
+    if (L === "bar") el.innerHTML = `<div class="h3row bb">${brand()}<span class="spacer"></span>${densWord}</div>`;
     else if (L === "day") {
       const d = state.date.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
       const dTxt = (isToday() ? "Today, " : state.date.toLocaleDateString(undefined, { weekday: "short" }) + ", ") + state.date.toLocaleDateString(undefined, { month: "short", day: "numeric" });

@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 3.0 (1:10 AM, not on live yet)
+- Bottom Bar header is back to live's: big The Lineup title with the Simple / Compact / Expanded pill, the date strip always showing, and the filled My Games / Live / All switch. The Today ▾ button and underline tabs are gone.
+
 ## Oct 21, 2026: Beta 3.0 (1:15 AM, not on live yet)
 - Back to live's look for games and sections: each section is a card with its title, count and collapse arrow, and games are live's rows (Simple, Compact and Expanded as before). The Your Game card is back when your team is live. The PDF card design is switched off.
 - Kept from tonight: the slim header (The Lineup, Today ▾, size icon) and text tabs, the new Up Next rows ("Sharks @ Senators, Tomorrow · 7:00 PM"), the Final section, and the "Off today" and "Updated" lines.
