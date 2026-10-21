@@ -3,7 +3,7 @@
 	"appName": "The Lineup",
 	"webDir": "www",
 	"server": {
-		"url": "https://carthur010.github.io/DieselScores/",
+		"url": "https://carthur010.github.io/TheLineup/",
 		"errorPath": "index.html"
 	},
 	"ios": {

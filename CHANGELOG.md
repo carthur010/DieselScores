@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Live and Beta 3.0 (12:05 PM)
+- The GitHub repo is now TheLineup, so the app lives at https://carthur010.github.io/TheLineup/ (Beta 3.0 at /TheLineup/beta3/). Share links and the iPhone app shell point at the new address. Your teams and settings carry over because they're saved per github.io account, not per repo.
+
 ## Oct 21, 2026: Live and Beta 3.0 (11:56 AM)
 - Out-of-market games on a team's local channel now show the pass you'd watch on: a Kings game on NBC Sports California reads "League Pass" in New York (Simple and Compact), and the watch button says "NBA League Pass". Local channels in your own market (MSG, SNY, YES) and national channels keep their names.
 

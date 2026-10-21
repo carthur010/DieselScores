@@ -1,7 +1,7 @@
 # Scores: Backlog & Roadmap
 
-Live: https://carthur010.github.io/DieselScores/
-Beta: https://carthur010.github.io/DieselScores/beta/
+Live: https://carthur010.github.io/TheLineup/
+Beta: https://carthur010.github.io/TheLineup/beta/
 Full history of updates: [CHANGELOG.md](CHANGELOG.md)
 
 > Beta 2.0 (/beta2) is now a snapshot of beta from Oct 14, 1:57 PM. The old Apple Sports redesign moved to /beta2-apple and stays parked. Its best ideas (game card, Upcoming tab, Stats/Odds, drag-to-reorder) now live in the classic beta.

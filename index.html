@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup</title>
-<meta name="build" content="20261021104800">
+<meta name="build" content="20261021120215">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="The Lineup">
@@ -3004,7 +3004,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (navStack.length > 10) navStack.shift();
   }
   // ---- Share links that open right to a game, team or league
-  const APP_URL = "https://carthur010.github.io/DieselScores/" + (location.pathname.includes("/beta") ? "beta/" : "");
+  const APP_URL = "https://carthur010.github.io/TheLineup/" + (location.pathname.includes("/beta3") ? "beta3/" : location.pathname.includes("/beta") ? "beta/" : "");
   async function shareLink(title, text, param) {
     const url = APP_URL + "?" + param;
     try {
