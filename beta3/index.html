@@ -1281,6 +1281,76 @@ button.brand, button.brand span { color: var(--accent); }
 :root[data-home="bar"] .h3seg button { flex: none; min-height: 40px; padding: 0 0 2px; border-radius: 0; background: transparent; color: var(--muted); font-size: 15px; font-weight: 600; border-bottom: 2.5px solid transparent; margin-bottom: -1px; }
 :root[data-home="bar"] .h3seg button.on { background: transparent; color: var(--fg); font-weight: 700; border-bottom-color: var(--brand-red, #a93439); }
 :root[data-home="bar"] .h3seg button .n { color: var(--brand-red, #a93439); opacity: 1; font-weight: 700; }
+/* ===================== Homepage redesign (Oct 21 PDF) =====================
+   Bold Title Case section names with a note on the right, then one rounded card per game. */
+:root:not([data-home="classic"]) main section.block > .bhead { padding: 22px 2px 10px; align-items: baseline; }
+:root:not([data-home="classic"]) main section.block > .bhead h2 { font-size: 22px; font-weight: 700; letter-spacing: -.01em; text-transform: none; color: var(--fg); font-family: var(--body); }
+:root:not([data-home="classic"]) main section.block > .bhead > .meta { margin-left: auto !important; order: 9; flex: none; font-size: 14px; font-weight: 600; color: var(--muted); }
+:root:not([data-home="classic"]) main section.block > .bhead .tog { display: none; }
+:root:not([data-home="classic"]) main section.block > .bbody { background: transparent; border: 0; border-radius: 0; overflow: visible; }
+:root:not([data-home="classic"]) main section.block[data-block="mv"] > .bbody { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+:root:not([data-home="classic"]) main section.block.closed > .bbody { display: block; }
+.linkish { border: 0; background: transparent; font: inherit; cursor: pointer; padding: 6px 0; }
+:root:not([data-home="classic"]) main .grid { grid-template-columns: 1fr; gap: 12px; }
+:root:not([data-home="classic"])[data-density="compact"] main .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ln-list { display: grid; gap: 12px; }
+.ln-list.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ln { display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; cursor: pointer; min-width: 0; color: var(--fg); }
+.ln b, .ln em { font-style: normal; }
+.ln-t { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-width: 0; }
+.ln-t img, .ln-t i { width: 26px; height: 26px; object-fit: contain; }
+.ln-t b { font-size: 18px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ln-t b small { font-size: 12px; color: var(--muted); font-weight: 600; }
+.ln-t em { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.ln .ln-t em.rec { font-size: 13px; font-weight: 500; color: var(--muted); }
+.ln-t.lose b, .ln-t.lose em { color: var(--muted); }
+.ln-st { font-weight: 700; color: var(--muted); }
+.ln-st.live, .ln-st.fin { color: var(--live); }
+.ln-act { display: inline-flex; gap: 8px; }
+.ln-act .bellbtn { width: 28px; height: 28px; border: 0; background: transparent; color: var(--muted); }
+.ln-act .bellbtn svg { width: 18px; height: 18px; }
+.ln-act .bellbtn.on { color: var(--accent); }
+/* Simple: one row, left column of league / clock / channel */
+.ln-simple { grid-template-columns: 74px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 12px 10px 14px; }
+.ln-meta { display: grid; gap: 2px; font-size: 12px; min-width: 0; }
+.ln-meta b { font-weight: 700; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ln-meta .ln-st { text-transform: uppercase; }
+.ln-meta small { font-size: 12px; font-weight: 700; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ln-teams { display: grid; gap: 8px; min-width: 0; }
+.ln-simple .ln-t { grid-template-columns: 24px minmax(0, 1fr) auto; }
+.ln-simple .ln-t img, .ln-simple .ln-t i { width: 24px; height: 24px; }
+.ln-simple .ln-t em { font-size: 20px; }
+.ln-simple .ln-act { flex-direction: column; gap: 6px; }
+/* Compact and Expanded: league and clock on top, channel and heart/bell under the teams */
+.ln-compact, .ln-expanded { gap: 8px; padding: 10px 12px 10px; }
+.ln-expanded { padding: 14px 16px 16px; gap: 10px; }
+.ln-top, .ln-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.ln-top b { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ln-top .ln-st { font-size: 13px; white-space: nowrap; }
+.ln-foot small { font-size: 13px; font-weight: 700; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.ln-foot { min-height: 28px; }
+.ln-compact .ln-t { grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; }
+.ln-compact .ln-t img, .ln-compact .ln-t i { width: 22px; height: 22px; }
+.ln-compact .ln-t b { font-size: 16px; }
+.ln-compact .ln-t em { font-size: 26px; }
+.ln-list:not(.two) .ln-compact .ln-t b, .ln-expanded .ln-t b { font-size: 18px; }
+.ln-list:not(.two) .ln-compact .ln-t em, .ln-expanded .ln-t em { font-size: 30px; }
+.ln-dd { font-size: 12px; }
+.ln-watch { display: flex; align-items: center; justify-content: center; min-height: 44px; margin-top: 4px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 15px; text-decoration: none; }
+/* Up Next and Your Leagues: one card with rows */
+.ln-card-list { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.ln-nx { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 16px 18px; cursor: pointer; }
+.ln-nx + .ln-nx { border-top: 1px solid var(--line); }
+.ln-nx img { width: 30px; height: 30px; object-fit: contain; }
+.ln-nx-t { display: grid; gap: 3px; min-width: 0; }
+.ln-nx-t b { font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ln-nx-t small { font-size: 13px; font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ln-next { font-style: normal; font-size: 13px; font-weight: 800; letter-spacing: .04em; color: var(--accent); }
+.ln-chev, .ln-lg i { font-style: normal; font-size: 18px; color: var(--accent); }
+.ln-lg { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 16px 20px; border: 0; background: transparent; color: var(--fg); font: inherit; text-align: left; cursor: pointer; }
+.ln-lg + .ln-lg { border-top: 1px solid var(--line); }
+.ln-lg span { display: grid; gap: 3px; } .ln-lg b { font-size: 17px; } .ln-lg small { font-size: 13px; font-weight: 600; color: var(--muted); }
+:root:not([data-home="classic"]) main .updated { text-align: left; font-size: 13px; font-weight: 600; color: var(--muted); margin: 4px 2px 0; }
 </style>
 </head>
 <body>
@@ -2623,7 +2693,46 @@ button.brand, button.brand span { color: var(--accent); }
       ${g.state === "pre" ? "" : `<span class="sc">${esc(t.score)}</span>`}
     </div>`;
   }
+  // ---- Homepage redesign (Oct 21 PDF): one card per game in all three sizes, for the Beta 3.0 layouts.
+  // Simple: league, clock and channel in a left column, then teams, scores, heart and bell.
+  // Compact: league and clock on top, teams with big scores, channel and heart/bell underneath (two-up).
+  // Expanded: Compact full width, plus a Watch On button.
+  const isV3 = () => state.homeLayout && state.homeLayout !== "classic";
+  function lnCard(g, showTag) {
+    const [a, h] = g.teams;
+    if (!a || !h) return "";
+    const d = state.density, fin = g.state === "post", pre = g.state === "pre";
+    const lose = (t, o) => !pre && ((fin && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
+    const st = pre ? (g.status && g.status !== timeLabel(g.date) && !/^\d/.test(g.status) ? g.status : timeLabel(g.date)) : g.status;
+    const net = !fin ? netLabel(g) : "";
+    const sub = fin ? (g.series || netLabel(g) || "") : net;
+    const tag = showTag ? gameTag(g) : "";
+    const lg = (g.lg.short || g.lg.name) + (tag ? " · " + tag : "");
+    const nm = t => `${t.seed ? `<small>(${esc(t.seed)})</small> ` : t.rank ? `<small>${esc(t.rank)}</small> ` : ""}${esc(t.name || t.abbr)}`;
+    const sc = t => pre ? `<em class="rec">${esc(t.record || "")}</em>` : `<em>${esc(t.score)}</em>`;
+    const row = (t, o) => `<div class="ln-t ${lose(t, o) ? "lose" : ""}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : "<i></i>"}<b>${nm(t)}</b>${sc(t)}</div>`;
+    const acts = fin ? "" : `<span class="ln-act">${heartBtn(g)}${bellBtn(g)}</span>`;
+    const stc = `ln-st ${g.state === "in" ? "live" : fin ? "fin" : ""}`;
+    const open = `class="ln ln-${d} tap" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name)}: game details"`;
+    if (d === "simple") return `<article ${open}>
+      <span class="ln-meta"><b>${esc(lg)}</b><span class="${stc}">${esc(st)}</span><small>${esc(sub)}</small></span>
+      <span class="ln-teams">${row(a, h)}${row(h, a)}</span>${acts}</article>`;
+    const w = d === "expanded" && !fin ? g.watch?.find(x => x.url) : null;
+    return `<article ${open}>
+      <div class="ln-top"><b>${esc(lg)}</b><span class="${stc}">${esc(st)}</span></div>
+      ${row(a, h)}${row(h, a)}
+      ${miniDD(g) ? `<div class="ln-dd">${miniDD(g)}</div>` : ""}
+      <div class="ln-foot"><small>${esc(sub)}</small>${acts}</div>
+      ${w ? `<a class="ln-watch" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">Watch On ${esc(w.app)}</a>` : ""}
+    </article>`;
+  }
+  // A section's games: two-up in Compact (one game goes full width), one column otherwise
+  function lnList(list, showTag) {
+    const two = state.density === "compact" && list.length > 1;
+    return `<div class="ln-list ${two ? "two" : ""}">${list.map(g => lnCard(g, showTag)).join("")}</div>`;
+  }
   function card(g, showLg) {
+    if (isV3()) return lnCard(g);
     if (state.density === "simple") return simpleRow(g, showLg === true);   // Simple stays simple, your teams too
     if (state.density === "compact" && !(state.expandFavs && g.fav)) return miniCard(g, showLg === true);
     return `<article class="g tap" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(g.teams.map(x => x.name).join(" vs "))}: game details">
@@ -2732,6 +2841,7 @@ button.brand, button.brand span { color: var(--accent); }
   // Your teams strip
   // Simple: just a list of games. Time, two teams, score, bell.
   function simpleRow(g, showLg) {
+    if (isV3()) return lnCard(g);
     const [a, h] = g.teams;
     if (!a || !h) return "";
     const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
@@ -2761,6 +2871,7 @@ button.brand, button.brand span { color: var(--accent); }
     return p.statYardage ?? null;
   }
   function miniCard(g, showLg) {
+    if (isV3()) return lnCard(g);
     const [a, h] = g.teams;
     const net = g.state !== "post" ? netLabel(g) : "";   // the channel, like the other views
     if (!a || !h) return "";
@@ -3695,6 +3806,7 @@ button.brand, button.brand span { color: var(--accent); }
   const gridOf = list => `<div class="grid">${list.map(g => card(g, true)).join("")}</div>`;
   const byState = (a, b) => (ORD3[a.state] - ORD3[b.state]) || new Date(a.date) - new Date(b.date) || (b.pin - a.pin) || gameRank(a) - gameRank(b);
   function worthHTML(picks) {
+    if (isV3()) return lnList(picks, picks.length > 1);
     if (state.density === "simple") return gridOf(picks);
     if (state.density === "compact") return `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>`;
     if (state.homeLayout === "day") return `<div class="feat hero">${featured(picks[0])}</div>${picks.length > 1 ? `<div class="wrows">${picks.slice(1).map(worthRow).join("")}</div>` : ""}`;
@@ -3713,19 +3825,26 @@ button.brand, button.brand span { color: var(--accent); }
     if (n?.myShort && n.myShort.length <= 14) return n.myShort;
     return m.name || m.abbr;
   }
+  // Up Next (Oct 21 redesign): "Rangers @ Blue Jackets", "Tomorrow · 7:00 PM · Columbus, OH", soonest first and
+  // marked NEXT. Teams in their off-season sit out; "Off today" at the bottom covers the leagues.
+  function nextWhen(d) {
+    const dt = new Date(d);
+    if (sameDay(dt, new Date())) return (dt.getHours() >= 17 ? "Tonight" : "Today") + " · " + timeLabel(d);
+    return whenLabel(d).replace(/\s+(\d{1,2}:\d{2}\s*[AP]M)$/i, " · $1");
+  }
   function upNextRows(ups) {
-    const off = x => x.n?.none ? 1 : 0;
-    return `<div class="nxt">${ups.slice().sort((a, b) => off(a) - off(b)).map(({ m, n }) => {
+    const list = ups.filter(x => x.n?.date).sort((a, b) => new Date(a.n.date) - new Date(b.n.date) || favRank(a.k) - favRank(b.k));
+    const waiting = ups.filter(x => !x.n || (!x.n.date && !x.n.none));
+    if (!list.length) return waiting.length ? `<p class="hint" style="padding:14px 16px">Checking schedules…</p>` : "";
+    return `<div class="ln-card-list">${list.map(({ m, n }, i) => {
       const lg = LG[m.lg] || {};
-      let when;
-      const comp = compShort(n?.comp), opp = lg.soccer && n?.oppName && n.oppName.length <= 14 ? n.oppName : n?.opp;
-      if (n?.date) when = `${comp ? `<i class="nxt-comp">${esc(comp)}</i> ` : ""}${n.at === "@" ? "at" : "vs"} ${esc(opp)}<small>${esc(whenLabel(n.date))}</small>${n.place ? `<small class="pl">${esc(n.place)}</small>` : ""}`;
-      else if (n?.none) { const b = BACK_IN.find(([re]) => re.test(lg.path || "")); when = lg.soccer ? "<small>No Fixtures Posted</small>" : `<small>Season Over${b ? " · Back In " + b[1] : ""}</small>`; }
-      else when = "<small>Checking…</small>";
-      return `<div class="nxt-row${n?.none ? " off" : ""}" ${n?.id ? `data-game="${esc(m.lg)}:${esc(n.id)}" role="button" tabindex="0"` : ""}>
+      const me = teamShort(m, n), opp = n.oppName && n.oppName.length <= 16 ? n.oppName : n.opp;
+      const comp = compShort(n.comp);
+      const title = n.at === "@" ? `${me} @ ${opp}` : `${opp} @ ${me}`;
+      return `<div class="ln-nx" ${n.id ? `data-game="${esc(m.lg)}:${esc(n.id)}" role="button" tabindex="0"` : ""}>
         ${m.logo ? `<img src="${esc(m.logo)}" alt="">` : "<span></span>"}
-        <span class="nm">${esc(teamShort(m, n))}<small>${esc(lg.short || lg.name || "")}</small></span>
-        <span class="when">${when}</span>
+        <span class="ln-nx-t"><b>${esc(title)}${comp ? ` <i class="nxt-comp">${esc(comp)}</i>` : ""}</b><small>${esc(nextWhen(n.date))}${n.place ? " · " + esc(n.place) : ""}</small></span>
+        ${i === 0 ? `<em class="ln-next">NEXT</em>` : `<i class="ln-chev">›</i>`}
       </div>`; }).join("")}</div>`;
   }
   // Teams with no game today: their next one
@@ -3733,8 +3852,8 @@ button.brand, button.brand span { color: var(--accent); }
     const playing = new Set(mine.flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
     const ups = [...state.favs].filter(k => !playing.has(k)).map(k => ({ k, m: state.favMeta[k], n: state.next[k] }))
       .filter(x => x.m).sort((a, b) => favRank(a.k) - favRank(b.k));
-    if (!ups.length) return "";
-    return block("fy-next", "Up Next", "", upNextRows(ups));
+    const body = ups.length ? upNextRows(ups) : "";
+    return body ? block("fy-next", "Up Next", "", body) : "";
   }
   // ---- Any Game That's On: the one best live game you can actually watch right now
   let agoSkip = [];
@@ -3806,48 +3925,52 @@ button.brand, button.brand span { color: var(--accent); }
     const L = state.homeLayout;
     let html = "";
     if (pickedNothing()) html += `<div class="pick-banner"><div><b>You're seeing every league</b><span>Follow your teams and leagues and The Lineup fills in with yours.</span></div><button class="chip on" data-open-welcome>Pick Favorites</button></div>`;
+    // Homepage redesign (Oct 21): Your Teams, Worth A Watch, You Are Looking Live, Final, Up Next. Your Game hero and
+    // the Tonight card step aside; your finished games move down to Final.
+    heroGame = null;
     const mine = games.filter(isMine).sort(byState);
-    const hero = myHero(games);
-    html += heroHTML(hero);
-    const rest = mine.filter(g => g !== hero);
+    const mineOn = mine.filter(g => g.state !== "post");
     const mvHTML = mvSection();
     const picks = isToday() ? worthPicks(games) : [];
     const pickIds = new Set(picks.map(g => g.id));
     const mineIds = new Set(mine.map(g => g.id));
-    // Rail has no Your Teams section, so your live games stay in this list there
-    const live = games.filter(g => g.state === "in" && g !== hero && !pickIds.has(g.id) && !mvHome.has(mvKey(g)) && (L === "rail" || !mineIds.has(g.id))).sort(byState);
-    const liveMine = rest.filter(g => g.state === "in").length;
-    // Your games are all done and others are live: lead with what's on, and fold your finals into one line further down
-    const anyOn = games.some(g => g.state === "in");
-    const doneMine = L !== "rail" && isToday() && !hero && rest.length && rest.every(g => g.state === "post") && anyOn;
-    if (doneMine) html += tonightCard(rest, games);
-    else if (L !== "rail") {
-      if (rest.length) html += block("fy-mine", hero ? "Your Other Teams" : "Your Teams", liveMine ? `${liveMine} Live · ${rest.length} Total` : countLabel(rest.length, rest) + (isToday() ? " Today" : ""), gridOf(rest));
-      else if (hero) { /* the hero is your only game today */ }
-      else html += `<div class="block empty">None of your teams play ${isToday() ? "today" : "on " + esc(dayLabel(state.date))}.${state.favs.size ? "" : `<div class="find-more"><button class="chip" data-open-sheet>Follow Teams</button></div>`}</div>`;
+    // League Rail has no Your Teams section, so your live games stay in this list there
+    const live = games.filter(g => g.state === "in" && !pickIds.has(g.id) && !mvHome.has(mvKey(g)) && (L === "rail" || !mineIds.has(g.id))).sort(byState);
+    const finals = games.filter(g => g.state === "post" && (isMine(g) || g.playoff)).sort((x, y) => (isMine(y) - isMine(x)) || new Date(y.date) - new Date(x.date)).slice(0, 8);
+    const liveN = list => list.filter(g => g.state === "in").length;
+    if (L !== "rail") {
+      const n = liveN(mineOn);
+      if (mineOn.length) html += block("fy-mine", "Your Teams", n ? `${n} Live` : countLabel(mineOn.length, mineOn) + (isToday() ? " Today" : ""), lnList(mineOn));
+      else if (!mine.length) html += `<div class="block empty">None of your teams play ${isToday() ? "today" : "on " + esc(dayLabel(state.date))}.${state.favs.size ? "" : `<div class="find-more"><button class="chip" data-open-sheet>Follow Teams</button></div>`}</div>`;
     }
     html += mvHTML;
-    if (picks.length) html += block("worth", "Worth A Watch", countLabel(picks.length, picks), worthHTML(picks));
-    if (live.length) html += block("fy-live", "You Are Looking Live", countLabel(live.length, live), gridOf(live));
-    if (L === "rail") {
-      // Everything else today in your world, grouped by start time; finals at the bottom
-      const shown = new Set([...pickIds, ...live.map(g => g.id)]);
-      const rest = games.filter(g => !shown.has(g.id) && g.state !== "in");
-      const pre = rest.filter(g => g.state === "pre").sort((a, b) => new Date(a.date) - new Date(b.date));
-      const groups = [];
-      pre.forEach(g => { const t = timeLabel(g.date), last = groups.at(-1); if (last && last.t === t) last.list.push(g); else groups.push({ t, list: [g] }); });
-      const fin = rest.filter(g => g.state === "post").sort((a, b) => (isMine(b) - isMine(a)) || new Date(b.date) - new Date(a.date));
-      if (fin.length) groups.push({ t: "Final", list: fin });
-      groups.forEach(({ t, list }) => { html += `<h3 class="tgrp-h">${esc(t)}</h3>${gridOf(list)}`; });
-      if (!games.length) html += `<div class="block empty">No games ${pickedNothing() ? "" : "in your leagues "}on ${esc(dayLabel(state.date))}.${findMore()}</div>`;
-    } else if (!live.length && !picks.length && mine.length && L === "bar") {
-      // nothing else is on: point to what's next
-    }
-    if (L !== "rail") html += upNextHTML(mine);
-    if (L === "day") html += everythingElse();
+    if (picks.length) html += block("worth", "Worth A Watch", picks.length === 1 ? (gameTag(picks[0]) || "1 Game") : countLabel(picks.length, picks), lnList(picks, picks.length > 1));
+    if (live.length) html += block("fy-live", "You Are Looking Live", `${live.length} Live`, lnList(live));
+    if (finals.length) html += block("fy-final", "Final", "", lnList(finals));
+    if (L === "rail" && !games.length) html += `<div class="block empty">No games ${pickedNothing() ? "" : "in your leagues "}on ${esc(dayLabel(state.date))}.${findMore()}</div>`;
+    html += upNextHTML(L === "rail" ? games.filter(isMine) : mine);
+    if (L === "day") html += yourLeagues();
     specialsFor("live").forEach(e => { html += BLOCK[e.kind](e); });
-    if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}${isToday() ? " · refreshes automatically" : ""}</p>`;
+    html += offToday();
+    if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}${isToday() ? " · Refreshes automatically" : ""}</p>`;
     return html;
+  }
+  // "Off today: NFL, WNBA, College Basketball": your leagues with nothing on this day
+  function offToday() {
+    if (pickedNothing() || state.loading) return "";
+    const off = state.favLeagues.filter(id => LG[id] && state.data[id] && !state.data[id].error && !(state.data[id].events || []).length && !(state.data[id].special || []).length).map(id => LG[id].short || LG[id].name);
+    return off.length ? `<p class="updated off">Off ${isToday() ? "today" : "this day"}: ${esc(off.join(", "))}</p>` : "";
+  }
+  // Your Day: your leagues with games this day, one tap to the league's scores
+  function yourLeagues() {
+    const cnt = {};
+    allGames().forEach(g => { cnt[g.lg.id] = (cnt[g.lg.id] || 0) + 1; });
+    allSpecial().forEach(e => { cnt[e.lg.id] = (cnt[e.lg.id] || 0) + 1; });
+    const ids = state.favLeagues.filter(id => LG[id] && cnt[id]);
+    if (!ids.length) return "";
+    const rows = ids.map(id => { const lg = LG[id], n = cnt[id];
+      return `<button class="ln-lg" data-go-tab="${id}"><span><b>${esc(lg.short || lg.name)} · ${n} ${lg.kind ? (n === 1 ? "event" : "events") : lg.soccer ? (n === 1 ? "match" : "matches") : (n === 1 ? "game" : "games")}</b><small>Open league scores</small></span><i>›</i></button>`; }).join("");
+    return `<section class="block" data-block="fy-lgs"><div class="bhead"><h2>Your Leagues</h2><button class="meta linkish" data-edit-leagues>Edit order</button></div><div class="bbody"><div class="ln-card-list">${rows}</div></div></section>`;
   }
   // Your Day: every league with games this day, yours first, one tap in
   function everythingElse() {
@@ -4039,7 +4162,7 @@ button.brand, button.brand span { color: var(--accent); }
         if (tab === "live") shown = new Set(picks.map(g => g.id));
         html += block("worth", "Worth A Watch", countLabel(picks.length, picks),
           // More than 4 picks: switch to the two-up compact cards so the section doesn't take over the page
-          state.density === "simple" ? gridOf(picks) : state.density === "compact" ? `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>` : worthRows(picks));
+          isV3() ? lnList(picks, picks.length > 1) : state.density === "simple" ? gridOf(picks) : state.density === "compact" ? `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>` : worthRows(picks));
       }
     }
 
@@ -4067,7 +4190,7 @@ button.brand, button.brand span { color: var(--accent); }
       const ups = [...state.favs].filter(k => !playing.has(k)).map(k => ({ k, m: state.favMeta[k], n: state.next[k] }))
         .filter(x => x.m).sort((a, b) => favRank(a.k) - favRank(b.k));
       if (ups.length) {
-        html += block("upnextteams", "Up Next", "", upNextRows(ups));
+        { const body = upNextRows(ups); if (body) html += block("upnextteams", "Up Next", "", body); }
       }
       if (state.updatedAt) html += `<p class="updated">Updated ${state.updatedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}${isToday() ? " · refreshes automatically" : ""}</p>`;
       main.innerHTML = html;
