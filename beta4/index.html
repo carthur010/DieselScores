@@ -2233,6 +2233,7 @@ button.brand, button.brand span { color: var(--accent); }
       if (full) { state.fullAt = Date.now(); state.fullDay = day; }
       // Failed attempts must not claim that old scores have just been updated.
       if (results.some(r => r.status === "fulfilled")) state.updatedAt = new Date();
+      state.loading = false;
       if (state.autoPending) { state.autoPending = false; state.tab = homeTab(); }
       if (isToday()) { checkAlerts(); checkReminders(); }
       syncScheduled();
