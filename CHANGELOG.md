@@ -2,6 +2,10 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Live and Beta 3.0 (1:55 PM)
+- Leagues tab: real logos on every tile. NCAA (NCAAF, NCAAM, NCAAW), WSL, EFL Cup, Community Shield, Women's FA Cup, WSL Players Cup, Ligue 1, Conference League, Women's Champions League, NWSL, PGA Tour, LPGA, ATP and WTA. Wide logos get a little more room. If a logo fails to load, the tile falls back to its short badge.
+- Leagues with no games that day leave the line under the name blank instead of showing a dash.
+
 ## Oct 21, 2026: Live and Beta 3.0 (12:05 PM)
 - The GitHub repo is now TheLineup, so the app lives at https://carthur010.github.io/TheLineup/ (Beta 3.0 at /TheLineup/beta3/). Share links and the iPhone app shell point at the new address. Your teams and settings carry over because they're saved per github.io account, not per repo.
 
