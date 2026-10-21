@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — College Basketball Names
+- Renamed the college basketball leagues NCAA Men’s Basketball and NCAA Women’s Basketball, with NCAAMB and NCAAWB as their short labels.
+
 ## Oct 21, 2026: Beta 4.0 — Simpler Navigation
 - Moved Search and Settings from the header to the bottom navigation alongside Scores and My Teams. Kept the view selector in the header.
 - Kept bottom navigation available in Settings and reduced its spacing while retaining labeled 44px touch targets.
