@@ -98,6 +98,8 @@
 .b4-card-team { display: flex; align-items: center; gap: 7px; min-width: 0; min-height: 31px; }
 .b4-card-team img, .b4-card-logo { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
 .b4-card-name { font-size: 16px; font-weight: 700; line-height: 1.15; overflow-wrap: anywhere; min-width: 0; }
+.b4-card-team-label { display: flex; align-items: baseline; flex-wrap: wrap; gap: 3px 7px; min-width: 0; flex: 1; }
+.b4-card-record { color: var(--muted); font-size: 11px; font-weight: 400; white-space: nowrap; }
 .b4-card-score { margin-left: auto; padding-left: 3px; flex-shrink: 0; font-size: 26px; line-height: 1; font-weight: 750; font-variant-numeric: tabular-nums; }
 .b4-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-top: auto; min-height: 32px; }
 .b4-card-tv { margin-left: auto; max-width: 72%; text-align: right; font-size: 11px; font-weight: 650; color: var(--muted); min-width: 0; overflow-wrap: anywhere; }
@@ -108,15 +110,24 @@
 .b4-card-actions .bellbtn::after { content: ""; position: absolute; inset: -4px 0; }
 .b4-card-actions .bellbtn svg { width: 18px; height: 18px; }
 .b4-card-actions .bellbtn.on { color: var(--accent); }
-.b4-card-expanded { padding: 14px; gap: 12px; }
-.b4-card-expanded .b4-card-top { font-size: 13px; }
-.b4-card-expanded .b4-card-team { min-height: 38px; gap: 9px; }
-.b4-card-expanded .b4-card-team img, .b4-card-expanded .b4-card-logo { width: 26px; height: 26px; }
-.b4-card-expanded .b4-card-name { font-size: 18px; }
-.b4-card-expanded .b4-card-score { font-size: 30px; }
-.b4-card-expanded .b4-card-tv { color: var(--muted); font-size: 13px; font-weight: 400; }
-.b4-card-expanded .b4-card-actions .bellbtn { width: 36px; height: 36px; }
-.b4-card-watch { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 99px; color: var(--accent); background: var(--accent-soft); font-size: 14px; font-weight: 700; text-align: center; }
+.b4-card-heading { display: inline-flex; align-items: baseline; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.b4-card-teams { display: grid; gap: 8px; }
+.b4-card-expanded { padding: 12px 14px 10px; gap: 10px; }
+.b4-card-expanded .b4-card-top { align-items: center; font-size: 11px; min-height: 24px; }
+.b4-card-expanded .b4-card-heading > b { padding: 4px 7px; border-radius: 5px; background: var(--accent-soft); color: var(--accent); font-size: 10px; letter-spacing: .04em; }
+.b4-card-expanded .b4-card-clock { font-size: 11px; }
+.b4-card-expanded .b4-card-teams { gap: 4px; }
+.b4-card-expanded .b4-card-team { min-height: 36px; gap: 10px; }
+.b4-card-expanded .b4-card-team img, .b4-card-expanded .b4-card-logo { width: 28px; height: 28px; }
+.b4-card-expanded .b4-card-name { font-size: 17px; font-weight: 650; line-height: 1.25; }
+.b4-card-expanded .b4-card-score { font-size: 28px; }
+.b4-card-expanded .b4-card-tv { font-size: 11px; font-weight: 500; max-width: 53%; }
+.b4-card-expanded .b4-card-foot { border-top: 1px solid var(--line); padding-top: 6px; gap: 8px; min-height: 50px; }
+.b4-card-expanded .b4-card-actions { gap: 2px; margin-left: auto; }
+.b4-card-expanded .b4-card-actions .bellbtn { width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); }
+.b4-card-expanded .b4-card-actions .bellbtn::after { display: none; }
+.b4-card-watch { display: flex; align-items: center; justify-content: center; gap: 5px; flex: 1; min-width: 0; min-height: 44px; padding: 8px 10px; border-radius: 99px; color: var(--accent); background: var(--accent-soft); font-size: 12px; font-weight: 650; line-height: 1.25; text-align: center; overflow-wrap: anywhere; }
+.b4-card-watch > span { font-size: 9px; }
 .b4-mixed { display: grid; gap: 12px; }
 .b4-mixed-compact { grid-template-columns: repeat(2,minmax(0,1fr)); }
 .b4-mixed > .b4-card-expanded { grid-column: 1 / -1; }

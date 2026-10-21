@@ -233,9 +233,28 @@ test('Game cards put the network in the header and use game actions instead of t
   for (const density of ['compact', 'expanded']) {
     const result = ctx.beta4Card(games[0], density);
     assert.match(result, /b4-card-top[^]*b4-card-tv/);
-    assert.match(result, /b4-card-foot"><span class="b4-card-clock b4-status">6:12 3rd/);
+    assert.match(result, /b4-card-clock b4-status">6:12 3rd/);
     assert.match(result, /data-favgame="nba:live"/);
     assert.match(result, /data-watchgame="nba:live"/);
     assert.doesNotMatch(result, /data-fav="|class="star/);
   }
+});
+
+
+test('Expanded shows real team records only before a game starts', () => {
+  const { ctx, games } = fixture();
+  const g = games[1]; g.teams[0].record = '12-4'; g.teams[1].record = '9-7';
+  let result = ctx.beta4Card(g, 'expanded');
+  assert.match(result, /b4-card-record">12-4</);
+  assert.match(result, /b4-card-record">9-7</);
+  assert.doesNotMatch(result, /b4-card-score/);
+  assert.doesNotMatch(ctx.beta4Card(g, 'compact'), /b4-card-record/);
+  for (const state of ['in', 'post']) {
+    g.state = state;
+    assert.doesNotMatch(ctx.beta4Card(g, 'expanded'), /b4-card-record/);
+  }
+  g.state = 'pre'; g.teams[0].record = ''; g.teams[1].record = '';
+  assert.doesNotMatch(ctx.beta4Card(g, 'expanded'), /b4-card-record/);
+  g.teams[0].record = '2-1'; g.teams[0].seasonRecord = '50-32';
+  assert.match(ctx.beta4Card(g, 'expanded'), /b4-card-record">50-32</);
 });

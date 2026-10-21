@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021201428">
+<meta name="build" content="20261021201952">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=9">
+<link rel="stylesheet" href="beta4.css?v=10">
 </head>
 <body>
 <header class="top">
@@ -6180,11 +6180,14 @@ button.brand, button.brand span { color: var(--accent); }
     if (!a || !h) return "";
     const expanded = density === "expanded", pre = g.state === "pre", final = g.state === "post";
     const key = gameKey(g), on = !!state.favGames[key];
-    const team = t => `<div class="b4-card-team">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : '<span class="b4-card-logo"></span>'}<b class="b4-card-name">${esc(b4Name(g, t))}</b>${pre ? "" : `<strong class="b4-card-score">${esc(t.score)}</strong>`}</div>`;
+    const team = t => `<div class="b4-card-team">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : '<span class="b4-card-logo"></span>'}<span class="b4-card-team-label"><b class="b4-card-name">${esc(b4Name(g, t))}</b>${expanded && pre && (t.seasonRecord || t.record) ? `<small class="b4-card-record">${esc(t.seasonRecord || t.record)}</small>` : ""}</span>${pre ? "" : `<strong class="b4-card-score">${esc(t.score)}</strong>`}</div>`;
     const channel = String(netLabel(g) || "").replace(/^(W?NBA) League Pass$/i, "League Pass");
     const watch = expanded && !final ? g.watch?.find(w => w.url) : null;
     const save = `<button class="bellbtn heartbtn ${on ? "on" : ""}" data-favgame="${esc(key)}" aria-pressed="${on}" aria-label="${on ? "Unsave" : "Save"} ${esc(a.name)} game">${on ? HEART_ON : HEART}</button>`;
-    return `<article class="b4-scorecard b4-card-${expanded ? "expanded" : "compact"} tap" data-game="${esc(key)}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name + ": game details")}"><div class="b4-card-top"><b>${esc(b4Short(g.lg))}</b><span class="b4-card-tv">${esc(channel)}</span></div>${team(a)}${team(h)}<div class="b4-card-foot"><span class="b4-card-clock ${g.state === "in" ? "b4-status" : ""}">${esc(g.status || timeLabel(g.date))}</span><span class="b4-card-actions">${save}${bellBtn(g)}</span></div>${watch ? `<a class="b4-card-watch" href="${esc(watch.url)}" ${watch.scheme ? `data-app="${esc(watch.scheme)}"` : ""} target="_blank" rel="noopener">Watch On ${esc(watch.app)}</a>` : ""}</article>`;
+    const clock = `<span class="b4-card-clock ${g.state === "in" ? "b4-status" : ""}">${esc(g.status || timeLabel(g.date))}</span>`;
+    const watchLink = watch ? `<a class="b4-card-watch" href="${esc(watch.url)}" ${watch.scheme ? `data-app="${esc(watch.scheme)}"` : ""} target="_blank" rel="noopener"><span aria-hidden="true">▶</span> Watch On ${esc(watch.app)}</a>` : "";
+    const actions = `<span class="b4-card-actions">${save}${bellBtn(g)}</span>`;
+    return `<article class="b4-scorecard b4-card-${expanded ? "expanded" : "compact"} tap" data-game="${esc(key)}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name + ": game details")}"><div class="b4-card-top"><span class="b4-card-heading"><b>${esc(b4Short(g.lg))}</b>${expanded ? clock : ""}</span><span class="b4-card-tv">${esc(channel)}</span></div><div class="b4-card-teams">${team(a)}${team(h)}</div><div class="b4-card-foot">${expanded ? watchLink : clock}${actions}</div></article>`;
   }
   function beta4Rows(games) {
     if (state.view === "league") games = games.slice().sort((a, b) => leagueRank(a.lg.id) - leagueRank(b.lg.id) || byState(a, b));

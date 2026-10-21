@@ -2,6 +2,10 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — Expanded view cleanup
+- Grouped league and clock in the header, retained right-aligned TV, tightened team spacing and aligned scores. Combined Watch, Save and Alerts into one footer with 44px controls.
+- Added available season records beside each team in Expanded pregame cards only. Records disappear for live and finished games.
+
 ## Oct 21, 2026: Beta 4.0 — Game card network alignment
 - Right-aligned TV networks in Compact and Expanded headers, with the clock at bottom left and heart/alert controls at bottom right. Scorecards have no team-favorite stars.
 
