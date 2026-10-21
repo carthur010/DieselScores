@@ -337,3 +337,25 @@ body:has(#sheet:not([hidden]).b4-team-editor) #botbar, body:has(#sheet:not([hidd
 .botbar button { min-height: 44px; gap: 3px; font-size: 11px; }
 .botbar svg { width: 21px; height: 21px; }
 :root[data-home="bar"] #ssheet.b4-settings.as-tab { padding-bottom: calc(60px + env(safe-area-inset-bottom,0px)); }
+
+/* Focus the home screen on today's games and keep only scope tabs while reading. */
+:root[data-home="bar"].bb-fold .b4-head,
+:root[data-home="bar"].bb-fold .b4-date { display: none; }
+:root[data-home="bar"].bb-fold .b4-scope { margin-top: 0; margin-bottom: 4px; }
+.b4-card-expanded { padding: 10px 12px; gap: 6px; }
+.b4-card-expanded .b4-card-team { min-height: 32px; gap: 8px; }
+.b4-card-expanded .b4-card-foot { min-height: 44px; padding-top: 4px; }
+.b4-upcoming-disclosure { margin: 18px 0; border-top: 1px solid var(--line); }
+.b4-upcoming-disclosure > summary { display: flex; align-items: center; gap: 8px; min-height: 52px; cursor: pointer; list-style: none; }
+.b4-upcoming-disclosure > summary::-webkit-details-marker { display: none; }
+.b4-upcoming-disclosure h2 { margin: 0; font-size: 16px; font-weight: 650; }
+.b4-upcoming-action { margin-left: auto; font-size: 12px; color: var(--accent); font-weight: 600; }
+.b4-upcoming-chevron { color: var(--muted); }
+.b4-upcoming-disclosure[open] .b4-upcoming-chevron { transform: rotate(180deg); }
+.b4-upcoming-disclosure > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+#sheet.b4-team-schedule-mode #q,
+#sheet.b4-team-schedule-mode #b4-add-heading,
+#sheet.b4-team-schedule-mode #results,
+#sheet.b4-team-schedule-mode #suggest,
+#sheet.b4-team-schedule-mode #sgames { display: none; }
+.b4-find-more { margin-top: 14px; }

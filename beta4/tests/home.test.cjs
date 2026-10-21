@@ -517,3 +517,29 @@ test('Next For Your Teams uses shared tiles, correct home/away order and future 
     assert.doesNotMatch(section, /data-favgame=|ln-nx/);
   }
 });
+
+test('Home starts with upcoming collapsed after today’s finals and retains its open state on refresh', () => {
+  const { ctx, games } = fixture();
+  ctx.nextWhen = () => 'Tomorrow · 7:00 PM';
+  ctx.state.favs = new Set(['nba:K']);
+  ctx.state.favMeta['nba:K'] = { lg: 'nba', abbr: 'K', name: 'Kings' };
+  ctx.state.next['nba:K'] = { id: 'next', date: '2026-10-22T23:00:00Z', at: '@', opp: 'C' };
+  let result = ctx.beta4Home(games);
+  assert.match(result, /<details class="b4-upcoming-disclosure">/);
+  assert.match(result, /See Upcoming/);
+  assert.ok(result.indexOf('<h2>Final</h2>') < result.indexOf('<details'));
+  assert.doesNotMatch(result, /Customize Home Sections|Manage Alerts/);
+  vm.runInContext('b4UpcomingOpen = true', ctx);
+  result = ctx.beta4Home(games);
+  assert.match(result, /<details class="b4-upcoming-disclosure" open>/);
+  assert.match(result, /Hide Upcoming/);
+});
+
+test('Search discovery omits the following list even with an empty query', () => {
+  const { ctx } = fixture();
+  const nodes = { sheet: { dataset: { b4Area: 'search' }, classList: { contains: () => false } }, q: { value: '' }, following: {}, 'b4-following-heading': {} };
+  ctx.document.getElementById = id => nodes[id];
+  ctx.beta4SearchVisibility();
+  assert.equal(nodes.following.hidden, true);
+  assert.equal(nodes['b4-following-heading'].hidden, true);
+});

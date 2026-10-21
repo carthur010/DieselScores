@@ -2,6 +2,12 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — A Calmer Home
+- Home keeps today’s games and finals ahead of a collapsed See Upcoming disclosure; upcoming tiles remain available in every density. The disclosure stays open during score refreshes.
+- Scrolling folds the logo and date away, leaving scope tabs. Expanded cards use tighter spacing and retain 44px game controls.
+- My Teams focuses on schedules and tracked games, with Find More Teams opening Search. Search handles discovery without repeating the following list.
+- Removed redundant home settings links; section customization and alerts remain in Settings. Worth A Watch retains one reason per pick.
+
 ## Oct 21, 2026: Beta 4.0 — College Basketball Names
 - Renamed the college basketball leagues NCAA Men’s Basketball and NCAA Women’s Basketball, with NCAAMB and NCAAWB as their short labels.
 

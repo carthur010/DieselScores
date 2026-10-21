@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021211441">
+<meta name="build" content="20261021211849">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=17">
+<link rel="stylesheet" href="beta4.css?v=18">
 </head>
 <body>
 <header class="top">
@@ -1416,7 +1416,7 @@ button.brand, button.brand span { color: var(--accent); }
 
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-h">
   <div class="sheet-card">
-    <div class="bhead"><button class="b4-editor-back" data-b4-team-back aria-label="Back">‹</button><h2 id="sheet-h">Your Teams</h2><div class="b4-team-tools"><button data-b4-add-team>Add Team</button><button data-b4-manage-teams>Manage Teams</button></div>
+    <div class="bhead"><button class="b4-editor-back" data-b4-team-back aria-label="Back">‹</button><h2 id="sheet-h">Your Teams</h2><div class="b4-team-tools"><button data-b4-manage-teams>Manage Teams</button></div>
       <button class="tog" id="sheet-x" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="sheet-body">
       <div class="wz-steps" id="wz-steps" hidden aria-hidden="true"><i></i><i></i><i></i></div>
@@ -4173,6 +4173,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (act === "settings") openSettings();
     document.getElementById(BB_SHEETS[act]).classList.add("as-tab");
     document.getElementById(BB_SHEETS[act]).dataset.b4Area = act;
+    if (act === "search") beta4SearchVisibility();
     syncLock(); bbSync();
   }
   // Closing a tab screen any other way (Escape, a link inside it) puts the highlight back on Scores
@@ -4466,7 +4467,7 @@ button.brand, button.brand span { color: var(--accent); }
     const el = document.getElementById("results");
     const q = document.getElementById("q").value.trim();
     beta4SearchVisibility();
-    if (!q) { el.innerHTML = '<p class="hint">Type a team, city, school or league. Covers the NFL, MLB, NBA, WNBA, NHL, college football and hoops, the major soccer leagues, golf and tennis.</p>'; return; }
+    if (!q) { el.innerHTML = '<p class="hint">Find a team, city, school or league to follow.</p>'; return; }
     const lgs = leagueMatches(q);
     const lgHtml = lgs.length ? `<h3>Leagues</h3><div class="res">${lgs.map(lgRow).join("")}</div>` : "";
     const teamHtml = searching ? '<p class="hint">Searching teams…</p>'
@@ -6125,7 +6126,7 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function beta4SearchVisibility() {
     const sheet = document.getElementById("sheet"), query = document.getElementById("q").value.trim();
-    const hide = !!query || sheet.classList.contains("b4-team-schedule-mode");
+    const hide = !!query || sheet.dataset?.b4Area === "search" || sheet.classList.contains("b4-team-schedule-mode");
     document.getElementById("following").hidden = hide;
     document.getElementById("b4-following-heading").hidden = hide;
   }
@@ -6152,7 +6153,7 @@ button.brand, button.brand span { color: var(--accent); }
       const subtitle = ready ? `${n.at === "@" ? "at" : "vs"} ${n.oppName || n.opp || "TBD"}` : n?.error ? "Schedule unavailable" : n?.none ? "No upcoming game scheduled" : "Checking schedule…";
       return `<${tag} class="b4-team-next" ${playable ? `data-game="${esc(m.lg)}:${esc(n.id)}"` : ""}>${m.logo ? `<img src="${esc(m.logo)}" alt="">` : "<span></span>"}<span><b>${esc(m.name)}</b><small>${esc(subtitle)}</small>${ready ? `<small>${esc(nextWhen(n.date))}</small>` : ""}</span>${playable ? "<i>›</i>" : ""}</${tag}>`;
     }).join("");
-    el.innerHTML = `<div class="b4-section-head"><h2>Upcoming Games</h2><small>${state.favs.size} teams</small></div>` + (rows ? `<div class="b4-team-schedule">${rows}</div>` : `<p class="hint">Follow a team below to see its next game here.</p>`) + ([...state.favs].some(k => state.next[k]?.error) ? `<button class="b4-link" data-b4-retry-teams>Retry Schedules</button>` : "");
+    el.innerHTML = `<div class="b4-section-head"><h2>Upcoming Games</h2><small>${state.favs.size} teams</small></div>` + (rows ? `<div class="b4-team-schedule">${rows}</div>` : `<p class="hint">Follow a team to see its next game here.</p>`) + `<button class="b4-settings-secondary b4-find-more" data-b4-add-team>Find More Teams</button>` + ([...state.favs].some(k => state.next[k]?.error) ? `<button class="b4-link" data-b4-retry-teams>Retry Schedules</button>` : "");
   }
   async function beta4LoadTeamUpcoming() {
     if (b4TeamsLoading) return;
@@ -6319,8 +6320,16 @@ button.brand, button.brand span { color: var(--accent); }
     const finals = !liveScope && beta4SectionShown("final") ? source.filter(g => g.state === "post" && (!forYou || isMine(g) || !!state.favGames[gameKey(g)])).sort((a,b) => new Date(b.date) - new Date(a.date)) : [];
     return { sections, upcoming, finals, source };
   }
+  let b4UpcomingOpen = false;
+  document.addEventListener("toggle", e => {
+    if (e.target.matches?.(".b4-upcoming-disclosure")) {
+      b4UpcomingOpen = e.target.open;
+      e.target.querySelector(".b4-upcoming-action").textContent = b4UpcomingOpen ? "Hide Upcoming" : "See Upcoming";
+    }
+  }, true);
   function beta4Home(games) {
     const plan = beta4HomePlan(games), forYou = ["foryou", "teams"].includes(state.tab);
+    let nextHtml = "";
     let html = plan.sections.map(section => {
       if (!section.games.length && !section.html) return "";
       const { key } = section;
@@ -6340,13 +6349,13 @@ button.brand, button.brand span { color: var(--accent); }
       const playing = new Set(plan.source.filter(isMine).flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
       const next = [...state.favs].filter(k => !playing.has(k)).map(k => ({ k, m: state.favMeta[k], n: state.next[k] })).filter(x => x.m && x.n?.date && (b4League === "all" || x.m.lg === b4League)).sort((a,b) => new Date(a.n.date) - new Date(b.n.date));
       const nextGames = [...new Map(next.map(beta4NextGame).filter(Boolean).map(g => [gameKey(g), g])).values()].slice(0,3);
-      if (nextGames.length) html += beta4Section("Next For Your Teams", `${nextGames.length} ${nextGames.length === 1 ? "Game" : "Games"}`, nextGames);
+      if (nextGames.length) nextHtml = `<details class="b4-upcoming-disclosure"${b4UpcomingOpen ? " open" : ""}><summary><h2>Next For Your Teams</h2><span class="b4-upcoming-action">${b4UpcomingOpen ? "Hide Upcoming" : "See Upcoming"}</span><span class="b4-upcoming-chevron" aria-hidden="true">⌄</span></summary>${beta4Rows(nextGames, true)}</details>`;
     }
     if (plan.finals.length) html += beta4Section("Final", `${plan.finals.length} ${plan.finals.length === 1 ? "Game" : "Games"}`, plan.finals);
+    html += nextHtml;
     const failed = LEAGUES.filter(lg => state.data[lg.id]?.error && (b4League === "all" ? state.favLeagues.includes(lg.id) : lg.id === b4League));
     if (failed.length) html += `<div class="b4-load-note">Some scores could not load (${failed.map(lg => esc(b4Short(lg))).join(", ")}). <button data-b4-refresh>Retry</button></div>`;
     if (!plan.source.length) html += `<div class="b4-empty"><p>${state.loading ? "Loading scores…" : "No games in your followed leagues on this date."}</p><button class="chip" data-bb="teams">Follow Teams</button></div>`;
-    html += `<div class="b4-help"><button data-b4-open-sections>Customize Home Sections</button> · <button data-bb="alerts">Manage Alerts</button></div>`;
     if (state.updatedAt) html += `<p class="b4-updated">Updated ${esc(timeLabel(state.updatedAt))} · Refreshes automatically</p>`;
     return html;
   }
@@ -6405,7 +6414,7 @@ button.brand, button.brand span { color: var(--accent); }
   });
   document.addEventListener("click", e => {
     if (e.target.closest("[data-b4-open-sections]")) { bbGo("settings"); b4SettingsPage = "sections"; renderSettings(); return; }
-    if (e.target.closest("[data-b4-add-team]")) { const q = document.getElementById("q"); q.focus({ preventScroll: true }); q.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
+    if (e.target.closest("[data-b4-add-team]")) { bbGo("search"); return; }
     if (e.target.closest("[data-b4-manage-teams]")) { b4TeamEditorReturn = "teams"; beta4OpenTeamEditor(); return; }
     if (e.target.closest("[data-b4-retry-teams]")) { beta4LoadTeamUpcoming(); return; }
     if (e.target.closest("[data-b4-density]")) { setDensity(b4NextDensity()); render(); return; }
