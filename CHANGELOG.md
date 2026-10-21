@@ -2,6 +2,12 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 - Score Refresh Recovery
+- Bound each league load to 12 seconds, including supplementary feeds, so one stalled request cannot lock the entire scoreboard.
+- Release the refresh lock and schedule the next attempt even after an error. Keep the last successful same-day scores with a retry notice when a feed fails, and do not advance the update timestamp when all feeds fail.
+- Poll every 15 seconds during live games and around scheduled tipoff, including when the live count is still zero. Refresh on network reconnection and restored pages.
+- Verified with mocked stalled feeds, failed requests, rendering errors, tipoff transitions and date changes. Running-site verification was blocked by this environment's network restrictions.
+
 ## Oct 21, 2026: Beta 4.0 — A Calmer Home
 - Home keeps today’s games and finals ahead of a collapsed See Upcoming disclosure; upcoming tiles remain available in every density. The disclosure stays open during score refreshes.
 - Scrolling folds the logo and date away, leaving scope tabs. Expanded cards use tighter spacing and retain 44px game controls.
