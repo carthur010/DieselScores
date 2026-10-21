@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 - Centered League Row
+- Centered All, the top five league shortcuts and More as a group. On narrow screens, edge margins collapse so every shortcut remains reachable by swiping.
+
 ## Oct 21, 2026: Beta 4.0 - Five League Shortcuts
 - League filters show All, the first five followed leagues in saved order, then More. With fewer followed leagues, only those leagues appear.
 - Kept shortcuts in one horizontally swipeable row, with the searchable More menu below. Golf and tennis shortcuts open their existing league views.
