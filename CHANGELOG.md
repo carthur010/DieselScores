@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Live and Beta 3.0 (11:56 AM)
+- Out-of-market games on a team's local channel now show the pass you'd watch on: a Kings game on NBC Sports California reads "League Pass" in New York (Simple and Compact), and the watch button says "NBA League Pass". Local channels in your own market (MSG, SNY, YES) and national channels keep their names.
+
 ## Oct 21, 2026: Live and Beta 3.0 (9:15 AM)
 - Leagues tab is all tiles: Your Leagues on top in your order, then every other league as tiles grouped by sport (Football, Basketball, Baseball, Hockey, Soccer...). Leagues you follow only show once, up top. Each tile has its logo (or a short badge like EFL, WSL, ATP), a name that fits (EFL Cup, Shield, ATP, WTA), today's count and a red live badge.
 
