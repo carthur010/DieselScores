@@ -71,6 +71,91 @@
 .b4-row .heartbtn { min-width: 44px; min-height: 44px; width: 44px; height: 44px; align-self: center; border: 0; background: transparent; }
 .b4-row .heartbtn svg { width: 18px; height: 18px; }
 .b4-channel { display: block; color: var(--muted); font-size: 11px; padding: 0; overflow-wrap: anywhere; }
+.b4-card-grid { display: grid; gap: 12px; align-items: stretch; }
+.b4-cards-compact, :root[data-home="bar"][data-density="compact"] .grid:has(> .b4-scorecard) { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.b4-cards-expanded, :root[data-home="bar"][data-density="expanded"] .grid:has(> .b4-scorecard) { grid-template-columns: minmax(0,1fr); gap: 12px; }
+.b4-scorecard { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 10px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 14px; }
+.b4-card-top { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; font-size: 12px; font-weight: 700; }
+.b4-card-top > b { min-width: 0; overflow-wrap: anywhere; }
+.b4-card-top > span { text-align: right; }
+.b4-card-team { display: flex; align-items: center; gap: 7px; min-width: 0; min-height: 31px; }
+.b4-card-team img, .b4-card-logo { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
+.b4-card-name { font-size: 16px; font-weight: 700; line-height: 1.15; overflow-wrap: anywhere; min-width: 0; }
+.b4-card-score { margin-left: auto; padding-left: 3px; flex-shrink: 0; font-size: 26px; line-height: 1; font-weight: 750; font-variant-numeric: tabular-nums; }
+.b4-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-top: auto; min-height: 32px; }
+.b4-card-tv { font-size: 12px; font-weight: 650; min-width: 0; overflow-wrap: anywhere; }
+.b4-card-actions { display: flex; flex-shrink: 0; gap: 0; }
+.b4-card-actions .bellbtn { display: grid; place-items: center; width: 30px; height: 36px; border: 0; background: transparent; color: var(--muted); position: relative; }
+.b4-card-actions .bellbtn::after { content: ""; position: absolute; inset: -4px 0; }
+.b4-card-actions .bellbtn svg { width: 18px; height: 18px; }
+.b4-card-actions .bellbtn.on { color: var(--accent); }
+.b4-card-expanded { padding: 14px; gap: 12px; }
+.b4-card-expanded .b4-card-top { font-size: 13px; }
+.b4-card-expanded .b4-card-team { min-height: 38px; gap: 9px; }
+.b4-card-expanded .b4-card-team img, .b4-card-expanded .b4-card-logo { width: 26px; height: 26px; }
+.b4-card-expanded .b4-card-name { font-size: 18px; }
+.b4-card-expanded .b4-card-score { font-size: 30px; }
+.b4-card-expanded .b4-card-tv { color: var(--muted); font-size: 13px; font-weight: 400; }
+.b4-card-expanded .b4-card-actions .bellbtn { width: 36px; height: 36px; }
+.b4-card-watch { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 99px; color: var(--accent); background: var(--accent-soft); font-size: 14px; font-weight: 700; text-align: center; }
+.b4-mixed { display: grid; gap: 12px; }
+.b4-mixed-compact { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.b4-mixed > .b4-card-expanded { grid-column: 1 / -1; }
+/* Settings: full iPhone pages, grouped cards and pill choices. */
+#ssheet.b4-settings { background: var(--bg); padding: env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px); }
+#ssheet.b4-settings .sheet-card { width: 100%; max-width: 520px; height: 100%; max-height: none; margin-inline: auto; background: var(--bg); border: 0; border-radius: 0; }
+#ssheet.b4-settings .bhead { padding: 10px 15px; border: 0; gap: 5px; background: var(--bg); flex-shrink: 0; }
+#ssheet.b4-settings .bhead h2 { margin: 0; font-size: 24px; font-weight: 750; letter-spacing: -.02em; }
+#ssheet.b4-settings .bhead .tog { display: grid !important; width: 44px; height: 44px; margin-left: auto; color: var(--muted); background: transparent; }
+#ssheet.b4-settings .bhead .tog svg { width: 16px; height: 16px; }
+.b4-settings-back { display: grid; place-items: center; width: 44px; min-height: 44px; flex-shrink: 0; color: var(--muted); font-size: 28px; }
+#ssheet.b4-settings #settings-body { padding: 8px 20px 30px; }
+.b4-settings-intro { color: var(--muted); font-size: 13px; line-height: 1.4; margin: 0 0 14px; }
+.b4-settings-box { border: 1px solid var(--line); border-radius: 14px; padding: 15px; background: var(--surface); margin-bottom: 14px; }
+.b4-settings-box h3 { margin: 0 0 8px; font-size: 14px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--fg); }
+.b4-settings-box p { margin: 0 0 8px; color: var(--muted); font-size: 13px; line-height: 1.4; }
+.b4-settings-box p:last-child { margin-bottom: 0; }
+.b4-settings-links { padding: 9px 14px; }
+.b4-settings-row { display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 12px; min-height: 64px; padding: 8px 0; text-align: left; }
+.b4-settings-row b { display: block; font-size: 14px; font-weight: 700; }
+.b4-settings-row small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; font-weight: 600; }
+.b4-settings-row em { color: var(--accent); font-size: 11px; font-weight: 650; font-style: normal; white-space: nowrap; }
+.b4-settings-options { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 8px 6px; }
+.b4-settings-options button { grid-column: span 2; min-height: 44px; border: 1px solid var(--line); border-radius: 99px; padding: 6px 4px; background: var(--surface); color: var(--muted); font-size: 14px; font-weight: 650; line-height: 1.25; min-width: 0; overflow-wrap: anywhere; }
+.b4-settings-options button.on { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--accent); }
+.b4-settings-options[data-count="1"] button, .b4-settings-options[data-count="4"] button:last-child, .b4-settings-options[data-count="10"] button:last-child { grid-column: span 6; }
+.b4-settings-options[data-count="2"] button, .b4-settings-options[data-count="5"] button:nth-last-child(-n+2), .b4-settings-options[data-count="8"] button:nth-last-child(-n+2) { grid-column: span 3; }
+.b4-settings-primary, .b4-settings-secondary { display: block; width: 100%; min-height: 44px; border-radius: 99px; padding: 10px 15px; font-size: 14px; font-weight: 650; text-align: center; margin: 0 0 14px; }
+.b4-settings-primary { background: var(--accent); color: var(--bg); }
+#ssheet.b4-settings [data-set-done] { display: block; }
+.b4-settings-secondary { background: var(--surface); color: var(--muted); border: 1px solid var(--line); }
+.b4-settings-foot { margin: 12px 0 0; color: var(--muted); font-size: 11px; font-weight: 600; }
+.b4-editor-back, .b4-find-teams, .b4-team-edit-hint { display: none; }
+body:has(#ssheet:not([hidden]).b4-settings) #botbar, body:has(#sheet:not([hidden]).b4-team-editor) #botbar, body:has(#sheet:not([hidden]).b4-team-finder) #botbar, body:has(#lsheet:not([hidden])) #botbar { display: none; }
+#sheet.b4-team-editor, #sheet.b4-team-finder, #lsheet { background: var(--bg); padding: env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px); }
+#sheet.b4-team-editor .sheet-card, #sheet.b4-team-finder .sheet-card, #lsheet .sheet-card { width: 100%; max-width: 520px; height: 100%; max-height: none; border: 0; border-radius: 0; background: var(--bg); }
+#sheet.b4-team-editor .bhead, #sheet.b4-team-finder .bhead, #lsheet .bhead { padding: 10px 15px; gap: 5px; border: 0; }
+#sheet.b4-team-editor .bhead h2, #sheet.b4-team-finder .bhead h2, #lsheet .bhead h2 { font-size: 24px; font-weight: 750; }
+#sheet.b4-team-editor .b4-editor-back, #sheet.b4-team-finder .b4-editor-back, #lsheet .b4-editor-back { display: grid; place-items: center; width: 44px; min-height: 44px; font-size: 28px; color: var(--muted); }
+#sheet.b4-team-editor .bhead .tog, #sheet.b4-team-finder .bhead .tog, #lsheet .bhead .tog { display: grid; margin-left: auto; width: 44px; height: 44px; background: transparent; }
+#sheet.b4-team-editor .sheet-body, #sheet.b4-team-finder .sheet-body, #lsheet .sheet-body { padding: 8px 20px 30px; }
+#sheet.b4-team-editor #q, #sheet.b4-team-editor #sgames, #sheet.b4-team-editor #results, #sheet.b4-team-editor #suggest, #sheet.b4-team-editor #sheet-teams > h3 { display: none; }
+#sheet.b4-team-editor .b4-team-edit-hint { display: block; font-size: 13px; color: var(--muted); margin: 0 0 14px; }
+#sheet.b4-team-editor #following, #lsheet #lfav, #lsheet #lrest { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px 14px; margin: 0 0 14px; }
+#sheet.b4-team-editor .res-row { min-height: 64px; padding: 10px 0; border: 0; }
+#sheet.b4-team-editor .res-row .nm { font-size: 14px; font-weight: 700; }
+#sheet.b4-team-editor .res-row .nm small { font-size: 11px; font-weight: 600; }
+#sheet.b4-team-editor .follow { font-size: 11px; color: var(--accent); border: 0; background: transparent; padding: 6px; }
+#sheet.b4-team-editor .handle { color: var(--accent); }
+#sheet.b4-team-editor .b4-find-teams { display: block; width: 100%; min-height: 44px; border: 1px solid var(--line); border-radius: 99px; background: var(--surface); color: var(--muted); font-size: 14px; font-weight: 650; margin: 14px 0; }
+#sheet.b4-team-editor #sheet-done, #sheet.b4-team-finder #sheet-done, #lsheet .set-done { display: block; width: 100%; min-height: 44px; border-radius: 99px; font-size: 14px; background: var(--accent); color: var(--bg); }
+#lsheet .lrow { grid-template-columns: minmax(0,1fr) auto 26px; min-height: 64px; gap: 4px; padding: 10px 0; border: 0; }
+#lsheet .lnum { display: none; }
+#lsheet .nm { font-size: 14px; font-weight: 700; }
+#lsheet .nm small { display: block; margin-top: 3px; font-size: 11px; color: var(--muted); }
+#lsheet .follow { border: 0; background: transparent; color: var(--accent); font-size: 11px; font-weight: 650; }
+#lsheet .handle { color: var(--accent); }
+#lsheet h3 { text-transform: none; letter-spacing: 0; font-size: 16px; margin: 18px 0 14px; }
 .b4-empty { padding: 23px 17px; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; font-size: 14px; text-align: center; color: var(--muted); }
 .b4-empty p { margin: 0 0 12px; }
 .b4-empty .chip { min-height: 44px; }

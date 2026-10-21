@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021195712">
+<meta name="build" content="20261021201124">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=6">
+<link rel="stylesheet" href="beta4.css?v=8">
 </head>
 <body>
 <header class="top">
@@ -1416,13 +1416,13 @@ button.brand, button.brand span { color: var(--accent); }
 
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-h">
   <div class="sheet-card">
-    <div class="bhead"><h2 id="sheet-h">Your Teams</h2>
+    <div class="bhead"><button class="b4-editor-back" data-b4-team-back aria-label="Back">‹</button><h2 id="sheet-h">Your Teams</h2>
       <button class="tog" id="sheet-x" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="sheet-body">
       <div class="wz-steps" id="wz-steps" hidden aria-hidden="true"><i></i><i></i><i></i></div>
       <div class="wl-brand" id="wl-brand" hidden><img class="red" src="brand/mark-red.png" alt=""><img class="cream" src="brand/mark-cream.png" alt=""><b>The Lineup</b><span>Live scores. Where to watch.<br>Your teams. All in one place.</span></div>
       <p class="hint" id="sheet-intro" hidden>Step 1 Of 3 · Follow your teams. You can change everything later in Settings. <button class="chip" data-welcome-code style="margin-top:8px">Have A Setup Code?</button></p>
-      <div id="sheet-teams">
+      <div id="sheet-teams"><p class="b4-team-edit-hint">Drag the handle to set your order.</p>
       <div id="b4-team-upcoming" hidden></div>
       <h3 id="b4-add-heading" hidden>Add Teams</h3>
       <input type="search" id="q" placeholder="Search teams and leagues" autocomplete="off" aria-label="Search teams and leagues">
@@ -1430,7 +1430,7 @@ button.brand, button.brand span { color: var(--accent); }
       <div class="res" id="results"></div>
       <div id="suggest"></div>
       <h3>Following <span class="h3-note">drag ☰ to set your order</span></h3>
-      <div class="res" id="following"></div>
+      <div class="res" id="following"></div><button class="b4-find-teams" data-b4-find-teams>Find More Teams</button>
       </div>
       <div id="sheet-lgs" hidden><p class="hint" style="margin:0 0 10px">Step 2 Of 3 · Tap the leagues you want on your home screen.</p>
         <div id="sheet-lglist"></div></div>
@@ -1446,8 +1446,8 @@ button.brand, button.brand span { color: var(--accent); }
 <div class="gcard" id="gsheet" hidden role="dialog" aria-modal="true" aria-label="Game details"></div>
 <div class="sheet" id="ssheet" hidden role="dialog" aria-modal="true" aria-labelledby="ssheet-h">
   <div class="sheet-card">
-    <div class="bhead"><h2 id="ssheet-h">Settings</h2>
-      <button class="tog" id="ssheet-x" aria-label="Done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="bhead"><button class="b4-settings-back" data-b4-settings-back aria-label="Back">‹</button><h2 id="ssheet-h">Settings</h2>
+      <button class="tog" id="ssheet-x" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="sheet-body" id="settings-body"></div>
   </div>
 </div>
@@ -1460,13 +1460,13 @@ button.brand, button.brand span { color: var(--accent); }
 </div>
 <div class="sheet" id="lsheet" hidden role="dialog" aria-modal="true" aria-labelledby="lsheet-h">
   <div class="sheet-card">
-    <div class="bhead"><h2 id="lsheet-h">My Leagues</h2>
+    <div class="bhead"><button class="b4-editor-back" data-b4-leagues-done aria-label="Back to Settings">‹</button><h2 id="lsheet-h">My Leagues</h2>
       <button class="tog" id="lsheet-x" aria-label="Done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="sheet-body">
-      <p class="hint">Drag the handle to set the order. Your leagues show first on My Leagues and Upcoming.</p>
+      <p class="hint">Add, remove and drag leagues into your order.</p>
       <div class="res" id="lfav"></div>
-      <h3>Add More</h3>
-      <div class="res" id="lrest"></div>
+      <h3>More Leagues</h3>
+      <div class="res" id="lrest"></div><button class="set-done" data-b4-leagues-done>Save Order</button>
     </div>
   </div>
 </div>
@@ -1730,7 +1730,6 @@ button.brand, button.brand span { color: var(--accent); }
 
   // Beta 4.0: the new home layouts open on For You
   if (state.homeLayout !== "classic") { const h3 = store.get("home3", "foryou"); state.tab = h3 === "auto" ? "foryou" : h3; state.autoPending = h3 === "auto"; }
-  state.homeLayout = "bar";
   document.documentElement.dataset.home = state.homeLayout;
 
   // =====================================================================
@@ -2770,6 +2769,7 @@ button.brand, button.brand span { color: var(--accent); }
     return `<div class="ln-list ${two ? "two" : ""}">${list.map(g => lnCard(g, showTag)).join("")}</div>`;
   }
   function card(g, showLg) {
+    if (state.homeLayout === "bar" && state.density !== "simple") return beta4Card(g);
     if (LN_CARDS && isV3()) return lnCard(g);
     if (state.density === "simple") return simpleRow(g, showLg === true);   // Simple stays simple, your teams too
     if (state.density === "compact" && !(state.expandFavs && g.fav)) return miniCard(g, showLg === true);
@@ -4165,7 +4165,7 @@ button.brand, button.brand span { color: var(--accent); }
     bbHideAll();
     if (act === "saved") { beta4SavedPaint(); document.getElementById("b4saved").hidden = false; beta4LoadSaved(); }
     if (act === "teams") { openSheet(); document.getElementById("sheet-h").textContent = "My Teams"; document.getElementById("q").blur(); document.getElementById("b4-team-upcoming").hidden = false; document.getElementById("b4-add-heading").hidden = false; beta4TeamUpcomingPaint(); beta4LoadTeamUpcoming(); }
-    if (act === "alerts") { setOpen.alerts = true; openSettings(); document.getElementById("ssheet-h").textContent = "Alerts"; document.getElementById("ssheet").classList.add("b4-alerts"); }
+    if (act === "alerts") { openSettings(); b4SettingsPage = "alerts"; renderSettings(); }
     if (act === "leagues") openLeagueMenu();
     if (act === "search") { openSheet(); document.getElementById("sheet-h").textContent = "Search"; }
     if (act === "settings") openSettings();
@@ -4371,25 +4371,26 @@ button.brand, button.brand span { color: var(--accent); }
   let results = [], searchTimer = null, searchSeq = 0;
   const LG_BY_SLUG = Object.fromEntries(TEAM_LEAGUES.map(l => [l.path, l.id]));
   function openSheet(welcome) {
+    document.getElementById("sheet").classList.remove("b4-team-editor", "b4-team-finder");
     document.getElementById("b4-team-upcoming").hidden = true; document.getElementById("b4-add-heading").hidden = true;
     document.getElementById("sheet-h").textContent = welcome === true ? "Welcome To The Lineup" : "Your Teams";
     wzPreset = ""; wzShow(welcome === true ? 1 : 0);
     renderSheetLeagues(); renderSheetTV(); renderPresets();
     document.getElementById("sheet").hidden = false;
-    setTimeout(() => { if (document.getElementById("sheet").dataset.b4Area !== "teams") document.getElementById("q").focus(); }, 50);
+    setTimeout(() => { if (document.getElementById("sheet").dataset.b4Area !== "teams" && !document.getElementById("sheet").classList.contains("b4-team-editor")) document.getElementById("q").focus(); }, 50);
     renderSheet();
     ensureMeta([...state.favs]).then(() => { renderSheet(); loadSuggestions(); });
   }
   // Sheets opened from Settings return to Settings when closed
   let fromSettings = false;
   function backToSettings() { if (fromSettings) { fromSettings = false; openSettings(); } }
-  function closeSheet() { const el = document.getElementById("sheet"); if (el.hidden) return; el.hidden = true; backToSettings(); }
+  function closeSheet() { const el = document.getElementById("sheet"); if (el.classList.contains("b4-team-finder")) { beta4OpenTeamEditor(); return; } if (el.hidden) return; el.hidden = true; backToSettings(); }
   function closeLeagues() { const el = document.getElementById("lsheet"); if (el.hidden) return; el.hidden = true; backToSettings(); }
   function resRow(t, i, list) {
-    const k = keyFor(t), on = state.favs.has(k), drag = list === "f";
+    const k = keyFor(t), on = state.favs.has(k), drag = list === "f", editing = document.getElementById("sheet").classList.contains("b4-team-editor");
     return `<div class="res-row ${drag ? "drag" : ""}" ${drag ? `data-k="${esc(k)}"` : ""}>${t.logo ? `<img src="${esc(t.logo)}" alt="">` : "<span></span>"}
-      <span class="nm tap" role="button" tabindex="0" data-open-team="${list}|${i}">${esc(t.name)}<small>${esc(LG[t.lg].short || LG[t.lg].name)} · View</small></span>
-      <button class="follow ${on ? "on" : ""}" data-list="${list}" data-i="${i}">${on ? "Following" : "Follow"}</button>${drag ? `<span class="handle" role="button" aria-label="Drag to reorder ${esc(t.name)}" title="Drag to reorder">${HANDLE}</span>` : ""}</div>`;
+      <span class="nm tap" role="button" tabindex="0" data-open-team="${list}|${i}">${esc(t.name)}<small>${esc(editing ? LG[t.lg].name : (LG[t.lg].short || LG[t.lg].name) + " · View")}</small></span>
+      <button class="follow ${on ? "on" : ""}" data-list="${list}" data-i="${i}" aria-label="${on ? "Unfollow" : "Follow"} ${esc(t.name)}">${editing && on ? "★" : on ? "Following" : "Follow"}</button>${drag ? `<span class="handle" role="button" aria-label="Drag to reorder ${esc(t.name)}" title="Drag to reorder">${HANDLE}</span>` : ""}</div>`;
   }
   // Suggestions: teams near the ones you follow, then popular picks
   const NEARBY = [
@@ -4617,11 +4618,11 @@ button.brand, button.brand span { color: var(--accent); }
   function renderLeagueSheet() {
     const favs = state.favLeagues.filter(id => LG[id]);
     document.getElementById("lfav").innerHTML = favs.length ? favs.map((id, i) => `<div class="lrow drag" data-lg="${id}">
-        <span class="lnum">${i + 1}</span><span class="nm">${esc(LG[id].name)}</span>
+        <span class="lnum">${i + 1}</span><span class="nm">${esc(LG[id].name)}<small>${esc(LG[id].college ? "NCAA" : LG[id].sport)}</small></span>
         <button class="follow on" data-ltoggle="${id}">Remove</button>
         <span class="handle" role="button" aria-label="Drag to reorder ${esc(LG[id].name)}" title="Drag to reorder">${HANDLE}</span></div>`).join("") : '<p class="hint">No leagues picked yet.</p>';
     document.getElementById("lrest").innerHTML = LEAGUES.filter(l => !favs.includes(l.id)).map(l => `<div class="lrow drag">
-        <span class="lnum"></span><span class="nm">${esc(l.name)}</span>
+        <span class="lnum"></span><span class="nm">${esc(l.name)}<small>${esc(l.college ? "NCAA" : l.sport)}</small></span>
         <button class="follow" data-ltoggle="${l.id}">Add</button><span></span></div>`).join("");
   }
   // New picks drop into sport order (Football, Basketball, Baseball, Hockey, Soccer, Golf, Tennis) until you drag your own order
@@ -5869,42 +5870,15 @@ button.brand, button.brand span { color: var(--accent); }
     const open = !!setOpen[id];
     return `<div class="set-sec ${open ? "open" : ""}"><button class="set-sec-h" data-set-sec="${id}" aria-expanded="${open}"><span>${esc(title)}<small>${esc(sub)}</small></span>${CHEV}</button>${open ? `<div class="set-sec-b">${body}</div>` : ""}</div>`;
   }
-  function renderSettings() {
-    const teams = state.favs.size, leagues = state.favLeagues.length;
-    const on = Object.values(state.alertPrefs).reduce((n, g) => n + Object.values(g).reduce((c, v) => c + (Array.isArray(v) ? v.length : v ? 1 : 0), 0), 0);
-    document.getElementById("settings-body").innerHTML =
-      `<div class="set-row"><div class="set-lbl">My Teams<small>Following ${teams} team${teams === 1 ? "" : "s"}</small></div><button class="chip" data-set-open="teams">Edit</button></div>` +
-      `<div class="set-row"><div class="set-lbl">My Leagues<small>${leagues} league${leagues === 1 ? "" : "s"} in your order</small></div><button class="chip" data-set-open="leagues">Edit Order</button></div>` +
-      `<div class="set-row"><div class="set-lbl">Beta 4.0<small>iPhone home · Compact match · Bottom navigation</small></div></div>` +
-      (store.get("owner", "") ? `<div class="set-row"><div class="set-lbl">Reset To My Setup<small>Puts back your teams, leagues and display settings</small></div><button class="chip" data-reset-setup>Reset</button></div>` : "") +
-      `<div class="set-row"><div class="set-lbl">Load A Setup<small>Have a setup code? Enter it to load those teams and leagues</small></div><button class="chip" data-load-setup>Enter Code</button></div>` +
-      setSection("display", "Layout & Display", "Open to, layout, color, appearance, odds",
-        (state.homeLayout !== "classic" ? segRow("Open To", "home3", store.get("home3", "foryou"), [["auto", "Smart"], ["foryou", { bar: "For You", day: "Your Day", rail: "For You" }[state.homeLayout]], ["live", "Live"], ["all", "All"]], "What you see when the app opens. Smart opens on Live when 3 or more games are on in your leagues, otherwise " + { bar: "For You", day: "Your Day", rail: "For You" }[state.homeLayout] + ".") : segRow("Open To", "home", store.get("home", "live"), [["auto", "Smart"], ["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens. Smart picks Live when your games are on, and My Teams when nothing is.")) +
-        segRow("Layout", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
-        segRow("Scoreboard", "density", state.density, [["simple", "Simple"], ["compact", "Compact"], ["expanded", "Expanded"]], "Or pinch the scores: in for smaller, out for bigger") +
-        segRow("Always Expand My Teams", "expandFavs", state.expandFavs ? "on" : "off", [["on", "On"], ["off", "Off"]], "In Compact, your teams' games stay full size. Simple keeps every game small.") +
-        segRow("Color", "palette", store.get("palette", "red"), [["red", "Red"], ["navy", "Navy"], ["green", "Green"], ["purple", "Purple"], ["orange", "Orange"]]) +
-        segRow("Appearance", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
-        segRow("Betting Odds", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "Lines on game cards and in Gamecast") + secRow()) +
-      setSection("tv", "TV & Streaming", `${state.tv.services.length} service${state.tv.services.length === 1 ? "" : "s"} · ${(MARKETS[state.tv.market] || MARKETS.other).name}`,
-        segRow("On My Services Tab", "svcTab", store.get("svcTab", true) ? "on" : "off", [["on", "Show"], ["off", "Hide"]], "A tab of games you can watch on your services") +
-        `<div class="set-row set-col"><div class="set-lbl">Home Market<small>Sets which regional channels you get and when local games are blacked out on league packages</small></div>
-          <div class="toggles">${Object.entries(MARKETS).map(([k, m]) => `<button class="chip ${state.tv.market === k ? "on" : ""}" data-tv-market="${k}" aria-pressed="${state.tv.market === k}">${esc(m.name)}</button>`).join("")}</div></div>` +
-        SERVICE_GROUPS.map(([label, grp, hint]) => `<div class="set-row set-col"><div class="set-lbl">${esc(label)}${hint ? `<small>${esc(hint)}</small>` : ""}</div>
-          <div class="toggles">${SERVICES.filter(s => s.grp === grp).map(s => { const on = state.tv.services.includes(s.id); return `<button class="chip ${on ? "on" : ""}" data-tv-svc="${s.id}" aria-pressed="${on}">${esc(s.label || s.name)}</button>`; }).join("")}</div></div>`).join("") +
-        `<p class="hint">Watch buttons only show services you pick. Anything else shows "Not on your services."</p>`) +
-      setSection("alerts", "Alerts", `${on} alert${on === 1 ? "" : "s"} on`,
-        alertGroup("team", "My Teams", "Games with teams you follow") +
-        alertGroup("watched", "Games You're Watching", "Tap the bell on any game to add it") +
-        alertGroup("all", "All Games", "Anything that turns interesting, any team") +
-        `<div class="set-row"><div class="set-lbl">Test Alerts<small>${esc(notifyStatus())}. ${LN ? "Start reminders arrive even when The Lineup is closed. Live alerts need it open." : "Alerts work while The Lineup is open."}</small></div><button class="chip" data-test-alert>Send Test</button></div>`) +
-      `<button class="set-done" data-set-done>Done</button>` +
-      `<p class="hint set-foot">${location.pathname.includes("/beta") ? `You're on the beta. <a href="../">Open The Live App</a>` : `Want to try new features early? <a href="beta/">Open The Beta</a>`}</p>`;
-  }
-  function openSettings() { document.getElementById("ssheet-h").textContent = "Settings"; document.getElementById("ssheet").classList.remove("b4-alerts"); document.getElementById("ssheet").dataset.b4Area = "settings"; renderSettings(); const el = document.getElementById("ssheet"); el.hidden = false; if (state.homeLayout === "bar") { el.classList.add("as-tab"); if (typeof bbSync === "function") bbSync(); } }
+  function renderSettings() { beta4RenderSettings(); }
+  function openSettings() { b4SettingsPage = "root"; document.getElementById("ssheet-h").textContent = "Settings"; document.getElementById("ssheet").classList.remove("b4-alerts"); document.getElementById("ssheet").dataset.b4Area = "settings"; renderSettings(); const el = document.getElementById("ssheet"); el.hidden = false; if (state.homeLayout === "bar") { el.classList.add("as-tab"); if (typeof bbSync === "function") bbSync(); } }
   document.getElementById("settingsbtn").onclick = openSettings;
   document.getElementById("ssheet-x").onclick = () => { document.getElementById("ssheet").hidden = true; };
   document.getElementById("ssheet").addEventListener("click", async e => {
+    const page = e.target.closest("[data-b4-settings-page]");
+    if (page) { b4SettingsPage = page.dataset.b4SettingsPage; renderSettings(); document.getElementById("settings-body").scrollTop = 0; return; }
+    if (e.target.closest("[data-b4-settings-back]")) { if (b4SettingsPage === "root") document.getElementById("ssheet").hidden = true; else { b4SettingsPage = ["team", "watched", "all"].includes(b4SettingsPage) ? "alerts" : "root"; renderSettings(); document.getElementById("settings-body").scrollTop = 0; } return; }
+    if (e.target.closest("[data-b4-enable-notifications]")) { await askPermission(); renderSettings(); return; }
     if (e.target.id === "ssheet") { document.getElementById("ssheet").hidden = true; return; }
     const sm = e.target.closest("[data-sec-mv]");
     if (sm) { const ord = secOrder(), i = ord.indexOf(sm.dataset.secMv), j = i + (+sm.dataset.dir); if (i >= 0 && j >= 0 && j < ord.length) { [ord[i], ord[j]] = [ord[j], ord[i]]; store.set("secOrder", ord); applySecOrder(); renderSettings(); render(); } return; }
@@ -5984,7 +5958,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (o) {
       document.getElementById("ssheet").hidden = true;
       fromSettings = true;
-      if (o.dataset.setOpen === "teams") openSheet();
+      if (o.dataset.setOpen === "teams") beta4OpenTeamEditor();
       else { renderLeagueSheet(); document.getElementById("lsheet").hidden = false; }
       // Bottom Bar: the editors open full screen inside the Settings tab, with X to go back
       if (state.homeLayout === "bar") { document.getElementById(o.dataset.setOpen === "teams" ? "sheet" : "lsheet").classList.add("as-tab", "sub"); syncLock(); bbSync(); }
@@ -6053,6 +6027,92 @@ button.brand, button.brand span { color: var(--accent); }
   }
 
   // Beta 4.0: compact iPhone home, using the existing feeds and detail routes.
+  let b4SettingsPage = "root";
+  const B4_SETTINGS_TITLES = { root: "Settings", display: "Layout & Display", tv: "TV & Streaming", alerts: "Alerts", team: "My Teams Alerts", watched: "Game Alerts", all: "All Games Alerts" };
+  function beta4SettingsBox(title, hint, body = "") {
+    return `<section class="b4-settings-box"><h3>${esc(title)}</h3>${hint ? `<p>${esc(hint)}</p>` : ""}${body}</section>`;
+  }
+  function beta4SettingsOptions(options, selected, attrs) {
+    return `<div class="b4-settings-options" data-count="${options.length}">${options.map(([value, label]) => {
+      const on = typeof selected === "function" ? selected(value) : String(value) === String(selected);
+      return `<button class="${on ? "on" : ""}" ${attrs(value)} aria-pressed="${on}">${esc(label)}</button>`;
+    }).join("")}</div>`;
+  }
+  function beta4SettingsChoice(title, hint, key, value, options) {
+    return beta4SettingsBox(title, hint, beta4SettingsOptions(options, value, v => `data-set="${esc(key)}" data-val="${esc(v)}"`));
+  }
+  function beta4SettingsRow(title, subtitle, attrs, action = "›") {
+    return `<button class="b4-settings-row" ${attrs}><span><b>${esc(title)}</b>${subtitle ? `<small>${esc(subtitle)}</small>` : ""}</span><em>${esc(action)}</em></button>`;
+  }
+  function beta4Notifications() {
+    const permission = LN ? nativePerm : ("Notification" in window ? Notification.permission : "unsupported");
+    const allowed = permission === "granted";
+    const text = allowed ? "The Lineup can send alerts when your selected events happen. You can change permission in your device settings." : `${notifyStatus()}. In-app alerts work while The Lineup is open.`;
+    return beta4SettingsBox(allowed ? "Phone Notifications Allowed" : "Notifications", text) +
+      (!allowed && permission !== "denied" && permission !== "unsupported" ? `<button class="b4-settings-primary" data-b4-enable-notifications>Enable Notifications</button>` : "");
+  }
+  function beta4AlertSettings(group) {
+    const prefs = state.alertPrefs[group];
+    const hint = { team: "Alerts for teams you follow.", watched: "Tap a game’s bell to use these preferences.", all: "Catch something interesting, even when neither team is yours." }[group];
+    const labels = { comeback: "Big Comebacks", nohit: "No-Hitter Watch", playoff: "Playoff Starts" };
+    let html = `<p class="b4-settings-intro">${esc(hint)}</p>`;
+    html += beta4SettingsBox(group === "all" ? "Around The Sports World" : "Notify Me", group === "all" ? "Global alerts are optional." : "Choose the moments you want to hear about.", beta4SettingsOptions(ALERT_EVENTS[group].map(([id, label]) => [id, group === "all" ? labels[id] || label : label]), id => !!prefs[id], id => `data-alert-group="${group}" data-alert-ev="${id}"`));
+    if (group !== "all") html += beta4SettingsBox("Heads-Up Before Start", "Choose one or more pregame reminders.", beta4SettingsOptions(REMIND_MINS.map(m => [m, `${m} Min`]), m => (prefs.remind || []).includes(m), m => `data-remind-group="${group}" data-remind="${m}"`));
+    if (group === "all") html += beta4SettingsBox("Test Alert", "Send a sample alert to check that notifications are working.");
+    if (group !== "all") html += beta4Notifications();
+    html += `<button class="b4-settings-secondary" data-test-alert>Send Test</button>`;
+    if (group === "all") html += beta4Notifications();
+    return html;
+  }
+  function beta4RenderSettings() {
+    const title = B4_SETTINGS_TITLES[b4SettingsPage] || B4_SETTINGS_TITLES.root;
+    document.getElementById("ssheet-h").textContent = title;
+    document.getElementById("ssheet").classList.add("b4-settings");
+    const market = (MARKETS[state.tv.market] || MARKETS.other).name;
+    let html = "";
+    if (b4SettingsPage === "root") {
+      html = `<p class="b4-settings-intro">Saved on this device. No account required.</p><div class="b4-settings-box b4-settings-links">` +
+        beta4SettingsRow("My Teams", `Following ${state.favs.size} teams`, 'data-set-open="teams"', "Edit") +
+        beta4SettingsRow("My Leagues", `${state.favLeagues.length} leagues in your order`, 'data-set-open="leagues"', "Edit order") +
+        beta4SettingsRow("Load A Setup", "Restore teams and leagues with a code", "data-load-setup", "Enter code") + `</div>` +
+        beta4SettingsChoice("Home Layout", "Try each layout. Your preferences stay the same.", "homeLayout", state.homeLayout, [["bar", "Bottom Bar"], ["day", "Your Day"], ["rail", "League Rail"], ["classic", "Classic"]]) +
+        `<div class="b4-settings-box b4-settings-links">` +
+        beta4SettingsRow("Layout & Display", "Open to, sorting, appearance and odds", 'data-b4-settings-page="display"', "⌄") +
+        beta4SettingsRow("TV & Streaming", `Your services · ${market}`, 'data-b4-settings-page="tv"', "⌄") +
+        beta4SettingsRow("Alerts", "Team, game and global alerts", 'data-b4-settings-page="alerts"', "⌄") + `</div><button class="b4-settings-primary" data-set-done>Done</button><p class="b4-settings-foot">You’re on the beta. <a href="../">Open the live app ↗</a></p>`;
+    } else if (b4SettingsPage === "display") {
+      const openKey = state.homeLayout === "classic" ? "home" : "home3";
+      html = `<p class="b4-settings-intro">Choose how The Lineup opens and how your games look.</p>` +
+        beta4SettingsChoice("Open To", "Smart opens on Live when your sports are on; otherwise For You.", openKey, store.get(openKey, state.homeLayout === "classic" ? "live" : "foryou"), [["auto", "Smart"], [state.homeLayout === "classic" ? "teams" : "foryou", "For You"], ["live", "Live"], ["all", "All"]]) +
+        beta4SettingsChoice("Sort Games", "Choose the order of your scoreboard.", "view", state.view, [["time", "By Time"], ["league", "By League"]]) +
+        beta4SettingsChoice("Scoreboard Size", "You can also pinch the scoreboard in or out.", "density", state.density, [["simple", "Simple"], ["compact", "Compact"], ["expanded", "Expanded"]]) +
+        beta4SettingsChoice("Always Expand My Teams", "Keep followed teams’ games full size in Simple and Compact.", "expandFavs", state.expandFavs ? "on" : "off", [["on", "On"], ["off", "Off"]]) +
+        beta4SettingsChoice("Color", "Choose an accent color.", "palette", store.get("palette", "red"), [["red", "Red"], ["navy", "Navy"], ["green", "Green"], ["purple", "Purple"], ["orange", "Orange"]]) +
+        beta4SettingsChoice("Appearance", "Auto follows your device appearance.", "theme", store.get("theme", "system"), [["system", "Auto"], ["light", "Light"], ["dark", "Dark"]]) +
+        beta4SettingsChoice("Betting Odds", "Show lines on game cards and in Game View.", "odds", state.showOdds ? "on" : "off", [["on", "Show"], ["off", "Hide"]]);
+    } else if (b4SettingsPage === "tv") {
+      html = `<p class="b4-settings-intro">Watch options match your services and home market.</p>` +
+        beta4SettingsChoice("On My Services", "Show a filter containing games you can watch.", "svcTab", store.get("svcTab", true) ? "on" : "off", [["on", "Show"], ["off", "Hide"]]) +
+        beta4SettingsBox("Home Market", "Sets regional channels and local league-package blackouts.", beta4SettingsOptions(Object.entries(MARKETS).map(([id, m]) => [id, m.name]), state.tv.market, id => `data-tv-market="${id}"`)) +
+        SERVICE_GROUPS.map(([label, group]) => beta4SettingsBox(label, "Select every service you have.", beta4SettingsOptions(SERVICES.filter(s => s.grp === group).map(s => [s.id, s.id === "antenna" ? "Antenna" : s.label || s.name]), id => state.tv.services.includes(id), id => `data-tv-svc="${id}"`))).join("") +
+        beta4SettingsBox("Only your services", "If none of your services carry a game, The Lineup shows ‘Not on your services.’ Local games may be blacked out on league packages.");
+    } else if (b4SettingsPage === "alerts") {
+      html = `<p class="b4-settings-intro">Choose alerts for your teams, saved games and the sports world.</p><div class="b4-settings-box b4-settings-links">` +
+        beta4SettingsRow("My Teams Alerts", "Teams you follow", 'data-b4-settings-page="team"') +
+        beta4SettingsRow("Game Alerts", "Games with the bell turned on", 'data-b4-settings-page="watched"') +
+        beta4SettingsRow("All Games Alerts", "Close games, overtime and more", 'data-b4-settings-page="all"') + `</div>`;
+    } else if (["team", "watched", "all"].includes(b4SettingsPage)) html = beta4AlertSettings(b4SettingsPage);
+    document.getElementById("settings-body").innerHTML = html;
+  }
+  function beta4OpenTeamEditor() {
+    openSheet();
+    const el = document.getElementById("sheet");
+    el.classList.add("b4-team-editor");
+    document.getElementById("sheet-h").textContent = "My Teams";
+    document.getElementById("q").blur();
+    renderSheet();
+  }
+
   let b4TeamsLoading = false;
   function beta4TeamUpcomingPaint() {
     const el = document.getElementById("b4-team-upcoming");
@@ -6115,8 +6175,21 @@ button.brand, button.brand span { color: var(--accent); }
     const on = !!state.favGames[key];
     return `<div class="b4-row"><button class="b4-game" data-game="${esc(key)}" aria-label="${esc(g.teams.map(t => b4Name(g, t)).join(" vs ") + ", " + g.status + ": game details")}"><span class="b4-time"><span class="${g.state === "in" ? "b4-status" : ""}">${esc(g.state === "pre" ? g.status || timeLabel(g.date) : g.status)}</span><small>${esc(b4Short(g.lg))}</small>${tv ? `<small class="b4-channel">${esc(tv)}</small>` : ""}</span><span>${team(a)}${team(h)}</span></button><button class="bellbtn heartbtn ${on ? "on" : ""}" data-favgame="${esc(key)}" aria-pressed="${on}" aria-label="${on ? "Unsave" : "Save"} ${esc(a.name)} game">${on ? HEART_ON : HEART}</button></div>`;
   }
+  function beta4Card(g, density = state.density) {
+    const [a, h] = g.teams;
+    if (!a || !h) return "";
+    const expanded = density === "expanded", pre = g.state === "pre", final = g.state === "post";
+    const key = gameKey(g), on = !!state.favGames[key];
+    const team = t => `<div class="b4-card-team">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : '<span class="b4-card-logo"></span>'}<b class="b4-card-name">${esc(b4Name(g, t))}</b>${pre ? "" : `<strong class="b4-card-score">${esc(t.score)}</strong>`}</div>`;
+    const channel = String(netLabel(g) || "").replace(/^(W?NBA) League Pass$/i, "League Pass");
+    const watch = expanded && !final ? g.watch?.find(w => w.url) : null;
+    const save = `<button class="bellbtn heartbtn ${on ? "on" : ""}" data-favgame="${esc(key)}" aria-pressed="${on}" aria-label="${on ? "Unsave" : "Save"} ${esc(a.name)} game">${on ? HEART_ON : HEART}</button>`;
+    return `<article class="b4-scorecard b4-card-${expanded ? "expanded" : "compact"} tap" data-game="${esc(key)}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name + ": game details")}"><div class="b4-card-top"><b>${esc(b4Short(g.lg))}</b><span class="${g.state === "in" ? "b4-status" : ""}">${esc(g.status || timeLabel(g.date))}</span></div>${team(a)}${team(h)}<div class="b4-card-foot"><span class="b4-card-tv">${esc(channel)}</span><span class="b4-card-actions">${save}${bellBtn(g)}</span></div>${watch ? `<a class="b4-card-watch" href="${esc(watch.url)}" ${watch.scheme ? `data-app="${esc(watch.scheme)}"` : ""} target="_blank" rel="noopener">Watch On ${esc(watch.app)}</a>` : ""}</article>`;
+  }
   function beta4Rows(games) {
-    return state.density === "simple" ? `<div class="b4-rows">${games.map(beta4Row).join("")}</div>` : gridOf(games);
+    if (state.view === "league") games = games.slice().sort((a, b) => leagueRank(a.lg.id) - leagueRank(b.lg.id) || byState(a, b));
+    if (state.expandFavs && state.density !== "expanded") return `<div class="b4-mixed b4-mixed-${state.density}">${games.map(g => isMine(g) ? beta4Card(g, "expanded") : state.density === "simple" ? `<div class="b4-rows">${beta4Row(g)}</div>` : beta4Card(g)).join("")}</div>`;
+    return state.density === "simple" ? `<div class="b4-rows">${games.map(beta4Row).join("")}</div>` : `<div class="b4-card-grid b4-cards-${state.density}">${games.map(g => beta4Card(g)).join("")}</div>`;
   }
   function beta4Section(title, meta, games) {
     return `<section class="b4-section"><div class="b4-section-head"><h2>${esc(title)}</h2><small>${esc(meta)}</small></div>${beta4Rows(games)}</section>`;
@@ -6190,6 +6263,9 @@ button.brand, button.brand span { color: var(--accent); }
   document.addEventListener("click", e => {
     if (e.target.closest("[data-b4-retry-teams]")) { beta4LoadTeamUpcoming(); return; }
     if (e.target.closest("[data-b4-density]")) { setDensity(b4NextDensity()); render(); return; }
+    if (e.target.closest("[data-b4-team-back]")) { closeSheet(); return; }
+    if (e.target.closest("[data-b4-leagues-done]")) { closeLeagues(); return; }
+    if (e.target.closest("[data-b4-find-teams]")) { const el = document.getElementById("sheet"); el.classList.remove("b4-team-editor"); el.classList.add("b4-team-finder"); document.getElementById("sheet-h").textContent = "Find Teams"; document.getElementById("q").focus(); return; }
     const scope = e.target.closest("[data-b4-scope]");
     if (scope) { state.tab = scope.dataset.b4Scope; render(); window.scrollTo({ top: 0, behavior: "smooth" }); return; }
     const league = e.target.closest("[data-b4-league]");

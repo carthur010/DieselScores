@@ -2,6 +2,16 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — Settings reference screens
+- Rebuilt Settings with grouped cards and dedicated Layout & Display, TV & Streaming and three alert-preference pages. Added back/close navigation, selected pill controls, Done and live-app actions.
+- Restyled team and league editors, retaining drag ordering, follow controls, Add/Remove and Save Order.
+- Restored persistent home-layout selection. Sort Games and Always Expand My Teams apply to the Beta 4 feed; notification status reflects actual device permission.
+
+## Oct 21, 2026: Beta 4.0 — Compact and Expanded reference layouts
+- Compact: two rounded cards per row with league top left, live clock top right, logos and full team names beside large scores, then TV and heart/bell controls.
+- Expanded: the same layout as one full-width card, with a full-width Watch On button for available streaming services.
+- Applied to home, league score grids and Saved; Simple retains the restored left-column time/league/TV layout.
+
 ## Oct 21, 2026: Beta 4.0 — My Teams upcoming games
 - My Teams starts with the next scheduled game for each followed team, then Add Teams and the existing search/follow controls. Teams already playing fetch their next future fixture. Includes loading, no-schedule and retry states.
 

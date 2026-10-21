@@ -12,7 +12,7 @@ function fixture() {
   const soccer = { id: 'wlc', name: 'WSL Players Cup', short: 'WSL Cup', path: 'soccer/eng.w.league_cup' };
   const game = (id, status, mine, league = lg) => ({ id, lg: league, state: status, mine, status: status === 'in' ? '6:12 3rd' : status === 'post' ? 'Final' : '7:00 PM', date: '2026-10-21T23:00:00Z', teams: [{ name: 'Away ' + id, abbr: 'A', score: 1 }, { name: 'Home ' + id, abbr: 'H', score: 2 }], watch: [] });
   const games = [game('live', 'in', true), game('pre', 'pre', true), game('other', 'pre', false), game('final', 'post', true), game('soccer', 'in', false, soccer)];
-  const body = { innerHTML: '' };
+  const body = { innerHTML: '', classList: { add() {} } };
   const saved = {};
   const ctx = {
     state: { tab: 'foryou', density: 'simple', favGames: {}, favs: new Set(), favMeta: {}, next: {}, favLeagues: ['nba'], data: {}, loading: false },
@@ -29,6 +29,7 @@ function fixture() {
     esc: s => String(s ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'),
     netLabel: () => 'NBA League Pass', isToday: () => true,
     HEART: '<svg></svg>', HEART_ON: '<svg></svg>', IC3: {},
+    bellBtn: g => g.state === 'post' ? '' : '<button data-watchgame="' + g.lg.id + ':' + g.id + '">Alerts</button>',
     mvSection: () => '', timeLabel: () => '7:00 PM', BLOCK: {}, API: 'https://example.test/',
     normalize: (event, league) => ({ ...event, lg: league, teams: event.competitions[0].competitors.map(c => ({ name: c.team.name, abbr: c.team.abbreviation, score: c.score })), status: 'Final', state: 'post' }),
     fetch: async () => ({ ok: true, json: async () => ({ header: { competitions: [{ date: '2026-10-20T23:00:00Z', competitors: [{ team: { name: 'Old Away', abbreviation: 'OA' }, score: 1 }, { team: { name: 'Old Home', abbreviation: 'OH' }, score: 2 }] }] } }) })
@@ -127,4 +128,82 @@ test('My Teams distinguishes a failed schedule request from no upcoming game', a
   await ctx.fetchNext('nba:A', true);
   assert.equal(ctx.state.next['nba:A'].error, true);
   assert.notEqual(ctx.state.next['nba:A'].none, true);
+});
+
+test('Compact cards show team names, scores and both game actions without a Watch button', () => {
+  const { ctx, games } = fixture(); ctx.state.density = 'compact';
+  games[0].teams[0].name = 'Rangers'; games[0].teams[0].abbr = 'NYR';
+  games[0].watch = [{ url: 'https://example.test/watch', app: 'Gotham Sports' }];
+  const result = ctx.beta4Rows(games.slice(0, 2));
+  assert.match(result, /b4-cards-compact/);
+  assert.match(result, />Rangers<\/b>/);
+  assert.match(result, /b4-card-score/);
+  assert.match(result, /data-favgame=/);
+  assert.match(result, /data-watchgame=/);
+  assert.doesNotMatch(result, /b4-card-watch|>NYR</);
+});
+
+test('Expanded cards link the Watch button to the matching streaming provider', () => {
+  const { ctx, games } = fixture(); ctx.state.density = 'expanded';
+  games[0].watch = [{ url: 'https://example.test/watch?game=1&live=1', app: 'Gotham Sports', scheme: 'gotham://watch' }];
+  const result = ctx.beta4Rows([games[0]]);
+  assert.match(result, /b4-cards-expanded/);
+  assert.match(result, /Watch On Gotham Sports/);
+  assert.match(result, /href="https:\/\/example.test\/watch\?game=1&amp;live=1"/);
+  assert.match(result, /data-app="gotham:\/\/watch"/);
+});
+
+test('Expanded cards do not invent a Watch destination or pregame scores', () => {
+  const { ctx, games } = fixture(); ctx.state.density = 'expanded';
+  const result = ctx.beta4Card(games[1]);
+  assert.doesNotMatch(result, /b4-card-watch|b4-card-score/);
+  assert.match(result, /7:00 PM/);
+});
+
+test('Always Expand My Teams expands followed games while leaving other Compact cards compact', () => {
+  const { ctx, games } = fixture();
+  ctx.state.density = 'compact'; ctx.state.expandFavs = true;
+  const result = ctx.beta4Rows([games[0], games[2]]);
+  assert.match(result, /b4-mixed-compact/);
+  assert.equal((result.match(/b4-card-expanded tap/g) || []).length, 1);
+  assert.equal((result.match(/b4-card-compact tap/g) || []).length, 1);
+});
+
+function settingsFixture() {
+  const { ctx, body } = fixture();
+  ctx.state.tv = { market: 'nyc', services: ['youtube'] };
+  ctx.state.homeLayout = 'bar'; ctx.state.alertPrefs = { team: { start: true, remind: [15] }, watched: { start: true, remind: [5] }, all: { close: false } };
+  Object.assign(ctx, {
+    MARKETS: { nyc: { name: 'New York' }, other: { name: 'Other' } },
+    LN: null, notifyStatus: () => 'Notifications not allowed yet',
+    ALERT_EVENTS: { team: [['start', 'Game Start']], watched: [['start', 'Game Start']], all: [['close', 'Close Games']] },
+    REMIND_MINS: [30, 15, 10, 5, 1],
+    SERVICE_GROUPS: [['Free To Watch', 'free']], SERVICES: [{ id: 'youtube', grp: 'free', name: 'YouTube' }, { id: 'tubi', grp: 'free', name: 'Tubi' }]
+  });
+  return { ctx, body };
+}
+
+test('Settings home links to dedicated display, TV and alerts pages', () => {
+  const { ctx, body } = settingsFixture(); ctx.beta4RenderSettings();
+  assert.match(body.innerHTML, /Saved on this device/);
+  assert.match(body.innerHTML, /data-b4-settings-page="display"/);
+  assert.match(body.innerHTML, /data-b4-settings-page="tv"/);
+  assert.match(body.innerHTML, /data-b4-settings-page="alerts"/);
+  assert.match(body.innerHTML, /data-set="homeLayout" data-val="bar" aria-pressed="true"/);
+});
+
+test('TV settings reflect saved market and service selections', () => {
+  const { ctx, body } = settingsFixture(); vm.runInContext('b4SettingsPage = "tv"', ctx); ctx.beta4RenderSettings();
+  assert.match(body.innerHTML, /data-tv-market="nyc" aria-pressed="true"/);
+  assert.match(body.innerHTML, /data-tv-svc="youtube" aria-pressed="true"/);
+  assert.match(body.innerHTML, /data-tv-svc="tubi" aria-pressed="false"/);
+});
+
+test('Alert pages retain independent event and reminder selections', () => {
+  const { ctx } = settingsFixture();
+  const team = ctx.beta4AlertSettings('team'), game = ctx.beta4AlertSettings('watched');
+  assert.match(team, /data-remind-group="team" data-remind="15" aria-pressed="true"/);
+  assert.match(game, /data-remind-group="watched" data-remind="5" aria-pressed="true"/);
+  assert.doesNotMatch(team, /Phone Notifications Allowed/);
+  assert.doesNotMatch(game, /Phone Notifications Allowed/);
 });
