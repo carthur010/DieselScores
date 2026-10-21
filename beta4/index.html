@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021195006">
+<meta name="build" content="20261021195130">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -6111,7 +6111,7 @@ button.brand, button.brand span { color: var(--accent); }
     else if (!feature.html && !final.length) html += `<div class="b4-empty"><p>${state.loading ? "Loading scores…" : live ? "No live games in this view right now." : fy ? "None of your followed teams or saved games play on this date." : "No games in this view on this date."}</p><button class="chip" data-b4-scope="all">See all games</button> <button class="chip" data-bb="teams">Follow teams</button></div>`;
     if (fy) {
       const extra = scoped.filter(g => g.state === "in" && !mine.some(m => gameKey(m) === gameKey(g))).slice(0, 8);
-      if (extra.length) html += beta4Section("Around your leagues", `${extra.length} live`, extra);
+      if (extra.length) html += beta4Section("You Are Looking Live", `${extra.length} live`, extra);
     }
     if (final.length) html += beta4Section("Final", `${final.length} ${final.length === 1 ? "game" : "games"}`, final);
     if (fy && b4League === "all") html += mvSection();
