@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021205922">
+<meta name="build" content="20261021210243">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=14">
+<link rel="stylesheet" href="beta4.css?v=15">
 </head>
 <body>
 <header class="top">
@@ -6304,13 +6304,8 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function beta4Home(games) {
     const plan = beta4HomePlan(games), forYou = ["foryou", "teams"].includes(state.tab);
-    const empty = {
-      mine: "None of your teams or hearted games are on in this view.",
-      worth: "No qualifying live games right now. Tight finishes, overtime, upsets, Top 25 matchups and playoffs appear here.",
-      live: "No other live games in your followed leagues right now.",
-      mv: "No unclaimed YouTube TV games are live or starting within 15 minutes. Move this section higher to give it first choice."
-    };
     let html = plan.sections.map(section => {
+      if (!section.games.length && !section.html) return "";
       const { key } = section;
       let contents = section.html, list = section.games;
       if (key === "mine" && forYou && beta4SectionShown("feature")) {
@@ -6319,9 +6314,6 @@ button.brand, button.brand span { color: var(--accent); }
         list = list.filter(g => gameKey(g) !== feature.key);
       }
       if (key !== "mv") contents += beta4Rows(key === "worth" ? list.map(g => ({ ...g, b4Reason: gameTag(g) || "Live Pick" })) : list, true);
-      if (!section.games.length && !contents) contents = `<p class="b4-section-empty">${empty[key]}</p>`;
-      // beta4Rows([]) has no content; show the section explanation instead of an empty grid.
-      if (!section.games.length && key !== "mv") contents = `<p class="b4-section-empty">${empty[key]}</p>`;
       const count = section.games.length ? `${section.games.length} ${key === "mv" ? "games in the quad" : key === "worth" ? "picks" : "games"}` : "";
       return `<section class="b4-section" data-home-section="${key}"><div class="b4-section-head"><h2>${B4_HOME_SECTIONS[key]}</h2><small>${esc(count)}</small></div>${contents}</section>`;
     }).join("");

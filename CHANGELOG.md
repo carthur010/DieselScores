@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — Hide Empty Sections
+- Empty home sections omit their heading and placeholder message, while remaining enabled in Settings. They reappear automatically when qualifying content is available.
+
 ## Oct 21, 2026: Beta 4.0 — Home Sections And Tracking
 - Restored Your Teams, Worth A Watch, You Are Looking Live and Your Multiview across home layouts. All sections show by default; Settings → Home Sections supports show/hide, move, reset and rule explanations. Your Game follows Your Teams; Final stays at the bottom.
 - Section order now controls first claim, with each game appearing once. Hidden sections release candidates to later sections. Worth A Watch uses live sport thresholds, overtime, cached pregame upset lines, Top 25 and playoffs, excludes owned games and blowouts, prioritizes close late games/playoffs and caps picks at six. Each pick displays one reason tag.

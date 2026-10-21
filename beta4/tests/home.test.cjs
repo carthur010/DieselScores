@@ -460,3 +460,16 @@ test('Settings container page metadata does not intercept move or preference but
   await handler({target:{closest:selector=>selector==='[data-set]'?preference:selector==='[data-b4-settings-page]'?container:null}});
   assert.equal(ctx.state.density,'expanded');
 });
+
+
+test('Empty home sections omit their headings and return automatically when populated', () => {
+  const {ctx,games}=fixture();
+  ctx.beta4HomeMultiview=()=>({games:[],html:'',available:true});
+  let result=ctx.beta4Home([games[1]]);
+  assert.match(result, /<h2>Your Teams<\/h2>/);
+  for(const title of ['Worth A Watch','You Are Looking Live','Your Multiview']) assert.ok(!result.includes('<h2>'+title+'</h2>'));
+  assert.doesNotMatch(result,/No qualifying live games|No other live games|No unclaimed YouTube/);
+  assert.equal(ctx.beta4SectionShown('worth'),true);
+  const pick={...games[0],id:'pick',mine:false}; games.push(pick); ctx.worthPicks=gs=>gs.filter(g=>g.id==='pick');
+  result=ctx.beta4Home(games); assert.match(result,/<h2>Worth A Watch<\/h2>/);
+});
