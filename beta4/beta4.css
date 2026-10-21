@@ -359,3 +359,7 @@ body:has(#sheet:not([hidden]).b4-team-editor) #botbar, body:has(#sheet:not([hidd
 #sheet.b4-team-schedule-mode #suggest,
 #sheet.b4-team-schedule-mode #sgames { display: none; }
 .b4-find-more { margin-top: 14px; }
+
+/* Keep All, the first five followed leagues and More on one swipeable row. */
+.b4-league-shortcuts { display: flex; align-items: center; gap: 6px; width: 100%; min-width: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.b4-league-shortcuts::-webkit-scrollbar { display: none; }
