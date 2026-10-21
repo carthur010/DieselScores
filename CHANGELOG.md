@@ -2,6 +2,12 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — My Teams upcoming games
+- My Teams starts with the next scheduled game for each followed team, then Add Teams and the existing search/follow controls. Teams already playing fetch their next future fixture. Includes loading, no-schedule and retry states.
+
+## Oct 21, 2026: Beta 4.0 — quick view toggle
+- Added a top-right button that cycles Simple → Compact → Expanded and saves the choice. The current view has a matching icon and label; the label folds away on smaller iPhones.
+
 ## Oct 21, 2026: Beta 4.0 — More leagues dropdown
 - More + opens a dropdown beneath the league tabs. Choosing a league updates the score feed in place. Escape and tapping outside close the dropdown.
 

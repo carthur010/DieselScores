@@ -92,3 +92,39 @@ test('Beta 4 shares follows but isolates display and game preferences', () => {
   assert.match(html, /location.pathname.includes\("\/beta4"\) \? "beta4\/"/);
   assert.doesNotMatch(html, /BETA4_IMPLEMENTATION/);
 });
+
+function scheduleFixture() {
+  const now = Date.now();
+  const event = (id, offset, state) => ({ id, date: new Date(now + offset).toISOString(), competitions: [{ status: { type: { state } }, competitors: [{ team: { id: '1', abbreviation: 'A' }, homeAway: 'away' }, { team: { id: '2', abbreviation: 'B', shortDisplayName: 'Opponent' } }] }] });
+  const events = [event('playing', -3600000, 'in'), event('next', 86400000, 'pre')];
+  const ctx = {
+    state: { favMeta: { 'nba:A': { lg: 'nba', id: '1' } }, next: {} },
+    LG: { nba: { path: 'basketball/nba' } }, API: 'https://example.test/',
+    Date, placeName: () => '', ymd: () => '20261022',
+    fetch: async () => ({ ok: true, json: async () => ({ events }) })
+  };
+  vm.createContext(ctx);
+  vm.runInContext('async function fetchNext' + html.split('async function fetchNext')[1].split('  async function refreshNext')[0], ctx);
+  return ctx;
+}
+
+test('My Teams next-game lookup skips a match already in progress', async () => {
+  const ctx = scheduleFixture();
+  await ctx.fetchNext('nba:A', true);
+  assert.equal(ctx.state.next['nba:A'].id, 'next');
+  assert.equal(ctx.state.next['nba:A'].oppName, 'Opponent');
+});
+
+test('ordinary next-game lookup still includes a live game', async () => {
+  const ctx = scheduleFixture();
+  await ctx.fetchNext('nba:A');
+  assert.equal(ctx.state.next['nba:A'].id, 'playing');
+});
+
+test('My Teams distinguishes a failed schedule request from no upcoming game', async () => {
+  const ctx = scheduleFixture();
+  ctx.fetch = async () => { throw new Error('offline'); };
+  await ctx.fetchNext('nba:A', true);
+  assert.equal(ctx.state.next['nba:A'].error, true);
+  assert.notEqual(ctx.state.next['nba:A'].none, true);
+});

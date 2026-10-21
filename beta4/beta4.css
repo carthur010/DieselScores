@@ -7,6 +7,8 @@
 .b4-head .brand .betatag { display: block; width: fit-content; margin: 5px 0 0; padding: 0; font: 600 10px var(--body); letter-spacing: .07em; color: var(--muted) !important; background: transparent !important; }
 .b4-icon { display: inline-grid; place-items: center; min-width: 44px; min-height: 44px; border-radius: 10px; color: var(--muted); flex-shrink: 0; }
 .b4-icon svg { width: 20px; height: 20px; }
+.b4-view { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; gap: 5px; min-width: 44px; min-height: 44px; padding: 6px 8px; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; color: var(--muted); font-size: 12px; font-weight: 600; }
+.b4-view svg { width: 17px; height: 17px; }
 .b4-scope { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); background: var(--accent-soft); border-radius: 12px; padding: 3px; margin: 9px 0 0; gap: 3px; }
 .b4-scope button { min-height: 44px; padding: 6px; border-radius: 9px; font-size: 14px; font-weight: 600; }
 .b4-scope button[aria-pressed="true"] { background: var(--surface); color: var(--accent); box-shadow: 0 1px 4px #00000010; }
@@ -27,6 +29,16 @@
 .b4-picker-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px; }
 .b4-picker-options button { min-height: 44px; padding: 8px; border-radius: 8px; text-align: left; font-size: 13px; overflow-wrap: anywhere; }
 .b4-picker-options button:hover, .b4-picker-options button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+#b4-team-upcoming { margin-bottom: 22px; }
+#b4-team-upcoming[hidden], #b4-add-heading[hidden] { display: none; }
+.b4-team-schedule { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.b4-team-next { display: grid; grid-template-columns: 30px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 12px; min-height: 70px; width: 100%; text-align: left; }
+.b4-team-next + .b4-team-next { border-top: 1px solid var(--line); }
+.b4-team-next img { width: 30px; height: 30px; object-fit: contain; }
+.b4-team-next b { display: block; font-size: 14px; font-weight: 650; }
+.b4-team-next small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.b4-team-next i { font-style: normal; color: var(--muted); }
+#b4-add-heading { font-size: 17px; color: var(--fg); text-transform: none; letter-spacing: -.02em; margin: 0 0 10px; }
 :root[data-home="bar"] #dates, :root[data-home="bar"] #mybar { display: none !important; }
 :root[data-home="bar"] .wrap > main { padding-top: 15px; display: block; }
 .b4-feature { border: 1px solid color-mix(in srgb,var(--accent) 24%,var(--line)); background: var(--accent-soft); border-radius: 14px; padding: 4px 12px 12px; margin-bottom: 17px; }
@@ -82,6 +94,7 @@
 .b4-load-note button { min-height: 44px; color: var(--accent); text-decoration: underline; }
 :root[data-home="bar"] #main > .block { margin-bottom: 15px; }
 @media(max-width:360px) {
+  .b4-view span { display: none; }
   .b4-head .brand { font-size: 26px; }
   .b4-league { padding-inline: 10px; }
   .b4-game { grid-template-columns: 64px minmax(0,1fr); gap: 5px; }

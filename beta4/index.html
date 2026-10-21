@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021195321">
+<meta name="build" content="20261021195712">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=4">
+<link rel="stylesheet" href="beta4.css?v=6">
 </head>
 <body>
 <header class="top">
@@ -1423,6 +1423,8 @@ button.brand, button.brand span { color: var(--accent); }
       <div class="wl-brand" id="wl-brand" hidden><img class="red" src="brand/mark-red.png" alt=""><img class="cream" src="brand/mark-cream.png" alt=""><b>The Lineup</b><span>Live scores. Where to watch.<br>Your teams. All in one place.</span></div>
       <p class="hint" id="sheet-intro" hidden>Step 1 Of 3 · Follow your teams. You can change everything later in Settings. <button class="chip" data-welcome-code style="margin-top:8px">Have A Setup Code?</button></p>
       <div id="sheet-teams">
+      <div id="b4-team-upcoming" hidden></div>
+      <h3 id="b4-add-heading" hidden>Add Teams</h3>
       <input type="search" id="q" placeholder="Search teams and leagues" autocomplete="off" aria-label="Search teams and leagues">
       <div id="sgames"></div>
       <div class="res" id="results"></div>
@@ -2295,7 +2297,7 @@ button.brand, button.brand span { color: var(--accent); }
     const city = a.city || "", region = a.state ? a.state : (!city && a.country && !/^(USA|United States)$/i.test(a.country) ? a.country : "");
     return [city, region].filter(Boolean).join(", ");
   }
-  async function fetchNext(k) {
+  async function fetchNext(k, upcomingOnly = false) {
     const m = state.favMeta[k];
     if (!m) return;
     const lg = LG[m.lg];
@@ -2303,6 +2305,7 @@ button.brand, button.brand span { color: var(--accent); }
       const now = Date.now();
       const ev = (j.events || []).filter(e => new Date(e.date).getTime() > now - 4 * 3600e3)
         .filter(e => (e.competitions?.[0]?.status?.type?.state || "pre") !== "post")
+        .filter(e => !upcomingOnly || (new Date(e.date).getTime() > now && (e.competitions?.[0]?.status?.type?.state || "pre") === "pre"))
         .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
       if (!ev) return null;
       const cs = ev.competitions?.[0]?.competitors || [];
@@ -2319,7 +2322,7 @@ button.brand, button.brand span { color: var(--accent); }
       if (lg.soccer) found = parse(await (await fetch(API + "soccer/all/teams/" + m.id + "/schedule?fixture=true")).json());
       if (!found) found = parse(await (await fetch(API + lg.path + "/teams/" + m.id + "/schedule")).json());
       if (!found && !lg.soccer) found = parse(await (await fetch(API + lg.path + "/teams/" + m.id + "/schedule?seasontype=3")).json());
-    } catch {}
+    } catch { if (upcomingOnly) { state.next[k] = { t: Date.now(), error: true }; return; } }
     // The team schedule feed can lag. Confirm time and arena against that day's scoreboard.
     if (found?.id) {
       try {
@@ -4161,7 +4164,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (act === cur && !gameOpen) return;
     bbHideAll();
     if (act === "saved") { beta4SavedPaint(); document.getElementById("b4saved").hidden = false; beta4LoadSaved(); }
-    if (act === "teams") { openSheet(); document.getElementById("sheet-h").textContent = "My Teams"; document.getElementById("q").blur(); }
+    if (act === "teams") { openSheet(); document.getElementById("sheet-h").textContent = "My Teams"; document.getElementById("q").blur(); document.getElementById("b4-team-upcoming").hidden = false; document.getElementById("b4-add-heading").hidden = false; beta4TeamUpcomingPaint(); beta4LoadTeamUpcoming(); }
     if (act === "alerts") { setOpen.alerts = true; openSettings(); document.getElementById("ssheet-h").textContent = "Alerts"; document.getElementById("ssheet").classList.add("b4-alerts"); }
     if (act === "leagues") openLeagueMenu();
     if (act === "search") { openSheet(); document.getElementById("sheet-h").textContent = "Search"; }
@@ -4368,6 +4371,7 @@ button.brand, button.brand span { color: var(--accent); }
   let results = [], searchTimer = null, searchSeq = 0;
   const LG_BY_SLUG = Object.fromEntries(TEAM_LEAGUES.map(l => [l.path, l.id]));
   function openSheet(welcome) {
+    document.getElementById("b4-team-upcoming").hidden = true; document.getElementById("b4-add-heading").hidden = true;
     document.getElementById("sheet-h").textContent = welcome === true ? "Welcome To The Lineup" : "Your Teams";
     wzPreset = ""; wzShow(welcome === true ? 1 : 0);
     renderSheetLeagues(); renderSheetTV(); renderPresets();
@@ -4515,6 +4519,7 @@ button.brand, button.brand span { color: var(--accent); }
     document.getElementById("following").innerHTML = following.length ? following.map((t, i) => resRow(t, i, "f")).join("") : '<p class="hint">Not following anyone yet.</p>';
     drawResults();
     drawSuggest();
+    if (document.getElementById("sheet").dataset.b4Area === "teams") { beta4TeamUpcomingPaint(); beta4LoadTeamUpcoming(); }
   }
 
   // =====================================================================
@@ -6048,10 +6053,39 @@ button.brand, button.brand span { color: var(--accent); }
   }
 
   // Beta 4.0: compact iPhone home, using the existing feeds and detail routes.
+  let b4TeamsLoading = false;
+  function beta4TeamUpcomingPaint() {
+    const el = document.getElementById("b4-team-upcoming");
+    if (!el || el.hidden) return;
+    const rows = [...state.favs].map(k => {
+      const m = state.favMeta[k] || { name: k.split(":")[1] }, n = state.next[k];
+      const ready = n?.date && new Date(n.date).getTime() > Date.now();
+      const playable = ready && n.id && LG[m.lg];
+      const tag = playable ? "button" : "div";
+      const subtitle = ready ? `${n.at === "@" ? "at" : "vs"} ${n.oppName || n.opp || "TBD"}` : n?.error ? "Schedule unavailable" : n?.none ? "No upcoming game scheduled" : "Checking schedule…";
+      return `<${tag} class="b4-team-next" ${playable ? `data-game="${esc(m.lg)}:${esc(n.id)}"` : ""}>${m.logo ? `<img src="${esc(m.logo)}" alt="">` : "<span></span>"}<span><b>${esc(m.name)}</b><small>${esc(subtitle)}</small>${ready ? `<small>${esc(nextWhen(n.date))}</small>` : ""}</span>${playable ? "<i>›</i>" : ""}</${tag}>`;
+    }).join("");
+    el.innerHTML = `<div class="b4-section-head"><h2>Upcoming games</h2><small>${state.favs.size} teams</small></div>` + (rows ? `<div class="b4-team-schedule">${rows}</div>` : `<p class="hint">Follow a team below to see its next game here.</p>`) + ([...state.favs].some(k => state.next[k]?.error) ? `<button class="b4-link" data-b4-retry-teams>Retry schedules</button>` : "");
+  }
+  async function beta4LoadTeamUpcoming() {
+    if (b4TeamsLoading) return;
+    b4TeamsLoading = true;
+    const keys = [...state.favs];
+    try {
+      await ensureMeta(keys);
+      beta4TeamUpcomingPaint();
+      const todo = keys.filter(k => { const n = state.next[k]; return !n || n.error || Date.now() - (n.t || 0) > 3 * 3600e3 || (!n.none && (!n.date || new Date(n.date).getTime() <= Date.now())); });
+      await Promise.allSettled(todo.map(async k => { await fetchNext(k, true); beta4TeamUpcomingPaint(); }));
+      store.set("next", state.next);
+    } catch { keys.filter(k => !state.next[k]).forEach(k => { state.next[k] = { error: true }; }); }
+    finally { b4TeamsLoading = false; beta4TeamUpcomingPaint(); }
+    if ([...state.favs].some(k => !keys.includes(k))) beta4LoadTeamUpcoming();
+  }
   let b4League = "all", b4Feature = store.get("featuredGame", "");
   let b4SavedLoading = false, b4SavedErrors = 0;
   const b4SavedCache = new Map();
   const b4HomeScope = () => ["foryou", "live", "all"].includes(state.tab);
+  const b4NextDensity = () => ({ simple: "compact", compact: "expanded", expanded: "simple" })[state.density] || "simple";
   const b4Short = lg => lg.short || lg.name;
   const b4Name = (g, t) => /eng\.w\.|wchampions|nwsl/.test(g.lg.path) && !/Women|\bW\b/i.test(t.name) ? t.name + " W" : t.name;
   const b4Chev = dir => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${dir === "left" ? "M15 6l-6 6 6 6" : "M9 6l6 6-6 6"}"/></svg>`;
@@ -6061,7 +6095,7 @@ button.brand, button.brand span { color: var(--accent); }
     const scope = b4HomeScope() ? state.tab : "all";
     const day = (isToday() ? "Today, " : state.date.toLocaleDateString(undefined, { weekday: "short" }) + ", ") + state.date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
     const zone = new Intl.DateTimeFormat(undefined, { timeZoneName: "short" }).formatToParts(state.date).find(p => p.type === "timeZoneName")?.value || "Local time";
-    document.getElementById("h3head").innerHTML = `<div class="b4-head"><button class="brand" data-h3="home" aria-label="The Lineup, home">The Lineup<em class="betatag">BETA 4.0</em></button><button class="b4-icon" data-b4-search aria-label="Search teams and leagues">${IC3.search}</button><button class="b4-icon" data-b4-settings aria-label="Settings">${IC3.gear}</button></div>
+    document.getElementById("h3head").innerHTML = `<div class="b4-head"><button class="brand" data-h3="home" aria-label="The Lineup, home">The Lineup<em class="betatag">BETA 4.0</em></button><button class="b4-icon" data-b4-search aria-label="Search teams and leagues">${IC3.search}</button><button class="b4-icon" data-b4-settings aria-label="Settings">${IC3.gear}</button><button class="b4-view" data-b4-density aria-label="${DENS_NAME[state.density]} view. Switch to ${DENS_NAME[b4NextDensity()]}" title="Switch to ${DENS_NAME[b4NextDensity()]}">${H3_DENS_IC[state.density]}<span>${DENS_NAME[state.density]}</span></button></div>
       <nav class="b4-scope" aria-label="Game scope">${[["foryou", "For You"], ["live", "Live"], ["all", "All"]].map(([id, label]) => `<button data-b4-scope="${id}" aria-pressed="${scope === id}">${label}${id === "live" ? `<span class="n">${n}</span>` : ""}</button>`).join("")}</nav>
       <div class="b4-date"><button class="b4-icon" data-h3="prev" aria-label="Previous day">${b4Chev("left")}</button><label class="b4-date-label">${esc(day)}<span class="b4-zone">${esc(zone)}</span>${IC3.cal}<input type="date" data-b4-date aria-label="Pick a date" value="${isoDate(state.date)}"></label><button class="b4-icon" data-h3="next" aria-label="Next day">${b4Chev("right")}</button></div>`;
     document.querySelector("[data-b4-date]").onchange = e => { const [y, m, d] = e.target.value.split("-").map(Number); if (y && m && d) setDate(new Date(y, m - 1, d)); };
@@ -6154,6 +6188,8 @@ button.brand, button.brand span { color: var(--accent); }
     b4SavedLoading = false; beta4SavedPaint();
   }
   document.addEventListener("click", e => {
+    if (e.target.closest("[data-b4-retry-teams]")) { beta4LoadTeamUpcoming(); return; }
+    if (e.target.closest("[data-b4-density]")) { setDensity(b4NextDensity()); render(); return; }
     const scope = e.target.closest("[data-b4-scope]");
     if (scope) { state.tab = scope.dataset.b4Scope; render(); window.scrollTo({ top: 0, behavior: "smooth" }); return; }
     const league = e.target.closest("[data-b4-league]");
