@@ -2,6 +2,10 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — Simpler Navigation
+- Moved Search and Settings from the header to the bottom navigation alongside Scores and My Teams. Kept the view selector in the header.
+- Kept bottom navigation available in Settings and reduced its spacing while retaining labeled 44px touch targets.
+
 ## Oct 21, 2026: Beta 4.0 — Consistent Game Tiles
 - Next For Your Teams uses the shared Simple, Compact and Expanded game tiles, with both teams and the future date.
 - Games involving starred teams omit the redundant tracking heart. Other games keep their tracking control; finished expanded tiles omit empty action footers.

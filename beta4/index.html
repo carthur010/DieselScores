@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021210741">
+<meta name="build" content="20261021211225">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=16">
+<link rel="stylesheet" href="beta4.css?v=17">
 </head>
 <body>
 <header class="top">
@@ -1474,6 +1474,8 @@ button.brand, button.brand span { color: var(--accent); }
 <nav class="botbar" id="botbar" aria-label="Main navigation">
 <button class="on" data-bb="home" aria-label="Scores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h1M3 12h1M3 18h1"/></svg>Scores</button>
 <button data-bb="teams" aria-label="My Teams"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/></svg>My Teams</button>
+<button data-bb="search" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</button>
+<button data-bb="settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m9 3-.6 2.4-2.1 1.2L4 6l-2 3.5L3.8 11v2L2 14.5 4 18l2.3-.6 2.1 1.2L9 21h6l.6-2.4 2.1-1.2 2.3.6 2-3.5-1.8-1.5v-2L22 9.5 20 6l-2.3.6-2.1-1.2L15 3z"/><circle cx="12" cy="12" r="3"/></svg>Settings</button>
 </nav>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
@@ -6180,7 +6182,7 @@ button.brand, button.brand span { color: var(--accent); }
     const scope = b4HomeScope() ? state.tab : "all";
     const day = (isToday() ? "Today, " : state.date.toLocaleDateString(undefined, { weekday: "short" }) + ", ") + state.date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
     const zone = new Intl.DateTimeFormat(undefined, { timeZoneName: "short" }).formatToParts(state.date).find(p => p.type === "timeZoneName")?.value || "Local time";
-    document.getElementById("h3head").innerHTML = `<div class="b4-head"><button class="brand" data-h3="home" aria-label="The Lineup, home">The Lineup<em class="betatag">BETA 4.0</em></button><button class="b4-icon" data-b4-search aria-label="Search teams and leagues">${IC3.search}</button><button class="b4-icon" data-b4-settings aria-label="Settings">${IC3.gear}</button><button class="b4-view" data-b4-density aria-label="${DENS_NAME[state.density]} view. Switch to ${DENS_NAME[b4NextDensity()]}" title="Switch to ${DENS_NAME[b4NextDensity()]}">${H3_DENS_IC[state.density]}<span>${DENS_NAME[state.density]}</span></button></div>
+    document.getElementById("h3head").innerHTML = `<div class="b4-head"><button class="brand" data-h3="home" aria-label="The Lineup, home">The Lineup<em class="betatag">BETA 4.0</em></button><button class="b4-view" data-b4-density aria-label="${DENS_NAME[state.density]} view. Switch to ${DENS_NAME[b4NextDensity()]}" title="Switch to ${DENS_NAME[b4NextDensity()]}">${H3_DENS_IC[state.density]}<span>${DENS_NAME[state.density]}</span></button></div>
       <nav class="b4-scope" aria-label="Game scope">${[["foryou", "For You"], ["live", "Live"], ["all", "All"]].map(([id, label]) => `<button data-b4-scope="${id}" aria-pressed="${scope === id}">${label}${id === "live" ? `<span class="n">${n}</span>` : ""}</button>`).join("")}</nav>
       <div class="b4-date"><button class="b4-icon" data-h3="prev" aria-label="Previous day">${b4Chev("left")}</button><label class="b4-date-label">${esc(day)}<span class="b4-zone">${esc(zone)}</span>${IC3.cal}<input type="date" data-b4-date aria-label="Pick a date" value="${isoDate(state.date)}"></label><button class="b4-icon" data-h3="next" aria-label="Next day">${b4Chev("right")}</button></div>`;
     document.querySelector("[data-b4-date]").onchange = e => { const [y, m, d] = e.target.value.split("-").map(Number); if (y && m && d) setDate(new Date(y, m - 1, d)); };

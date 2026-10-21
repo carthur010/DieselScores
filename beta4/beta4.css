@@ -161,7 +161,7 @@
 .b4-settings-secondary { background: var(--surface); color: var(--muted); border: 1px solid var(--line); }
 .b4-settings-foot { margin: 12px 0 0; color: var(--muted); font-size: 11px; font-weight: 600; }
 .b4-editor-back, .b4-find-teams, .b4-team-edit-hint { display: none; }
-body:has(#ssheet:not([hidden]).b4-settings) #botbar, body:has(#sheet:not([hidden]).b4-team-editor) #botbar, body:has(#sheet:not([hidden]).b4-team-finder) #botbar, body:has(#lsheet:not([hidden])) #botbar { display: none; }
+body:has(#sheet:not([hidden]).b4-team-editor) #botbar, body:has(#sheet:not([hidden]).b4-team-finder) #botbar, body:has(#lsheet:not([hidden])) #botbar { display: none; }
 #sheet.b4-team-editor, #sheet.b4-team-finder, #lsheet { background: var(--bg); padding: env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px); }
 #sheet.b4-team-editor .sheet-card, #sheet.b4-team-finder .sheet-card, #lsheet .sheet-card { width: 100%; max-width: 520px; height: 100%; max-height: none; border: 0; border-radius: 0; background: var(--bg); }
 #sheet.b4-team-editor .bhead, #sheet.b4-team-finder .bhead, #lsheet .bhead { padding: 10px 15px; gap: 5px; border: 0; }
@@ -331,3 +331,9 @@ body:has(#ssheet:not([hidden]).b4-settings) #botbar, body:has(#sheet:not([hidden
 
 /* Starred teams are tracked automatically; reclaim the redundant heart column. */
 .b4-row.b4-row-no-heart { grid-template-columns: minmax(0,1fr); padding-right: 10px; }
+
+/* Keep global tools within thumb reach and the header focused on scores. */
+:root[data-home="bar"] .botbar { grid-template-columns: repeat(4,minmax(0,1fr)); padding-top: 5px; }
+.botbar button { min-height: 44px; gap: 3px; font-size: 11px; }
+.botbar svg { width: 21px; height: 21px; }
+:root[data-home="bar"] #ssheet.b4-settings.as-tab { padding-bottom: calc(60px + env(safe-area-inset-bottom,0px)); }
