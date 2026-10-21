@@ -2,6 +2,10 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 3.0 (12:45 AM, not on live yet)
+- Something On is gone from the header. The top row is now The Lineup, Today ▾ and the size icon.
+- The title and the first bottom bar tab say The Lineup instead of Scores.
+
 ## Oct 21, 2026: Beta 3.0 (12:40 AM, homepage redesign from Charles's PDF, not on live yet)
 - Keeps the slim header (Scores, Today ▾, Something On, size icon) and the text tabs.
 - Sections read like the mockups: bold Title Case names with a note on the right ("2 Live", "Close Game", "3 Games Today").

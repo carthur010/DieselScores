@@ -1264,7 +1264,7 @@ button.brand, button.brand span { color: var(--accent); }
 .h3pill.ago-btn svg { width: 11px; height: 11px; }
 #main > .fy-tonight { order: -1; }
 #main > .mv-bar { order: var(--o-mv, 1); }
-/* Bottom Bar header, slimmed (Oct 20): one row (title, date, Something On, size), text tabs with an underline, date strip on demand */
+/* Bottom Bar header, slimmed (Oct 20): one row (The Lineup, date, size), text tabs with an underline, date strip on demand */
 :root[data-home="bar"] .h3row.bb { padding-block: 10px 4px; gap: 10px; }
 :root[data-home="bar"] .h3row.bb .brand { font-size: 24px; }
 :root[data-home="bar"] .h3row.bb .brand .betatag { display: none; }
@@ -1453,7 +1453,7 @@ button.brand, button.brand span { color: var(--accent); }
   </div>
 </div>
 <nav class="botbar" id="botbar" aria-label="Main">
-  <button class="on" data-bb="home" aria-label="Scores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Scores</button>
+  <button class="on" data-bb="home" aria-label="The Lineup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>The Lineup</button>
   <button data-bb="leagues" aria-label="Leagues"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>Leagues</button>
   <button data-bb="search" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Search</button>
   <button data-bb="settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>Settings</button>
@@ -4000,19 +4000,18 @@ button.brand, button.brand span { color: var(--accent); }
     const liveN = games.filter(g => g.state === "in").length + allSpecial().filter(e => e.state === "in" && state.favLeagues.includes(e.lg.id)).length;
     const dens = `<button class="h3pill h3dens" data-h3="dens" aria-label="${DENS_NAME[state.density]} scoreboard. Tap to switch" title="${DENS_NAME[state.density]}">${H3_DENS_IC[state.density] || DENS_NAME[state.density]}</button>`;
     const livePill = liveN ? `<span class="h3pill live"><i></i>${liveN} Live</span>` : "";
-    const brand = cls => `<button class="brand ${cls || ""}" data-h3="home" aria-label="The Lineup, home">Scores<em class="betatag">Beta 3.0</em></button>`;
-    const ago = liveN ? `<button class="h3pill ago-btn" data-ago aria-label="Any game that's on: pick the best live game for me">${PLAY_BIG}<span>Something On</span></button>` : "";
-    // With games on, the red Something On button takes the live pill's spot (the Live tab still shows the count)
+    const brand = cls => `<button class="brand ${cls || ""}" data-h3="home" aria-label="The Lineup, home">The Lineup<em class="betatag">Beta 3.0</em></button>`;
+    // One row: The Lineup, Today ▾ and the size icon (the Live tab shows the live count)
     // Bottom Bar: one slim row. The date is a button that opens the strip, so the strip isn't always taking room
     const dayTxt = isToday() ? "Today" : state.date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
     const dateBtn = `<button class="h3date ${state.showCal ? "on" : ""}" data-h3="cal" aria-label="Pick a day" aria-expanded="${!!(state.showCal || !isToday())}">${esc(dayTxt)}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>`;
-    if (L === "bar") el.innerHTML = `<div class="h3row bb">${brand()}${dateBtn}<span class="spacer"></span>${ago || livePill}${dens}</div>`;
+    if (L === "bar") el.innerHTML = `<div class="h3row bb">${brand()}${dateBtn}<span class="spacer"></span>${dens}</div>`;
     else if (L === "day") {
       const d = state.date.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
       el.innerHTML = `<div class="h3day"><button class="grow" data-h3="home" aria-label="Home" style="text-align:left"><span class="k">Beta 3.0${liveN ? ` · <span class="lv">${liveN} Live</span>` : ""}</span></button>
-        ${ago}${dens}<button class="h3btn ${state.showCal ? "on" : ""}" data-h3="cal" aria-label="Pick a day" aria-pressed="${state.showCal}">${IC3.cal}</button><button class="h3btn" data-h3="search" aria-label="Search teams and leagues">${IC3.search}</button><button class="h3btn" data-h3="settings" aria-label="Settings">${IC3.gear}</button></div><button class="d3" data-h3="home" aria-label="Today">${esc(d)}</button>`;
+        ${dens}<button class="h3btn ${state.showCal ? "on" : ""}" data-h3="cal" aria-label="Pick a day" aria-pressed="${state.showCal}">${IC3.cal}</button><button class="h3btn" data-h3="search" aria-label="Search teams and leagues">${IC3.search}</button><button class="h3btn" data-h3="settings" aria-label="Settings">${IC3.gear}</button></div><button class="d3" data-h3="home" aria-label="Today">${esc(d)}</button>`;
     } else el.innerHTML = `<div class="h3row">${brand("sm")}<button class="h3search" data-h3="search" aria-label="Search teams and leagues">${IC3.search}<span>Teams, leagues</span></button><button class="h3btn" data-h3="settings" aria-label="Settings">${IC3.gear}</button></div>
-      <div class="h3row" style="padding-block:0 4px">${dens}<span class="spacer"></span>${ago || livePill}</div>`;
+      <div class="h3row" style="padding-block:0 4px">${dens}<span class="spacer"></span>${livePill}</div>`;
   }
   function renderTabsV3(el, games, everything) {
     const L = state.homeLayout, tab = state.tab;
