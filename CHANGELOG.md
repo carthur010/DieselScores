@@ -2,6 +2,10 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 - Five League Shortcuts
+- League filters show All, the first five followed leagues in saved order, then More. With fewer followed leagues, only those leagues appear.
+- Kept shortcuts in one horizontally swipeable row, with the searchable More menu below. Golf and tennis shortcuts open their existing league views.
+
 ## Oct 21, 2026: Beta 4.0 - Score Refresh Recovery
 - Bound each league load to 12 seconds, including supplementary feeds, so one stalled request cannot lock the entire scoreboard.
 - Release the refresh lock and schedule the next attempt even after an error. Keep the last successful same-day scores with a retry notice when a feed fails, and do not advance the update timestamp when all feeds fail.
