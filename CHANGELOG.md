@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — three bottom tabs
+- Removed Alerts from the bottom bar. Scores, My Teams and Saved now share the width evenly. Alerts remain accessible in Settings and game details.
+
 ## Oct 21, 2026: Beta 4.0 — score row alignment
 - Restored the live layout for Simple score rows: time, league and TV stacked in the left column, alongside the teams. Removed the redundant Live label beside the league.
 - Centered the league filter tabs, including More, as one group.

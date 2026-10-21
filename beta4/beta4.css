@@ -64,7 +64,7 @@
 .b4-updated { font-size: 11px; color: var(--muted); padding: 12px 0 0; text-align: center; }
 .b4-help { font-size: 11px; color: var(--muted); text-align: center; margin: 8px 0; }
 .b4-help button { min-height: 44px; padding: 6px; text-decoration: underline; text-underline-offset: 3px; }
-:root[data-home="bar"] .botbar { background: var(--bg); padding-top: 7px; }
+:root[data-home="bar"] .botbar { grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--bg); padding-top: 7px; }
 .botbar button { min-height: 49px; gap: 5px; font-size: 11px; }
 :root[data-home="bar"] .sheet.as-tab .sheet-card { max-width: 760px; }
 #ssheet.b4-alerts .set-sec:not(:has([data-set-sec="alerts"])), #ssheet.b4-alerts .sheet-body > .set-row, #ssheet.b4-alerts .set-foot { display: none; }
