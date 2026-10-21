@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 3.0 (1:20 AM, not on live yet)
+- Your Day: Your Leagues is a regular section card at the bottom (after Up Next), with slim one-line rows like "NHL · 3 Games · 1 Live ›". No more "Open league scores" on every row; Edit Order sits at the bottom of the card.
+
 ## Oct 21, 2026: Beta 3.0 (1:10 AM, not on live yet)
 - Bottom Bar header is back to live's: big The Lineup title with the Simple / Compact / Expanded pill, the date strip always showing, and the filled My Games / Live / All switch. The Today ▾ button and underline tabs are gone.
 

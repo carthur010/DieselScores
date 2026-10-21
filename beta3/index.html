@@ -1347,6 +1347,15 @@ button.brand, button.brand span { color: var(--accent); }
 .ln-simple .ln-act { gap: 2px; }
 .ln-simple .ln-act .bellbtn { width: 30px; height: 30px; }
 .ln-list { gap: 8px; }
+/* Your Day: Your Leagues as slim rows at the bottom, before the footer lines (Oct 21) */
+.ln-lg { display: grid; grid-template-columns: minmax(0, 1fr) auto 14px; align-items: center; gap: 10px; min-height: 46px; padding: 8px 16px; }
+.ln-lg b { font-size: 15px; font-weight: 600; }
+.ln-lg small { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.ln-lg small .lv { display: inline; color: var(--live); font-weight: 700; }
+.ln-lg i { font-size: 16px; }
+.lg-foot { padding: 8px 16px 12px; border-top: 1px solid var(--line); }
+#main > [data-block="fy-lgs"] { order: 50; }
+:root[data-home="day"] #main > .updated { order: 60; }
 </style>
 </head>
 <body>
@@ -3973,18 +3982,18 @@ button.brand, button.brand span { color: var(--accent); }
     const off = state.favLeagues.filter(id => LG[id] && state.data[id] && !state.data[id].error && !(state.data[id].events || []).length && !(state.data[id].special || []).length).map(id => LG[id].short || LG[id].name);
     return off.length ? `<p class="updated off">Off ${isToday() ? "today" : "this day"}: ${esc(off.join(", "))}</p>` : "";
   }
-  // Your Day: your leagues with games this day, one tap to the league's scores
+  // Your Day: your leagues with games this day, one slim row each ("NHL · 3 Games · 1 Live ›"), at the bottom
   function yourLeagues() {
-    const cnt = {};
-    allGames().forEach(g => { cnt[g.lg.id] = (cnt[g.lg.id] || 0) + 1; });
-    allSpecial().forEach(e => { cnt[e.lg.id] = (cnt[e.lg.id] || 0) + 1; });
+    const cnt = {}, live = {};
+    allGames().forEach(g => { cnt[g.lg.id] = (cnt[g.lg.id] || 0) + 1; if (g.state === "in") live[g.lg.id] = (live[g.lg.id] || 0) + 1; });
+    allSpecial().forEach(e => { cnt[e.lg.id] = (cnt[e.lg.id] || 0) + 1; if (e.state === "in") live[e.lg.id] = (live[e.lg.id] || 0) + 1; });
     const ids = state.favLeagues.filter(id => LG[id] && cnt[id]);
     if (!ids.length) return "";
     const rows = ids.map(id => { const lg = LG[id], n = cnt[id];
-      return `<button class="ln-lg" data-go-tab="${id}"><span><b>${esc(lg.short || lg.name)} · ${n} ${lg.kind ? (n === 1 ? "event" : "events") : lg.soccer ? (n === 1 ? "match" : "matches") : (n === 1 ? "game" : "games")}</b><small>Open league scores</small></span><i>›</i></button>`; }).join("");
-    return `<section class="block" data-block="fy-lgs"><div class="bhead"><h2>Your Leagues</h2><button class="meta linkish" data-edit-leagues>Edit order</button></div><div class="bbody"><div class="ln-card-list">${rows}</div></div></section>`;
+      const unit = lg.kind ? (n === 1 ? "Event" : "Events") : lg.soccer ? (n === 1 ? "Match" : "Matches") : (n === 1 ? "Game" : "Games");
+      return `<button class="ln-lg" data-go-tab="${id}"><b>${esc(lg.short || lg.name)}</b><small>${n} ${unit}${live[id] ? ` · <span class="lv">${live[id]} Live</span>` : ""}</small><i>›</i></button>`; }).join("");
+    return block("fy-lgs", "Your Leagues", `${ids.length} ${ids.length === 1 ? "League" : "Leagues"}`, `<div class="ln-card-list">${rows}</div><div class="lg-foot"><button class="chip" data-edit-leagues>Edit Order</button></div>`);
   }
-  // Your Day: every league with games this day, yours first, one tap in
   function everythingElse() {
     const cnt = {}, live = {};
     allGames().forEach(g => { cnt[g.lg.id] = (cnt[g.lg.id] || 0) + 1; if (g.state === "in") live[g.lg.id] = (live[g.lg.id] || 0) + 1; });
