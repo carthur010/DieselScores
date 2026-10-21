@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 3.0</title>
-<meta name="build" content="20261021092000">
+<meta name="build" content="20261021104800">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 3.0">
@@ -2017,10 +2017,14 @@ button.brand, button.brand span { color: var(--accent); }
   const isSpanishNet = n => SPANISH_NET.test(String(n || "")) ? 1 : 0;
   const shortNet = n => String(n || "").replace(/^SEC Network$/i, "SECN").replace(/^ACC Network$/i, "ACCN").replace(/^Big Ten Network$/i, "BTN").replace(/^CBS Sports Network$/i, "CBSSN").replace(/^NFL Network$/i, "NFLN").replace(/^NBA TV$/i, "NBA TV").replace(/^NBC Sports Network$/i, "NBCSN").replace(/^USA Net(work)?$/i, "USA").replace(/^Golf Channel$/i, "GOLF").replace(/^(ESPN|FOX|Fox) Deportes$/, "$1 Dep.").replace(/^beIN SPORTS en Espa[ñn]ol$/i, "beIN Español");
   function netLabel(g) {
-    if (g.watch?.[0]?.nets?.[0]) return shortNet(g.watch[0].nets[0]);
+    const w0 = g.watch?.[0];
+    // Out-of-market local channel (Kings on NBC Sports California in New York): name the pass you'd actually watch it on
+    if (w0?.kind === "package" && w0.nets?.[0] && ANY_RSN.test(w0.nets[0]) && !NATIONAL.test(w0.nets[0])) return PASS_LABEL[w0.app] || w0.app;
+    if (w0?.nets?.[0]) return shortNet(w0.nets[0]);
     const all = (g.broadcast || "").split(" / ").map(x => x.trim()).filter(Boolean);
     return shortNet(all.find(x => !isSpanishNet(x)) || all[0] || "");
   }
+  const PASS_LABEL = { "NBA League Pass": "League Pass", "WNBA League Pass": "League Pass", "ESPN": "ESPN+" };
   function watchPill(g) {
     if (g.state === "post") return "";
     if (!g.watch?.length) {
@@ -2031,7 +2035,7 @@ button.brand, button.brand span { color: var(--accent); }
     }
     const [w, ...rest] = g.watch;
     const title = `${w.app}: ${w.nets.join(", ")}` + (rest.length ? ` · Also on ${rest.map(x => `${x.app} (${x.nets.join(", ")})`).join(", ")}` : "");
-    const inner = `${PLAY}<b>${esc(w.app)}</b>${w.nets[0].toLowerCase() === w.app.toLowerCase() ? "" : `<span>${esc(w.nets[0])}</span>`}${rest.length ? `<i>+${rest.length}</i>` : ""}`;
+    const inner = `${PLAY}<b>${esc(w.app)}</b>${w.nets[0].toLowerCase() === w.app.toLowerCase() || (w.kind === "package" && ANY_RSN.test(w.nets[0]) && !NATIONAL.test(w.nets[0])) ? "" : `<span>${esc(w.nets[0])}</span>`}${rest.length ? `<i>+${rest.length}</i>` : ""}`;
     if (!w.url) return `<span class="watch" title="${esc(title)}">${inner}</span>`;   // cable: no single app to open
     return `<a class="watch" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener" title="${esc(title)}">${inner}</a>`;
   }
