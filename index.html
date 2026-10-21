@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup</title>
-<meta name="build" content="20261021120215">
+<meta name="build" content="20261021132106">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="The Lineup">
@@ -1217,8 +1217,8 @@ button.brand, button.brand span { color: var(--accent); }
 #pksheet.lg-v3 #pk-h { font-size: 30px; font-weight: 800; letter-spacing: -.02em; color: var(--accent); }
 .lg-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 4px 0 10px; }
 .lg-tile { position: relative; display: grid; justify-items: center; gap: 3px; padding: 12px 4px 10px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); min-height: 96px; }
-.lg-tile .lg-ic { width: 34px; height: 34px; display: grid; place-items: center; font-size: 11px; font-weight: 800; color: var(--accent); }
-.lg-tile .lg-ic img { width: 32px; height: 32px; object-fit: contain; }
+.lg-tile .lg-ic { min-width: 34px; max-width: 64px; height: 34px; display: grid; place-items: center; font-size: 11px; font-weight: 800; color: var(--accent); }
+.lg-tile .lg-ic img { max-width: 60px; width: auto; height: 32px; object-fit: contain; }
 .lg-tile b { font-size: 13px; font-weight: 700; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lg-tile small { font-size: 11px; color: var(--muted); }
 .lg-tile i { position: absolute; top: -5px; right: -3px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--accent); color: #fff; font-style: normal; font-size: 11px; font-weight: 800; display: grid; place-items: center; border: 2px solid var(--bg); }
@@ -3601,7 +3601,19 @@ button.brand, button.brand span { color: var(--accent); }
     ucl: "https://a.espncdn.com/i/leaguelogos/soccer/500/2.png", laliga: "https://a.espncdn.com/i/leaguelogos/soccer/500/15.png",
     seriea: "https://a.espncdn.com/i/leaguelogos/soccer/500/12.png", bund: "https://a.espncdn.com/i/leaguelogos/soccer/500/10.png",
     uel: "https://a.espncdn.com/i/leaguelogos/soccer/500/2310.png", mls: "https://a.espncdn.com/i/leaguelogos/soccer/500/19.png",
-    facup: "https://a.espncdn.com/i/leaguelogos/soccer/500/40.png" };
+    facup: "https://a.espncdn.com/i/leaguelogos/soccer/500/40.png",
+    ncaaf: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/NCAA_logo.svg/330px-NCAA_logo.svg.png",
+    ncaam: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/NCAA_logo.svg/330px-NCAA_logo.svg.png",
+    ncaaw: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/NCAA_logo.svg/330px-NCAA_logo.svg.png",
+    wsl: "https://a.espncdn.com/i/leaguelogos/soccer/500/2314.png", eflc: "https://a.espncdn.com/i/leaguelogos/soccer/500/41.png",
+    shield: "https://upload.wikimedia.org/wikipedia/en/thumb/d/d6/FA_Community_Shield_logo.svg/330px-FA_Community_Shield_logo.svg.png",
+    wfa: "https://upload.wikimedia.org/wikipedia/en/3/32/Women%27s_FA_Cup.png",
+    wlc: "https://upload.wikimedia.org/wikipedia/en/2/23/FA_Women%27s_League_Cup_logo.png",
+    ligue1: "https://a.espncdn.com/i/leaguelogos/soccer/500/9.png", uecl: "https://a.espncdn.com/i/leaguelogos/soccer/500/20296.png",
+    uwcl: "https://a.espncdn.com/i/leaguelogos/soccer/500/2408.png", nwsl: "https://a.espncdn.com/i/leaguelogos/soccer/500/2323.png",
+    pga: "https://a.espncdn.com/i/teamlogos/leagues/500/pgatour.png", lpga: "https://a.espncdn.com/i/teamlogos/leagues/500/lpga.png",
+    atp: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/ATP_Tour_logo.svg/330px-ATP_Tour_logo.svg.png",
+    wta: "https://upload.wikimedia.org/wikipedia/en/thumb/0/0e/WTA_Tour_logo.png/330px-WTA_Tour_logo.png" };
   function openLeagueMenu() {
     pkCustom = null;
     const el = document.getElementById("pksheet"), body = document.getElementById("pk-body");
@@ -3622,7 +3634,7 @@ button.brand, button.brand span { color: var(--accent); }
     const TILE_BADGE = { ncaaf: "NCAA", ncaam: "NCAA", ncaaw: "NCAA", wsl: "WSL", eflc: "EFL", shield: "FA", wfa: "FA", wlc: "WSL", ligue1: "L1", uecl: "UECL", uwcl: "UWCL", mls: "MLS", nwsl: "NWSL", pga: "PGA", lpga: "LPGA", atp: "ATP", wta: "WTA" };
     const tile = l => { const n = cnt[l.id] || 0, lv = live[l.id] || 0, logo = LG_LOGO[l.id];
       const badge = esc(TILE_BADGE[l.id] || (l.short || l.name).split(" ")[0].slice(0, 4));
-      return `<button class="lg-tile" data-menu-lg="${l.id}" aria-label="${esc(l.name)}${lv ? `, ${lv} live` : ""}">${lv ? `<i>${lv}</i>` : ""}<span class="lg-ic">${logo ? `<img src="${logo}" alt="" onerror="this.replaceWith(document.createTextNode('${badge}'))">` : badge}</span><b>${esc(TILE_NAME[l.id] || l.short || l.name)}</b><small>${n ? `${n} ${l.soccer ? (n === 1 ? "Match" : "Matches") : l.kind ? (n === 1 ? "Event" : "Events") : (n === 1 ? "Game" : "Games")}` : "—"}</small></button>`; };
+      return `<button class="lg-tile" data-menu-lg="${l.id}" aria-label="${esc(l.name)}${lv ? `, ${lv} live` : ""}">${lv ? `<i>${lv}</i>` : ""}<span class="lg-ic">${logo ? `<img src="${logo}" alt="" onerror="this.replaceWith(document.createTextNode('${badge}'))">` : badge}</span><b>${esc(TILE_NAME[l.id] || l.short || l.name)}</b><small>${n ? `${n} ${l.soccer ? (n === 1 ? "Match" : "Matches") : l.kind ? (n === 1 ? "Event" : "Events") : (n === 1 ? "Game" : "Games")}` : "&nbsp;"}</small></button>`; };
     if (v3) { body.innerHTML = `<div class="pk-list lm-list">${mine.length ? `<h3>Your Leagues</h3><div class="lg-tiles">${mine.map(tile).join("")}</div>` : ""}${SPORT_ORDER.map(sp => { const lgs = rest.filter(l => l.sport === sp); if (!lgs.length) return "";
       return `<h3>${esc(sp)}</h3><div class="lg-tiles">${lgs.map(tile).join("")}</div>`; }).join("")}</div>`; el.hidden = false; syncLock(); return; }
     body.innerHTML = `<div class="pk-list lm-list">${mine.length ? `<h3>My Leagues</h3>${mine.map(row).join("")}` : ""}${SPORT_ORDER.map(sp => { const lgs = rest.filter(l => l.sport === sp); if (!lgs.length) return "";
