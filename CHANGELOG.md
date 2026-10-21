@@ -2,6 +2,13 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 3.0 (12:15 AM, Bottom Bar header, not on live yet)
+- One slim row on top: Scores, a Today ▾ button, Something On and the size icon. About half the height it was.
+- The date strip tucks away. Tap Today ▾ to open it; it stays open while you're on another day and folds back when you return to Today.
+- My Games / Live / All are text tabs with a red underline instead of a filled box. The live count is red.
+- Something On is a quiet outlined pill instead of solid red, so the title stays the loudest thing up top.
+- Your Day, League Rail and Classic are unchanged and still in Settings.
+
 ## Oct 20, 2026: Beta 3.0 (11:55 PM, not on live yet)
 From the Oct 20 audit, checked on tonight's NHL and NBA games at iPhone width.
 - Soccer teams show their real next match. Arsenal and Newcastle said "No games scheduled"; the app now reads ESPN's fixtures feed, which covers the league, Champions League and cups. Up Next and team pages both use it.
