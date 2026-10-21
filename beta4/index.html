@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021234000">
+<meta name="build" content="20261021231813">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=18">
+<link rel="stylesheet" href="beta4.css?v=19">
 </head>
 <body>
 <header class="top">
@@ -6231,10 +6231,9 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function beta4Filters(el, games, everything) {
     el.hidden = false;
-    const available = [...state.favLeagues.filter(id => LG[id] && !LG[id].kind), ...TEAM_LEAGUES.map(lg => lg.id)];
-    const chosen = [...new Set(available)].slice(0, 3);
+    const chosen = [...new Set(state.favLeagues.filter(id => LG[id]))].slice(0, 5);
     const extra = b4League !== "all" && !chosen.includes(b4League) && LG[b4League];
-    el.innerHTML = `<button class="b4-league" data-b4-league="all" aria-pressed="${b4League === "all"}">All</button>` + chosen.map(id => `<button class="b4-league" data-b4-league="${id}" aria-pressed="${b4League === id}">${esc(b4Short(LG[id]))}</button>`).join("") + `<button class="b4-league b4-more ${extra ? "b4-more-selected" : ""}" data-b4-more aria-label="More Leagues${extra ? ". Selected " + esc(extra.name) : ""}" aria-expanded="false" aria-controls="b4-league-picker">${extra ? esc(b4Short(extra)) + " ▾" : "More +"}</button><div class="b4-league-picker" id="b4-league-picker" role="group" aria-label="Choose A League" hidden><label class="b4-picker-search">Find A League<input type="search" data-b4-league-search placeholder="Search Leagues" autocomplete="off"></label><div data-b4-league-options>${beta4LeagueMenu()}</div></div>`;
+    el.innerHTML = `<div class="b4-league-shortcuts"><button class="b4-league" data-b4-league="all" aria-pressed="${b4League === "all"}">All</button>` + chosen.map(id => `<button class="b4-league" data-b4-league="${id}" aria-pressed="${b4League === id}">${esc(b4Short(LG[id]))}</button>`).join("") + `<button class="b4-league b4-more ${extra ? "b4-more-selected" : ""}" data-b4-more aria-label="More Leagues${extra ? ". Selected " + esc(extra.name) : ""}" aria-expanded="false" aria-controls="b4-league-picker">${extra ? esc(b4Short(extra)) + " ▾" : "More"}</button></div><div class="b4-league-picker" id="b4-league-picker" role="group" aria-label="Choose A League" hidden><label class="b4-picker-search">Find A League<input type="search" data-b4-league-search placeholder="Search Leagues" autocomplete="off"></label><div data-b4-league-options>${beta4LeagueMenu()}</div></div>`;
   }
   function beta4HasStarredTeam(g) { return g.teams.some(t => isFavTeam(g.lg, t.abbr)); }
   function beta4Heart(g) {
@@ -6458,7 +6457,12 @@ button.brand, button.brand span { color: var(--accent); }
     const scope = e.target.closest("[data-b4-scope]");
     if (scope) { state.tab = scope.dataset.b4Scope; render(); window.scrollTo({ top: 0, behavior: "smooth" }); return; }
     const league = e.target.closest("[data-b4-league]");
-    if (league) { b4League = league.dataset.b4League; if (!b4HomeScope()) state.tab = "all"; render(); return; }
+    if (league) {
+      const id = league.dataset.b4League;
+      if (LG[id]?.kind) { b4League = "all"; state.tab = id; }
+      else { b4League = id; if (!b4HomeScope()) state.tab = "all"; }
+      render(); return;
+    }
     const more = e.target.closest("[data-b4-more]");
     if (more) { const picker = document.getElementById("b4-league-picker"); picker.hidden = !picker.hidden; more.setAttribute("aria-expanded", String(!picker.hidden)); return; }
     const option = e.target.closest("[data-b4-option]");
