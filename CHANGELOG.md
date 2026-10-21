@@ -2,6 +2,16 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — UX Review Fixes
+- Saved games are grouped under dated Today, Tomorrow, Upcoming Games and Previous Games sections.
+- Search hides unrelated followed teams during a query and separates team, league and game results.
+- Larger secondary text and 44px game controls; odd Compact cards span the row. Tightened the header and featured card in Simple/Compact.
+- League shortcuts stay pinned. More includes a searchable menu with My Leagues first and an explicit selected league label.
+- My Teams adds header actions for Add Team and Manage Teams. Schedule and management lists are separated, with return navigation.
+- Settings uses right-facing navigation chevrons and one root Close action. Smart opens Live whenever a relevant live event is available.
+- Replaced the Settings sun icon with a gear, corrected the search title case, and aligned game-detail colors with the cream/red app theme.
+- Watch destinations, broadcast labels and alert preferences retain their existing behavior.
+
 ## Oct 21, 2026: Beta 4.0 — Record Alignment
 - Right-aligned pregame team records in Expanded cards.
 

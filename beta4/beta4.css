@@ -221,3 +221,86 @@ body:has(#ssheet:not([hidden]).b4-settings) #botbar, body:has(#sheet:not([hidden
 }
 @media(min-width:700px) { .b4-match { max-width: 560px; margin-inline: auto; } .b4-row { padding-block: 10px; } }
 @media(prefers-reduced-motion:reduce) { *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; } }
+/* Beta 4 UX refinement: readable controls, stable navigation and quieter detail pages. */
+.b4-head { padding: 4px 0 2px; }
+.b4-head .brand { font-size: 26px; }
+.b4-head .brand .betatag { font-size: 10px; margin-top: 2px; }
+.b4-scope { margin-top: 4px; }
+.b4-date { padding-top: 0; }
+:root[data-home="bar"] #tabs.leagues { gap: 5px; padding-bottom: 3px; }
+:root[data-home="bar"] .wrap > main { padding-top: 10px; }
+.b4-league { padding-inline: 10px; font-size: 13px; }
+.b4-more-selected { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.b4-picker-search { display: grid; gap: 7px; font-size: 13px; font-weight: 650; }
+.b4-picker-search input { width: 100%; min-height: 44px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); font-size: 16px; }
+.b4-league-picker h3 { margin: 15px 8px 6px; font-size: 13px; text-transform: none; letter-spacing: 0; }
+.b4-picker-options button { font-size: 14px; }
+.b4-card-grid > .b4-scorecard:last-child:nth-child(odd), .b4-mixed > .b4-card-compact:only-child { grid-column: 1 / -1; }
+.b4-card-tv, .b4-card-record, .b4-card-clock { font-size: 13px; }
+.b4-card-expanded .b4-card-tv, .b4-card-expanded .b4-card-clock { font-size: 13px; }
+.b4-card-expanded .b4-card-heading > b { font-size: 12px; }
+.b4-card-actions .bellbtn { width: 44px; height: 44px; }
+.b4-card-actions .bellbtn::after { display: none; }
+.b4-card-foot { align-items: center; min-height: 44px; }
+.b4-card-clock { overflow-wrap: anywhere; min-width: 0; }
+.b4-card-actions { margin-left: auto; }
+.b4-time { font-size: 13px; }
+.b4-time small { font-size: 12px; }
+.b4-team { font-size: 14px; }
+.b4-section-head small, .b4-updated, .b4-help, .botbar button { font-size: 12px; }
+.b4-feature-club .star { width: 44px; height: 44px; top: -12px; left: -14px; }
+.b4-feature-home .star { left: auto; right: -14px; }
+.b4-feature-foot .bellbtn { width: 44px; height: 44px; }
+.b4-feature-foot .bellbtn::after { display: none; }
+.b4-feature-standing > span, .b4-feature-league, .b4-feature-foot, .b4-watch { font-size: 12px; }
+.b4-feature-slim { padding: 8px 12px; display: grid; grid-template-columns: 1fr auto; column-gap: 8px; row-gap: 2px; }
+.b4-feature-slim .b4-feature-head { grid-column: 1; grid-row: 1; }
+.b4-feature-slim .b4-feature-head > span { font-size: 12px; letter-spacing: .03em; }
+.b4-feature-slim .b4-feature-league { grid-column: 2; grid-row: 1; margin: 0; align-self: center; }
+.b4-feature-slim .b4-feature-standing { display: none; }
+.b4-feature-slim .b4-feature-matchup { grid-column: 1 / -1; margin: 3px 0; }
+.b4-feature-slim .b4-feature-club img, .b4-feature-slim .b4-feature-crest { width: 30px; height: 30px; }
+.b4-feature-slim .b4-feature-scoreline b { font-size: 30px; }
+.b4-feature-slim .b4-feature-foot { grid-column: 1 / -1; }
+.b4-feature-slim .b4-feature-club .star { display: none; }
+.b4-feature-slim .b4-feature-scoreline { min-height: 42px; }
+.b4-feature-slim .b4-watch { min-height: 44px; }
+.b4-team-tools { display: none; }
+#sheet.b4-team-schedule-mode .bhead { flex-wrap: wrap; }
+#sheet.b4-team-schedule-mode .b4-team-tools { display: flex; margin-left: auto; gap: 6px; }
+.b4-team-tools button { min-height: 44px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 99px; color: var(--accent); background: var(--surface); font-size: 13px; font-weight: 650; }
+#sheet.b4-team-schedule-mode #following, #sheet.b4-team-schedule-mode #b4-following-heading { display: none; }
+#sheet:not(.b4-team-editor) .handle { display: none; }
+#sheet .res-row .follow { min-height: 44px; min-width: 44px; font-size: 12px; }
+#sheet.b4-team-schedule-mode #b4-add-heading { padding-top: 8px; }
+#sheet.b4-team-editor .bhead .tog { display: grid !important; }
+.b4-settings-row small, .b4-settings-row em, .b4-settings-foot { font-size: 12px; }
+#ssheet.b4-settings[data-b4-settings-page="root"] .b4-settings-back { display: none; }
+#ssheet.b4-settings[data-b4-settings-page="root"] [data-set-done] { display: none; }
+:where(button,a,input,[tabindex]):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+#gsheet .gc-hero { color: var(--fg); border-bottom: 1px solid var(--line); }
+#gsheet .gc-bg { background: linear-gradient(120deg,var(--accent-soft),var(--surface)); }
+#gsheet .gc-bg::after { display: none; }
+#gsheet .gc-top .circ { background: var(--surface); color: var(--muted); border: 1px solid var(--line); width: 44px; height: 44px; }
+#gsheet .gc-team .big.lose { color: var(--muted); }
+#gsheet .gc-team img { filter: none; }
+#gsheet .gc-lbl, #gsheet .gc-team small, #gsheet .gc-mid small, #gsheet .gc-info, #gsheet .scorers, #gsheet .gc-sit { color: var(--muted); }
+#gsheet .gc-mid .gc-when b { color: var(--live); }
+#gsheet .gc-team .star { color: var(--muted); min-width: 44px; min-height: 44px; }
+#gsheet .gc-team .star.on { color: var(--star); }
+#gsheet .gc-ls { background: var(--surface); border: 1px solid var(--line); }
+#gsheet .gc-ls th { color: var(--muted); font-size: 12px; }
+#gsheet .gc-ls tbody tr + tr td { border-color: var(--line); }
+#gsheet .gc-sit .diamond rect { stroke: var(--muted); }
+#gsheet .gc-sit .diamond rect.on { fill: var(--accent); stroke: var(--accent); }
+#gsheet .gc-sit .outs i { border-color: var(--muted); }
+#gsheet .gc-sit .outs i.on { background: var(--accent); border-color: var(--accent); }
+#gsheet .tm-hero small { color: var(--muted); }
+#gsheet .tm-hero img { filter: none; }
+.b4-feature:not(.b4-feature-slim) .b4-feature-club { display: flex; flex-direction: column; align-items: center; }
+.b4-feature:not(.b4-feature-slim) .b4-feature-club > button[data-game] { order: 0; }
+.b4-feature:not(.b4-feature-slim) .b4-feature-club .star { position: static; order: 1; margin-top: 2px; }
+#sheet.b4-team-editor .handle, #lsheet .handle { display: grid; place-items: center; min-width: 44px; min-height: 44px; }
+#lsheet .follow { min-width: 44px; min-height: 44px; font-size: 12px; }
+.b4-card-compact .b4-card-foot { flex-wrap: wrap; row-gap: 2px; }
+.b4-card-compact .b4-card-clock { flex: 1 0 60px; }

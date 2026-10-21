@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021202419">
+<meta name="build" content="20261021203914">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=12">
+<link rel="stylesheet" href="beta4.css?v=13">
 </head>
 <body>
 <header class="top">
@@ -1416,7 +1416,7 @@ button.brand, button.brand span { color: var(--accent); }
 
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-h">
   <div class="sheet-card">
-    <div class="bhead"><button class="b4-editor-back" data-b4-team-back aria-label="Back">‹</button><h2 id="sheet-h">Your Teams</h2>
+    <div class="bhead"><button class="b4-editor-back" data-b4-team-back aria-label="Back">‹</button><h2 id="sheet-h">Your Teams</h2><div class="b4-team-tools"><button data-b4-add-team>Add Team</button><button data-b4-manage-teams>Manage Teams</button></div>
       <button class="tog" id="sheet-x" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="sheet-body">
       <div class="wz-steps" id="wz-steps" hidden aria-hidden="true"><i></i><i></i><i></i></div>
@@ -1429,7 +1429,7 @@ button.brand, button.brand span { color: var(--accent); }
       <div id="sgames"></div>
       <div class="res" id="results"></div>
       <div id="suggest"></div>
-      <h3>Following <span class="h3-note">drag ☰ to set your order</span></h3>
+      <h3 id="b4-following-heading">Following</h3>
       <div class="res" id="following"></div><button class="b4-find-teams" data-b4-find-teams>Find More Teams</button>
       </div>
       <div id="sheet-lgs" hidden><p class="hint" style="margin:0 0 10px">Step 2 Of 3 · Tap the leagues you want on your home screen.</p>
@@ -3739,8 +3739,8 @@ button.brand, button.brand span { color: var(--accent); }
   // "Smart" Open To: Live when any of your games or leagues are on right now, otherwise My Teams
   function homeTab() {
     const h = state.homeLayout !== "classic" ? store.get("home3", "foryou") : store.get("home", "live");
-    // Smart: My Games already leads with your live teams and lists what else is on, so Live only wins on a busy slate
-    if (state.homeLayout !== "classic" && h === "auto") return allGames().filter(g => g.state === "in" && inMyWorld(g)).length + specialsFor("live").filter(e => e.state === "in").length >= 3 ? "live" : "foryou";
+    // Smart opens Live whenever a relevant live event is available.
+    if (state.homeLayout !== "classic" && h === "auto") return allGames().filter(g => g.state === "in" && inMyWorld(g)).length + specialsFor("live").filter(e => e.state === "in").length > 0 ? "live" : "foryou";
     if (state.homeLayout !== "classic") return ["foryou", "live", "all"].includes(h) ? h : "foryou";
     if (h !== "auto") return h;
     const live = allGames().some(g => g.state === "in" && inMyWorld(g)) || specialsFor("live").some(e => e.state === "in");
@@ -4057,7 +4057,7 @@ button.brand, button.brand span { color: var(--accent); }
   const IC3 = {
     cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>',
     search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>',
-    gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>',
+    gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m9 3-.6 2.4-2.1 1.2L4 6l-2 3.5L3.8 11v2L2 14.5 4 18l2.3-.6 2.1 1.2L9 21h6l.6-2.4 2.1-1.2 2.3.6 2-3.5-1.8-1.5v-2L22 9.5 20 6l-2.3.6-2.1-1.2L15 3z"/><circle cx="12" cy="12" r="3"/></svg>',
   };
   // Scoreboard size as a picture, not a word: rows (Simple), a 2x2 grid (Compact), stacked cards (Expanded)
   const H3_DENS_IC = {
@@ -4164,7 +4164,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (act === cur && !gameOpen) return;
     bbHideAll();
     if (act === "saved") { beta4SavedPaint(); document.getElementById("b4saved").hidden = false; beta4LoadSaved(); }
-    if (act === "teams") { openSheet(); document.getElementById("sheet-h").textContent = "My Teams"; document.getElementById("q").blur(); document.getElementById("b4-team-upcoming").hidden = false; document.getElementById("b4-add-heading").hidden = false; beta4TeamUpcomingPaint(); beta4LoadTeamUpcoming(); }
+    if (act === "teams") { openSheet(); document.getElementById("sheet-h").textContent = "My Teams"; document.getElementById("sheet").classList.add("b4-team-schedule-mode"); beta4SearchVisibility(); document.getElementById("q").blur(); document.getElementById("b4-team-upcoming").hidden = false; document.getElementById("b4-add-heading").hidden = false; beta4TeamUpcomingPaint(); beta4LoadTeamUpcoming(); }
     if (act === "alerts") { openSettings(); b4SettingsPage = "alerts"; renderSettings(); }
     if (act === "leagues") openLeagueMenu();
     if (act === "search") { openSheet(); document.getElementById("sheet-h").textContent = "Search"; }
@@ -4371,7 +4371,7 @@ button.brand, button.brand span { color: var(--accent); }
   let results = [], searchTimer = null, searchSeq = 0;
   const LG_BY_SLUG = Object.fromEntries(TEAM_LEAGUES.map(l => [l.path, l.id]));
   function openSheet(welcome) {
-    document.getElementById("sheet").classList.remove("b4-team-editor", "b4-team-finder");
+    document.getElementById("sheet").classList.remove("b4-team-editor", "b4-team-finder", "b4-team-schedule-mode");
     document.getElementById("b4-team-upcoming").hidden = true; document.getElementById("b4-add-heading").hidden = true;
     document.getElementById("sheet-h").textContent = welcome === true ? "Welcome To The Lineup" : "Your Teams";
     wzPreset = ""; wzShow(welcome === true ? 1 : 0);
@@ -4384,7 +4384,7 @@ button.brand, button.brand span { color: var(--accent); }
   // Sheets opened from Settings return to Settings when closed
   let fromSettings = false;
   function backToSettings() { if (fromSettings) { fromSettings = false; openSettings(); } }
-  function closeSheet() { const el = document.getElementById("sheet"); if (el.classList.contains("b4-team-finder")) { beta4OpenTeamEditor(); return; } if (el.hidden) return; el.hidden = true; backToSettings(); }
+  function closeSheet() { const el = document.getElementById("sheet"); if (el.classList.contains("b4-team-finder")) { beta4OpenTeamEditor(); return; } if (el.hidden) return; el.hidden = true; if (b4TeamEditorReturn === "teams") { b4TeamEditorReturn = ""; bbGo("teams"); return; } backToSettings(); }
   function closeLeagues() { const el = document.getElementById("lsheet"); if (el.hidden) return; el.hidden = true; backToSettings(); }
   function resRow(t, i, list) {
     const k = keyFor(t), on = state.favs.has(k), drag = list === "f", editing = document.getElementById("sheet").classList.contains("b4-team-editor");
@@ -4462,11 +4462,12 @@ button.brand, button.brand span { color: var(--accent); }
   function drawResults(searching) {
     const el = document.getElementById("results");
     const q = document.getElementById("q").value.trim();
+    beta4SearchVisibility();
     if (!q) { el.innerHTML = '<p class="hint">Type a team, city, school or league. Covers the NFL, MLB, NBA, WNBA, NHL, college football and hoops, the major soccer leagues, golf and tennis.</p>'; return; }
     const lgs = leagueMatches(q);
     const lgHtml = lgs.length ? `<h3>Leagues</h3><div class="res">${lgs.map(lgRow).join("")}</div>` : "";
     const teamHtml = searching ? '<p class="hint">Searching teams…</p>'
-      : results.length ? `${lgs.length ? "<h3>Teams</h3>" : ""}<div class="res">${results.map((t, i) => resRow(t, i, "r")).join("")}</div>`
+      : results.length ? `<h3>Teams</h3><div class="res">${results.map((t, i) => resRow(t, i, "r")).join("")}</div>`
       : lgs.length ? "" : '<p class="hint">No teams or leagues match that.</p>';
     el.innerHTML = lgHtml + teamHtml;
   }
@@ -4520,6 +4521,7 @@ button.brand, button.brand span { color: var(--accent); }
     document.getElementById("following").innerHTML = following.length ? following.map((t, i) => resRow(t, i, "f")).join("") : '<p class="hint">Not following anyone yet.</p>';
     drawResults();
     drawSuggest();
+    beta4SearchVisibility();
     if (document.getElementById("sheet").dataset.b4Area === "teams") { beta4TeamUpcomingPaint(); beta4LoadTeamUpcoming(); }
   }
 
@@ -5873,13 +5875,13 @@ button.brand, button.brand span { color: var(--accent); }
   function renderSettings() { beta4RenderSettings(); }
   function openSettings() { b4SettingsPage = "root"; document.getElementById("ssheet-h").textContent = "Settings"; document.getElementById("ssheet").classList.remove("b4-alerts"); document.getElementById("ssheet").dataset.b4Area = "settings"; renderSettings(); const el = document.getElementById("ssheet"); el.hidden = false; if (state.homeLayout === "bar") { el.classList.add("as-tab"); if (typeof bbSync === "function") bbSync(); } }
   document.getElementById("settingsbtn").onclick = openSettings;
-  document.getElementById("ssheet-x").onclick = () => { document.getElementById("ssheet").hidden = true; };
+  document.getElementById("ssheet-x").onclick = beta4CloseSettings;
   document.getElementById("ssheet").addEventListener("click", async e => {
     const page = e.target.closest("[data-b4-settings-page]");
     if (page) { b4SettingsPage = page.dataset.b4SettingsPage; renderSettings(); document.getElementById("settings-body").scrollTop = 0; return; }
-    if (e.target.closest("[data-b4-settings-back]")) { if (b4SettingsPage === "root") document.getElementById("ssheet").hidden = true; else { b4SettingsPage = ["team", "watched", "all"].includes(b4SettingsPage) ? "alerts" : "root"; renderSettings(); document.getElementById("settings-body").scrollTop = 0; } return; }
+    if (e.target.closest("[data-b4-settings-back]")) { if (b4SettingsPage === "root") beta4CloseSettings(); else { b4SettingsPage = ["team", "watched", "all"].includes(b4SettingsPage) ? "alerts" : "root"; renderSettings(); document.getElementById("settings-body").scrollTop = 0; } return; }
     if (e.target.closest("[data-b4-enable-notifications]")) { await askPermission(); renderSettings(); return; }
-    if (e.target.id === "ssheet") { document.getElementById("ssheet").hidden = true; return; }
+    if (e.target.id === "ssheet") { beta4CloseSettings(); return; }
     const sm = e.target.closest("[data-sec-mv]");
     if (sm) { const ord = secOrder(), i = ord.indexOf(sm.dataset.secMv), j = i + (+sm.dataset.dir); if (i >= 0 && j >= 0 && j < ord.length) { [ord[i], ord[j]] = [ord[j], ord[i]]; store.set("secOrder", ord); applySecOrder(); renderSettings(); render(); } return; }
     const b = e.target.closest("[data-set]");
@@ -6027,8 +6029,9 @@ button.brand, button.brand span { color: var(--accent); }
   }
 
   // Beta 4.0: compact iPhone home, using the existing feeds and detail routes.
-  let b4SettingsPage = "root";
+  let b4SettingsPage = "root", b4TeamEditorReturn = "";
   const B4_SETTINGS_TITLES = { root: "Settings", display: "Layout & Display", tv: "TV & Streaming", alerts: "Alerts", team: "My Teams Alerts", watched: "Game Alerts", all: "All Games Alerts" };
+  function beta4CloseSettings() { document.getElementById("ssheet").hidden = true; bbSync(); }
   function beta4SettingsBox(title, hint, body = "") {
     return `<section class="b4-settings-box"><h3>${esc(title)}</h3>${hint ? `<p>${esc(hint)}</p>` : ""}${body}</section>`;
   }
@@ -6068,6 +6071,7 @@ button.brand, button.brand span { color: var(--accent); }
     const title = B4_SETTINGS_TITLES[b4SettingsPage] || B4_SETTINGS_TITLES.root;
     document.getElementById("ssheet-h").textContent = title;
     document.getElementById("ssheet").classList.add("b4-settings");
+    document.getElementById("ssheet").dataset.b4SettingsPage = b4SettingsPage;
     const market = (MARKETS[state.tv.market] || MARKETS.other).name;
     let html = "";
     if (b4SettingsPage === "root") {
@@ -6077,9 +6081,9 @@ button.brand, button.brand span { color: var(--accent); }
         beta4SettingsRow("Load A Setup", "Restore teams and leagues with a code", "data-load-setup", "Enter Code") + `</div>` +
         beta4SettingsChoice("Home Layout", "Try each layout. Your preferences stay the same.", "homeLayout", state.homeLayout, [["bar", "Bottom Bar"], ["day", "Your Day"], ["rail", "League Rail"], ["classic", "Classic"]]) +
         `<div class="b4-settings-box b4-settings-links">` +
-        beta4SettingsRow("Layout & Display", "Open to, sorting, appearance and odds", 'data-b4-settings-page="display"', "⌄") +
-        beta4SettingsRow("TV & Streaming", `Your services · ${market}`, 'data-b4-settings-page="tv"', "⌄") +
-        beta4SettingsRow("Alerts", "Team, game and global alerts", 'data-b4-settings-page="alerts"', "⌄") + `</div><button class="b4-settings-primary" data-set-done>Done</button><p class="b4-settings-foot">You’re on the beta. <a href="../">Open The Live App ↗</a></p>`;
+        beta4SettingsRow("Layout & Display", "Open to, sorting, appearance and odds", 'data-b4-settings-page="display"', "›") +
+        beta4SettingsRow("TV & Streaming", `Your services · ${market}`, 'data-b4-settings-page="tv"', "›") +
+        beta4SettingsRow("Alerts", "Team, game and global alerts", 'data-b4-settings-page="alerts"', "›") + `</div><button class="b4-settings-primary" data-set-done>Done</button><p class="b4-settings-foot">You’re on the beta. <a href="../">Open The Live App ↗</a></p>`;
     } else if (b4SettingsPage === "display") {
       const openKey = state.homeLayout === "classic" ? "home" : "home3";
       html = `<p class="b4-settings-intro">Choose how The Lineup opens and how your games look.</p>` +
@@ -6104,13 +6108,21 @@ button.brand, button.brand span { color: var(--accent); }
     } else if (["team", "watched", "all"].includes(b4SettingsPage)) html = beta4AlertSettings(b4SettingsPage);
     document.getElementById("settings-body").innerHTML = html;
   }
+  function beta4SearchVisibility() {
+    const sheet = document.getElementById("sheet"), query = document.getElementById("q").value.trim();
+    const hide = !!query || sheet.classList.contains("b4-team-schedule-mode");
+    document.getElementById("following").hidden = hide;
+    document.getElementById("b4-following-heading").hidden = hide;
+  }
   function beta4OpenTeamEditor() {
     openSheet();
     const el = document.getElementById("sheet");
     el.classList.add("b4-team-editor");
-    document.getElementById("sheet-h").textContent = "My Teams";
+    document.getElementById("q").value = "";
+    document.getElementById("sheet-h").textContent = b4TeamEditorReturn === "teams" ? "Manage Teams" : "My Teams";
     document.getElementById("q").blur();
     renderSheet();
+    beta4SearchVisibility();
   }
 
   let b4TeamsLoading = false;
@@ -6160,12 +6172,19 @@ button.brand, button.brand span { color: var(--accent); }
       <div class="b4-date"><button class="b4-icon" data-h3="prev" aria-label="Previous day">${b4Chev("left")}</button><label class="b4-date-label">${esc(day)}<span class="b4-zone">${esc(zone)}</span>${IC3.cal}<input type="date" data-b4-date aria-label="Pick a date" value="${isoDate(state.date)}"></label><button class="b4-icon" data-h3="next" aria-label="Next day">${b4Chev("right")}</button></div>`;
     document.querySelector("[data-b4-date]").onchange = e => { const [y, m, d] = e.target.value.split("-").map(Number); if (y && m && d) setDate(new Date(y, m - 1, d)); };
   }
+  function beta4LeagueMenu(query = "") {
+    const matches = LEAGUES.filter(lg => [lg.name, lg.short, lg.sport].filter(Boolean).join(" ").toLowerCase().includes(query.trim().toLowerCase()));
+    const mine = state.favLeagues.map(id => matches.find(lg => lg.id === id)).filter(Boolean);
+    const rest = matches.filter(lg => !state.favLeagues.includes(lg.id));
+    const section = (title, leagues) => leagues.length ? `<section><h3>${title}</h3><div class="b4-picker-options">${leagues.map(lg => `<button data-b4-option="${lg.id}" aria-pressed="${(b4HomeScope() ? b4League : state.tab) === lg.id}">${esc(lg.name)}</button>`).join("")}</div></section>` : "";
+    return section("My Leagues", mine) + section("More Leagues", rest) || `<p class="hint">No leagues match your search.</p>`;
+  }
   function beta4Filters(el, games, everything) {
     el.hidden = false;
     const available = [...state.favLeagues.filter(id => LG[id] && !LG[id].kind), ...TEAM_LEAGUES.map(lg => lg.id)];
     const chosen = [...new Set(available)].slice(0, 3);
-    if (b4League !== "all" && !chosen.includes(b4League) && LG[b4League]) chosen[chosen.length ? chosen.length - 1 : 0] = b4League;
-    el.innerHTML = `<button class="b4-league" data-b4-league="all" aria-pressed="${b4League === "all"}">All</button>` + chosen.map(id => `<button class="b4-league" data-b4-league="${id}" aria-pressed="${b4League === id}">${esc(b4Short(LG[id]))}</button>`).join("") + `<button class="b4-league b4-more" data-b4-more aria-label="More leagues" aria-expanded="false" aria-controls="b4-league-picker">More +</button><div class="b4-league-picker" id="b4-league-picker" role="group" aria-label="Choose a league" hidden><div class="b4-picker-title">Choose a league</div><div class="b4-picker-options">${LEAGUES.map(lg => `<button data-b4-option="${lg.id}" aria-pressed="${(b4HomeScope() ? b4League : state.tab) === lg.id}">${esc(lg.name)}</button>`).join("")}</div></div>`;
+    const extra = b4League !== "all" && !chosen.includes(b4League) && LG[b4League];
+    el.innerHTML = `<button class="b4-league" data-b4-league="all" aria-pressed="${b4League === "all"}">All</button>` + chosen.map(id => `<button class="b4-league" data-b4-league="${id}" aria-pressed="${b4League === id}">${esc(b4Short(LG[id]))}</button>`).join("") + `<button class="b4-league b4-more ${extra ? "b4-more-selected" : ""}" data-b4-more aria-label="More Leagues${extra ? ". Selected " + esc(extra.name) : ""}" aria-expanded="false" aria-controls="b4-league-picker">${extra ? esc(b4Short(extra)) + " ▾" : "More +"}</button><div class="b4-league-picker" id="b4-league-picker" role="group" aria-label="Choose A League" hidden><label class="b4-picker-search">Find A League<input type="search" data-b4-league-search placeholder="Search Leagues" autocomplete="off"></label><div data-b4-league-options>${beta4LeagueMenu()}</div></div>`;
   }
   function beta4Row(g) {
     const key = gameKey(g), [a, h] = g.teams;
@@ -6210,7 +6229,7 @@ button.brand, button.brand span { color: var(--accent); }
     const w = g.watch?.find(x => x.url);
     const watch = w ? `<a class="b4-watch" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener"><span aria-hidden="true">▶</span> ${esc(w.app)}</a>` : `<span class="b4-feature-channel">${esc(netLabel(g) || "TV unavailable")}</span>`;
     const save = `<button class="bellbtn heartbtn ${saved ? "on" : ""}" data-favgame="${esc(key)}" aria-pressed="${saved}" aria-label="${saved ? "Unsave" : "Save"} ${esc(a.name)} game">${saved ? HEART_ON : HEART}</button>`;
-    return { key, html: `<section class="b4-feature" aria-label="Your featured match"><div class="b4-feature-head"><span>Your Game</span>${live.length > 1 ? `<button class="b4-link" data-b4-change>Change</button>` : ""}</div><div class="b4-feature-league">${esc(b4Short(g.lg))}</div><div class="b4-feature-standing"><span>${esc(leader)}</span></div><div class="b4-feature-matchup">${club(a, "away")}<button class="b4-feature-scoreline" data-game="${esc(key)}" aria-label="${label}"><b>${esc(a.score)}</b><span class="b4-status">${esc(g.status)}</span><b>${esc(h.score)}</b></button>${club(h, "home")}</div><div class="b4-feature-foot">${watch}${save}${bellBtn(g)}</div></section>` };
+    return { key, html: `<section class="b4-feature${state.density === "expanded" ? "" : " b4-feature-slim"}" aria-label="Your featured match"><div class="b4-feature-head"><span>Your Game</span>${live.length > 1 ? `<button class="b4-link" data-b4-change>Change</button>` : ""}</div><div class="b4-feature-league">${esc(b4Short(g.lg))}</div><div class="b4-feature-standing"><span>${esc(leader)}</span></div><div class="b4-feature-matchup">${club(a, "away")}<button class="b4-feature-scoreline" data-game="${esc(key)}" aria-label="${label}"><b>${esc(a.score)}</b><span class="b4-status">${esc(g.status)}</span><b>${esc(h.score)}</b></button>${club(h, "home")}</div><div class="b4-feature-foot">${watch}${save}${bellBtn(g)}</div></section>` };
   }
 
   function beta4Home(games) {
@@ -6242,13 +6261,33 @@ button.brand, button.brand span { color: var(--accent); }
     if (state.updatedAt) html += `<p class="b4-updated">Updated ${esc(timeLabel(state.updatedAt))} · Refreshes automatically</p>`;
     return html;
   }
+  function beta4SavedSections(games, now = new Date()) {
+    const midnight = d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const today = midnight(now), tomorrowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1), tomorrow = midnight(tomorrowDate);
+    const groups = new Map();
+    for (const g of games) {
+      const date = new Date(g.date || state.favGames[gameKey(g)]?.date || "");
+      const day = Number.isNaN(date.getTime()) ? null : midnight(date);
+      const key = day === null ? "unknown" : String(day);
+      if (!groups.has(key)) groups.set(key, { day, date, games: [] });
+      groups.get(key).games.push(g);
+    }
+    return [...groups.values()].sort((a,b) => {
+      const order = x => x.day === null ? 4 : x.day === today ? 0 : x.day === tomorrow ? 1 : x.day > today ? 2 : 3;
+      return order(a) - order(b) || (order(a) === 3 ? b.day - a.day : a.day - b.day);
+    }).map(group => {
+      const label = group.day === today ? "Today" : group.day === tomorrow ? "Tomorrow" : group.day === null ? "Date Unavailable" : group.day < today ? "Previous Games" : "Upcoming Games";
+      const date = group.day === null ? "" : group.date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: group.date.getFullYear() !== now.getFullYear() ? "numeric" : undefined });
+      return beta4Section(label, date, group.games);
+    }).join("");
+  }
   function beta4SavedPaint() {
     const body = document.getElementById("b4saved-body");
     if (!body) return;
     const current = new Map([...b4SavedCache, ...allGames().map(g => [gameKey(g), g])]);
     const keys = Object.keys(state.favGames);
     const list = keys.map(k => current.get(k)).filter(Boolean).sort((a, b) => new Date(a.date) - new Date(b.date));
-    body.innerHTML = `<p class="hint">Games you save with ♡ appear here, including games on other dates. Saving a game does not enable alerts.</p>` + (list.length ? beta4Rows(list) : `<div class="b4-empty"><p>${keys.length ? (b4SavedErrors && !b4SavedLoading ? "Saved scores could not load." : "Loading your saved games…") : "No saved games yet."}</p>${keys.length ? "" : `<button class="chip" data-bb="home">Find A Game To Save</button>`}</div>`) + (b4SavedLoading ? `<p class="b4-load-note" role="status">Checking saved scores…</p>` : b4SavedErrors ? `<p class="b4-load-note">${b4SavedErrors} saved ${b4SavedErrors === 1 ? "game is" : "games are"} unavailable. <button data-b4-retry-saved>Retry</button></p>` : "");
+    body.innerHTML = `<p class="hint">Games you save with ♡ appear here, including games on other dates. Saving a game does not enable alerts.</p>` + (list.length ? beta4SavedSections(list) : `<div class="b4-empty"><p>${keys.length ? (b4SavedErrors && !b4SavedLoading ? "Saved scores could not load." : "Loading your saved games…") : "No saved games yet."}</p>${keys.length ? "" : `<button class="chip" data-bb="home">Find A Game To Save</button>`}</div>`) + (b4SavedLoading ? `<p class="b4-load-note" role="status">Checking saved scores…</p>` : b4SavedErrors ? `<p class="b4-load-note">${b4SavedErrors} saved ${b4SavedErrors === 1 ? "game is" : "games are"} unavailable. <button data-b4-retry-saved>Retry</button></p>` : "");
   }
   async function beta4LoadSaved() {
     if (b4SavedLoading) return;
@@ -6268,7 +6307,12 @@ button.brand, button.brand span { color: var(--accent); }
     }));
     b4SavedLoading = false; beta4SavedPaint();
   }
+  document.addEventListener("input", e => {
+    if (e.target.matches("[data-b4-league-search]")) document.querySelector("[data-b4-league-options]").innerHTML = beta4LeagueMenu(e.target.value);
+  });
   document.addEventListener("click", e => {
+    if (e.target.closest("[data-b4-add-team]")) { const q = document.getElementById("q"); q.focus({ preventScroll: true }); q.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
+    if (e.target.closest("[data-b4-manage-teams]")) { b4TeamEditorReturn = "teams"; beta4OpenTeamEditor(); return; }
     if (e.target.closest("[data-b4-retry-teams]")) { beta4LoadTeamUpcoming(); return; }
     if (e.target.closest("[data-b4-density]")) { setDensity(b4NextDensity()); render(); return; }
     if (e.target.closest("[data-b4-team-back]")) { closeSheet(); return; }
@@ -6289,7 +6333,7 @@ button.brand, button.brand span { color: var(--accent); }
       render(); document.querySelector("[data-b4-more]")?.focus(); return;
     }
     if (!e.target.closest("#b4-league-picker")) { const picker = document.getElementById("b4-league-picker"); if (picker) { picker.hidden = true; document.querySelector("[data-b4-more]")?.setAttribute("aria-expanded", "false"); } }
-    if (e.target.closest("[data-b4-search]")) { bbGo("search"); document.getElementById("sheet-h").textContent = "Search teams and leagues"; return; }
+    if (e.target.closest("[data-b4-search]")) { bbGo("search"); document.getElementById("sheet-h").textContent = "Search Teams And Leagues"; return; }
     if (e.target.closest("[data-b4-settings]")) { bbGo("settings"); return; }
     if (e.target.closest("[data-b4-change]")) {
       const pool = allGames().filter(g => g.state === "in" && isMine(g) && (b4League === "all" || g.lg.id === b4League)).sort(byState);

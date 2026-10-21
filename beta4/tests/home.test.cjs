@@ -12,7 +12,7 @@ function fixture() {
   const soccer = { id: 'wlc', name: 'WSL Players Cup', short: 'WSL Cup', path: 'soccer/eng.w.league_cup' };
   const game = (id, status, mine, league = lg) => ({ id, lg: league, state: status, mine, status: status === 'in' ? '6:12 3rd' : status === 'post' ? 'Final' : '7:00 PM', date: '2026-10-21T23:00:00Z', teams: [{ name: 'Away ' + id, abbr: 'A', score: 1 }, { name: 'Home ' + id, abbr: 'H', score: 2 }], watch: [] });
   const games = [game('live', 'in', true), game('pre', 'pre', true), game('other', 'pre', false), game('final', 'post', true), game('soccer', 'in', false, soccer)];
-  const body = { innerHTML: '', classList: { add() {} } };
+  const body = { innerHTML: '', dataset: {}, classList: { add() {}, contains() { return false; } } };
   const saved = {};
   const ctx = {
     state: { tab: 'foryou', density: 'simple', favGames: {}, favs: new Set(), favMeta: {}, next: {}, favLeagues: ['nba'], data: {}, loading: false },
@@ -257,4 +257,57 @@ test('Expanded shows real team records only before a game starts', () => {
   assert.doesNotMatch(ctx.beta4Card(g, 'expanded'), /b4-card-record/);
   g.teams[0].record = '2-1'; g.teams[0].seasonRecord = '50-32';
   assert.match(ctx.beta4Card(g, 'expanded'), /b4-card-record">50-32</);
+});
+
+
+test('Saved sections retain dates and put Today, Tomorrow and upcoming games before previous games', () => {
+  const { ctx, games } = fixture();
+  const dated = (id, date) => ({ ...games[1], id, date });
+  const result = ctx.beta4SavedSections([
+    dated('old', '2026-10-19T12:00:00'), dated('future', '2026-10-24T12:00:00'),
+    dated('tomorrow', '2026-10-22T12:00:00'), dated('today', '2026-10-21T12:00:00')
+  ], new Date('2026-10-21T12:00:00'));
+  assert.ok(result.indexOf('<h2>Today</h2>') < result.indexOf('<h2>Tomorrow</h2>'));
+  assert.ok(result.indexOf('<h2>Tomorrow</h2>') < result.indexOf('<h2>Upcoming Games</h2>'));
+  assert.ok(result.indexOf('<h2>Upcoming Games</h2>') < result.indexOf('<h2>Previous Games</h2>'));
+  assert.match(result, /Oct 19/); assert.match(result, /Oct 24/);
+});
+
+test('League menu prioritizes favorites and filters by name without dropping the selection', () => {
+  const { ctx } = fixture();
+  const menu = ctx.beta4LeagueMenu();
+  assert.ok(menu.indexOf('My Leagues') < menu.indexOf('More Leagues'));
+  const searched = ctx.beta4LeagueMenu('WSL');
+  assert.match(searched, /WSL Players Cup/); assert.doesNotMatch(searched, />NBA</);
+  assert.match(ctx.beta4LeagueMenu('zzzzz'), /No leagues match/);
+});
+
+test('Choosing an extra league keeps pinned shortcut order stable', () => {
+  const { ctx } = fixture();
+  const el = { innerHTML: '', hidden: true };
+  ctx.beta4Filters(el, [], []);
+  const before = [...el.innerHTML.matchAll(/data-b4-league="([^"]+)"/g)].map(x => x[1]);
+  ctx.LG.extra = { id: 'extra', name: 'Extra League', short: 'EX' };
+  vm.runInContext('b4League = "extra"', ctx);
+  ctx.beta4Filters(el, [], []);
+  assert.deepEqual([...el.innerHTML.matchAll(/data-b4-league="([^"]+)"/g)].map(x => x[1]), before);
+  assert.match(el.innerHTML, /Selected Extra League/);
+});
+
+test('Active search hides unrelated following content and clearing it restores the list', () => {
+  const { ctx } = fixture();
+  const nodes = { sheet: { classList: { contains: () => false } }, q: { value: 'Arsenal' }, following: {}, 'b4-following-heading': {} };
+  ctx.document.getElementById = id => nodes[id];
+  ctx.beta4SearchVisibility();
+  assert.equal(nodes.following.hidden, true);
+  nodes.q.value = ''; ctx.beta4SearchVisibility(); assert.equal(nodes.following.hidden, false);
+  nodes.sheet.classList.contains = () => true; ctx.beta4SearchVisibility(); assert.equal(nodes.following.hidden, true);
+});
+
+test('Smart opens Live for a single relevant live game and For You when none are live', () => {
+  const { ctx, games } = fixture();
+  ctx.state.homeLayout = 'bar'; ctx.store.set('home3', 'auto'); ctx.inMyWorld = g => g.mine;
+  vm.runInContext(html.slice(html.indexOf('  function homeTab()'), html.indexOf('  function specialsFor(')), ctx);
+  assert.equal(ctx.homeTab(), 'live');
+  games[0].state = 'post'; assert.equal(ctx.homeTab(), 'foryou');
 });
