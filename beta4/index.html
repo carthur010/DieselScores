@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021211849">
+<meta name="build" content="20261021234000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -2143,33 +2143,33 @@ button.brand, button.brand span { color: var(--accent); }
   // Fetching
   // =====================================================================
   const topFlight = {};
-  async function loadTopFlight(slug) {
+  async function loadTopFlight(slug, signal) {
     if (topFlight[slug]) return topFlight[slug];
     try {
-      const j = await (await fetch(API + "soccer/" + slug + "/teams")).json();
+      const j = await (await fetch(API + "soccer/" + slug + "/teams", { signal })).json();
       const ids = (j.sports?.[0]?.leagues?.[0]?.teams || []).map(t => t.team?.id).filter(Boolean);
       if (ids.length) topFlight[slug] = new Set(ids);
     } catch {}
     return topFlight[slug] || null;
   }
 
-  async function loadLeague(lg) {
+  async function loadLeague(lg, signal) {
     if (lg.kind) {
       const url = API + lg.path + "/scoreboard" + (isToday() && lg.kind !== "tennis" ? "" : "?dates=" + ymd(state.date));
-      const r = await fetch(url, { cache: "no-store" });
+      const r = await fetch(url, { cache: "no-store", signal });
       if (!r.ok) throw new Error("HTTP " + r.status);
       const j = await r.json();
       const special = (j.events || []).map(ev => { try { return PARSE[lg.kind](ev, lg); } catch { return null; } }).filter(Boolean).filter(relevant);
       return { events: [], special };
     }
-    const r = await fetch(API + lg.path + "/scoreboard?dates=" + ymd(state.date) + (lg.extra || ""), { cache: "no-store" });
+    const r = await fetch(API + lg.path + "/scoreboard?dates=" + ymd(state.date) + (lg.extra || ""), { cache: "no-store", signal });
     if (!r.ok) throw new Error("HTTP " + r.status);
     const j = await r.json();
     let games = (j.events || []).map(ev => normalize(ev, lg));
     // After midnight, last night's games are still on the previous day's scoreboard. Pull in the ones still being played.
     if (isToday() && new Date().getHours() < 8) {
       try {
-        const ry = await fetch(API + lg.path + "/scoreboard?dates=" + ymd(addDays(state.date, -1)) + (lg.extra || ""), { cache: "no-store" });
+        const ry = await fetch(API + lg.path + "/scoreboard?dates=" + ymd(addDays(state.date, -1)) + (lg.extra || ""), { cache: "no-store", signal });
         if (ry.ok) {
           const have = new Set(games.map(g => g.id));
           ((await ry.json()).events || []).map(ev => normalize(ev, lg)).filter(g => !have.has(g.id) && g.state === "in").forEach(g => games.push(g));
@@ -2177,13 +2177,13 @@ button.brand, button.brand span { color: var(--accent); }
       } catch {}
     }
     if (lg.topFlight && games.length) {
-      const set = await loadTopFlight(lg.topFlight);
+      const set = await loadTopFlight(lg.topFlight, signal);
       if (set) games = games.filter(g => g.teams.some(t => set.has(t.id)));
     }
     if (lg.id === "ncaaf" && games.length) {
       const p4 = new Set();
       await Promise.allSettled(P4_GROUPS.map(async gid => {
-        const rr = await fetch(API + lg.path + "/scoreboard?dates=" + ymd(state.date) + "&groups=" + gid + "&limit=100", { cache: "no-store" });
+        const rr = await fetch(API + lg.path + "/scoreboard?dates=" + ymd(state.date) + "&groups=" + gid + "&limit=100", { cache: "no-store", signal });
         if (rr.ok) ((await rr.json()).events || []).forEach(e => p4.add(e.id));
       }));
       games.forEach(g => g.p4 = p4.has(g.id));
@@ -2191,10 +2191,24 @@ button.brand, button.brand span { color: var(--accent); }
     return { events: games, special: [] };
   }
 
+  // Bound the entire request, including JSON parsing and supplementary feeds.
+  function loadLeagueWithTimeout(lg) {
+    const controller = new AbortController();
+    let timer;
+    const timeout = new Promise((_, reject) => {
+      timer = setTimeout(() => {
+        reject(new Error("Scores request timed out"));
+        controller.abort();
+      }, 12000);
+    });
+    return Promise.race([loadLeague(lg, controller.signal), timeout])
+      .finally(() => clearTimeout(timer));
+  }
+
   function hotLeague(lg) {
     if (state.tab === lg.id) return true;
     const d = state.data[lg.id];
-    if (!d || d.error) return true;
+    if (!d || d.error || d.stale) return true;
     const soon = Date.now() + 20 * 60000;
     return (d.events || []).some(g => g.state === "in" || (g.state === "pre" && new Date(g.date).getTime() < soon))
       || (d.special || []).some(e => e.state === "in");
@@ -2202,33 +2216,50 @@ button.brand, button.brand span { color: var(--accent); }
   async function loadAll(partial) {
     if (state.loading) return;
     state.loading = true;
+    const day = ymd(state.date);
     document.getElementById("refresh").classList.add("spin");
-    // Smart refresh: a full sweep on open, on a new day and every 10 minutes. In between, only leagues with something
-    // live, about to start (20 min) or open on screen. Off-season leagues and finished slates sit out.
-    const full = !partial || !state.fullAt || Date.now() - state.fullAt > 600000 || state.fullDay !== ymd(state.date);
-    const list = full ? LEAGUES : LEAGUES.filter(hotLeague);
-    const results = await Promise.allSettled(list.map(loadLeague));
-    results.forEach((r, i) => {
-      const id = list[i].id, prev = state.data[id];
-      state.data[id] = r.status === "fulfilled" ? r.value : (!full && prev && !prev.error ? prev : { events: [], special: [], error: r.reason?.message || "failed" });
-    });
-    if (full) { state.fullAt = Date.now(); state.fullDay = ymd(state.date); }
-    state.loading = false;
-    state.updatedAt = new Date();
-    if (state.autoPending) { state.autoPending = false; state.tab = homeTab(); }
-    document.getElementById("refresh").classList.remove("spin");
-    if (isToday()) { checkAlerts(); checkReminders(); }
-    syncScheduled();
-    render();
-    schedule();
-    refreshNext();
+    try {
+      const full = !partial || !state.fullAt || Date.now() - state.fullAt > 600000 || state.fullDay !== day;
+      const list = full ? LEAGUES : LEAGUES.filter(hotLeague);
+      const sameDate = state.fullDay === day;
+      const results = await Promise.allSettled(list.map(loadLeagueWithTimeout));
+      // A response for the previous date must never overwrite the selected day.
+      if (ymd(state.date) !== day) return;
+      results.forEach((r, i) => {
+        const id = list[i].id, prev = sameDate && state.data[id];
+        state.data[id] = r.status === "fulfilled" ? r.value
+          : (prev && !prev.error ? { ...prev, stale: true } : { events: [], special: [], error: r.reason?.message || "failed" });
+      });
+      if (full) { state.fullAt = Date.now(); state.fullDay = day; }
+      // Failed attempts must not claim that old scores have just been updated.
+      if (results.some(r => r.status === "fulfilled")) state.updatedAt = new Date();
+      if (state.autoPending) { state.autoPending = false; state.tab = homeTab(); }
+      if (isToday()) { checkAlerts(); checkReminders(); }
+      syncScheduled();
+      render();
+      refreshNext();
+    } finally {
+      // Keep polling even if a feed, parser or rendering callback fails.
+      state.loading = false;
+      document.getElementById("refresh").classList.remove("spin");
+      if (ymd(state.date) !== day) loadAll().catch(() => {});
+      else schedule();
+    }
   }
 
   function schedule() {
     clearTimeout(state.timer);
     if (!isToday()) return;
-    const anyLive = allGames().some(g => g.state === "in") || allSpecial().some(e => e.state === "in");
-    state.timer = setTimeout(() => { if (!document.hidden) loadAll(true); else schedule(); }, anyLive ? 30000 : 120000);
+    const now = Date.now();
+    const active = allGames().some(g => g.state === "in" || (g.state === "pre"
+      && !/Postponed|Canceled|Cancelled|Suspended/i.test(g.status || "")
+      && new Date(g.date).getTime() <= now + 15 * 60000
+      && new Date(g.date).getTime() >= now - 6 * 3600000))
+      || allSpecial().some(e => e.state === "in");
+    state.timer = setTimeout(() => {
+      if (!document.hidden) loadAll(true).catch(() => {});
+      else schedule();
+    }, active ? 15000 : 60000);
   }
 
   function allGames() { return TEAM_LEAGUES.flatMap(lg => state.data[lg.id]?.events || []).map(g => ({ ...g, fav: g.teams.some(t => isFavTeam(g.lg, t.abbr)), pin: !!state.favGames[g.lg.id + ":" + g.id] })); }
@@ -6025,6 +6056,8 @@ button.brand, button.brand span { color: var(--accent); }
     else if (state.hiddenAt && Date.now() - state.hiddenAt > 10 * 60e3 && store.get("home", "live") === "auto" && document.getElementById("gsheet").hidden) state.autoPending = true;
     if (!document.hidden && isToday() && state.updatedAt && Date.now() - state.updatedAt > 25000) loadAll(true);
   });
+  window.addEventListener("online", () => { if (!document.hidden) loadAll().catch(() => {}); });
+  window.addEventListener("pageshow", e => { if (e.persisted && !document.hidden) loadAll().catch(() => {}); });
   // GitHub Pages lets browsers keep the page for ~10 minutes. Check for a newer build and jump to it.
   async function checkForUpdate() {
     if (!location.protocol.startsWith("http")) return;
@@ -6353,8 +6386,8 @@ button.brand, button.brand span { color: var(--accent); }
     }
     if (plan.finals.length) html += beta4Section("Final", `${plan.finals.length} ${plan.finals.length === 1 ? "Game" : "Games"}`, plan.finals);
     html += nextHtml;
-    const failed = LEAGUES.filter(lg => state.data[lg.id]?.error && (b4League === "all" ? state.favLeagues.includes(lg.id) : lg.id === b4League));
-    if (failed.length) html += `<div class="b4-load-note">Some scores could not load (${failed.map(lg => esc(b4Short(lg))).join(", ")}). <button data-b4-refresh>Retry</button></div>`;
+    const failed = LEAGUES.filter(lg => (state.data[lg.id]?.error || state.data[lg.id]?.stale) && (b4League === "all" ? state.favLeagues.includes(lg.id) : lg.id === b4League));
+    if (failed.length) html += `<div class="b4-load-note">Some scores could not refresh (${failed.map(lg => esc(b4Short(lg))).join(", ")}). <button data-b4-refresh>Retry</button></div>`;
     if (!plan.source.length) html += `<div class="b4-empty"><p>${state.loading ? "Loading scores…" : "No games in your followed leagues on this date."}</p><button class="chip" data-bb="teams">Follow Teams</button></div>`;
     if (state.updatedAt) html += `<p class="b4-updated">Updated ${esc(timeLabel(state.updatedAt))} · Refreshes automatically</p>`;
     return html;
