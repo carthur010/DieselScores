@@ -190,7 +190,7 @@ body:has(#ssheet:not([hidden]).b4-settings) #botbar, body:has(#sheet:not([hidden
 .b4-empty p { margin: 0 0 12px; }
 .b4-empty .chip { min-height: 44px; }
 .b4-upnext { margin-top: 19px; border-top: 1px solid var(--line); padding-top: 12px; }
-.b4-upnext h2 { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 0 0 6px; }
+.b4-upnext h2 { font-size: 12px; color: var(--muted); text-transform: none; letter-spacing: 0; margin: 0 0 6px; }
 .b4-upnext .ln-nx { padding: 9px 0; }
 .b4-upnext .ln-nx-t b { font-size: 14px; white-space: normal; }
 .b4-upnext .ln-nx-t small { font-size: 12px; font-weight: 400; }

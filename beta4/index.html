@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021201952">
+<meta name="build" content="20261021202218">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=10">
+<link rel="stylesheet" href="beta4.css?v=11">
 </head>
 <body>
 <header class="top">
@@ -1470,11 +1470,11 @@ button.brand, button.brand span { color: var(--accent); }
     </div>
   </div>
 </div>
-<div class="sheet" id="b4saved" hidden role="dialog" aria-modal="true" aria-labelledby="b4saved-h"><div class="sheet-card"><div class="bhead"><h2 id="b4saved-h">Saved games</h2></div><div class="sheet-body" id="b4saved-body"></div></div></div>
+<div class="sheet" id="b4saved" hidden role="dialog" aria-modal="true" aria-labelledby="b4saved-h"><div class="sheet-card"><div class="bhead"><h2 id="b4saved-h">Saved Games</h2></div><div class="sheet-body" id="b4saved-body"></div></div></div>
 <nav class="botbar" id="botbar" aria-label="Main navigation">
 <button class="on" data-bb="home" aria-label="Scores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h1M3 12h1M3 18h1"/></svg>Scores</button>
 <button data-bb="teams" aria-label="My Teams"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/></svg>My Teams</button>
-<button data-bb="saved" aria-label="Saved games"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20s-7-4.4-9-9.2C1.6 7.3 4 4 7.3 4c2 0 3.4 1.1 4.7 2.7C13.3 5.1 14.7 4 16.7 4 20 4 22.4 7.3 21 10.8 19 15.6 12 20 12 20z"/></svg>Saved</button>
+<button data-bb="saved" aria-label="Saved Games"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20s-7-4.4-9-9.2C1.6 7.3 4 4 7.3 4c2 0 3.4 1.1 4.7 2.7C13.3 5.1 14.7 4 16.7 4 20 4 22.4 7.3 21 10.8 19 15.6 12 20 12 20z"/></svg>Saved</button>
 </nav>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
@@ -6073,13 +6073,13 @@ button.brand, button.brand span { color: var(--accent); }
     if (b4SettingsPage === "root") {
       html = `<p class="b4-settings-intro">Saved on this device. No account required.</p><div class="b4-settings-box b4-settings-links">` +
         beta4SettingsRow("My Teams", `Following ${state.favs.size} teams`, 'data-set-open="teams"', "Edit") +
-        beta4SettingsRow("My Leagues", `${state.favLeagues.length} leagues in your order`, 'data-set-open="leagues"', "Edit order") +
-        beta4SettingsRow("Load A Setup", "Restore teams and leagues with a code", "data-load-setup", "Enter code") + `</div>` +
+        beta4SettingsRow("My Leagues", `${state.favLeagues.length} leagues in your order`, 'data-set-open="leagues"', "Edit Order") +
+        beta4SettingsRow("Load A Setup", "Restore teams and leagues with a code", "data-load-setup", "Enter Code") + `</div>` +
         beta4SettingsChoice("Home Layout", "Try each layout. Your preferences stay the same.", "homeLayout", state.homeLayout, [["bar", "Bottom Bar"], ["day", "Your Day"], ["rail", "League Rail"], ["classic", "Classic"]]) +
         `<div class="b4-settings-box b4-settings-links">` +
         beta4SettingsRow("Layout & Display", "Open to, sorting, appearance and odds", 'data-b4-settings-page="display"', "⌄") +
         beta4SettingsRow("TV & Streaming", `Your services · ${market}`, 'data-b4-settings-page="tv"', "⌄") +
-        beta4SettingsRow("Alerts", "Team, game and global alerts", 'data-b4-settings-page="alerts"', "⌄") + `</div><button class="b4-settings-primary" data-set-done>Done</button><p class="b4-settings-foot">You’re on the beta. <a href="../">Open the live app ↗</a></p>`;
+        beta4SettingsRow("Alerts", "Team, game and global alerts", 'data-b4-settings-page="alerts"', "⌄") + `</div><button class="b4-settings-primary" data-set-done>Done</button><p class="b4-settings-foot">You’re on the beta. <a href="../">Open The Live App ↗</a></p>`;
     } else if (b4SettingsPage === "display") {
       const openKey = state.homeLayout === "classic" ? "home" : "home3";
       html = `<p class="b4-settings-intro">Choose how The Lineup opens and how your games look.</p>` +
@@ -6095,7 +6095,7 @@ button.brand, button.brand span { color: var(--accent); }
         beta4SettingsChoice("On My Services", "Show a filter containing games you can watch.", "svcTab", store.get("svcTab", true) ? "on" : "off", [["on", "Show"], ["off", "Hide"]]) +
         beta4SettingsBox("Home Market", "Sets regional channels and local league-package blackouts.", beta4SettingsOptions(Object.entries(MARKETS).map(([id, m]) => [id, m.name]), state.tv.market, id => `data-tv-market="${id}"`)) +
         SERVICE_GROUPS.map(([label, group]) => beta4SettingsBox(label, "Select every service you have.", beta4SettingsOptions(SERVICES.filter(s => s.grp === group).map(s => [s.id, s.id === "antenna" ? "Antenna" : s.label || s.name]), id => state.tv.services.includes(id), id => `data-tv-svc="${id}"`))).join("") +
-        beta4SettingsBox("Only your services", "If none of your services carry a game, The Lineup shows ‘Not on your services.’ Local games may be blacked out on league packages.");
+        beta4SettingsBox("Only Your Services", "If none of your services carry a game, The Lineup shows ‘Not on your services.’ Local games may be blacked out on league packages.");
     } else if (b4SettingsPage === "alerts") {
       html = `<p class="b4-settings-intro">Choose alerts for your teams, saved games and the sports world.</p><div class="b4-settings-box b4-settings-links">` +
         beta4SettingsRow("My Teams Alerts", "Teams you follow", 'data-b4-settings-page="team"') +
@@ -6125,7 +6125,7 @@ button.brand, button.brand span { color: var(--accent); }
       const subtitle = ready ? `${n.at === "@" ? "at" : "vs"} ${n.oppName || n.opp || "TBD"}` : n?.error ? "Schedule unavailable" : n?.none ? "No upcoming game scheduled" : "Checking schedule…";
       return `<${tag} class="b4-team-next" ${playable ? `data-game="${esc(m.lg)}:${esc(n.id)}"` : ""}>${m.logo ? `<img src="${esc(m.logo)}" alt="">` : "<span></span>"}<span><b>${esc(m.name)}</b><small>${esc(subtitle)}</small>${ready ? `<small>${esc(nextWhen(n.date))}</small>` : ""}</span>${playable ? "<i>›</i>" : ""}</${tag}>`;
     }).join("");
-    el.innerHTML = `<div class="b4-section-head"><h2>Upcoming games</h2><small>${state.favs.size} teams</small></div>` + (rows ? `<div class="b4-team-schedule">${rows}</div>` : `<p class="hint">Follow a team below to see its next game here.</p>`) + ([...state.favs].some(k => state.next[k]?.error) ? `<button class="b4-link" data-b4-retry-teams>Retry schedules</button>` : "");
+    el.innerHTML = `<div class="b4-section-head"><h2>Upcoming Games</h2><small>${state.favs.size} teams</small></div>` + (rows ? `<div class="b4-team-schedule">${rows}</div>` : `<p class="hint">Follow a team below to see its next game here.</p>`) + ([...state.favs].some(k => state.next[k]?.error) ? `<button class="b4-link" data-b4-retry-teams>Retry Schedules</button>` : "");
   }
   async function beta4LoadTeamUpcoming() {
     if (b4TeamsLoading) return;
@@ -6222,8 +6222,8 @@ button.brand, button.brand span { color: var(--accent); }
     const mine = scoped.filter(g => isMine(g) || !!state.favGames[gameKey(g)]);
     const primary = (fy ? mine : live ? scoped.filter(g => g.state === "in") : scoped).filter(g => gameKey(g) !== feature.key);
     const active = primary.filter(g => g.state !== "post"), final = primary.filter(g => g.state === "post");
-    if (active.length) html += beta4Section(fy ? "Your games" : live ? "Live now" : "All games", `${active.length} ${active.length === 1 ? "game" : "games"}${b4League === "all" ? "" : " · " + b4Short(LG[b4League])}`, active);
-    else if (!feature.html && !final.length) html += `<div class="b4-empty"><p>${state.loading ? "Loading scores…" : live ? "No live games in this view right now." : fy ? "None of your followed teams or saved games play on this date." : "No games in this view on this date."}</p><button class="chip" data-b4-scope="all">See all games</button> <button class="chip" data-bb="teams">Follow teams</button></div>`;
+    if (active.length) html += beta4Section(fy ? "Your Games" : live ? "Live Now" : "All Games", `${active.length} ${active.length === 1 ? "game" : "games"}${b4League === "all" ? "" : " · " + b4Short(LG[b4League])}`, active);
+    else if (!feature.html && !final.length) html += `<div class="b4-empty"><p>${state.loading ? "Loading scores…" : live ? "No live games in this view right now." : fy ? "None of your followed teams or saved games play on this date." : "No games in this view on this date."}</p><button class="chip" data-b4-scope="all">See All Games</button> <button class="chip" data-bb="teams">Follow Teams</button></div>`;
     if (fy) {
       const extra = scoped.filter(g => g.state === "in" && !mine.some(m => gameKey(m) === gameKey(g))).slice(0, 8);
       if (extra.length) html += beta4Section("You Are Looking Live", `${extra.length} live`, extra);
@@ -6234,11 +6234,11 @@ button.brand, button.brand span { color: var(--accent); }
     if (fy && isToday()) {
       const playing = new Set(scoped.filter(isMine).flatMap(g => g.teams.map(t => favKey(g.lg, t.abbr))));
       const next = [...state.favs].filter(k => !playing.has(k)).map(k => ({ k, m: state.favMeta[k], n: state.next[k] })).filter(x => x.m && x.n?.date && (b4League === "all" || x.m.lg === b4League)).sort((a, b) => new Date(a.n.date) - new Date(b.n.date)).slice(0, 3);
-      if (next.length) html += `<section class="b4-upnext"><h2>Next for your teams</h2>${upNextRows(next)}</section>`;
+      if (next.length) html += `<section class="b4-upnext"><h2>Next For Your Teams</h2>${upNextRows(next)}</section>`;
     }
     const failed = LEAGUES.filter(lg => state.data[lg.id]?.error && (b4League === "all" ? state.favLeagues.includes(lg.id) : lg.id === b4League));
     if (failed.length) html += `<div class="b4-load-note">Some scores could not load (${failed.map(lg => esc(b4Short(lg))).join(", ")}). <button data-b4-refresh>Retry</button></div>`;
-    html += `<div class="b4-help"><button data-bb="teams">★ Follow teams</button> · ♡ Save games · <button data-bb="alerts">Manage alerts</button></div>`;
+    html += `<div class="b4-help"><button data-bb="teams">★ Follow Teams</button> · ♡ Save Games · <button data-bb="alerts">Manage Alerts</button></div>`;
     if (state.updatedAt) html += `<p class="b4-updated">Updated ${esc(timeLabel(state.updatedAt))} · Refreshes automatically</p>`;
     return html;
   }
@@ -6248,7 +6248,7 @@ button.brand, button.brand span { color: var(--accent); }
     const current = new Map([...b4SavedCache, ...allGames().map(g => [gameKey(g), g])]);
     const keys = Object.keys(state.favGames);
     const list = keys.map(k => current.get(k)).filter(Boolean).sort((a, b) => new Date(a.date) - new Date(b.date));
-    body.innerHTML = `<p class="hint">Games you save with ♡ appear here, including games on other dates. Saving a game does not enable alerts.</p>` + (list.length ? beta4Rows(list) : `<div class="b4-empty"><p>${keys.length ? (b4SavedErrors && !b4SavedLoading ? "Saved scores could not load." : "Loading your saved games…") : "No saved games yet."}</p>${keys.length ? "" : `<button class="chip" data-bb="home">Find a game to save</button>`}</div>`) + (b4SavedLoading ? `<p class="b4-load-note" role="status">Checking saved scores…</p>` : b4SavedErrors ? `<p class="b4-load-note">${b4SavedErrors} saved ${b4SavedErrors === 1 ? "game is" : "games are"} unavailable. <button data-b4-retry-saved>Retry</button></p>` : "");
+    body.innerHTML = `<p class="hint">Games you save with ♡ appear here, including games on other dates. Saving a game does not enable alerts.</p>` + (list.length ? beta4Rows(list) : `<div class="b4-empty"><p>${keys.length ? (b4SavedErrors && !b4SavedLoading ? "Saved scores could not load." : "Loading your saved games…") : "No saved games yet."}</p>${keys.length ? "" : `<button class="chip" data-bb="home">Find A Game To Save</button>`}</div>`) + (b4SavedLoading ? `<p class="b4-load-note" role="status">Checking saved scores…</p>` : b4SavedErrors ? `<p class="b4-load-note">${b4SavedErrors} saved ${b4SavedErrors === 1 ? "game is" : "games are"} unavailable. <button data-b4-retry-saved>Retry</button></p>` : "");
   }
   async function beta4LoadSaved() {
     if (b4SavedLoading) return;

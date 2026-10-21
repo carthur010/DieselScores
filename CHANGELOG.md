@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 4.0 — Consistent Title Case
+- Capitalized section headings and action labels consistently, including Your Games, All Games, Live Now, Upcoming Games and Saved Games.
+
 ## Oct 21, 2026: Beta 4.0 — Expanded view cleanup
 - Grouped league and clock in the header, retained right-aligned TV, tightened team spacing and aligned scores. Combined Watch, Save and Alerts into one footer with 44px controls.
 - Added available season records beside each team in Expanded pregame cards only. Records disappear for live and finished games.
