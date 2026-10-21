@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 3.0 (1:25 AM, not on live yet)
+- Your Day: tap a league in Your Leagues to drop its games down right there (live first, then upcoming, then finals). Tap again to fold it up. "All NHL Scores ›" at the bottom of each drop-down opens the league page. Golf and tennis rows still open their tab.
+
 ## Oct 21, 2026: Beta 3.0 (1:20 AM, not on live yet)
 - Your Day: Your Leagues is a regular section card at the bottom (after Up Next), with slim one-line rows like "NHL · 3 Games · 1 Live ›". No more "Open league scores" on every row; Edit Order sits at the bottom of the card.
 

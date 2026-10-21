@@ -1356,6 +1356,13 @@ button.brand, button.brand span { color: var(--accent); }
 .lg-foot { padding: 8px 16px 12px; border-top: 1px solid var(--line); }
 #main > [data-block="fy-lgs"] { order: 100; }
 :root[data-home="day"] #main > .updated { order: 101; }
+.ln-lg-x { display: grid; place-items: center; width: 16px; height: 16px; color: var(--muted); transition: transform .15s; transform: rotate(180deg); }
+.ln-lg-x svg { width: 14px; height: 14px; }
+.ln-lg.open .ln-lg-x { transform: none; }
+.ln-lg.open { background: var(--surface-2, transparent); }
+.ln-lg-drop { border-top: 1px solid var(--line); }
+.ln-lg-drop .grid { gap: 0; }
+.ln-lg-go { display: block; width: 100%; min-height: 44px; padding: 10px 16px; border: 0; border-top: 1px solid var(--line); background: transparent; color: var(--accent); font: inherit; font-size: 14px; font-weight: 700; text-align: left; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -3982,6 +3989,15 @@ button.brand, button.brand span { color: var(--accent); }
     const off = state.favLeagues.filter(id => LG[id] && state.data[id] && !state.data[id].error && !(state.data[id].events || []).length && !(state.data[id].special || []).length).map(id => LG[id].short || LG[id].name);
     return off.length ? `<p class="updated off">Off ${isToday() ? "today" : "this day"}: ${esc(off.join(", "))}</p>` : "";
   }
+  const lgOpen = new Set();   // Your Leagues rows that are dropped down (cleared on reload)
+  document.addEventListener("click", e => {
+    const x = e.target.closest("[data-lg-x]");
+    if (!x) return;
+    e.preventDefault(); e.stopPropagation();
+    const id = x.dataset.lgX;
+    lgOpen.has(id) ? lgOpen.delete(id) : lgOpen.add(id);
+    render();
+  }, true);
   // Your Day: your leagues with games this day, one slim row each ("NHL · 3 Games · 1 Live ›"), at the bottom
   function yourLeagues() {
     const cnt = {}, live = {};
@@ -3989,9 +4005,15 @@ button.brand, button.brand span { color: var(--accent); }
     allSpecial().forEach(e => { cnt[e.lg.id] = (cnt[e.lg.id] || 0) + 1; if (e.state === "in") live[e.lg.id] = (live[e.lg.id] || 0) + 1; });
     const ids = state.favLeagues.filter(id => LG[id] && cnt[id]);
     if (!ids.length) return "";
+    // Tap a league to drop its games down right here; "All NHL Scores ›" inside opens the league page.
+    // Golf and tennis have no game list, so those rows still open their tab.
     const rows = ids.map(id => { const lg = LG[id], n = cnt[id];
       const unit = lg.kind ? (n === 1 ? "Event" : "Events") : lg.soccer ? (n === 1 ? "Match" : "Matches") : (n === 1 ? "Game" : "Games");
-      return `<button class="ln-lg" data-go-tab="${id}"><b>${esc(lg.short || lg.name)}</b><small>${n} ${unit}${live[id] ? ` · <span class="lv">${live[id]} Live</span>` : ""}</small><i>›</i></button>`; }).join("");
+      const label = `<b>${esc(lg.short || lg.name)}</b><small>${n} ${unit}${live[id] ? ` · <span class="lv">${live[id]} Live</span>` : ""}</small>`;
+      if (lg.kind) return `<button class="ln-lg" data-go-tab="${id}">${label}<i>›</i></button>`;
+      const open = lgOpen.has(id);
+      const list = open ? allGames().filter(g => g.lg.id === id).sort(byState) : [];
+      return `<button class="ln-lg ${open ? "open" : ""}" data-lg-x="${id}" aria-expanded="${open}">${label}<i class="ln-lg-x">${CHEV}</i></button>${open ? `<div class="ln-lg-drop">${gridOf(list)}<button class="ln-lg-go" data-open-lgpage="${id}">All ${esc(lg.short || lg.name)} Scores ›</button></div>` : ""}`; }).join("");
     return block("fy-lgs", "Your Leagues", `${ids.length} ${ids.length === 1 ? "League" : "Leagues"}`, `<div class="ln-card-list">${rows}</div><div class="lg-foot"><button class="chip" data-edit-leagues>Edit Order</button></div>`);
   }
   function everythingElse() {
