@@ -1604,7 +1604,15 @@ button.brand, button.brand span { color: var(--accent); }
     favs: ["nfl:NE", "nhl:SJ", "ncaaf:USC", "soccer:NEW", "soccer:ARS", "nba:NY", "nhl:NYR", "ncaaf:UCLA", "nba:SAC", "mlb:SF", "mlb:ARI", "mlb:NYM", "ncaam:UCLA", "soccer:MIL"],
     favMeta: {"nfl:NE": {"lg": "nfl", "id": "17", "abbr": "NE", "name": "New England Patriots", "color": "#002a5c", "logo": "https://a.espncdn.com/i/teamlogos/nfl/500/ne.png"}, "nhl:SJ": {"lg": "nhl", "id": "18", "abbr": "SJ", "name": "San Jose Sharks", "color": "#00788a", "logo": "https://a.espncdn.com/i/teamlogos/nhl/500/sj.png"}, "ncaaf:USC": {"lg": "ncaaf", "id": "30", "abbr": "USC", "name": "USC Trojans", "color": "#9d2235", "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/30.png"}, "soccer:NEW": {"lg": "epl", "id": "361", "abbr": "NEW", "name": "Newcastle United", "color": "#000000", "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/361.png"}, "soccer:ARS": {"lg": "epl", "id": "359", "abbr": "ARS", "name": "Arsenal", "color": "#e20520", "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/359.png"}, "nba:NY": {"lg": "nba", "id": "18", "abbr": "NY", "name": "New York Knicks", "color": "#1d428a", "logo": "https://a.espncdn.com/i/teamlogos/nba/500/ny.png"}, "nhl:NYR": {"lg": "nhl", "id": "13", "abbr": "NYR", "name": "New York Rangers", "color": "#0056ae", "logo": "https://a.espncdn.com/i/teamlogos/nhl/500/nyr.png"}, "ncaaf:UCLA": {"lg": "ncaaf", "id": "26", "abbr": "UCLA", "name": "UCLA Bruins", "color": "#2774ae", "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/26.png"}, "nba:SAC": {"lg": "nba", "id": "23", "abbr": "SAC", "name": "Sacramento Kings", "color": "#5a2d81", "logo": "https://a.espncdn.com/i/teamlogos/nba/500/sac.png"}, "mlb:SF": {"lg": "mlb", "id": "26", "abbr": "SF", "name": "San Francisco Giants", "color": "#000000", "logo": "https://a.espncdn.com/i/teamlogos/mlb/500/sf.png"}, "mlb:ARI": {"lg": "mlb", "id": "29", "abbr": "ARI", "name": "Arizona Diamondbacks", "color": "#aa182c", "logo": "https://a.espncdn.com/i/teamlogos/mlb/500/ari.png"}, "mlb:NYM": {"lg": "mlb", "id": "21", "abbr": "NYM", "name": "New York Mets", "color": "#002d72", "logo": "https://a.espncdn.com/i/teamlogos/mlb/500/nym.png"}, "ncaam:UCLA": {"lg": "ncaam", "id": "26", "abbr": "UCLA", "name": "UCLA Bruins", "color": "#2774ae", "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/26.png"}, "soccer:MIL": {"lg": "seriea", "id": "103", "abbr": "MIL", "name": "AC Milan", "color": "#e4002b", "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/103.png"}},
     favLeagues: ["mlb", "nhl", "nfl", "ncaaf", "epl", "ucl", "nba", "pga", "facup", "laliga", "seriea", "bund", "uel", "ncaam"],
+    // Charles's display defaults (Oct 21): Bottom Bar, opens on My Games, By Time, Simple, Always Expand off, Red, Auto,
+    // odds shown, sections in the order Your Teams, Worth A Watch, You Are Looking Live, Your Multiview
+    display: { homeLayout: "bar", home3: "foryou", view3: "time", density: "simple", expandFavs: false, palette: "red", theme: "system", showOdds: true, secOrder: ["mine", "worth", "live", "mv"] },
   };
+  // Write a setup's display defaults straight into this version's storage (before the app reads them)
+  function writeDisplay(S, P) {
+    if (!S.display) return;
+    try { Object.entries(S.display).forEach(([k, v]) => localStorage.setItem(P + k, JSON.stringify(v))); } catch {}
+  }
   // Everyone else starts fresh: no teams (they pick on first visit) and a general league order
   const DEFAULT_FAVS = [];
   const DEFAULT_FAV_LEAGUES = ["nfl", "nba", "mlb", "nhl", "ncaaf", "epl", "ucl", "ncaam"];
@@ -1636,6 +1644,7 @@ button.brand, button.brand span { color: var(--accent); }
       localStorage.setItem("scoreline-shared:lgCustom", "true");
       localStorage.setItem("scoreline-shared:onboarded", "true");
       localStorage.setItem("scoreline-shared:owner", JSON.stringify(code === "me" ? "ca" : code));
+      writeDisplay(s, P);
       if (code !== "jc") { const t = JSON.parse(localStorage.getItem(P + "tv") || "null"); if (!t || !(t.services || []).length) localStorage.setItem(P + "tv", JSON.stringify(DEFAULT_TV)); }
       localStorage.removeItem(P + "next");
       q.delete("me"); q.delete("setup");
@@ -1684,7 +1693,7 @@ button.brand, button.brand span { color: var(--accent); }
     autoPending: store.get("home", "live") === "auto",
     conf: (() => { const c = store.get("conf", null); return c && typeof c === "object" ? c : {}; })(),
     blkF: (() => { const c = store.get("blkF", null); return c && typeof c === "object" ? c : {}; })(),
-    view: store.get("view3", "league"),
+    view: store.get("view3", "time"),
     favs: new Set(store.get("favs", DEFAULT_FAVS)),
     favMeta: { ...MY_SETUP.favMeta, ...store.get("favMeta", {}) },   // key -> { lg, id, name, logo, color }
     next: store.get("next", {}),         // key -> { t, date, opp, oppLogo, at, none }
@@ -1713,8 +1722,8 @@ button.brand, button.brand span { color: var(--accent); }
       if (s && Array.isArray(s.services)) return { ...DEFAULT_TV, ...s };
       if (!store.get("onboarded", false) && !store.get("favs", []).length) { const t = { services: [], market: "" }; store.set("tv", t); return t; }   // new people pick their own
       return { ...DEFAULT_TV, services: [...DEFAULT_TV.services] }; })(),
-    density: store.get("density", "expanded"),       // "compact" | "expanded"
-    expandFavs: store.get("expandFavs", true),       // in Compact, keep your teams' games full size (Simple ignores it)
+    density: store.get("density", "simple"),         // "simple" | "compact" | "expanded" (Simple by default, Oct 21)
+    expandFavs: store.get("expandFavs", false),      // in Compact, keep your teams' games full size (Simple ignores it)
     homeLayout: ["bar", "day", "rail", "classic"].includes(store.get("homeLayout", "bar")) ? store.get("homeLayout", "bar") : "bar",
     showCal: false,                                  // Your Day: date strip opens from the calendar button
     upcoming: { key: "", at: 0, days: [], loading: false },
@@ -5787,7 +5796,7 @@ button.brand, button.brand span { color: var(--accent); }
   }
   // ---- Home section order: Your Multiview, Worth A Watch, You Are Looking Live (and Your Teams in Beta 3.0)
   const SEC_NAMES = { mine: "Your Teams", mv: "Your Multiview", worth: "Worth A Watch", live: "You Are Looking Live" };
-  const secKeys = () => ("homeLayout" in state ? ["mine", "mv", "worth", "live"] : ["mv", "worth", "live"]);
+  const secKeys = () => ("homeLayout" in state ? ["mine", "worth", "live", "mv"] : ["mv", "worth", "live"]);
   function secOrder() {
     const keys = secKeys(), saved = store.get("secOrder", []).filter(k => keys.includes(k));
     return saved.concat(keys.filter(k => !saved.includes(k)));
@@ -5820,7 +5829,7 @@ button.brand, button.brand span { color: var(--accent); }
       `<div class="set-row"><div class="set-lbl">My Teams<small>Following ${teams} team${teams === 1 ? "" : "s"}</small></div><button class="chip" data-set-open="teams">Edit</button></div>` +
       `<div class="set-row"><div class="set-lbl">My Leagues<small>${leagues} league${leagues === 1 ? "" : "s"} in your order</small></div><button class="chip" data-set-open="leagues">Edit Order</button></div>` +
       segRow("Home Layout", "homeLayout", state.homeLayout, [["bar", "Bottom Bar"], ["day", "Your Day"], ["rail", "League Rail"], ["classic", "Classic"]], "New in Beta 3.0. Try each one. Classic is the current beta.") +
-      (store.get("owner", "") ? `<div class="set-row"><div class="set-lbl">Reset To My Setup<small>Puts back your saved teams and leagues, in order</small></div><button class="chip" data-reset-setup>Reset</button></div>` : "") +
+      (store.get("owner", "") ? `<div class="set-row"><div class="set-lbl">Reset To My Setup<small>Puts back your teams, leagues and display settings</small></div><button class="chip" data-reset-setup>Reset</button></div>` : "") +
       `<div class="set-row"><div class="set-lbl">Load A Setup<small>Have a setup code? Enter it to load those teams and leagues</small></div><button class="chip" data-load-setup>Enter Code</button></div>` +
       setSection("display", "Layout & Display", "Open to, layout, color, appearance, odds",
         (state.homeLayout !== "classic" ? segRow("Open To", "home3", store.get("home3", "foryou"), [["auto", "Smart"], ["foryou", { bar: "My Games", day: "Your Day", rail: "For You" }[state.homeLayout]], ["live", "Live"], ["all", "All"]], "What you see when the app opens. Smart opens on Live when 3 or more games are on in your leagues, otherwise " + { bar: "My Games", day: "Your Day", rail: "For You" }[state.homeLayout] + ".") : segRow("Open To", "home", store.get("home", "live"), [["auto", "Smart"], ["live", "Live"], ["all", "All"], ["teams", "My Teams"], ["mine", "My Leagues"], ["upcoming", "Upcoming"]], "The tab you see when the app opens. Smart picks Live when your games are on, and My Teams when nothing is.")) +
@@ -5918,7 +5927,8 @@ button.brand, button.brand span { color: var(--accent); }
       store.set("onboarded", true);
       store.set("favs", [...state.favs]); store.set("favMeta", state.favMeta); store.set("favLeagues", state.favLeagues);
       state.next = {}; store.set("next", {});
-      toast("Setup Restored", "Your teams and leagues are back in your order", "", "", false);
+      toast("Setup Restored", "Your teams, leagues and display settings are back", "", "", false);
+      if (S.display) { writeDisplay(S, location.pathname.includes("/beta") ? "scoreline-b3:" : "scoreline:"); setTimeout(() => location.reload(), 600); return; }
       renderSettings(); render(); refreshNext();
       return;
     }
@@ -5945,7 +5955,8 @@ button.brand, button.brand span { color: var(--accent); }
     store.set("favs", [...state.favs]); store.set("favMeta", state.favMeta); store.set("favLeagues", state.favLeagues);
     if (["me", "ca"].includes(code) && !state.tv.services.length) { state.tv = { ...DEFAULT_TV, services: [...DEFAULT_TV.services] }; store.set("tv", state.tv); }
     state.next = {}; store.set("next", {});
-    toast("Setup Loaded", "Your teams and leagues are on this device", "", "", false);
+    if (S.display) { writeDisplay(S, location.pathname.includes("/beta") ? "scoreline-b3:" : "scoreline:"); setTimeout(() => location.reload(), 300); }
+    toast("Setup Loaded", "Your teams, leagues and display settings are on this device", "", "", false);
     return true;
   }
   document.addEventListener("click", e => {

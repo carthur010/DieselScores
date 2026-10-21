@@ -2,6 +2,11 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 21, 2026: Beta 3.0 (1:10 AM, not on live yet)
+- Charles's setup now includes his display settings: Bottom Bar, Open To My Games, By Time, Simple, Always Expand My Teams off, Red, Auto, Betting Odds shown, and sections in the order Your Teams, Worth A Watch, You Are Looking Live, Your Multiview.
+- The CA code (Welcome or Settings), the ?me / ?setup=ca link and Reset To My Setup all load them, then reload once so everything takes effect.
+- Anyone starting fresh on Beta 3.0 gets the same layout defaults: By Time, Simple, Always Expand off, and that section order.
+
 ## Oct 21, 2026: Beta 3.0 (1:05 AM, not on live yet)
 - Smart Open To opens on Live only when 3 or more games are on in your leagues. Otherwise it opens on My Games, which already shows your live teams first and everything else that's on. One late game no longer drops you on a nearly empty Live tab.
 - Fixed: after switching from Your Day to Bottom Bar, the My Games / Live / All row could stay hidden.
