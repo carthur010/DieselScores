@@ -1199,14 +1199,6 @@ button.brand, button.brand span { color: var(--accent); }
 .h3seg button { border-radius: 11px; font-weight: 500; color: var(--fg); }
 .h3seg button.on { font-weight: 600; }
 
-/* Sections: small caps label above a card, like the board */
-:root:not([data-home="classic"]) main section.block { background: transparent; border: 0; border-radius: 0; overflow: visible; }
-:root:not([data-home="classic"]) main section.block > .bhead { padding: 18px 4px 8px; border-bottom: 0; gap: 8px; }
-:root:not([data-home="classic"]) main section.block > .bhead h2 { font-size: 13px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
-:root:not([data-home="classic"]) main section.block > .bhead .meta { font-size: 12px; }
-:root:not([data-home="classic"]) main section.block > .bhead .tog { width: 28px; height: 28px; background: transparent; }
-:root:not([data-home="classic"]) main section.block > .bbody { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
-:root:not([data-home="classic"]) main section.block.empty, :root:not([data-home="classic"]) main .block.empty { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; }
 
 /* Bottom bar */
 .botbar button { font-weight: 600; }
@@ -1283,16 +1275,7 @@ button.brand, button.brand span { color: var(--accent); }
 :root[data-home="bar"] .h3seg button .n { color: var(--brand-red, #a93439); opacity: 1; font-weight: 700; }
 /* ===================== Homepage redesign (Oct 21 PDF) =====================
    Bold Title Case section names with a note on the right, then one rounded card per game. */
-:root:not([data-home="classic"]) main section.block > .bhead { padding: 22px 2px 10px; align-items: baseline; }
-:root:not([data-home="classic"]) main section.block > .bhead h2 { font-size: 22px; font-weight: 700; letter-spacing: -.01em; text-transform: none; color: var(--fg); font-family: var(--body); }
-:root:not([data-home="classic"]) main section.block > .bhead > .meta { margin-left: auto !important; order: 9; flex: none; font-size: 14px; font-weight: 600; color: var(--muted); }
-:root:not([data-home="classic"]) main section.block > .bhead .tog { display: none; }
-:root:not([data-home="classic"]) main section.block > .bbody { background: transparent; border: 0; border-radius: 0; overflow: visible; }
-:root:not([data-home="classic"]) main section.block[data-block="mv"] > .bbody { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
-:root:not([data-home="classic"]) main section.block.closed > .bbody { display: block; }
 .linkish { border: 0; background: transparent; font: inherit; cursor: pointer; padding: 6px 0; }
-:root:not([data-home="classic"]) main .grid { grid-template-columns: 1fr; gap: 12px; }
-:root:not([data-home="classic"])[data-density="compact"] main .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .ln-list { display: grid; gap: 12px; }
 .ln-list.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .ln { display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; cursor: pointer; min-width: 0; color: var(--fg); }
@@ -1339,7 +1322,7 @@ button.brand, button.brand span { color: var(--accent); }
 .ln-dd { font-size: 12px; }
 .ln-watch { display: flex; align-items: center; justify-content: center; min-height: 44px; margin-top: 4px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 15px; text-decoration: none; }
 /* Up Next and Your Leagues: one card with rows */
-.ln-card-list { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.ln-card-list { background: transparent; }
 .ln-nx { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 16px 18px; cursor: pointer; }
 .ln-nx + .ln-nx { border-top: 1px solid var(--line); }
 .ln-nx img { width: 30px; height: 30px; object-fit: contain; }
@@ -2732,6 +2715,7 @@ button.brand, button.brand span { color: var(--accent); }
   // Compact: league and clock on top, teams with big scores, channel and heart/bell underneath (two-up).
   // Expanded: Compact full width, plus a Watch On button.
   const isV3 = () => state.homeLayout && state.homeLayout !== "classic";
+  const LN_CARDS = false;   // Oct 21: Charles prefers live's game rows and section cards, so the PDF card is off
   function lnCard(g, showTag) {
     const [a, h] = g.teams;
     if (!a || !h) return "";
@@ -2763,11 +2747,12 @@ button.brand, button.brand span { color: var(--accent); }
   }
   // A section's games: two-up in Compact (one game goes full width), one column otherwise
   function lnList(list, showTag) {
+    if (!LN_CARDS) return gridOf(list);
     const two = state.density === "compact" && list.length > 1;
     return `<div class="ln-list ${two ? "two" : ""}">${list.map(g => lnCard(g, showTag)).join("")}</div>`;
   }
   function card(g, showLg) {
-    if (isV3()) return lnCard(g);
+    if (LN_CARDS && isV3()) return lnCard(g);
     if (state.density === "simple") return simpleRow(g, showLg === true);   // Simple stays simple, your teams too
     if (state.density === "compact" && !(state.expandFavs && g.fav)) return miniCard(g, showLg === true);
     return `<article class="g tap" data-game="${g.lg.id}:${g.id}" role="button" tabindex="0" aria-label="${esc(g.teams.map(x => x.name).join(" vs "))}: game details">
@@ -2876,7 +2861,7 @@ button.brand, button.brand span { color: var(--accent); }
   // Your teams strip
   // Simple: just a list of games. Time, two teams, score, bell.
   function simpleRow(g, showLg) {
-    if (isV3()) return lnCard(g);
+    if (LN_CARDS && isV3()) return lnCard(g);
     const [a, h] = g.teams;
     if (!a || !h) return "";
     const lose = (t, o) => g.state !== "pre" && ((g.state === "post" && o.winner && !t.winner) || (g.state === "in" && (+t.score) < (+o.score)));
@@ -2906,7 +2891,7 @@ button.brand, button.brand span { color: var(--accent); }
     return p.statYardage ?? null;
   }
   function miniCard(g, showLg) {
-    if (isV3()) return lnCard(g);
+    if (LN_CARDS && isV3()) return lnCard(g);
     const [a, h] = g.teams;
     const net = g.state !== "post" ? netLabel(g) : "";   // the channel, like the other views
     if (!a || !h) return "";
@@ -3842,7 +3827,7 @@ button.brand, button.brand span { color: var(--accent); }
   const gridOf = list => `<div class="grid">${list.map(g => card(g, true)).join("")}</div>`;
   const byState = (a, b) => (ORD3[a.state] - ORD3[b.state]) || new Date(a.date) - new Date(b.date) || (b.pin - a.pin) || gameRank(a) - gameRank(b);
   function worthHTML(picks) {
-    if (isV3()) return lnList(picks, picks.length > 1);
+    if (LN_CARDS && isV3()) return lnList(picks, picks.length > 1);
     if (state.density === "simple") return gridOf(picks);
     if (state.density === "compact") return `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>`;
     if (state.homeLayout === "day") return `<div class="feat hero">${featured(picks[0])}</div>${picks.length > 1 ? `<div class="wrows">${picks.slice(1).map(worthRow).join("")}</div>` : ""}`;
@@ -3963,25 +3948,26 @@ button.brand, button.brand span { color: var(--accent); }
     if (pickedNothing()) html += `<div class="pick-banner"><div><b>You're seeing every league</b><span>Follow your teams and leagues and The Lineup fills in with yours.</span></div><button class="chip on" data-open-welcome>Pick Favorites</button></div>`;
     // Homepage redesign (Oct 21): Your Teams, Worth A Watch, You Are Looking Live, Final, Up Next. Your Game hero and
     // the Tonight card step aside; your finished games move down to Final.
-    heroGame = null;
     const mine = games.filter(isMine).sort(byState);
-    const mineOn = mine.filter(g => g.state !== "post");
+    const hero = L !== "rail" ? myHero(games) : (heroGame = null);
+    html += heroHTML(hero);
+    const mineOn = mine.filter(g => g.state !== "post" && g !== hero);
     const mvHTML = mvSection();
     const picks = isToday() ? worthPicks(games) : [];
     const pickIds = new Set(picks.map(g => g.id));
     const mineIds = new Set(mine.map(g => g.id));
     // League Rail has no Your Teams section, so your live games stay in this list there
-    const live = games.filter(g => g.state === "in" && !pickIds.has(g.id) && !mvHome.has(mvKey(g)) && (L === "rail" || !mineIds.has(g.id))).sort(byState);
+    const live = games.filter(g => g.state === "in" && g !== hero && !pickIds.has(g.id) && !mvHome.has(mvKey(g)) && (L === "rail" || !mineIds.has(g.id))).sort(byState);
     const finals = games.filter(g => g.state === "post" && (isMine(g) || g.playoff)).sort((x, y) => (isMine(y) - isMine(x)) || new Date(y.date) - new Date(x.date)).slice(0, 8);
     const liveN = list => list.filter(g => g.state === "in").length;
     if (L !== "rail") {
       const n = liveN(mineOn);
-      if (mineOn.length) html += block("fy-mine", "Your Teams", n ? `${n} Live` : countLabel(mineOn.length, mineOn) + (isToday() ? " Today" : ""), lnList(mineOn));
-      else if (!mine.length) html += `<div class="block empty">None of your teams play ${isToday() ? "today" : "on " + esc(dayLabel(state.date))}.${state.favs.size ? "" : `<div class="find-more"><button class="chip" data-open-sheet>Follow Teams</button></div>`}</div>`;
+      if (mineOn.length) html += block("fy-mine", hero ? "Your Other Teams" : "Your Teams", n ? `${n} Live` : countLabel(mineOn.length, mineOn) + (isToday() ? " Today" : ""), lnList(mineOn));
+      else if (!mine.length && !hero) html += `<div class="block empty">None of your teams play ${isToday() ? "today" : "on " + esc(dayLabel(state.date))}.${state.favs.size ? "" : `<div class="find-more"><button class="chip" data-open-sheet>Follow Teams</button></div>`}</div>`;
     }
     html += mvHTML;
-    if (picks.length) html += block("worth", "Worth A Watch", picks.length === 1 ? (gameTag(picks[0]) || "1 Game") : countLabel(picks.length, picks), lnList(picks, picks.length > 1));
-    if (live.length) html += block("fy-live", "You Are Looking Live", `${live.length} Live`, lnList(live));
+    if (picks.length) html += block("worth", "Worth A Watch", countLabel(picks.length, picks), worthHTML(picks));
+    if (live.length) html += block("fy-live", "You Are Looking Live", countLabel(live.length, live), lnList(live));
     if (finals.length) html += block("fy-final", "Final", "", lnList(finals));
     if (L === "rail" && !games.length) html += `<div class="block empty">No games ${pickedNothing() ? "" : "in your leagues "}on ${esc(dayLabel(state.date))}.${findMore()}</div>`;
     html += upNextHTML(L === "rail" ? games.filter(isMine) : mine);
@@ -4204,7 +4190,7 @@ button.brand, button.brand span { color: var(--accent); }
         if (tab === "live") shown = new Set(picks.map(g => g.id));
         html += block("worth", "Worth A Watch", countLabel(picks.length, picks),
           // More than 4 picks: switch to the two-up compact cards so the section doesn't take over the page
-          isV3() ? lnList(picks, picks.length > 1) : state.density === "simple" ? gridOf(picks) : state.density === "compact" ? `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>` : worthRows(picks));
+          LN_CARDS && isV3() ? lnList(picks, picks.length > 1) : state.density === "simple" ? gridOf(picks) : state.density === "compact" ? `<div class="grid lp-grid">${picks.map(g => miniCard(g, true)).join("")}</div>` : worthRows(picks));
       }
     }
 
@@ -4286,7 +4272,7 @@ button.brand, button.brand span { color: var(--accent); }
         : TEAM_LEAGUES.map(lg => {
         const list = feed.filter(g => g.lg.id === lg.id).sort((x, y) => new Date(x.date) - new Date(y.date));
         if (!list.length) return "";
-        return `<div class="tl-group">${isV3() ? "" : `<div class="tl-head"><span class="crumb">${esc(lg.name)}</span></div>`}
+        return `<div class="tl-group">${LN_CARDS && isV3() ? "" : `<div class="tl-head"><span class="crumb">${esc(lg.name)}</span></div>`}
           <div class="grid">${list.map(card).join("")}</div></div>`;
       }).join("");
       html += block("feed", "You Are Looking Live", countLabel(feed.length, feed), parts);
