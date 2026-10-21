@@ -3,14 +3,13 @@
 Newest first. Beta changes move to Live when shipped.
 
 ## Oct 20, 2026: Beta 3.0 (11:30 PM, not on live yet)
-- The Lineup brand board, applied: Warm Cream background (#FFF7EC), Charcoal text (#262626), Primary Red (#A93439) and Accent Gold (#AC9841), with Inter as the app font. Dark mode moves to charcoal.
+- The Lineup brand board, applied: Warm Cream background (#FFF7EC), Charcoal text (#262626), Primary Red (#A93439) and Accent Gold (#AC9841), in SF Pro (Apple's system font, Barlow on other devices). Dark mode moves to charcoal.
 - Home header: a big red Scores title with the view pill and a live pill ("2 Live") on the right, like the board.
 - Date strip reads Sat, Sun, Mon, Today, Wed with a red line under the day you're on.
 - Sections are small caps labels (YOUR TEAMS, WORTH A WATCH, UP NEXT) above a rounded card.
 - Leagues tab: big red Leagues title, Your Leagues as a tile grid with each league's mark, game count and a red live badge, then every league by sport.
 - Welcome opens on the L mark, The Lineup wordmark and the tagline.
 - Brand assets in beta3/brand: the L mark (red and cream), red, dark and mono icons, and a crisper favicon. The Home Screen icon is unchanged.
-- Classic layout keeps its header, sized down so the icons stay on one line in Inter.
 
 ## Oct 19, 2026: Live (11:55 AM)
 - Beta 3.0 is now the live app: the bottom bar (Scores, Leagues, Search, Settings), For You home with Your Game, the strip, Your Multiview, Worth A Watch and You Are Looking Live, the Simple / Compact / Expanded switch, and the Home Layout choice in Settings (Bottom Bar, Your Day, League Rail, Classic).

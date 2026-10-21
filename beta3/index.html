@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 3.0</title>
-<meta name="build" content="20261020231500">
+<meta name="build" content="20261020232000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 3.0">
@@ -16,7 +16,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: date strip on top, Apple-style "My Teams" scoreboard rows, then CBS-style collapsible two-column league grids */
 :root {
@@ -1147,10 +1147,11 @@ button.brand, button.brand span { color: var(--accent); }
 .why.gold { color: var(--gold); background: var(--gold-soft); }
 
 /* ===================== The Lineup brand (Oct 20 brand board) =====================
-   Primary Red #A93439 · Warm Cream #FFF7EC · Accent Gold #AC9841 · Charcoal #262626 · Inter */
+   Primary Red #A93439 · Warm Cream #FFF7EC · Accent Gold #AC9841 · Charcoal #262626 · SF Pro */
 :root {
-  --display: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-  --body: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  /* SF Pro on Apple devices (built in); Barlow everywhere else */
+  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Barlow Condensed", "Helvetica Neue", Arial, sans-serif;
+  --body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Barlow", "Helvetica Neue", Arial, sans-serif;
   --brand-red: #a93439; --brand-cream: #fff7ec; --brand-gold: #ac9841; --brand-char: #262626;
 }
 :root:not([data-palette]), :root[data-palette="red"] {
@@ -1168,8 +1169,6 @@ button.brand, button.brand span { color: var(--accent); }
   --muted: #b3a998; --dim: #5e5850; --accent: #e0676b; --accent-soft: #3d2223; --live: #ff5a5f;
   --star: #c9b65e; --gold: #c9b65e; --gold-soft: #2f2a1a;
 }
-body { font-feature-settings: "tnum" 1, "cv11" 1; letter-spacing: -.005em; }
-.brand, .bhead h2, .row .ab, .row .sc, .f-sc, .ms-t b, .ms-t em, .lb .num, .lb .pos, .lnum, .toast b { font-stretch: normal; }
 
 /* Header: red title, view pill and live pill on the right */
 .h3row { padding-block: 16px 6px; }
@@ -1209,8 +1208,6 @@ body { font-feature-settings: "tnum" 1, "cv11" 1; letter-spacing: -.005em; }
 :root[data-theme="dark"] .wl-brand img.red { display: none; } :root[data-theme="dark"] .wl-brand img.cream { display: block; }
 :root[data-theme="light"] .wl-brand img.red { display: block; } :root[data-theme="light"] .wl-brand img.cream { display: none; }
 
-/* Classic header: Inter runs wider than SF condensed, keep the icons on one line */
-:root[data-home="classic"] header.top .brand { font-size: 25px; letter-spacing: -.02em; font-weight: 800; }
 /* Leagues tab: big red title, tile grid for your leagues */
 #pksheet.lg-v3 #pk-h { font-size: 30px; font-weight: 800; letter-spacing: -.02em; color: var(--accent); }
 .lg-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 4px 0 10px; }
