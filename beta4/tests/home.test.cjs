@@ -594,3 +594,181 @@ test('Team editors do not overwrite the parent tab position', () => {
   ctx.bbRestore('teams');
   assert.equal(nodes.sheet.scrollTop, 320);
 });
+
+test('My Teams uses shared game tiles in each density and deduplicates followed opponents', () => {
+  const {ctx, body} = fixture();
+  ctx.state.favs = new Set(['nba:A', 'nba:B']);
+  ctx.state.favMeta = {
+    'nba:A': {lg:'nba', abbr:'A', name:'Away'},
+    'nba:B': {lg:'nba', abbr:'B', name:'Home'}
+  };
+  const date = new Date(Date.now()+86400000).toISOString();
+  ctx.state.next = {
+    'nba:A': {id:'shared', date, at:'@', opp:'B', oppName:'Home'},
+    'nba:B': {id:'shared', date, at:'vs', opp:'A', oppName:'Away'}
+  };
+  ctx.nextWhen = () => 'Tomorrow · 7:00 PM';
+  for (const [density, css] of [['simple','b4-rows'],['compact','b4-cards-compact'],['expanded','b4-cards-expanded']]) {
+    ctx.state.density = density; ctx.beta4TeamUpcomingPaint();
+    assert.match(body.innerHTML, new RegExp(css));
+    assert.equal((body.innerHTML.match(/data-game="nba:shared"/g)||[]).length,1);
+    assert.match(body.innerHTML, /1 Game/);
+    assert.match(body.innerHTML, /Tomorrow · 7:00 PM/);
+    assert.doesNotMatch(body.innerHTML, /class="b4-team-next"/);
+  }
+});
+
+test('My Teams separates schedule errors, off-season teams and loading states and keeps Retry', () => {
+  const {ctx,body} = fixture();
+  ctx.state.favs = new Set(['nba:A','nba:B','nba:C']);
+  ctx.state.favMeta = {'nba:A':{name:'A <team>'},'nba:B':{name:'B'},'nba:C':{name:'C'}};
+  ctx.state.next = {'nba:A':{error:true},'nba:B':{none:true}};
+  ctx.beta4TeamUpcomingPaint();
+  assert.match(body.innerHTML,/Team Schedules/);
+  assert.match(body.innerHTML,/Schedule unavailable/);
+  assert.match(body.innerHTML,/No upcoming game scheduled/);
+  assert.match(body.innerHTML,/Checking schedule…/);
+  assert.match(body.innerHTML,/A &lt;team&gt;/);
+  assert.match(body.innerHTML,/data-b4-retry-teams/);
+  assert.doesNotMatch(body.innerHTML,/Next For Your Teams/);
+});
+
+function golfFixture() {
+  const {ctx} = fixture();
+  ctx.str = v => v == null ? '' : typeof v === 'object' ? (v.displayValue ?? v.value ?? '') : String(v);
+  ctx.evState = ev => ev.status?.type || {};
+  ctx.SHAREIC = '<svg></svg>';
+  vm.runInContext(html.slice(html.indexOf('  function parseGolf(ev, lg) {'), html.indexOf('  function parseRace')),ctx);
+  vm.runInContext(html.slice(html.indexOf('  function beta4GolfView(e) {'), html.indexOf('  document.addEventListener("click", e => {',html.indexOf('  function beta4GolfView(e) {'))),ctx);
+  return ctx;
+}
+
+test('Golf derives tied positions and holes completed from the current round only', () => {
+  const ctx = golfFixture();
+  const player = (id,total,holes) => ({id,athlete:{displayName:'Player '+id,shortName:'P. '+id},score:total,linescores:[{period:1,displayValue:total,linescores:Array.from({length:holes},()=>({value:4}))},{period:2}]});
+  const e=ctx.parseGolf({id:'event',status:{type:{state:'in'}},competitions:[{status:{period:1,type:{state:'in',detail:'Round 1 - In Progress'}},broadcasts:[{names:['Golf Chnl']}],competitors:[player('1','-7',11),player('2','-7',18),player('3','-6',9)]}]},{id:'pga',name:'PGA Tour',short:'PGA'});
+  assert.deepEqual(Array.from(e.rows,r=>r.pos),['T1','T1','3']);
+  assert.deepEqual(Array.from(e.rows,r=>r.thru),['11','F','9']);
+  assert.equal(e.rows[0].today,'-7');
+  assert.equal(e.broadcast,'Golf Channel');
+  assert.equal(e.round,1);
+  assert.match(e.rows[0].headshot,/golf\/players\/full\/1.png/);
+});
+
+test('Golf does not reuse a previous round score or invent scores for unstarted players', () => {
+  const ctx=golfFixture();
+  const e=ctx.parseGolf({competitions:[{status:{period:2,type:{state:'pre'}},competitors:[{athlete:{displayName:'Not started'},linescores:[{period:1,displayValue:'-3'},{period:2}]}]}]},{id:'pga'});
+  assert.equal(e.rows[0].today,''); assert.equal(e.rows[0].thru,''); assert.equal(e.rows[0].pos,'');
+});
+
+test('Tournament view renders the full field with escaped names and accessible columns', () => {
+  const ctx=golfFixture();
+  const e={id:'event',lg:{id:'pga',name:'PGA Tour',short:'PGA'},name:'Cup <test>',round:2,state:'in',detail:'Round 2 - In Progress',broadcast:'Golf Channel',rows:Array.from({length:120},(_,i)=>({pos:String(i+1),name:'Player '+i,shortName:'P. '+i,total:'-2',today:'E',thru:'5'}))};
+  const result=ctx.beta4GolfView(e);
+  assert.equal((result.match(/<th scope="row">/g)||[]).length,120);
+  assert.match(result,/Cup &lt;test&gt;/); assert.match(result,/R2<\/th>/);
+  assert.match(result,/Round 2 · In Progress/); assert.match(result,/Live on Golf Channel/);
+  assert.match(result,/aria-pressed="false"/); assert.match(result,/Back to Scores/);
+  assert.doesNotMatch(result,/undefined/);
+});
+
+test('Unstarted even-par golfers do not inflate the ranks of players above par', () => {
+  const ctx=golfFixture();
+  const e=ctx.parseGolf({competitions:[{status:{period:1,type:{state:'in'}},competitors:[{id:'1',athlete:{displayName:'Playing'},score:'+1',linescores:[{period:1,displayValue:'+1',linescores:[{value:5}]}]},{id:'2',athlete:{displayName:'Waiting'},score:'E',linescores:[{period:1,displayValue:'-'}]}]}]},{id:'pga'});
+  assert.equal(e.rows[0].pos,'1');
+  assert.equal(e.rows[1].pos,'');
+  assert.equal(e.rows[1].total,'');
+});
+
+test('Player scorecards keep future holes blank and distinguish birdies, eagles and bogeys', () => {
+  const ctx=golfFixture();
+  const player={rounds:[{period:1,linescores:[{period:1,value:3,scoreType:{displayValue:'-1'}},{period:2,value:3,scoreType:{displayValue:'-2'}},{period:3,value:4,scoreType:{displayValue:'+1'}},{period:4,value:6,scoreType:{displayValue:'+2'}}]}]};
+  const holes=ctx.beta4GolfHoles(player,1,{});
+  assert.deepEqual(Array.from(holes.slice(0,4),h=>h.par),[4,5,3,4]);
+  assert.equal(holes[4].value,null); assert.equal(holes[4].par,null);
+  const result=ctx.beta4GolfScorecard(player,1,{});
+  for(const kind of ['birdie','eagle','bogey','double'])assert.match(result,new RegExp('b4-gp-stroke '+kind));
+  assert.match(result,/Front nine scorecard/);assert.match(result,/Back nine scorecard/);
+  assert.match(result,/<td>16<\/td>/);
+  assert.doesNotMatch(result,/undefined|NaN/);
+});
+
+test('Player performance uses tournament statistics and preserves legitimate zero values', () => {
+  const ctx=golfFixture();
+  const result=ctx.beta4GolfPlayerStats({scope:'all',round:1,player:{rounds:[]},stats:{splits:{categories:[{stats:[{name:'strokesGainedPutting',displayValue:'0.000',rankDisplayValue:'T5'},{name:'driveAccuracyPct',displayValue:'70'}]}]}}});
+  assert.match(result,/SG: Putting<\/th><td>0.000<\/td><td>T5/);
+  assert.match(result,/Driving Accuracy<\/th><td>70%/);
+  assert.match(result,/SG: Off The Tee<\/th><td>–/);
+  assert.match(result,/Performance/);assert.match(result,/Scoring/);
+});
+
+test('Playing groups exclude golfers starting on a different tee at the same time', async () => {
+  const ctx=golfFixture();ctx.beta4GolfPlayerPaint=()=>{};
+  const rows=[{id:'a',teeGroup:'tee'},{id:'b',teeGroup:'tee'},{id:'c',teeGroup:'tee'}];
+  const v={event:{id:'event',lg:{id:'pga'},rows},player:rows[0],status:{teeTime:'2026-10-22T11:08Z',startHole:1}};
+  ctx.testView=v;vm.runInContext('b4Golfer=testView',ctx);
+  ctx.beta4GolfJSON=async url=>({teeTime:'2026-10-22T11:08Z',startHole:url.includes('/b/')?1:10});
+  await ctx.beta4GolfLoadGroup();
+  assert.deepEqual(Array.from(v.group,p=>p.id),['a','b']);
+  assert.equal(v.groupLoading,false);
+});
+
+test('Late player data cannot repaint a player page that has been closed', async () => {
+  const ctx=golfFixture();let paints=0,resolve;
+  ctx.beta4GolfPlayerPaint=()=>{paints++;};
+  ctx.beta4GolfJSON=()=>new Promise(r=>{resolve=r;});
+  ctx.testView={event:{id:'event',lg:{id:'pga'}},player:{id:'a'},scope:'all'};
+  vm.runInContext('b4Golfer=testView',ctx);
+  const request=ctx.beta4GolfLoadStats();
+  vm.runInContext('b4Golfer=null',ctx);
+  resolve({splits:{categories:[]}});await request;
+  assert.equal(paints,1);assert.equal(ctx.testView.stats,undefined);
+});
+
+test('Golf previews remove Hot and open the in-app leaderboard', () => {
+  const ctx=golfFixture();ctx.block=(_id,_title,_meta,body)=>body;
+  vm.runInContext(html.slice(html.indexOf('  function toPar('),html.indexOf('  function beta4GolfView(')),ctx);
+  const result=ctx.golfBlock({lg:{id:'pga',name:'PGA Tour'},id:'event',state:'in',detail:'Live',rows:[{name:'Leader',today:'-7',total:'-7'}],link:'https://espn.com/leaderboard'});
+  assert.doesNotMatch(result,/Hot|why hot|href=/);
+  assert.match(result,/data-b4-golf-open="pga\|event"/);
+});
+
+test('Tee times separate simultaneous groups starting at different tees and sort chronologically', () => {
+  const ctx=golfFixture();
+  const e={rows:[{id:'a'},{id:'b'},{id:'c'},{id:'d'}]};
+  const statuses=new Map([
+    ['a',{teeTime:'2026-10-22T11:08Z',startHole:10}],
+    ['b',{teeTime:'2026-10-22T10:35Z',startHole:1}],
+    ['c',{teeTime:'2026-10-22T11:08Z',startHole:1}],
+    ['d',{teeTime:'2026-10-22T11:08Z',startHole:1}]
+  ]);
+  const groups=ctx.beta4GolfTeeGroups(e,statuses);
+  assert.equal(groups.length,3);
+  assert.equal(groups[0].time,'2026-10-22T10:35Z');
+  assert.deepEqual(Array.from(groups[1].players,p=>p.player.id),['c','d']);
+  assert.equal(groups[2].tee,10);
+});
+
+test('Tee-time status shows only supported progress and retains withdrawals', () => {
+  const ctx=golfFixture();
+  assert.equal(ctx.beta4GolfTeeStatus({thru:12,type:{state:'in'}},{}),'Thru 12');
+  assert.equal(ctx.beta4GolfTeeStatus({thru:18,type:{state:'post'}},{}),'Finished');
+  assert.equal(ctx.beta4GolfTeeStatus({type:{state:'pre'}},{}),'Scheduled');
+  assert.equal(ctx.beta4GolfTeeStatus({type:{name:'STATUS_WITHDRAWN',description:'Withdrawn'}},{}),'Withdrawn');
+});
+
+test('Tee-time requests use six workers at most, reuse fresh data and retry failures', async () => {
+  const ctx=golfFixture();ctx.state.tab='pga';
+  const event={id:'event',lg:{id:'pga'},round:1,rows:Array.from({length:14},(_,id)=>({id:String(id+1),name:'Player '+id}))};
+  ctx.testEvent=event;vm.runInContext("b4GolfTournamentTabs.set('pga:event','tees')",ctx);
+  ctx.document.getElementById=()=>null;
+  let active=0,max=0,calls=0,fail=true;
+  ctx.beta4GolfJSON=async url=>{calls++;active++;max=Math.max(max,active);await Promise.resolve();active--;if(fail && url.includes('/3/status'))throw new Error('offline');return {period:1,teeTime:'2026-10-22T11:00Z',startHole:1};};
+  await ctx.beta4GolfLoadTeeTimes(event);
+  assert.ok(max<=6);assert.equal(calls,14);
+  let entry=vm.runInContext("b4GolfTeeCache.get('pga:event:1')",ctx);
+  assert.equal(entry.statuses.size,13);assert.equal(entry.errors.size,1);
+  await ctx.beta4GolfLoadTeeTimes(event);assert.equal(calls,14);
+  fail=false;await ctx.beta4GolfLoadTeeTimes(event,true);
+  assert.equal(calls,15);assert.equal(entry.statuses.size,14);assert.equal(entry.errors.size,0);
+});

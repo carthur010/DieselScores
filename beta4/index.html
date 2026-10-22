@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261022090000">
+<meta name="build" content="20261022143505">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=20">
+<link rel="stylesheet" href="beta4.css?v=24">
 </head>
 <body>
 <header class="top">
@@ -2053,23 +2053,40 @@ button.brand, button.brand span { color: var(--accent); }
 
   function parseGolf(ev, lg) {
     const comp = ev.competitions?.[0] || {};
-    const type = evState(ev);
+    const type = comp.status?.type || evState(ev);
+    const round = Number(comp.status?.period || ev.status?.period) || 1;
     const rows = (comp.competitors || []).map((c, i) => {
-      const ls = (c.linescores || []).filter(l => l && (l.value != null || l.displayValue));
-      const today = ls.length ? ls[ls.length - 1] : null;
-      const thruRaw = c.status?.thru ?? c.status?.hole;
+      const athlete = c.athlete || {};
+      const rounds = c.linescores || [];
+      const current = rounds.find(l => Number(l.period) === round) || (!rounds.some(l => l.period) ? rounds[round - 1] : null);
+      const holes = (current?.linescores || []).filter(h => h.value != null || h.displayValue);
+      const thruRaw = c.status?.thru ?? c.status?.hole ?? (holes.length || null);
       return {
-        name: c.athlete?.displayName || c.athlete?.fullName || "",
-        flag: c.athlete?.flag?.href || "",
+        rounds, teeGroup: (current?.statistics?.categories || []).flatMap(c => c.stats || []).map(s => s.displayValue || "").find(value => /^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s/.test(value)) || "",
+        id: c.id || athlete.id || "", name: athlete.displayName || athlete.fullName || "",
+        shortName: athlete.shortName || athlete.displayName || athlete.fullName || "",
+        headshot: athlete.headshot?.href || (typeof athlete.headshot === "string" ? athlete.headshot : "") || (c.id ? `https://a.espncdn.com/i/headshots/golf/players/full/${c.id}.png` : ""),
+        flag: athlete.flag?.href || "", country: athlete.flag?.alt || "",
         pos: c.status?.position?.displayName || c.position?.displayName || "",
         order: c.sortOrder ?? c.order ?? i + 1,
-        total: str(c.score),
-        today: today ? str(today.displayValue ?? today.value) : "",
+        total: str(c.score), hasPlayed: rounds.some(l => /^(?:E|[+-]?\d+)$/.test(str(l.displayValue)) || l.linescores?.length), today: current ? str(current.displayValue) : "",
         thru: thruRaw != null && thruRaw !== "" ? (+thruRaw >= 18 ? "F" : String(thruRaw)) : (c.status?.displayValue || ""),
       };
     }).filter(r => r.name).sort((a, b) => a.order - b.order);
+    // Some golf feeds omit positions: derive competition ranks, including ties, from total to par.
+    const score = r => r.hasPlayed && /^(?:E|[+-]?\d+)$/.test(r.total) ? (r.total === "E" ? 0 : Number(r.total)) : null;
+    const scored = rows.filter(r => score(r) !== null);
+    rows.forEach(r => {
+      if (r.pos || score(r) === null) return;
+      const value = score(r), rank = 1 + scored.filter(other => score(other) < value).length;
+      r.pos = (scored.filter(other => score(other) === value).length > 1 ? "T" : "") + rank;
+    });
+    rows.forEach(r => { if (!r.hasPlayed && r.total === "E") r.total = ""; });
+    const broadcasts = [...new Set((comp.broadcasts || []).flatMap(b => b.names || []))];
     return { kind: "golf", lg, id: ev.id, name: ev.shortName || ev.name || lg.name, date: ev.date, end: ev.endDate,
-      state: type.state || "pre", detail: type.detail || type.shortDetail || "", link: ev.links?.[0]?.href || "", rows };
+      round, logo: ev.logos?.[0]?.href || comp.logos?.[0]?.href || "",
+      broadcast: (broadcasts.join(", ") || comp.broadcast || "").replace(/Golf Chnl/g, "Golf Channel"),
+      state: type.state || "pre", detail: type.detail || type.shortDetail || type.description || "", link: ev.links?.[0]?.href || "", rows };
   }
 
   function parseRace(ev, lg) {
@@ -2987,22 +3004,276 @@ button.brand, button.brand span { color: var(--accent); }
     return e.detail || "Final";
   }
   function golfBlock(e) {
+    if (state.tab === e.lg.id) return beta4GolfView(e);
     const rows = e.rows.slice(0, 10);
     const leadTotal = rows[0]?.total;
     const body = rows.length ? `<div class="lb-wrap"><table class="lb">
       <thead><tr><th>Pos</th><th>Player</th><th class="num">Total</th><th class="num">Today</th><th class="num">Thru</th></tr></thead>
       <tbody>${rows.map(r => {
-        const hot = /^-\d/.test(r.today) && parseInt(r.today) <= -5;
         return `<tr class="${r.total && r.total === leadTotal ? "lead" : ""}">
           <td class="pos">${esc(r.pos || "–")}</td>
-          <td><span class="pl">${r.flag ? `<img src="${esc(r.flag)}" alt="">` : ""}${esc(r.name)}${hot ? ' <span class="why hot">Hot</span>' : ""}</span></td>
+          <td><span class="pl">${r.flag ? `<img src="${esc(r.flag)}" alt="">` : ""}${esc(r.name)}</span></td>
           <td class="num ${toPar(r.total)}">${esc(r.total || "–")}</td>
           <td class="num ${toPar(r.today)}">${esc(r.today || "–")}</td>
           <td class="num">${esc(r.thru || "–")}</td></tr>`;
       }).join("")}</tbody></table></div>` : `<div class="empty">Tee times aren't posted yet.</div>`;
-    const more = e.link ? `<div class="f-act" style="padding-bottom:12px"><a class="f-link" href="${esc(e.link)}" target="_blank" rel="noopener">Full Leaderboard</a></div>` : "";
+    const more = `<div class="f-act" style="padding-bottom:12px"><button class="f-link" data-b4-golf-open="${esc(e.lg.id+'|'+e.id)}">Full Leaderboard</button></div>`;
     return block("ev-" + e.lg.id + e.id, `${e.lg.short || e.lg.name} · ${e.name}`, eventMeta(e), body + more);
   }
+  function beta4GolfView(e) {
+    const following = store.get("golfFollowed", []).includes(e.lg.id + ":" + e.id);
+    const status = e.detail || (e.state === "in" ? "In Progress" : e.state === "post" ? "Final" : "Upcoming");
+    const detail = /round/i.test(status) ? status.replace(/\s-\s/g, " · ") : `Round ${e.round} · ${status}`;
+    const photo = r => `<span class="b4-golf-avatar">${r.headshot ? `<img class="b4-golf-headshot" src="${esc(r.headshot)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ""}${r.flag ? `<img class="b4-golf-flag" src="${esc(r.flag)}" alt="${esc(r.country)}" loading="lazy">` : ""}</span>`;
+    const rows = e.rows.map(r => `<tr><td class="b4-golf-pos">${esc(r.pos || "–")}</td><th scope="row"><button class="b4-golf-player b4-golf-player-link" data-b4-golf-player="${esc(e.lg.id+'|'+e.id+'|'+(r.id || ''))}" aria-label="View ${esc(r.name)} player page"${r.id ? "" : " disabled"}>${photo(r)}<span title="${esc(r.name)}">${esc(r.shortName || r.name)}${store.get("golfPlayerFavorites",[]).includes(e.lg.id+":"+r.id) ? ' <i class="b4-golf-favorite-star" aria-label="Favorite player">★</i>' : ""}</span></button></th><td class="b4-golf-total">${esc(r.total || "–")}</td><td>${esc(r.today || "–")}</td><td>${esc(r.thru || "–")}</td></tr>`).join("");
+    const selected=b4GolfTournamentTabs.get(beta4GolfEventKey(e)) || 'leaderboard';
+    if(selected==='tees') setTimeout(()=>beta4GolfLoadTeeTimes(e),0);
+    const tabs=`<nav class="b4-golf-tabs" aria-label="Tournament sections"><button data-b4-golf-tab="${esc(e.lg.id+'|'+e.id+'|leaderboard')}" aria-pressed="${selected==='leaderboard'}">Leaderboard</button><button data-b4-golf-tab="${esc(e.lg.id+'|'+e.id+'|tees')}" aria-pressed="${selected==='tees'}">Tee Times</button></nav>`;
+    const leaderboard=`<div class="b4-golf-board"><h2>Leaderboard</h2>${rows ? `<table><caption class="sr-only">${esc(e.name)} leaderboard, round ${e.round}</caption><thead><tr><th scope="col"><span class="sr-only">Position</span></th><th scope="col">Player</th><th scope="col" title="Total to par">TOT</th><th scope="col" title="Round ${e.round} to par">R${e.round}</th><th scope="col" title="Holes completed">THRU</th></tr></thead><tbody>${rows}</tbody></table>` : `<p class="b4-golf-empty">Tee times aren’t posted yet. Check back closer to the first round.</p>`}${e.link ? `<a class="b4-golf-source" href="${esc(e.link)}" target="_blank" rel="noopener">Tournament details on ESPN ↗</a>` : ""}</div>`;
+    return `<section class="b4-golf" aria-label="${esc(e.name)}"><header class="b4-golf-hero"><div class="b4-golf-toolbar"><button data-h3="home" aria-label="Back to Scores">‹</button><span>${esc(e.lg.name)}</span><button data-b4-golf-share="${esc(e.lg.id)}" aria-label="Share tournament">${SHAREIC}</button></div><div class="b4-golf-badge">${e.logo ? `<img src="${esc(e.logo)}" alt="">` : `<span>${esc(e.lg.short || e.lg.name)}<small>TOUR</small></span>`}</div><h1>${esc(e.name)}</h1><p class="b4-golf-status">${esc(detail)}</p><button class="b4-golf-follow" data-b4-golf-follow="${esc(e.lg.id + ":" + e.id)}" aria-pressed="${following}"><span aria-hidden="true">${following ? "✓" : "+"}</span> ${following ? "Following" : "Follow"}</button>${e.broadcast ? `<p class="b4-golf-broadcast">${e.state === "in" ? "Live on " : "TV · "}${esc(e.broadcast)}</p>` : ""}</header>${tabs}${selected==='tees' ? `<div class="b4-golf-board b4-golf-tee-board" id="b4-tees-${esc(beta4GolfTeeKey(e))}">${beta4GolfTeeTimes(e)}</div>` : leaderboard}</section>`;
+  }
+  const b4GolfTournamentTabs = new Map(), b4GolfTeeCache = new Map();
+  const beta4GolfEventKey = e => e.lg.id+':'+e.id;
+  const beta4GolfTeeKey = e => beta4GolfEventKey(e)+':'+e.round;
+  function beta4GolfTeeGroups(e, statuses) {
+    const groups = new Map();
+    for(const player of e.rows) {
+      const status=statuses.get(String(player.id));
+      if(!status?.teeTime || !Number.isFinite(Date.parse(status.teeTime)))continue;
+      const tee=status.startHole ?? null;
+      const key=status.teeTime+'|'+(tee ?? 'unknown');
+      if(!groups.has(key))groups.set(key,{time:status.teeTime,tee,players:[]});
+      groups.get(key).players.push({player,status});
+    }
+    return [...groups.values()].sort((a,b)=>Date.parse(a.time)-Date.parse(b.time)||(Number(a.tee)||99)-(Number(b.tee)||99));
+  }
+  function beta4GolfTeeStatus(status, player) {
+    const type=status?.type || {};
+    if(/withdraw|disqual|cut/i.test(type.name || ''))return type.description || type.shortDetail || 'Out';
+    if(type.completed || type.state==='post' || Number(status?.thru)>=18)return 'Finished';
+    if(type.state==='pre')return 'Scheduled';
+    const thru=status?.thru;
+    if(thru!=null && Number(thru)>0)return 'Thru '+thru;
+    if(type.state==='in')return 'In Progress';
+    return player.thru==='F' ? 'Finished' : player.thru ? 'Thru '+player.thru : 'Scheduled';
+  }
+  function beta4GolfTeeTimes(e) {
+    const entry=b4GolfTeeCache.get(beta4GolfTeeKey(e));
+    const groups=beta4GolfTeeGroups(e,entry?.statuses || new Map());
+    const zone=new Intl.DateTimeFormat(undefined,{timeZoneName:'short'}).formatToParts(new Date()).find(p=>p.type==='timeZoneName')?.value || 'Local Time';
+    const time=value=>new Date(value).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+    const favorite=id=>store.get('golfPlayerFavorites',[]).includes(e.lg.id+':'+id);
+    const body=groups.map(group=>`<tr><td class="b4-tee-time"><time datetime="${esc(group.time)}">${esc(time(group.time))}</time><small>${esc(zone)}</small></td><td class="b4-tee-number">${esc(group.tee ?? '–')}</td><td colspan="2"><div class="b4-tee-players">${group.players.map(({player:p,status})=>`<div class="b4-tee-player"><button class="b4-tee-favorite" data-b4-tee-favorite="${esc(e.lg.id+'|'+e.id+'|'+p.id)}" aria-pressed="${favorite(p.id)}" aria-label="${favorite(p.id)?'Unfavorite':'Favorite'} ${esc(p.name)}">${favorite(p.id)?'★':'☆'}</button><button class="b4-tee-name" data-b4-golf-player="${esc(e.lg.id+'|'+e.id+'|'+p.id)}">${esc(p.name)}</button><span class="b4-tee-status">${esc(beta4GolfTeeStatus(status,p))}</span></div>`).join('')}</div></td></tr>`).join('');
+    const unavailable=entry?.errors?.size || 0;
+    return `<div class="b4-tee-heading"><h2>All Players</h2><span>Round ${e.round} · Time in ${esc(zone)}</span></div>${entry?.loading ? `<p class="b4-golf-empty b4-tee-load" role="status">Loading tee times… ${entry.statuses.size} of ${e.rows.length} players</p>` : ''}${body ? `<table class="b4-tee-table"><caption class="sr-only">Round ${e.round} tee times in ${esc(zone)}</caption><thead><tr><th scope="col">Time</th><th scope="col">Tee</th><th scope="col">Players</th><th scope="col">Status</th></tr></thead><tbody>${body}</tbody></table>` : !entry?.loading ? '<p class="b4-golf-empty">Tee times aren’t available for this round yet.</p>' : ''}${unavailable ? `<p class="b4-tee-feedback">${unavailable} ${unavailable===1?'player’s tee time is':'players’ tee times are'} unavailable. <button data-b4-tee-retry="${esc(beta4GolfEventKey(e))}">Retry</button></p>` : ''}`;
+  }
+  async function beta4GolfLoadTeeTimes(e, retry=false) {
+    const key=beta4GolfTeeKey(e);
+    let entry=b4GolfTeeCache.get(key);
+    if(entry?.loading || (!retry && entry?.loadedAt && Date.now()-entry.loadedAt<90000))return;
+    if(!entry || (!retry && entry.loadedAt))entry={statuses:new Map(),errors:new Set(),loading:false};
+    b4GolfTeeCache.set(key,entry);entry.loading=true;entry.errors.clear();
+    const paint=()=>{const panel=document.getElementById('b4-tees-'+key);if(panel)panel.innerHTML=beta4GolfTeeTimes(e);};
+    paint();
+    const queue=e.rows.filter(p=>p.id && !entry.statuses.has(String(p.id)));let cursor=0,completed=0;
+    // Resolve only when the Tee Times tab is requested, with bounded concurrency.
+    await Promise.all(Array.from({length:Math.min(6,queue.length)},async()=>{
+      while(cursor<queue.length){
+        if(state.tab!==e.lg.id || b4GolfTournamentTabs.get(beta4GolfEventKey(e))!=='tees')break;
+        const player=queue[cursor++];
+        try {
+          const status=await beta4GolfJSON(`${b4GolfCore}${e.lg.id}/events/${e.id}/competitions/${e.id}/competitors/${player.id}/status`);
+          if(status.period!=null && Number(status.period)!==Number(e.round))throw new Error('Round changed');
+          if(!status.teeTime)throw new Error('Tee time unavailable');
+          entry.statuses.set(String(player.id),status);
+        } catch {entry.errors.add(String(player.id));}
+        if(++completed%6===0)paint();
+      }
+    }));
+    entry.loading=false;
+    // Leaving the tab cancels the remaining queue; a later visit can resume it.
+    if(cursor>=queue.length)entry.loadedAt=Date.now();
+    paint();
+  }
+  let b4Golfer = null, b4GolfPollTimer = null;
+  const b4GolfBioCache = new Map(), b4GolfEventCache = new Map();
+  const b4GolfCore = 'https://sports.core.api.espn.com/v2/sports/golf/leagues/';
+  async function beta4GolfJSON(url) {
+    const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    if (!response.ok) { console.warn('Golf detail request failed', response.status, url); throw new Error('Golf data unavailable'); }
+    return response.json();
+  }
+  function beta4GolfStatMap(data) {
+    return Object.fromEntries((data?.splits?.categories || []).flatMap(c => c.stats || []).filter(s => s.name).map(s => [s.name, s]));
+  }
+  function beta4GolfHoles(player, round, course) {
+    const line = (player.rounds || []).find(r => Number(r.period) === Number(round));
+    return Array.from({length:18}, (_, i) => {
+      const hole = (line?.linescores || []).find(h => Number(h.period) === i + 1);
+      const value = hole?.value != null && Number.isFinite(Number(hole.value)) && Number(hole.value) > 0 ? Number(hole.value) : null;
+      const deltaText = hole?.scoreType?.displayValue;
+      const delta = deltaText === 'E' ? 0 : /^[+-]?\d+$/.test(deltaText || '') ? Number(deltaText) : null;
+      const courseHole = (course?.holes || []).find(h => Number(h.number) === i + 1);
+      const par = courseHole?.shotsToPar ?? (value != null && delta != null ? value - delta : null);
+      return { number:i+1, par, value, delta:value != null && par != null ? value - par : delta };
+    });
+  }
+  function beta4GolfScorecard(player, round, course) {
+    const holes = beta4GolfHoles(player, round, course);
+    const total = cells => cells.some(h => h.value != null) ? cells.reduce((n,h) => n + (h.value || 0),0) : '–';
+    const parTotal = cells => cells.every(h => h.par != null) ? cells.reduce((n,h) => n+h.par,0) : '–';
+    const side = start => {
+      const cells = holes.slice(start,start+9), label = start ? 'In' : 'Out';
+      return `<div class="b4-gp-score-scroll" tabindex="0" role="region" aria-label="${start ? 'Back' : 'Front'} nine scorecard"><table class="b4-gp-score"><thead><tr><th scope="col">Hole</th>${cells.map(h=>`<th scope="col">${h.number}</th>`).join('')}<th scope="col">${label}</th></tr></thead><tbody><tr><th scope="row">Par</th>${cells.map(h=>`<td>${h.par ?? '–'}</td>`).join('')}<td>${parTotal(cells)}</td></tr><tr><th scope="row">R${round}</th>${cells.map(h=>`<td><span class="b4-gp-stroke ${h.value == null || h.delta == null ? '' : h.delta <= -2 ? 'eagle' : h.delta === -1 ? 'birdie' : h.delta === 1 ? 'bogey' : h.delta >= 2 ? 'double' : ''}">${h.value ?? '–'}</span></td>`).join('')}<td>${total(cells)}</td></tr></tbody></table></div>`;
+    };
+    return side(0)+side(9)+`<div class="b4-gp-legend"><span><i class="eagle"></i> Eagle</span><span><i class="birdie"></i> Birdie</span><span><i class="bogey"></i> Bogey</span><span><i class="double"></i> Double bogey +</span></div>`;
+  }
+  function beta4GolfPlayerStats(v) {
+    const stats = beta4GolfStatMap(v.stats), missing = '–';
+    const definitions = [
+      ['SG: Off The Tee',['strokesGainedOffTee','strokesGainedOffTheTee']],
+      ['SG: Approach to Green',['strokesGainedApproach','strokesGainedApproachTheGreen']],
+      ['SG: Around The Green',['strokesGainedAroundGreen','strokesGainedAroundTheGreen']],
+      ['SG: Putting',['strokesGainedPutting']], ['SG: Total',['strokesGainedTotal']],
+      ['Driving Accuracy',['driveAccuracyPct'],'%'], ['Longest Drive',['longDrive','longestDrive'],' yds'],
+      ['Greens in Regulation',['gir'],'%'], ['Sand Saves',['sandSaves'],'%'],
+      ['Scrambling',['scrambling','scramblingPct'],'%'], ['Putts per GIR',['puttsGirAvg']],
+      ['Feet of Putts Made',['feetOfPuttsMade','puttDistanceTotal']]
+    ];
+    const rows = definitions.map(([label,keys,unit]) => {
+      const stat = keys.map(k=>stats[k]).find(Boolean);
+      let value = stat?.displayValue ?? missing;
+      if (unit && /^[-+]?\d+(\.\d+)?$/.test(value)) value += unit;
+      return `<tr><th scope="row">${esc(label)}</th><td>${esc(value)}</td><td>${esc(stat?.rankDisplayValue || stat?.rank || missing)}</td></tr>`;
+    }).join('');
+    const table = (title,body) => `<section class="b4-gp-panel"><h2>${title}</h2><table class="b4-gp-stats"><thead><tr><th scope="col">Stat</th><th scope="col">Total</th><th scope="col">Rank</th></tr></thead><tbody>${body}</tbody></table></section>`;
+    const holes = (v.scope === 'all' ? (v.player.rounds || []).flatMap(r=>beta4GolfHoles(v.player,r.period,v.course)) : beta4GolfHoles(v.player,v.round,v.course)).filter(h=>h.value != null && h.delta != null);
+    const scoring = [['Eagles', d=>d<=-2],['Birdies',d=>d===-1],['Pars',d=>d===0],['Bogeys',d=>d===1],['Double Bogeys',d=>d===2],['Other',d=>d>=3]].map(([label,match]) => `<tr><th scope="row">${label}</th><td>${holes.length ? holes.filter(h=>match(h.delta)).length : missing}</td><td>${missing}</td></tr>`).join('');
+    return `<p class="b4-gp-note">${v.scope === 'all' ? 'Tournament totals' : 'Round '+v.round}. Unavailable statistics and ranks appear as a dash.</p>`+table('Performance',rows)+table('Scoring',scoring);
+  }
+  function beta4GolfPlayerInfo(v) {
+    const bio = v.bio || {}, place = bio.birthPlace || {};
+    const birth = bio.dateOfBirth ? new Date(bio.dateOfBirth).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric',timeZone:'UTC'}) : '–';
+    const birthplace = [place.city,place.stateAbbreviation || place.state?.trim(),place.country].filter(Boolean).join(', ') || '–';
+    return `<section class="b4-gp-info"><h2>Player Information</h2><dl><div><dt>World Ranking</dt><dd>${esc(str(bio.worldRanking) || '–')}</dd></div><div><dt>Birth Date</dt><dd>${esc(birth)}${bio.age != null ? ` (${esc(bio.age)} years)` : ''}</dd></div><div><dt>Birthplace</dt><dd>${esc(birthplace)}</dd></div></dl></section>`;
+  }
+  function beta4GolfPlayerPaint() {
+    const v = b4Golfer; if (!v) return;
+    const el = document.getElementById('gsheet');
+    const y = el.scrollTop, p = v.player;
+    const favorite = store.get('golfPlayerFavorites',[]).includes(v.event.lg.id+':'+p.id);
+    const rounds = [...new Set([...(p.rounds || []).filter(r=>Number(r.period)<=v.event.round || r.linescores?.length).map(r=>Number(r.period)),v.event.round])].filter(n=>n>0).sort();
+    const line = (p.rounds || []).find(r=>Number(r.period)===v.event.round);
+    const strokes = (line?.linescores || []).reduce((n,h)=>n+(Number(h.value)||0),0);
+    const content = v.tab === 'stats' ? beta4GolfPlayerStats(v) : v.tab === 'group' ? beta4GolfPlayerGroup(v) : `<section class="b4-gp-panel"><h2>Scorecard</h2>${beta4GolfScorecard(p,v.round,v.course)}</section>${beta4GolfPlayerInfo(v)}`;
+    el.classList.add('b4-golf-player-page');
+    el.innerHTML = `<div class="b4-gp-wrap"><div class="b4-gp-toolbar"><button data-gclose aria-label="Back to leaderboard">‹</button><span>${esc(v.event.lg.name)}</span><button data-gclose aria-label="Close player page">×</button></div><header class="b4-gp-hero">${p.headshot ? `<img class="b4-gp-portrait" src="${esc(p.headshot)}" alt="${esc(p.name)}" onerror="this.style.visibility='hidden'">` : ''}<h1>${p.flag ? `<img src="${esc(p.flag)}" alt="${esc(p.country)}">` : ''}${esc(p.name)}</h1><p>Position ${esc(p.pos || '–')} · Total ${esc(p.total || '–')}</p><small>${esc(v.event.name)}</small><dl class="b4-gp-summary">${[['Today',p.today],['Thru',p.thru],['R'+v.event.round,strokes || '–'],['Strokes',(p.rounds || []).reduce((n,r)=>n+(r.linescores || []).reduce((sum,h)=>sum+(Number(h.value)||0),0),0) || '–']].map(([k,value])=>`<div><dt>${esc(k)}</dt><dd>${esc(value || '–')}</dd></div>`).join('')}</dl></header><div class="b4-gp-actions"><button data-b4-gp-favorite aria-pressed="${favorite}">${favorite ? '★ Favorited' : '☆ Favorite'}</button><button data-b4-gp-group aria-pressed="${v.tab==='group'}">Group</button></div><nav class="b4-gp-tabs" aria-label="Player sections">${['scorecard','stats'].map(tab=>`<button data-b4-gp-tab="${tab}" aria-pressed="${v.tab===tab}">${tab==='stats' ? 'Stats' : 'Scorecard'}</button>`).join('')}</nav><div class="b4-gp-rounds" aria-label="Round selection"${v.tab==='group' ? ' hidden' : ''}>${v.tab === 'stats' ? `<button data-b4-gp-round="all" aria-pressed="${v.scope==='all'}">All</button>` : ''}${rounds.map(round=>`<button data-b4-gp-round="${round}" aria-pressed="${v.round===round && (v.tab!=='stats' || v.scope!=='all')}">R${round}${round===v.event.round && v.event.state==='in' ? ' · Live' : ''}</button>`).join('')}</div>${v.loading ? '<p class="b4-gp-note" role="status">Loading player details…</p>' : ''}${v.error ? '<p class="b4-gp-note">Some player details could not load. <button data-b4-gp-retry>Retry</button></p>' : ''}${content}</div>`;
+    el.scrollTop = y;
+  }
+  function beta4GolfPlayerGroup(v) {
+    if (v.groupLoading) return '<section class="b4-gp-panel"><h2>Playing Group</h2><p role="status">Loading playing group…</p></section>';
+    if (!v.group?.length) return '<section class="b4-gp-panel"><h2>Playing Group</h2><p>Playing-group details are not available for this round.</p></section>';
+    return `<section class="b4-gp-panel"><h2>Playing Group</h2><p class="b4-gp-note">Round ${v.event.round}${v.status?.teeTime ? ' · '+new Date(v.status.teeTime).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}) : ''}</p>${v.group.map(p=>`<button class="b4-gp-group-member" data-b4-golf-player="${esc(v.event.lg.id+'|'+v.event.id+'|'+p.id)}">${p.headshot ? `<img src="${esc(p.headshot)}" alt="">` : ''}<span><b>${esc(p.name)}</b><small>Pos ${esc(p.pos || '–')} · Total ${esc(p.total || '–')} · Thru ${esc(p.thru || '–')}</small></span><span aria-hidden="true">›</span></button>`).join('')}${v.group.map(p=>`<details class="b4-gp-group-card"><summary>${esc(p.shortName || p.name)} · Scorecard</summary>${beta4GolfScorecard(p,v.event.round,v.course)}</details>`).join('')}</section>`;
+  }
+  async function beta4GolfLoadGroup() {
+    const v = b4Golfer; if (!v || v.groupLoading) return;
+    if (v.detailsLoading && !v.status) { v.groupLoading=true; beta4GolfPlayerPaint(); return; }
+    v.groupLoading=true; beta4GolfPlayerPaint();
+    try {
+      const candidates = v.player.teeGroup ? v.event.rows.filter(p=>p.teeGroup === v.player.teeGroup) : [];
+      const results = await Promise.allSettled(candidates.map(async p=>({p,status:p.id===v.player.id && v.status ? v.status : await beta4GolfJSON(`${b4GolfCore}${v.event.lg.id}/events/${v.event.id}/competitions/${v.event.id}/competitors/${p.id}/status`)})));
+      if (b4Golfer!==v) return;
+      if (!v.status?.teeTime) throw new Error('Group unavailable');
+      v.group=results.filter(r=>r.status==='fulfilled').map(r=>r.value).filter(({status})=>status.teeTime===v.status.teeTime && status.startHole===v.status.startHole).map(({p})=>p);
+      if (v.group.length<2) v.group=[];
+    } catch { v.group=[]; }
+    finally { if(b4Golfer===v) {v.groupLoading=false;beta4GolfPlayerPaint();} }
+  }
+  async function beta4GolfLoadDetails() {
+    const v=b4Golfer; if(!v) return;
+    v.loading=true;v.detailsLoading=true;v.error=false;beta4GolfPlayerPaint();
+    const base=`${b4GolfCore}${v.event.lg.id}`, eventBase=`${base}/events/${v.event.id}`;
+    const tasks = [
+      ['bio',b4GolfBioCache.get(v.player.id) || beta4GolfJSON(`${base}/athletes/${v.player.id}`)],
+      ['eventData',b4GolfEventCache.get(v.event.id) || beta4GolfJSON(eventBase)],
+      ['status',beta4GolfJSON(`${eventBase}/competitions/${v.event.id}/competitors/${v.player.id}/status`)]
+    ];
+    const results=await Promise.allSettled(tasks.map(([,task])=>task));
+    if(b4Golfer!==v) return;
+    results.forEach((result,i)=>{if(result.status==='fulfilled') v[tasks[i][0]]=result.value;else v.error=true;});
+    if(v.bio) b4GolfBioCache.set(v.player.id,v.bio);
+    if(v.eventData) {b4GolfEventCache.set(v.event.id,v.eventData);const courseId=(v.status?.course?.$ref || '').match(/courses\/([^?]+)/)?.[1];v.course=v.eventData.courses?.find(c=>c.id===courseId)||v.eventData.courses?.find(c=>c.host)||v.eventData.courses?.[0];}
+    v.loading=false;v.detailsLoading=false;beta4GolfPlayerPaint();
+    if(v.tab==='group') { v.groupLoading=false; beta4GolfLoadGroup(); }
+  }
+  async function beta4GolfLoadStats() {
+    const v=b4Golfer;if(!v) return;
+    const scope=v.scope==='all' ? 0 : v.round;
+    v.loading=true;beta4GolfPlayerPaint();
+    try {const stats=await beta4GolfJSON(`${b4GolfCore}${v.event.lg.id}/events/${v.event.id}/competitions/${v.event.id}/competitors/${v.player.id}/statistics/${scope}`);if(b4Golfer===v && (v.scope==='all'?0:v.round)===scope)v.stats=stats;}
+    catch {if(b4Golfer===v)v.error=true;}
+    finally {if(b4Golfer===v && (v.scope==='all'?0:v.round)===scope){v.loading=false;beta4GolfPlayerPaint();}}
+  }
+  function beta4GolfSchedulePlayerRefresh() {
+    clearTimeout(b4GolfPollTimer);
+    const v=b4Golfer;
+    if(!v || v.event.state!=='in')return;
+    b4GolfPollTimer=setTimeout(async()=>{
+      try {
+        if(b4Golfer!==v || document.hidden)return;
+        const data=await loadLeagueWithTimeout(v.event.lg);
+        if(b4Golfer!==v)return;
+        const event=data.special?.find(e=>String(e.id)===String(v.event.id));
+        const player=event?.rows.find(p=>String(p.id)===String(v.player.id));
+        if(event && player){
+          const oldRound=v.event.round;
+          v.event=event;v.player=player;
+          if(v.group) v.group=v.group.map(member=>event.rows.find(p=>String(p.id)===String(member.id)) || member);
+          if(v.round===oldRound && event.round!==oldRound)v.round=event.round;
+          beta4GolfPlayerPaint();
+          if(v.tab==='stats')beta4GolfLoadStats();
+        }
+      } catch { if(b4Golfer===v){v.error=true;beta4GolfPlayerPaint();} }
+      finally { if(b4Golfer===v)beta4GolfSchedulePlayerRefresh(); }
+    },30000);
+  }
+  function beta4OpenGolfPlayer(key) {
+    const [lg,eventId,playerId]=key.split('|');
+    const event=allSpecial().find(e=>e.lg.id===lg && String(e.id)===eventId),player=event?.rows.find(p=>String(p.id)===playerId);
+    if(!event || !player)return;
+    closeGame();b4Golfer={event,player,round:event.round,scope:'all',tab:'scorecard'};
+    const el=document.getElementById('gsheet');el.hidden=false;el.scrollTop=0;beta4GolfPlayerPaint();beta4GolfLoadDetails();beta4GolfSchedulePlayerRefresh();
+  }
+  document.addEventListener('click',e=>{
+    const player=e.target.closest('[data-b4-golf-player]');if(player){beta4OpenGolfPlayer(player.dataset.b4GolfPlayer);return;}
+    if(!b4Golfer)return;
+    const v=b4Golfer;
+    if(e.target.closest('[data-b4-gp-favorite]')){const key=v.event.lg.id+':'+v.player.id,saved=new Set(store.get('golfPlayerFavorites',[]));saved.has(key)?saved.delete(key):saved.add(key);store.set('golfPlayerFavorites',[...saved]);beta4GolfPlayerPaint();}
+    const tab=e.target.closest('[data-b4-gp-tab]');if(tab){v.tab=tab.dataset.b4GpTab;beta4GolfPlayerPaint();if(v.tab==='stats')beta4GolfLoadStats();}
+    if(e.target.closest('[data-b4-gp-group]')){v.tab='group';beta4GolfPlayerPaint();beta4GolfLoadGroup();}
+    const round=e.target.closest('[data-b4-gp-round]');if(round){v.scope=round.dataset.b4GpRound;if(v.scope!=='all')v.round=Number(v.scope);v.stats=null;beta4GolfPlayerPaint();if(v.tab==='stats')beta4GolfLoadStats();}
+    if(e.target.closest('[data-b4-gp-retry]')){beta4GolfLoadDetails();if(v.tab==='stats')beta4GolfLoadStats();}
+  });
+  document.addEventListener("click", e => {
+    const open=e.target.closest('[data-b4-golf-open]');
+    if(open){const [lg,id]=open.dataset.b4GolfOpen.split('|');if(!LG[lg])return;b4GolfTournamentTabs.set(lg+':'+id,'leaderboard');state.tab=lg;store.set('tab2',lg);render();window.scrollTo({top:0,behavior:'smooth'});return;}
+    const tab=e.target.closest('[data-b4-golf-tab]');
+    if(tab){const [lg,id,section]=tab.dataset.b4GolfTab.split('|');const event=allSpecial().find(e=>e.lg.id===lg && String(e.id)===id);if(!event)return;b4GolfTournamentTabs.set(lg+':'+id,section);render();document.querySelector(`[data-b4-golf-tab="${lg}|${id}|${section}"]`)?.focus({preventScroll:true});document.querySelector('.b4-golf-tabs')?.scrollIntoView({block:'start'});if(section==='tees')beta4GolfLoadTeeTimes(event);return;}
+    const retry=e.target.closest('[data-b4-tee-retry]');
+    if(retry){const event=allSpecial().find(e=>beta4GolfEventKey(e)===retry.dataset.b4TeeRetry);if(event)beta4GolfLoadTeeTimes(event,true);return;}
+    const teeFavorite=e.target.closest('[data-b4-tee-favorite]');
+    if(teeFavorite){const [lg,id,playerId]=teeFavorite.dataset.b4TeeFavorite.split('|'),key=lg+':'+playerId,saved=new Set(store.get('golfPlayerFavorites',[]));saved.has(key)?saved.delete(key):saved.add(key);store.set('golfPlayerFavorites',[...saved]);teeFavorite.setAttribute('aria-pressed',String(saved.has(key)));teeFavorite.setAttribute('aria-label',(saved.has(key)?'Unfavorite':'Favorite')+' '+(allSpecial().find(e=>String(e.id)===id && e.lg.id===lg)?.rows.find(p=>String(p.id)===playerId)?.name || 'player'));teeFavorite.textContent=saved.has(key)?'★':'☆';return;}
+    const follow = e.target.closest("[data-b4-golf-follow]");
+    if (follow) {
+      const key = follow.dataset.b4GolfFollow, saved = new Set(store.get("golfFollowed", []));
+      saved.has(key) ? saved.delete(key) : saved.add(key);
+      store.set("golfFollowed", [...saved]);
+      follow.setAttribute("aria-pressed", String(saved.has(key)));
+      follow.innerHTML = `<span aria-hidden="true">${saved.has(key) ? "✓" : "+"}</span> ${saved.has(key) ? "Following" : "Follow"}`;
+    }
+    const share = e.target.closest("[data-b4-golf-share]");
+    if (share) shareLink(LG[share.dataset.b4GolfShare].name, "PGA Tour leaderboard on The Lineup", "league=" + share.dataset.b4GolfShare);
+  });
   // Tennis: the day's singles matches, live first, then results, then what's next
   const CARET = '<svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>';
   const CHECK = '<svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
@@ -3781,7 +4052,7 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function specialsFor(tab) {
     const all = allSpecial();
-    if (tab === "all" || tab === "live") return all.filter(e => e.state === "in" && (pickedNothing() || state.favLeagues.includes(e.lg.id)));
+    if (tab === "all" || tab === "live") return all.filter(e => e.state === "in" && (pickedNothing() || state.favLeagues.includes(e.lg.id) || store.get("golfFollowed", []).includes(e.lg.id + ":" + e.id)));
     if (LG[tab]?.kind) { const pick = LG[tab].kind === "tennis" && state.conf?.[tab]; return all.filter(e => e.lg.id === tab && (!pick || String(e.id) === pick)); }
     return [];
   }
@@ -4184,7 +4455,7 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function bbHideAll() {
     fromSettings = false;
-    ["sheet", "ssheet", "pksheet", "lsheet", "b4saved"].forEach(id => { const el = document.getElementById(id); el.hidden = true; el.classList.remove("as-tab"); delete el.dataset.b4Area; });
+    ["sheet", "ssheet", "pksheet", "lsheet", "b4saved"].forEach(id => { const el = document.getElementById(id); el.hidden = true; el.classList.remove("as-tab", "sub"); delete el.dataset.b4Area; });
     if (!document.getElementById("gsheet").hidden) { navStack = []; closeGame(); }
   }
   // Teams and Search share a sheet, but keep separate navigation state.
@@ -4251,6 +4522,7 @@ button.brand, button.brand span { color: var(--accent); }
   todayBtn.onclick = () => { setDate(new Date()); window.scrollTo({ top: 0, behavior: "smooth" }); };
   document.body.appendChild(todayBtn);
   function render() {
+    document.documentElement.classList.toggle("b4-golf-page", LG[state.tab]?.kind === "golf" && !!state.data[state.tab]?.special?.length);
     todayBtn.hidden = isToday() || state.tab === "upcoming";
     applySecOrder();
     mvShownR = false; if (mvOpen) setTimeout(paintMv, 0);
@@ -5112,8 +5384,10 @@ button.brand, button.brand span { color: var(--accent); }
     if (tile) { e.stopPropagation(); const k = tile.dataset.mvTile; mvOpen = false; navStack = [() => openMultiview()]; openGame(k); }
   }, true);
   function closeGame() {
-    document.getElementById("gsheet").hidden = true; mvOpen = false;
+    const wasGolfPlayer = !!b4Golfer;
+    document.getElementById("gsheet").hidden = true; document.getElementById("gsheet").classList.remove("b4-golf-player-page"); b4Golfer = null; clearTimeout(b4GolfPollTimer); mvOpen = false;
     clearTimeout(gameTimer); openGameKey = null; lastSummary = null; tennisKey = null; teamView = null; leagueView = null;
+    if (wasGolfPlayer) render();
   }
   function repaintGame() {
     if (!openGameKey) return;
@@ -6211,15 +6485,19 @@ button.brand, button.brand span { color: var(--accent); }
   function beta4TeamUpcomingPaint() {
     const el = document.getElementById("b4-team-upcoming");
     if (!el || el.hidden) return;
-    const rows = [...state.favs].map(k => {
+    const games = new Map(), waiting = [];
+    for (const k of state.favs) {
       const m = state.favMeta[k] || { name: k.split(":")[1] }, n = state.next[k];
       const ready = n?.date && new Date(n.date).getTime() > Date.now();
-      const playable = ready && n.id && LG[m.lg];
-      const tag = playable ? "button" : "div";
-      const subtitle = ready ? `${n.at === "@" ? "at" : "vs"} ${n.oppName || n.opp || "TBD"}` : n?.error ? "Schedule unavailable" : n?.none ? "No upcoming game scheduled" : "Checking schedule…";
-      return `<${tag} class="b4-team-next" ${playable ? `data-game="${esc(m.lg)}:${esc(n.id)}"` : ""}>${m.logo ? `<img src="${esc(m.logo)}" alt="">` : "<span></span>"}<span><b>${esc(m.name)}</b><small>${esc(subtitle)}</small>${ready ? `<small>${esc(nextWhen(n.date))}</small>` : ""}</span>${playable ? "<i>›</i>" : ""}</${tag}>`;
-    }).join("");
-    el.innerHTML = `<div class="b4-section-head"><h2>Upcoming Games</h2><small>${state.favs.size} teams</small></div>` + (rows ? `<div class="b4-team-schedule">${rows}</div>` : `<p class="hint">Follow a team to see its next game here.</p>`) + `<button class="b4-settings-secondary b4-find-more" data-b4-add-team>Find More Teams</button>` + ([...state.favs].some(k => state.next[k]?.error) ? `<button class="b4-link" data-b4-retry-teams>Retry Schedules</button>` : "");
+      const game = ready ? beta4NextGame({ m, n }) : null;
+      if (game) { games.set(gameKey(game), game); continue; }
+      const subtitle = n?.error ? "Schedule unavailable" : n?.none ? "No upcoming game scheduled" : "Checking schedule…";
+      waiting.push(`<div class="b4-team-next">${m.logo ? `<img src="${esc(m.logo)}" alt="">` : "<span></span>"}<span><b>${esc(m.name)}</b><small>${esc(subtitle)}</small></span></div>`);
+    }
+    const list = [...games.values()];
+    const scheduled = list.length ? beta4Section("Next For Your Teams", `${list.length} ${list.length === 1 ? "Game" : "Games"}`, list) : "";
+    const pending = waiting.length ? `<section class="b4-section"><div class="b4-section-head"><h2>Team Schedules</h2><small>${waiting.length} ${waiting.length === 1 ? "Team" : "Teams"}</small></div><div class="b4-team-schedule">${waiting.join("")}</div></section>` : "";
+    el.innerHTML = `<p class="b4-teams-intro">The next matchup for each team you follow.</p>` + scheduled + pending + (!state.favs.size ? `<div class="b4-empty"><p>Follow a team to see its next game here.</p></div>` : "") + `<button class="b4-settings-secondary b4-find-more" data-b4-add-team>Find More Teams</button>` + ([...state.favs].some(k => state.next[k]?.error) ? `<button class="b4-link" data-b4-retry-teams>Retry Schedules</button>` : "");
   }
   async function beta4LoadTeamUpcoming() {
     if (b4TeamsLoading) return;
@@ -6541,7 +6819,7 @@ button.brand, button.brand span { color: var(--accent); }
   if (deepLink) setTimeout(() => {
     if (deepLink.game && LG[deepLink.game.split(":")[0]]) openGame(deepLink.game);
     else if (deepLink.team) { const [l, i] = deepLink.team.split(":"); if (LG[l] && i) openTeam({ lg: l, id: i, name: "", abbr: "", logo: "", color: "" }); }
-    else if (deepLink.league && LG[deepLink.league]) openLeaguePage(deepLink.league);
+    else if (deepLink.league && LG[deepLink.league]) { if (LG[deepLink.league].kind) openLeague(deepLink.league); else openLeaguePage(deepLink.league); }
   }, 400);
   // First visit for someone new: no saved teams yet, so open Pick Your Teams
   if (window.__setupLoaded) toast("Setup Loaded", "Your teams and leagues are on this device", "", "", false);

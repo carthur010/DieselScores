@@ -2,6 +2,31 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 22, 2026: Beta 4.0 — Tournament Tee Times
+- Removed Hot badges from golf previews. Full Leaderboard explicitly opens the in-app tournament leaderboard.
+- Added Leaderboard / Tee Times navigation. Tee Times groups all players by confirmed starting tee and tee time, sorted chronologically in the device timezone. Player names open profiles; stars toggle existing player favorites.
+- Loads player statuses on demand with six requests at most, progressive display, short-lived caching and retry for failed players. Does not infer fairway/green locations when the feed only provides completed-hole counts.
+- Validation: 61 automated checks pass; browser verified in-app leaderboard navigation and the real 120-player, 40-group field.
+
+## Oct 22, 2026: Beta 4.0 — Golf Player Pages
+- Leaderboard player names open a navy profile based on the supplied reference, with portrait, flag, position, total, round summary and biography.
+- Added the highlighted Favorite, Group, Scorecard and Stats controls. Favorites persist and show a star on the leaderboard. Group resolves matching tee times and starting holes, with member navigation and expandable scorecards.
+- Front/back nine scorecards show course pars, recorded strokes, partial totals and birdie/eagle/bogey markings. Round selectors retain missing or unplayed holes as dashes.
+- Stats includes Performance and Scoring with tournament/round scopes; unavailable metrics and ranks stay blank. Player scores refresh every 30 seconds while live; closing cancels refresh and stale requests cannot reopen the page.
+- Validation: 57 automated checks pass; player opening, Favorites, group membership/navigation, biography, Stats, round selection and 320px overflow verified.
+
+## Oct 22, 2026: Beta 4.0 — PGA Tour Tournament View
+- Added a green tournament view based on the supplied reference, with textured turf, tournament status, broadcast, persistent Follow and Share controls, and a full-field leaderboard.
+- Player portraits and flags accompany short names. Columns show total to par, the current round score and holes completed; ranks include ties and finished rounds show F.
+- Corrected golf parsing to use the active round, derive missing positions and holes completed, and exclude unstarted players from inferred ranks. Full Leaderboard opens in-app; golf league share links now open correctly.
+- Validation: 53 automated checks pass; real 120-player PGA feed, portraits, Follow persistence, deep links and 320px overflow checked in the browser. Uses a PGA badge when the event feed has no tournament logo.
+
+## Oct 22, 2026: Beta 4.0 — Consistent My Teams
+- My Teams uses the shared Simple, Compact and Expanded matchup tiles, with both opponents, dates, channels and existing game actions. Following both opponents shows one matchup.
+- Matched header typography, spacing and borders to the rest of Beta 4. Teams with unavailable, pending or empty schedules appear beneath matchups, with Retry retained for failed requests.
+- Cleared editor subpage styling when returning to a main tab, preventing stray Close and Done controls.
+- Validation: 49 automated checks; phone preview, matchup detail opening, team management and return navigation.
+
 ## Oct 22, 2026: Live and Beta 3.0 (10:28 AM)
 - Golf tournament page: Tee Times tab next to Leaderboard. Every group for the current round in tee order (hole 1 and hole 10 starts listed separately), times in your time zone, a star to favorite each player, position and score once they start, and where the group is now (On 12, Finished). Tap a name for the player page.
 
