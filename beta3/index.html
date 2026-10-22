@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 3.0</title>
-<meta name="build" content="20261022102101">
+<meta name="build" content="20261022102545">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 3.0">
@@ -1428,6 +1428,18 @@ button.brand, button.brand span { color: var(--accent); }
 .gf-row .gf-fav { color: var(--star); width: 12px; height: 12px; margin-left: 4px; flex: 0 0 auto; }
 @media (max-width: 380px) { .gs-r { grid-template-columns: 28px repeat(9, 1fr) 30px; } .gs-h { width: 24px; height: 24px; } .gp-stats { gap: 18px; } }
 /* ---------- Golf tournament page ---------- */
+.gf-tabs { border-color: rgba(255,255,255,.18); margin-top: 0; }
+.gt-tz { display: block; font-size: 12px; font-weight: 600; color: rgba(255,255,255,.6); margin-top: 2px; }
+.gt-g { display: grid; grid-template-columns: 76px 1fr auto; gap: 8px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,.1); align-items: start; }
+.gt-t b { display: block; font-size: 15px; font-variant-numeric: tabular-nums; } .gt-t small { font-size: 12px; color: rgba(255,255,255,.6); }
+.gt-ps { display: grid; gap: 6px; min-width: 0; }
+.gt-p { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.gt-star { flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.1); color: rgba(255,255,255,.55); }
+.gt-star svg { width: 15px; height: 15px; } .gt-star.on { color: var(--star); background: rgba(255,255,255,.18); }
+.gt-nm { color: #fff; font-size: 15px; font-weight: 600; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.gt-nm small { font-weight: 500; color: rgba(255,255,255,.6); font-size: 13px; }
+.gt-st { font-size: 13px; font-weight: 700; color: rgba(255,255,255,.6); text-align: right; white-space: nowrap; padding-top: 2px; } .gt-st.on { color: #fff; }
+
 .gf { min-height: 100vh; padding-bottom: 90px; color: #fff; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.10 0 0 0 0 0.30 0 0 0 0 0.06 0 0 0 1.9 -0.55'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E"), repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 60px, rgba(0,0,0,.04) 60px 120px), radial-gradient(120% 55% at 50% 0%, #4d8a33 0%, #33661f 40%, #1d3b14 100%); background-color: #23461a; background-size: 240px 240px, auto, auto; }
 .gf .gc-wrap { padding-top: calc(env(safe-area-inset-top) + 10px); }
 .gf .circ { background: rgba(0,0,0,.28); color: #fff; border-color: rgba(255,255,255,.15); }
@@ -3195,7 +3207,7 @@ button.brand, button.brand span { color: var(--accent); }
   async function openGolfPage(id) {
     const lg = LG[id]; if (!lg || lg.kind !== "golf") return;
     fromSettings = false; closeSheet(); closeGame();
-    const gv = { id, data: null, all: false }; golfView = gv;
+    const gv = { id, data: null, all: false, tab: "lb" }; golfView = gv;
     const el = document.getElementById("gsheet"); el.hidden = false; el.scrollTop = 0;
     paintGolf(gv); loadGolf(gv);
   }
@@ -3217,7 +3229,7 @@ button.brand, button.brand span { color: var(--accent); }
       const pos = out || (s.position?.displayName && s.position.displayName !== "-" ? s.position.displayName : "");
       return { id: a.id || p.id || "", name: a.shortName || a.displayName || "", full: a.displayName || "",
         head: a.headshot?.href || (a.id ? `https://a.espncdn.com/i/headshots/golf/players/full/${a.id}.png` : ""),
-        flag: a.flag?.href || "", country: a.flag?.alt || "", pos, out: !!out, order: p.sortOrder ?? i + 1, tee: s.teeTime || "", startHole: s.startHole || 1,
+        flag: a.flag?.href || "", country: a.flag?.alt || "", pos, out: !!out, order: p.sortOrder ?? i + 1, tee: s.teeTime || "", startHole: s.startHole || 1, hole: s.hole || 0, done: !!(t.completed || s.thru >= 18 || t.state === "post"), started: t.state === "in" || !!s.thru,
         tot: golfToPar((p.statistics || []).find(x => x.name === "scoreToPar")?.displayValue ?? str(p.score)), rd: golfToPar(rd?.displayValue), thru, movement: p.movement || 0 };
     }).filter(p => p.name).sort((x, y) => (x.out - y.out) || x.order - y.order);
     const bc = (c.broadcasts || []).map(b => b.media?.name || b.media?.shortName || (b.names || [])[0]).filter(Boolean);
@@ -3243,6 +3255,27 @@ button.brand, button.brand span { color: var(--accent); }
     if (d.state === "in") return d.detail || `Round ${d.round} · In Progress`;
     if (d.state === "pre") return "Starts " + whenLabel(d.date);
     return d.detail || "Final";
+  }
+
+  // Tee Times: this round's groups in tee order, both tees, with where each group is now
+  function golfTeeHTML(d) {
+    const groups = new Map();
+    d.players.filter(p => p.tee && !p.out).forEach(p => { const k = p.tee + "|" + p.startHole; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(p); });
+    const list = [...groups.entries()].map(([k, ps]) => ({ tee: ps[0].tee, start: ps[0].startHole, ps })).sort((a, b) => new Date(a.tee) - new Date(b.tee) || a.start - b.start);
+    if (!list.length) return `<div class="gf-card"><h3>Tee Times</h3><p class="gf-empty">Tee times aren't posted yet.</p></div>`;
+    const favs = golfFavs(), tz = new Intl.DateTimeFormat(undefined, { timeZoneName: "short" }).formatToParts(new Date()).find(x => x.type === "timeZoneName")?.value || "";
+    const status = ps => {
+      if (ps.every(p => p.done)) return "Finished";
+      const p = ps.find(x => x.started && !x.done) || ps[0];
+      if (!p.started) return "";
+      const thru = parseInt(p.thru) || 0;
+      return p.hole ? `On ${p.hole}` : thru ? `Thru ${thru}` : "Started";
+    };
+    const rows = list.map(g => { const st = status(g.ps);
+      return `<div class="gt-g"><div class="gt-t"><b>${esc(timeLabel(g.tee))}</b><small>Hole ${g.start}</small></div>
+        <div class="gt-ps">${g.ps.map(p => { const f = favs.includes(String(p.id)); return `<div class="gt-p"><button class="gt-star ${f ? "on" : ""}" data-gt-fav="${esc(p.id)}" aria-pressed="${f}" aria-label="${f ? "Unfavorite" : "Favorite"} ${esc(p.full || p.name)}">${f ? STAR : STAR_O}</button><button class="gt-nm" data-gp-open="${esc(p.id)}">${esc(p.full || p.name)}${p.pos && p.started ? ` <small>${esc(p.pos)} · ${esc(p.tot)}</small>` : ""}</button></div>`; }).join("")}</div>
+        <div class="gt-st ${st && st !== "Finished" ? "on" : ""}">${esc(st)}</div></div>`; }).join("");
+    return `<div class="gf-card"><h3>Round ${d.round} Tee Times${tz ? ` <small class="gt-tz">Times in ${esc(tz)}</small>` : ""}</h3>${rows}</div>`;
   }
   function paintGolf(gv) {
     if (golfView !== gv) return;
@@ -3270,11 +3303,12 @@ button.brand, button.brand span { color: var(--accent); }
       const rows = list.map(row).join("");
       const favCard = mine.length ? `<div class="gf-card"><h3>Your Players</h3>${mine.map(row).join("")}</div>` : "";
       const more = d.players.length > 50 ? `<button class="gf-more" data-gf-all>${gv.all ? "Show Top 50" : `Show All ${d.players.length}`}</button>` : "";
-      card = favCard + `<div class="gf-card"><h3>Leaderboard</h3><div class="gf-row gf-head"><span class="gf-pos"></span><span class="gf-pl">Player</span><span class="gf-n">TOT</span><span class="gf-n">R${d.round}</span><span class="gf-n thru">THRU</span></div>${rows}${more}</div>`;
+      card = gv.tab === "tee" ? golfTeeHTML(d) : favCard + `<div class="gf-card"><h3>Leaderboard</h3><div class="gf-row gf-head"><span class="gf-pos"></span><span class="gf-pl">Player</span><span class="gf-n">TOT</span><span class="gf-n">R${d.round}</span><span class="gf-n thru">THRU</span></div>${rows}${more}</div>`;
       const info = [["Course", d.course], ["Purse", d.purse], ["Defending Champion", d.champ]].filter(x => x[1]);
       if (info.length) card += `<div class="gf-card gf-info">${info.map(([k, v]) => `<div><small>${esc(k)}</small><b>${esc(v)}</b></div>`).join("")}${d.link ? `<a href="${esc(d.link)}" target="_blank" rel="noopener">Full Leaderboard On ESPN</a>` : ""}</div>`;
     }
-    el.innerHTML = `<div class="gf"><div class="gc-wrap">${hero}${card}</div></div>`;
+    const tabs = d && !d.none && d.players?.length ? `<div class="gp-tabs gf-tabs" role="tablist">${[["lb", "Leaderboard"], ["tee", "Tee Times"]].map(([k, l]) => `<button class="${gv.tab === k ? "on" : ""}" data-gf-tab="${k}" role="tab" aria-selected="${gv.tab === k}">${l}</button>`).join("")}</div>` : "";
+    el.innerHTML = `<div class="gf"><div class="gc-wrap">${hero}${tabs}${card}</div></div>`;
     el.scrollTop = y;
   }
 
@@ -5995,6 +6029,8 @@ button.brand, button.brand span { color: var(--accent); }
       const gv = golfView;
       if (e.target.closest("[data-gf-follow]")) { state.favLeagues = toggleLeague(gv.id); store.set("favLeagues", state.favLeagues); render(); paintGolf(gv); return; }
       if (e.target.closest("[data-gf-all]")) { gv.all = !gv.all; paintGolf(gv); return; }
+      const gft = e.target.closest("[data-gf-tab]"); if (gft) { gv.tab = gft.dataset.gfTab; paintGolf(gv); return; }
+      const gtf = e.target.closest("[data-gt-fav]"); if (gtf) { const id = gtf.dataset.gtFav, fv = golfFavs(), i = fv.indexOf(id); if (i >= 0) fv.splice(i, 1); else fv.push(id); store.set("golfFavs", fv); paintGolf(gv); return; }
       const gpo = e.target.closest("[data-gp-open]"); if (gpo) { openGolfPlayer(gv, gpo.dataset.gpOpen); return; }
       if (gv.player) {
         const pv = gv.player;
