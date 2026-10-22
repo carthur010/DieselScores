@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 22, 2026: Live and Beta 3.0 (10:28 AM)
+- Golf tournament page: Tee Times tab next to Leaderboard. Every group for the current round in tee order (hole 1 and hole 10 starts listed separately), times in your time zone, a star to favorite each player, position and score once they start, and where the group is now (On 12, Finished). Tap a name for the player page.
+
 ## Oct 22, 2026: Live and Beta 3.0 (10:25 AM)
 - PGA Tour and LPGA tournament page: grass hero with the tournament name, round and status, Follow, and "Live on Golf Channel". Leaderboard with position, headshot and flag, TOT, current round and THRU (* for back-nine starts, tee times before they go). Top 50 with Show All, refreshes every minute while live. Course, purse and defending champion below.
 - Player page: tap any golfer for their headshot, Position and Total, Today, Thru, Round and Strokes. Favorite stars them (they also show in Your Players atop the leaderboard), Group shows their playing partners. Scorecard tab with Out and In, par, birdie circles, eagle double circles, bogey squares, a running to-par line and a round switcher; Stats tab with driving, greens, putting, sand saves and scoring; Player Information with FedExCup rank, earnings, birth date, birthplace, college and turned pro.
