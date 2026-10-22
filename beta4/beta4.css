@@ -437,7 +437,7 @@ body:has(#sheet:not([hidden]).b4-team-editor) #botbar, body:has(#sheet:not([hidd
 .b4-golf-player-link { width:100%; text-align:left; min-height:44px; }
 #gsheet.b4-golf-player-page { --gp-text:var(--fg); --gp-muted:var(--muted); background:var(--bg); color:var(--gp-text); padding-top:env(safe-area-inset-top,0px); }
 .b4-gp-wrap { max-width:720px; margin:auto; padding:0 14px 40px; }
-.b4-gp-header { margin:0 -14px; padding:12px 14px 0; background:linear-gradient(120deg,var(--accent-soft),var(--surface)); border-bottom:1px solid var(--line); border-radius:0 0 24px 24px; }
+.b4-gp-header { margin:0 -14px; padding:calc(env(safe-area-inset-top, 0px) + 12px) 14px 0; background:linear-gradient(120deg,var(--accent-soft),var(--surface)); border-bottom:1px solid var(--line); border-radius:0 0 24px 24px; }
 .b4-gp-toolbar { display:flex; align-items:center; justify-content:space-between; color:var(--gp-muted); font-size:13px; }
 .b4-gp-toolbar button { display:grid; place-items:center; width:44px; height:44px; font-size:28px; border-radius:50%; background:var(--surface); border:1px solid var(--line); color:var(--gp-text); }
 .b4-gp-hero { padding:14px 10px 0; text-align:center; }

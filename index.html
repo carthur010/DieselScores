@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup</title>
-<meta name="build" content="20261022160542">
+<meta name="build" content="20261022123613">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="The Lineup">
@@ -1478,7 +1478,7 @@ button.brand, button.brand span { color: var(--accent); }
 @media (max-width: 380px) { .gf-row { grid-template-columns: 26px 1fr 38px 38px 52px; } .gf-nm, .gf-n { font-size: 15px; } }
 /* Golf uses the same header, actions and cards as matchup pages. */
 .gf .gc-wrap, .gp .gc-wrap { padding-top:0; }
-.gf-hero, .gp-header { margin:0 -16px; padding:12px 16px 20px; background:linear-gradient(120deg,var(--accent-soft),var(--surface)); border-bottom:1px solid var(--line); border-radius:0 0 24px 24px; }
+.gf-hero, .gp-header { margin:0 -16px; padding:calc(env(safe-area-inset-top, 0px) + 12px) 16px 20px; background:linear-gradient(120deg,var(--accent-soft),var(--surface)); border-bottom:1px solid var(--line); border-radius:0 0 24px 24px; }
 .gf-st { color:var(--live); font-weight:700; margin-top:8px; }
 .gf-actions, .gp-btns { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:10px; margin:18px 0; }
 .gf-follow { margin:0; box-shadow:none; min-height:44px; font-size:14px; padding:10px 18px; }
