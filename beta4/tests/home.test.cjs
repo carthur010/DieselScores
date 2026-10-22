@@ -638,6 +638,7 @@ function golfFixture() {
   ctx.str = v => v == null ? '' : typeof v === 'object' ? (v.displayValue ?? v.value ?? '') : String(v);
   ctx.evState = ev => ev.status?.type || {};
   ctx.SHAREIC = '<svg></svg>';
+  ctx.watchOptions = () => [];
   vm.runInContext(html.slice(html.indexOf('  function parseGolf(ev, lg) {'), html.indexOf('  function parseRace')),ctx);
   vm.runInContext(html.slice(html.indexOf('  function beta4GolfView(e) {'), html.indexOf('  document.addEventListener("click", e => {',html.indexOf('  function beta4GolfView(e) {'))),ctx);
   return ctx;
@@ -771,4 +772,27 @@ test('Tee-time requests use six workers at most, reuse fresh data and retry fail
   await ctx.beta4GolfLoadTeeTimes(event);assert.equal(calls,14);
   fail=false;await ctx.beta4GolfLoadTeeTimes(event,true);
   assert.equal(calls,15);assert.equal(entry.statuses.size,14);assert.equal(entry.errors.size,0);
+});
+
+test('Player sections place Group after Stats and keep Favorite in the action row', () => {
+  const ctx=golfFixture();
+  const node={innerHTML:'',scrollTop:0,classList:{add(){}}};ctx.document.getElementById=()=>node;
+  ctx.testView={event:{lg:{id:'pga',name:'PGA Tour'},name:'Cup',round:1,state:'in'},player:{id:'1',name:'Player',rounds:[]},round:1,tab:'scorecard'};
+  vm.runInContext('b4Golfer=testView',ctx);ctx.beta4GolfPlayerPaint();
+  const nav=node.innerHTML.match(/<nav class="b4-gp-tabs"[\s\S]*?<\/nav>/)[0];
+  assert.ok(nav.indexOf('Scorecard')<nav.indexOf('Stats'));
+  assert.ok(nav.indexOf('Stats')<nav.indexOf('Group'));
+  assert.doesNotMatch(node.innerHTML,/data-b4-gp-group/);
+  assert.match(node.innerHTML,/<div class="b4-gp-actions"><button data-b4-gp-favorite/);
+});
+
+test('Tournament action row uses configured streaming destinations and escapes their labels', () => {
+  const ctx=golfFixture();
+  let networks;ctx.watchOptions=nets=>{networks=nets;return [{url:'https://tv.example.test/',app:'YouTube <TV>',scheme:'youtubetv://'}];};
+  const result=ctx.beta4GolfView({id:'event',lg:{id:'pga',name:'PGA Tour',short:'PGA'},name:'Cup',round:1,state:'in',rows:[],broadcast:'Golf Channel'});
+  assert.equal(networks[0].name,'Golf Channel');
+  assert.match(result,/Watch On YouTube &lt;TV&gt;/);
+  assert.match(result,/data-app="youtubetv:\/\/"/);
+  assert.ok(result.indexOf('b4-golf-actions')>result.indexOf('</header>'));
+  assert.ok(result.indexOf('b4-golf-actions')<result.indexOf('<nav'));
 });

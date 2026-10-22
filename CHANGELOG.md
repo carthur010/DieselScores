@@ -2,6 +2,13 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 22, 2026: Live, Beta 3.0 and Beta 4.0 — PGA Tour Layout
+- Moved Group into the player section navigation after Scorecard and Stats; Favorite remains an action above the tabs.
+- Tournament pages now use the matchup palette, soft header gradient, red status and active tabs, white bordered cards, and a separate Watch / Follow action row. Watch resolves through the existing TV-service preferences.
+- Player pages use the same app palette, soft header gradient, red controls and white Scorecard, Stats, Group and Player Information cards.
+- Promoted only the golf layout changes to Live and Beta 3.0, preserving their existing navigation and data flows.
+- Validation: 67 automated checks pass; all inline scripts parse. Mobile tournament, scorecard, Group and Tee Times flows checked in the browser.
+
 ## Oct 22, 2026: Beta 4.0 — Tournament Tee Times
 - Removed Hot badges from golf previews. Full Leaderboard explicitly opens the in-app tournament leaderboard.
 - Added Leaderboard / Tee Times navigation. Tee Times groups all players by confirmed starting tee and tee time, sorted chronologically in the device timezone. Player names open profiles; stars toggle existing player favorites.

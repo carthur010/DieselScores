@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261022143505">
+<meta name="build" content="20261022151938">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=24">
+<link rel="stylesheet" href="beta4.css?v=26">
 </head>
 <body>
 <header class="top">
@@ -3021,6 +3021,9 @@ button.brand, button.brand span { color: var(--accent); }
     return block("ev-" + e.lg.id + e.id, `${e.lg.short || e.lg.name} · ${e.name}`, eventMeta(e), body + more);
   }
   function beta4GolfView(e) {
+    const destinations=watchOptions(e.broadcast ? e.broadcast.split(',').map(name=>({name:name.trim()})) : [],e.lg);
+    const watch=destinations.find(option=>option.url);
+    const watchAction=watch && e.state!=='post' ? `<a class="b4-golf-watch" href="${esc(watch.url)}"${watch.scheme ? ` data-app="${esc(watch.scheme)}"` : ''} target="_blank" rel="noopener"><span aria-hidden="true">▶</span> Watch On ${esc(watch.app)}</a>` : '';
     const following = store.get("golfFollowed", []).includes(e.lg.id + ":" + e.id);
     const status = e.detail || (e.state === "in" ? "In Progress" : e.state === "post" ? "Final" : "Upcoming");
     const detail = /round/i.test(status) ? status.replace(/\s-\s/g, " · ") : `Round ${e.round} · ${status}`;
@@ -3030,7 +3033,7 @@ button.brand, button.brand span { color: var(--accent); }
     if(selected==='tees') setTimeout(()=>beta4GolfLoadTeeTimes(e),0);
     const tabs=`<nav class="b4-golf-tabs" aria-label="Tournament sections"><button data-b4-golf-tab="${esc(e.lg.id+'|'+e.id+'|leaderboard')}" aria-pressed="${selected==='leaderboard'}">Leaderboard</button><button data-b4-golf-tab="${esc(e.lg.id+'|'+e.id+'|tees')}" aria-pressed="${selected==='tees'}">Tee Times</button></nav>`;
     const leaderboard=`<div class="b4-golf-board"><h2>Leaderboard</h2>${rows ? `<table><caption class="sr-only">${esc(e.name)} leaderboard, round ${e.round}</caption><thead><tr><th scope="col"><span class="sr-only">Position</span></th><th scope="col">Player</th><th scope="col" title="Total to par">TOT</th><th scope="col" title="Round ${e.round} to par">R${e.round}</th><th scope="col" title="Holes completed">THRU</th></tr></thead><tbody>${rows}</tbody></table>` : `<p class="b4-golf-empty">Tee times aren’t posted yet. Check back closer to the first round.</p>`}${e.link ? `<a class="b4-golf-source" href="${esc(e.link)}" target="_blank" rel="noopener">Tournament details on ESPN ↗</a>` : ""}</div>`;
-    return `<section class="b4-golf" aria-label="${esc(e.name)}"><header class="b4-golf-hero"><div class="b4-golf-toolbar"><button data-h3="home" aria-label="Back to Scores">‹</button><span>${esc(e.lg.name)}</span><button data-b4-golf-share="${esc(e.lg.id)}" aria-label="Share tournament">${SHAREIC}</button></div><div class="b4-golf-badge">${e.logo ? `<img src="${esc(e.logo)}" alt="">` : `<span>${esc(e.lg.short || e.lg.name)}<small>TOUR</small></span>`}</div><h1>${esc(e.name)}</h1><p class="b4-golf-status">${esc(detail)}</p><button class="b4-golf-follow" data-b4-golf-follow="${esc(e.lg.id + ":" + e.id)}" aria-pressed="${following}"><span aria-hidden="true">${following ? "✓" : "+"}</span> ${following ? "Following" : "Follow"}</button>${e.broadcast ? `<p class="b4-golf-broadcast">${e.state === "in" ? "Live on " : "TV · "}${esc(e.broadcast)}</p>` : ""}</header>${tabs}${selected==='tees' ? `<div class="b4-golf-board b4-golf-tee-board" id="b4-tees-${esc(beta4GolfTeeKey(e))}">${beta4GolfTeeTimes(e)}</div>` : leaderboard}</section>`;
+    return `<section class="b4-golf" aria-label="${esc(e.name)}"><header class="b4-golf-hero"><div class="b4-golf-toolbar"><button data-h3="home" aria-label="Back to Scores">‹</button><span>${esc(e.lg.name)}</span><button data-b4-golf-share="${esc(e.lg.id)}" aria-label="Share tournament">${SHAREIC}</button></div><div class="b4-golf-badge">${e.logo ? `<img src="${esc(e.logo)}" alt="">` : `<span>${esc(e.lg.short || e.lg.name)}<small>TOUR</small></span>`}</div><h1>${esc(e.name)}</h1><p class="b4-golf-status">${esc(detail)}</p>${e.broadcast ? `<p class="b4-golf-broadcast">${e.state === "in" ? "Live on " : "TV · "}${esc(e.broadcast)}</p>` : ""}</header><div class="b4-golf-actions">${watchAction}<button class="b4-golf-follow" data-b4-golf-follow="${esc(e.lg.id + ":" + e.id)}" aria-pressed="${following}"><span aria-hidden="true">${following ? "♥" : "♡"}</span> ${following ? "Following" : "Follow"}</button></div>${tabs}${selected==='tees' ? `<div class="b4-golf-board b4-golf-tee-board" id="b4-tees-${esc(beta4GolfTeeKey(e))}">${beta4GolfTeeTimes(e)}</div>` : leaderboard}</section>`;
   }
   const b4GolfTournamentTabs = new Map(), b4GolfTeeCache = new Map();
   const beta4GolfEventKey = e => e.lg.id+':'+e.id;
@@ -3167,7 +3170,7 @@ button.brand, button.brand span { color: var(--accent); }
     const strokes = (line?.linescores || []).reduce((n,h)=>n+(Number(h.value)||0),0);
     const content = v.tab === 'stats' ? beta4GolfPlayerStats(v) : v.tab === 'group' ? beta4GolfPlayerGroup(v) : `<section class="b4-gp-panel"><h2>Scorecard</h2>${beta4GolfScorecard(p,v.round,v.course)}</section>${beta4GolfPlayerInfo(v)}`;
     el.classList.add('b4-golf-player-page');
-    el.innerHTML = `<div class="b4-gp-wrap"><div class="b4-gp-toolbar"><button data-gclose aria-label="Back to leaderboard">‹</button><span>${esc(v.event.lg.name)}</span><button data-gclose aria-label="Close player page">×</button></div><header class="b4-gp-hero">${p.headshot ? `<img class="b4-gp-portrait" src="${esc(p.headshot)}" alt="${esc(p.name)}" onerror="this.style.visibility='hidden'">` : ''}<h1>${p.flag ? `<img src="${esc(p.flag)}" alt="${esc(p.country)}">` : ''}${esc(p.name)}</h1><p>Position ${esc(p.pos || '–')} · Total ${esc(p.total || '–')}</p><small>${esc(v.event.name)}</small><dl class="b4-gp-summary">${[['Today',p.today],['Thru',p.thru],['R'+v.event.round,strokes || '–'],['Strokes',(p.rounds || []).reduce((n,r)=>n+(r.linescores || []).reduce((sum,h)=>sum+(Number(h.value)||0),0),0) || '–']].map(([k,value])=>`<div><dt>${esc(k)}</dt><dd>${esc(value || '–')}</dd></div>`).join('')}</dl></header><div class="b4-gp-actions"><button data-b4-gp-favorite aria-pressed="${favorite}">${favorite ? '★ Favorited' : '☆ Favorite'}</button><button data-b4-gp-group aria-pressed="${v.tab==='group'}">Group</button></div><nav class="b4-gp-tabs" aria-label="Player sections">${['scorecard','stats'].map(tab=>`<button data-b4-gp-tab="${tab}" aria-pressed="${v.tab===tab}">${tab==='stats' ? 'Stats' : 'Scorecard'}</button>`).join('')}</nav><div class="b4-gp-rounds" aria-label="Round selection"${v.tab==='group' ? ' hidden' : ''}>${v.tab === 'stats' ? `<button data-b4-gp-round="all" aria-pressed="${v.scope==='all'}">All</button>` : ''}${rounds.map(round=>`<button data-b4-gp-round="${round}" aria-pressed="${v.round===round && (v.tab!=='stats' || v.scope!=='all')}">R${round}${round===v.event.round && v.event.state==='in' ? ' · Live' : ''}</button>`).join('')}</div>${v.loading ? '<p class="b4-gp-note" role="status">Loading player details…</p>' : ''}${v.error ? '<p class="b4-gp-note">Some player details could not load. <button data-b4-gp-retry>Retry</button></p>' : ''}${content}</div>`;
+    el.innerHTML = `<div class="b4-gp-wrap"><div class="b4-gp-header"><div class="b4-gp-toolbar"><button data-gclose aria-label="Back to leaderboard">‹</button><span>${esc(v.event.lg.name)}</span><button data-gclose aria-label="Close player page">×</button></div><header class="b4-gp-hero">${p.headshot ? `<img class="b4-gp-portrait" src="${esc(p.headshot)}" alt="${esc(p.name)}" onerror="this.style.visibility='hidden'">` : ''}<h1>${p.flag ? `<img src="${esc(p.flag)}" alt="${esc(p.country)}">` : ''}${esc(p.name)}</h1><p>Position ${esc(p.pos || '–')} · Total ${esc(p.total || '–')}</p><small>${esc(v.event.name)}</small><dl class="b4-gp-summary">${[['Today',p.today],['Thru',p.thru],['R'+v.event.round,strokes || '–'],['Strokes',(p.rounds || []).reduce((n,r)=>n+(r.linescores || []).reduce((sum,h)=>sum+(Number(h.value)||0),0),0) || '–']].map(([k,value])=>`<div><dt>${esc(k)}</dt><dd>${esc(value || '–')}</dd></div>`).join('')}</dl></header></div><div class="b4-gp-actions"><button data-b4-gp-favorite aria-pressed="${favorite}">${favorite ? '★ Favorited' : '☆ Favorite'}</button></div><nav class="b4-gp-tabs" aria-label="Player sections">${['scorecard','stats','group'].map(tab=>`<button data-b4-gp-tab="${tab}" aria-pressed="${v.tab===tab}">${{scorecard:'Scorecard',stats:'Stats',group:'Group'}[tab]}</button>`).join('')}</nav><div class="b4-gp-rounds" aria-label="Round selection"${v.tab==='group' ? ' hidden' : ''}>${v.tab === 'stats' ? `<button data-b4-gp-round="all" aria-pressed="${v.scope==='all'}">All</button>` : ''}${rounds.map(round=>`<button data-b4-gp-round="${round}" aria-pressed="${v.round===round && (v.tab!=='stats' || v.scope!=='all')}">R${round}${round===v.event.round && v.event.state==='in' ? ' · Live' : ''}</button>`).join('')}</div>${v.loading ? '<p class="b4-gp-note" role="status">Loading player details…</p>' : ''}${v.error ? '<p class="b4-gp-note">Some player details could not load. <button data-b4-gp-retry>Retry</button></p>' : ''}${content}</div>`;
     el.scrollTop = y;
   }
   function beta4GolfPlayerGroup(v) {
@@ -3249,8 +3252,7 @@ button.brand, button.brand span { color: var(--accent); }
     if(!b4Golfer)return;
     const v=b4Golfer;
     if(e.target.closest('[data-b4-gp-favorite]')){const key=v.event.lg.id+':'+v.player.id,saved=new Set(store.get('golfPlayerFavorites',[]));saved.has(key)?saved.delete(key):saved.add(key);store.set('golfPlayerFavorites',[...saved]);beta4GolfPlayerPaint();}
-    const tab=e.target.closest('[data-b4-gp-tab]');if(tab){v.tab=tab.dataset.b4GpTab;beta4GolfPlayerPaint();if(v.tab==='stats')beta4GolfLoadStats();}
-    if(e.target.closest('[data-b4-gp-group]')){v.tab='group';beta4GolfPlayerPaint();beta4GolfLoadGroup();}
+    const tab=e.target.closest('[data-b4-gp-tab]');if(tab){v.tab=tab.dataset.b4GpTab;beta4GolfPlayerPaint();if(v.tab==='stats')beta4GolfLoadStats();if(v.tab==='group')beta4GolfLoadGroup();}
     const round=e.target.closest('[data-b4-gp-round]');if(round){v.scope=round.dataset.b4GpRound;if(v.scope!=='all')v.round=Number(v.scope);v.stats=null;beta4GolfPlayerPaint();if(v.tab==='stats')beta4GolfLoadStats();}
     if(e.target.closest('[data-b4-gp-retry]')){beta4GolfLoadDetails();if(v.tab==='stats')beta4GolfLoadStats();}
   });
@@ -3269,7 +3271,7 @@ button.brand, button.brand span { color: var(--accent); }
       saved.has(key) ? saved.delete(key) : saved.add(key);
       store.set("golfFollowed", [...saved]);
       follow.setAttribute("aria-pressed", String(saved.has(key)));
-      follow.innerHTML = `<span aria-hidden="true">${saved.has(key) ? "✓" : "+"}</span> ${saved.has(key) ? "Following" : "Follow"}`;
+      follow.innerHTML = `<span aria-hidden="true">${saved.has(key) ? "♥" : "♡"}</span> ${saved.has(key) ? "Following" : "Follow"}`;
     }
     const share = e.target.closest("[data-b4-golf-share]");
     if (share) shareLink(LG[share.dataset.b4GolfShare].name, "PGA Tour leaderboard on The Lineup", "league=" + share.dataset.b4GolfShare);

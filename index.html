@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup</title>
-<meta name="build" content="20261022102545">
+<meta name="build" content="20261022151938">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="The Lineup">
@@ -1369,113 +1369,135 @@ button.brand, button.brand span { color: var(--accent); }
 
 
 /* ---------- Golf player page ---------- */
-.gp { min-height: 100vh; padding-bottom: 90px; color: #fff; background: radial-gradient(130% 50% at 50% 0%, #24507f 0%, #173556 45%, #0b1626 100%); background-color: #0b1626; }
+.gp { min-height:100vh; padding-bottom:90px; color:var(--fg); background:var(--bg); }
 .gp .gc-wrap { padding-top: calc(env(safe-area-inset-top) + 10px); }
-.gp .circ { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.15); }
+.gp .circ { background: var(--surface); color: var(--fg); border-color: var(--line); }
 .gp-hero { text-align: center; padding-bottom: 14px; }
-.gp-face { width: 116px; height: 116px; margin: 0 auto 12px; border-radius: 50%; background: #1d3f66; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,.35); }
+.gp-face { width: 116px; height: 116px; margin: 0 auto 12px; border-radius: 50%; background: var(--surface); overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,.35); }
 .gp-face img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .gp-hero h2 { display: inline-flex; align-items: center; gap: 8px; font-size: 26px; font-weight: 700; margin: 0; }
 .gp-flag { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
-.gp-sub { font-size: 16px; font-weight: 600; color: rgba(255,255,255,.7); margin-top: 4px; }
+.gp-sub { font-size: 16px; font-weight: 600; color: var(--muted); margin-top: 4px; }
 .gp-stats { display: flex; justify-content: center; gap: 26px; margin: 18px 0 4px; }
-.gp-stats small { display: block; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: rgba(255,255,255,.65); }
+.gp-stats small { display: block; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
 .gp-stats b { font-size: 16px; font-variant-numeric: tabular-nums; }
 .gp-btns { display: flex; justify-content: center; gap: 10px; margin-top: 16px; }
-.gp-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 999px; font-size: 15px; font-weight: 700; color: #fff; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); }
+.gp-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 999px; font-size: 15px; font-weight: 700; color: var(--fg); background: var(--surface); border: 1px solid var(--line); }
 .gp-btn svg { width: 17px; height: 17px; }
-.gp-btn.on { background: #fff; color: #173556; }
+.gp-btn.on { background: #fff; color: var(--accent); }
 .gp-btn.on[data-gp-fav] svg { color: var(--star); }
-.gp-tabs { display: flex; justify-content: center; gap: 24px; margin: 6px 0 12px; border-bottom: 1px solid rgba(255,255,255,.14); }
-.gp-tabs button { padding: 10px 2px; font-size: 17px; font-weight: 700; color: rgba(255,255,255,.5); border-bottom: 3px solid transparent; margin-bottom: -1px; }
-.gp-tabs button.on { color: #fff; border-color: #fff; }
-.gp .gf-card, .gp-card { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); padding: 14px 12px 12px; }
-.gp-card h3 small { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.6); margin-left: 4px; }
+.gp-tabs { display: flex; justify-content: center; gap: 24px; margin: 6px 0 12px; border-bottom: 1px solid var(--line); }
+.gp-tabs button { padding: 10px 2px; font-size: 17px; font-weight: 700; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.gp-tabs button.on { color: var(--fg); border-color: var(--fg); }
+.gp .gf-card, .gp-card { background: var(--surface); border-color: var(--line); padding: 14px 12px 12px; }
+.gp-card h3 small { font-size: 13px; font-weight: 600; color: var(--muted); margin-left: 4px; }
 .gp-rds { display: flex; justify-content: center; gap: 6px; margin: -2px 0 10px; }
-.gp-rds button { padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; color: rgba(255,255,255,.75); background: rgba(255,255,255,.08); }
-.gp-rds button.on { background: #fff; color: #173556; }
-.gp-live { font-style: normal; font-size: 10px; background: #e5383b; color: #fff; padding: 1px 5px; border-radius: 4px; margin-left: 3px; vertical-align: 1px; }
+.gp-rds button { padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--muted); background: var(--surface); }
+.gp-rds button.on { background: #fff; color: var(--accent); }
+.gp-live { font-style: normal; font-size: 10px; background: #e5383b; color: var(--fg); padding: 1px 5px; border-radius: 4px; margin-left: 3px; vertical-align: 1px; }
 .gs-nine + .gs-nine { margin-top: 14px; }
 .gs-r { display: grid; grid-template-columns: 34px repeat(9, 1fr) 34px; align-items: center; text-align: center; font-variant-numeric: tabular-nums; }
 .gs-r > span:first-child { text-align: left; font-weight: 700; font-size: 14px; }
-.gs-num { font-size: 13px; color: rgba(255,255,255,.6); padding-bottom: 4px; }
-.gs-par { font-size: 15px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,.15); }
+.gs-num { font-size: 13px; color: var(--muted); padding-bottom: 4px; }
+.gs-par { font-size: 15px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
 .gs-sc { font-size: 15px; padding: 8px 0 2px; }
 .gs-sc > span:last-child, .gs-par > span:last-child { font-weight: 700; }
-.gs-tp { font-size: 11px; color: rgba(255,255,255,.55); padding-bottom: 2px; }
+.gs-tp { font-size: 11px; color: var(--muted); padding-bottom: 2px; }
 .gs-h { display: inline-grid; place-items: center; width: 27px; height: 27px; margin: 0 auto; font-style: normal; }
-.gs-h.bd, .gs-h.eg { border: 1.5px solid rgba(255,255,255,.85); border-radius: 50%; }
-.gs-h.eg { box-shadow: 0 0 0 2px #1b3a5e, 0 0 0 3.5px rgba(255,255,255,.85); }
-.gs-h.bg, .gs-h.db { border: 1.5px solid rgba(255,255,255,.85); border-radius: 3px; }
-.gs-h.db { box-shadow: 0 0 0 2px #1b3a5e, 0 0 0 3.5px rgba(255,255,255,.85); }
-.gs-key { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; margin-top: 16px; font-size: 13px; color: rgba(255,255,255,.65); }
+.gs-h.bd, .gs-h.eg { border: 1.5px solid var(--muted); border-radius: 50%; }
+.gs-h.eg { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--muted); }
+.gs-h.bg, .gs-h.db { border: 1.5px solid var(--muted); border-radius: 3px; }
+.gs-h.db { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--muted); }
+.gs-key { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; margin-top: 16px; font-size: 13px; color: var(--muted); }
 .gs-key span { display: inline-flex; align-items: center; gap: 7px; }
 .gs-key .gs-h { width: 18px; height: 18px; margin: 0; }
-.gp-h { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: rgba(255,255,255,.6); margin: 4px 4px 6px; }
+.gp-h { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 4px 4px 6px; }
 .gp-h + .gp-tbl { margin-bottom: 12px; }
-.gp-tbl > div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 4px; border-top: 1px solid rgba(255,255,255,.1); font-size: 15px; }
+.gp-tbl > div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 4px; border-top: 1px solid var(--line); font-size: 15px; }
 .gp-tbl b { font-variant-numeric: tabular-nums; }
 .gp-info-h { text-align: center; font-size: 18px; margin: 22px 0 10px; }
 .gp-info { display: grid; gap: 10px; padding: 0 6px; font-size: 15px; }
-.gp-info small { font-size: 15px; color: rgba(255,255,255,.6); }
+.gp-info small { font-size: 15px; color: var(--muted); }
 .gp-info b { font-weight: 500; }
-.gp-g { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 4px; border-top: 1px solid rgba(255,255,255,.1); color: #fff; text-align: left; }
-.gp-g.me { background: rgba(255,255,255,.06); border-radius: 10px; }
-.gp-gn { flex: 1; min-width: 0; } .gp-gn b { display: block; font-size: 16px; } .gp-gn small { font-size: 13px; color: rgba(255,255,255,.65); }
-.gp-gt { font-size: 14px; color: rgba(255,255,255,.8); }
-.gp .gf-face .gf-flag { border-color: #173556; background: #173556; }
+.gp-g { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 4px; border-top: 1px solid var(--line); color: var(--fg); text-align: left; }
+.gp-g.me { background: var(--surface); border-radius: 10px; }
+.gp-gn { flex: 1; min-width: 0; } .gp-gn b { display: block; font-size: 16px; } .gp-gn small { font-size: 13px; color: var(--muted); }
+.gp-gt { font-size: 14px; color: var(--muted); }
+.gp .gf-face .gf-flag { border-color: var(--accent); background: #173556; }
 .gf-row.tap { cursor: pointer; }
 .gf-row .gf-fav { color: var(--star); width: 12px; height: 12px; margin-left: 4px; flex: 0 0 auto; }
 @media (max-width: 380px) { .gs-r { grid-template-columns: 28px repeat(9, 1fr) 30px; } .gs-h { width: 24px; height: 24px; } .gp-stats { gap: 18px; } }
 /* ---------- Golf tournament page ---------- */
-.gf-tabs { border-color: rgba(255,255,255,.18); margin-top: 0; }
-.gt-tz { display: block; font-size: 12px; font-weight: 600; color: rgba(255,255,255,.6); margin-top: 2px; }
-.gt-g { display: grid; grid-template-columns: 76px 1fr auto; gap: 8px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,.1); align-items: start; }
-.gt-t b { display: block; font-size: 15px; font-variant-numeric: tabular-nums; } .gt-t small { font-size: 12px; color: rgba(255,255,255,.6); }
+.gf-tabs { border-color: var(--line); margin-top: 0; }
+.gt-tz { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+.gt-g { display: grid; grid-template-columns: 76px 1fr auto; gap: 8px; padding: 12px 0; border-top: 1px solid var(--line); align-items: start; }
+.gt-t b { display: block; font-size: 15px; font-variant-numeric: tabular-nums; } .gt-t small { font-size: 12px; color: var(--muted); }
 .gt-ps { display: grid; gap: 6px; min-width: 0; }
 .gt-p { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.gt-star { flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.1); color: rgba(255,255,255,.55); }
-.gt-star svg { width: 15px; height: 15px; } .gt-star.on { color: var(--star); background: rgba(255,255,255,.18); }
-.gt-nm { color: #fff; font-size: 15px; font-weight: 600; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.gt-nm small { font-weight: 500; color: rgba(255,255,255,.6); font-size: 13px; }
-.gt-st { font-size: 13px; font-weight: 700; color: rgba(255,255,255,.6); text-align: right; white-space: nowrap; padding-top: 2px; } .gt-st.on { color: #fff; }
+.gt-star { flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); color: var(--muted); }
+.gt-star svg { width: 15px; height: 15px; } .gt-star.on { color: var(--star); background: var(--surface); }
+.gt-nm { color: var(--fg); font-size: 15px; font-weight: 600; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.gt-nm small { font-weight: 500; color: var(--muted); font-size: 13px; }
+.gt-st { font-size: 13px; font-weight: 700; color: var(--muted); text-align: right; white-space: nowrap; padding-top: 2px; } .gt-st.on { color: var(--fg); }
 
-.gf { min-height: 100vh; padding-bottom: 90px; color: #fff; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.10 0 0 0 0 0.30 0 0 0 0 0.06 0 0 0 1.9 -0.55'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E"), repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 60px, rgba(0,0,0,.04) 60px 120px), radial-gradient(120% 55% at 50% 0%, #4d8a33 0%, #33661f 40%, #1d3b14 100%); background-color: #23461a; background-size: 240px 240px, auto, auto; }
+.gf { min-height:100vh; padding-bottom:90px; color:var(--fg); background:var(--bg); }
 .gf .gc-wrap { padding-top: calc(env(safe-area-inset-top) + 10px); }
-.gf .circ { background: rgba(0,0,0,.28); color: #fff; border-color: rgba(255,255,255,.15); }
+.gf .circ { background: var(--surface); color: var(--fg); border-color: var(--line); }
 .gf-hero { text-align: center; padding-bottom: 18px; }
-.gf-lg { font-size: 15px; font-weight: 600; color: rgba(255,255,255,.7); margin-top: 4px; }
+.gf-lg { font-size: 15px; font-weight: 600; color: var(--muted); margin-top: 4px; }
 .gf-logo { width: 76px; height: 76px; margin: 12px auto 10px; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: 0 4px 16px rgba(0,0,0,.3); }
 .gf-logo img { width: 52px; height: 52px; object-fit: contain; }
-.gf-hero h2 { font-size: 22px; font-weight: 700; line-height: 1.2; margin: 0 8px; text-shadow: 0 1px 6px rgba(0,0,0,.35); }
-.gf-st { font-size: 15px; color: rgba(255,255,255,.72); margin-top: 4px; }
-.gf-follow { margin: 16px auto 0; display: inline-flex; align-items: center; gap: 8px; padding: 11px 26px; border-radius: 999px; font-size: 17px; font-weight: 700; color: #fff; background: rgba(40,80,25,.75); border: 1px solid rgba(255,255,255,.2); box-shadow: 0 2px 10px rgba(0,0,0,.2); }
+.gf-hero h2 { font-size: 22px; font-weight: 700; line-height: 1.2; margin: 0 8px;  }
+.gf-st { font-size: 15px; color: var(--muted); margin-top: 4px; }
+.gf-follow { margin: 16px auto 0; display: inline-flex; align-items: center; gap: 8px; padding: 11px 26px; border-radius: 999px; font-size: 17px; font-weight: 700; color: var(--fg); background: var(--surface); border: 1px solid var(--line); box-shadow: 0 2px 10px rgba(0,0,0,.2); }
 .gf-follow svg { width: 22px; height: 22px; }
-.gf-follow.on { background: rgba(255,255,255,.92); color: #1e3b14; }
-.gf-net { font-size: 13px; color: rgba(255,255,255,.72); margin-top: 12px; }
-.gf-card { background: rgba(28,52,20,.62); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.1); border-radius: 22px; padding: 14px 16px 6px; margin-bottom: 14px; }
+.gf-follow.on { background: var(--surface); color: #1e3b14; }
+.gf-net { font-size: 13px; color: var(--muted); margin-top: 12px; }
+.gf-card { background: var(--surface); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px 6px; margin-bottom: 14px; }
 .gf-card h3 { text-align: center; font-size: 17px; font-weight: 700; margin: 2px 0 10px; }
-.gf-row { display: grid; grid-template-columns: 30px 1fr 42px 42px 56px; align-items: center; gap: 4px; min-height: 50px; border-top: 1px solid rgba(255,255,255,.1); font-variant-numeric: tabular-nums; }
-.gf-row.gf-head { min-height: 32px; border-top: 0; font-size: 13px; color: rgba(255,255,255,.65); }
-.gf-pos { font-size: 14px; color: rgba(255,255,255,.75); text-align: center; }
+.gf-row { display: grid; grid-template-columns: 30px 1fr 42px 42px 56px; align-items: center; gap: 4px; min-height: 50px; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.gf-row.gf-head { min-height: 32px; border-top: 0; font-size: 13px; color: var(--muted); }
+.gf-pos { font-size: 14px; color: var(--muted); text-align: center; }
 .gf-pl { display: flex; align-items: center; gap: 9px; min-width: 0; }
-.gf-face { position: relative; flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.14); }
+.gf-face { position: relative; flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%; background: var(--surface); }
 .gf-face img:first-child { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: top; }
-.gf-face .gf-flag { position: absolute; right: -4px; bottom: -3px; width: 14px; height: 14px; border-radius: 50%; object-fit: cover; border: 1.5px solid #234018; background: #234018; }
+.gf-face .gf-flag { position: absolute; right: -4px; bottom: -3px; width: 14px; height: 14px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--surface); background: var(--surface); }
 .gf-nm { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gf-n { text-align: center; font-size: 16px; }
-.gf-n.dim { color: rgba(255,255,255,.6); }
-.gf-n.thru { color: rgba(255,255,255,.8); font-size: 14px; white-space: nowrap; }
+.gf-n.dim { color: var(--muted); }
+.gf-n.thru { color: var(--muted); font-size: 14px; white-space: nowrap; }
 .gf-n.thru.tee { font-size: 12px; }
-.gf-head .gf-n { font-size: 13px; color: rgba(255,255,255,.65); }
+.gf-head .gf-n { font-size: 13px; color: var(--muted); }
 .gf-row.out { opacity: .55; }
-.gf-more { display: block; width: 100%; padding: 14px 0 10px; border-top: 1px solid rgba(255,255,255,.1); color: #fff; font-weight: 700; font-size: 15px; }
-.gf-empty { text-align: center; color: rgba(255,255,255,.7); padding: 10px 0 14px; }
+.gf-more { display: block; width: 100%; padding: 14px 0 10px; border-top: 1px solid var(--line); color: var(--fg); font-weight: 700; font-size: 15px; }
+.gf-empty { text-align: center; color: var(--muted); padding: 10px 0 14px; }
 .gf-info { display: grid; gap: 12px; padding: 16px; }
-.gf-info small { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: rgba(255,255,255,.6); }
+.gf-info small { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .gf-info b { font-size: 15px; font-weight: 600; }
-.gf-info a { color: #fff; font-weight: 700; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+.gf-info a { color: var(--fg); font-weight: 700; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 380px) { .gf-row { grid-template-columns: 26px 1fr 38px 38px 52px; } .gf-nm, .gf-n { font-size: 15px; } }
+/* Golf uses the same header, actions and cards as matchup pages. */
+.gf .gc-wrap, .gp .gc-wrap { padding-top:0; }
+.gf-hero, .gp-header { margin:0 -16px; padding:12px 16px 20px; background:linear-gradient(120deg,var(--accent-soft),var(--surface)); border-bottom:1px solid var(--line); border-radius:0 0 24px 24px; }
+.gf-st { color:var(--live); font-weight:700; margin-top:8px; }
+.gf-actions, .gp-btns { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:10px; margin:18px 0; }
+.gf-follow { margin:0; box-shadow:none; min-height:44px; font-size:14px; padding:10px 18px; }
+.gf-follow.on, .gp-btn.on, .gp-rds button.on { background:var(--accent-soft); border:1px solid var(--accent); color:var(--accent); }
+.gf-watch { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:10px 18px; border-radius:99px; background:var(--accent); color:var(--bg); font-size:14px; font-weight:650; text-decoration:none; }
+.gp-tabs { justify-content:space-around; gap:16px; border-color:var(--line); }
+.gp-tabs button { min-height:44px; }
+.gp-tabs button.on { border-color:var(--accent); }
+.gf-card { backdrop-filter:none; -webkit-backdrop-filter:none; }
+.gf-card h3, .gp-info-h { text-align:left; color:var(--muted); font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
+.gp-info-card { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px 12px; margin-bottom:14px; }
+.gp-info-h { margin:0 0 14px; }
+.gp-face { width:86px; height:86px; border:1px solid var(--line); box-shadow:none; }
+.gp-btn, .gp-rds button { min-height:44px; border:1px solid var(--line); }
+.gp-stats { justify-content:space-around; gap:8px; }
+.gt-nm { white-space:normal; overflow-wrap:anywhere; }
+.gt-st { max-width:64px; white-space:normal; }
+.gf-follow:focus-visible, .gp button:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+
 </style>
 </head>
 <body>
@@ -3289,8 +3311,10 @@ button.brand, button.brand span { color: var(--accent); }
       ${logo ? `<div class="gf-logo"><img src="${esc(logo)}" alt="" onerror="this.parentNode.remove()"></div>` : ""}
       <h2>${esc(d && !d.none ? d.name : lg.name)}</h2>
       <div class="gf-st">${d && !d.none ? esc(golfStatus(d)) : "&nbsp;"}</div>
-      <button class="gf-follow ${on ? "on" : ""}" data-gf-follow aria-pressed="${on}">${on ? CHECK : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="13" r="8"/><path d="M11 9v4l2.5 2M17 3v5M14.5 5.5h5"/></svg>'}${on ? "Following" : "Follow"}</button>
+
       ${watch ? `<div class="gf-net">${esc(watch)}</div>` : ""}</div>`;
+    const w = d && !d.none && d.state !== "post" && d.net ? watchOptions([{name:d.net}],lg)[0] : null;
+    const actions = `<div class="gf-actions">${w ? `<a class="gf-watch" href="${esc(w.url)}" ${w.scheme ? `data-app="${esc(w.scheme)}"` : ""} target="_blank" rel="noopener">▶ Watch On ${esc(w.app)}</a>` : ""}<button class="gf-follow ${on ? "on" : ""}" data-gf-follow aria-pressed="${on}">${on ? "♥" : "♡"} ${on ? "Following" : "Follow"}</button></div>`;
     let card;
     if (!d) card = `<div class="gf-card"><div class="skel"></div><div class="skel"></div></div>`;
     else if (d.none || !d.players.length) card = `<div class="gf-card"><h3>Leaderboard</h3><p class="gf-empty">${d.none ? "No tournament this week." : "Tee times aren't posted yet."}</p></div>`;
@@ -3305,10 +3329,10 @@ button.brand, button.brand span { color: var(--accent); }
       const more = d.players.length > 50 ? `<button class="gf-more" data-gf-all>${gv.all ? "Show Top 50" : `Show All ${d.players.length}`}</button>` : "";
       card = gv.tab === "tee" ? golfTeeHTML(d) : favCard + `<div class="gf-card"><h3>Leaderboard</h3><div class="gf-row gf-head"><span class="gf-pos"></span><span class="gf-pl">Player</span><span class="gf-n">TOT</span><span class="gf-n">R${d.round}</span><span class="gf-n thru">THRU</span></div>${rows}${more}</div>`;
       const info = [["Course", d.course], ["Purse", d.purse], ["Defending Champion", d.champ]].filter(x => x[1]);
-      if (info.length) card += `<div class="gf-card gf-info">${info.map(([k, v]) => `<div><small>${esc(k)}</small><b>${esc(v)}</b></div>`).join("")}${d.link ? `<a href="${esc(d.link)}" target="_blank" rel="noopener">Full Leaderboard On ESPN</a>` : ""}</div>`;
+      if (info.length) card += `<div class="gf-card gf-info">${info.map(([k, v]) => `<div><small>${esc(k)}</small><b>${esc(v)}</b></div>`).join("")}${d.link ? `<a href="${esc(d.link)}" target="_blank" rel="noopener">Tournament Details On ESPN</a>` : ""}</div>`;
     }
     const tabs = d && !d.none && d.players?.length ? `<div class="gp-tabs gf-tabs" role="tablist">${[["lb", "Leaderboard"], ["tee", "Tee Times"]].map(([k, l]) => `<button class="${gv.tab === k ? "on" : ""}" data-gf-tab="${k}" role="tab" aria-selected="${gv.tab === k}">${l}</button>`).join("")}</div>` : "";
-    el.innerHTML = `<div class="gf"><div class="gc-wrap">${hero}${tabs}${card}</div></div>`;
+    el.innerHTML = `<div class="gf"><div class="gc-wrap">${hero}${actions}${tabs}${card}</div></div>`;
     el.scrollTop = y;
   }
 
@@ -3376,7 +3400,7 @@ button.brand, button.brand span { color: var(--accent); }
       ["Earnings", ss.amount?.displayValue && ss.amount.value ? ss.amount.displayValue + (ss.amount.rankDisplayValue ? ` (${ss.amount.rankDisplayValue})` : "") : ""],
       ["Birth Date", dob ? `${dob.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}${pr.age ? ` (${pr.age} Years)` : ""}` : ""],
       ["Birthplace", pr.birthPlace || a.displayBirthPlace || ""], ["College", pr.college || a.college?.name || ""], ["Turned Pro", a.turnedPro ? String(a.turnedPro) : ""]].filter(x => x[1]);
-    return rows.length ? `<h3 class="gp-info-h">Player Information</h3><div class="gp-info">${rows.map(([k, x]) => `<div><small>${esc(k)}:</small> <b>${esc(x)}</b></div>`).join("")}</div>` : "";
+    return rows.length ? `<div class="gp-info-card"><h3 class="gp-info-h">Player Information</h3><div class="gp-info">${rows.map(([k, x]) => `<div><small>${esc(k)}:</small> <b>${esc(x)}</b></div>`).join("")}</div></div>` : "";
   }
   function golfGroup(d, p) {
     if (!p.tee) return [p];
@@ -3393,20 +3417,22 @@ button.brand, button.brand span { color: var(--accent); }
       <h2>${p.flag ? `<img class="gp-flag" src="${esc(p.flag)}" alt="${esc(p.country)}">` : ""}${esc(pv.sum?.profile?.displayName || p.full || p.name)}</h2>
       <div class="gp-sub">${p.pos ? `Position ${esc(p.pos)} · ` : ""}Total ${esc(p.tot)}</div>
       <div class="gp-stats"><div><small>Today</small><b>${esc(p.rd)}</b></div><div><small>Thru</small><b>${esc(p.thru || "-")}</b></div><div><small>R${d.round}</small><b>${esc(String(strokes))}</b></div><div><small>Str</small><b>${esc(String(rounds.reduce((s, r) => s + (+r.strokes || 0), 0) || "-"))}</b></div></div>
-      <div class="gp-btns"><button class="gp-btn ${fav ? "on" : ""}" data-gp-fav aria-pressed="${fav}">${fav ? STAR : STAR_O}Favorite</button><button class="gp-btn ${pv.group ? "on" : ""}" data-gp-group aria-pressed="${pv.group}">${GROUP_IC}Group</button></div></div>`;
+      </div>`;
+    const actions = `<div class="gp-btns"><button class="gp-btn ${fav ? "on" : ""}" data-gp-fav aria-pressed="${fav}">${fav ? STAR : STAR_O}Favorite</button></div>`;
     let group = "";
-    if (pv.group) {
+    if (pv.tab === "group") {
       const g = golfGroup(d, p);
       group = `<div class="gf-card gp-card"><h3>${g.length > 1 ? "Playing Group" : "Playing Alone"}${p.tee ? ` <small>${esc(timeLabel(p.tee))}${p.startHole === 10 ? " · Hole 10" : ""}</small>` : ""}</h3>${g.map(x => `<button class="gp-g ${x.id === p.id ? "me" : ""}" data-gp-open="${esc(x.id)}"><span class="gf-face">${x.head ? `<img src="${esc(x.head)}" alt="" onerror="this.remove()">` : ""}${x.flag ? `<img class="gf-flag" src="${esc(x.flag)}" alt="">` : ""}</span><span class="gp-gn"><b>${esc(x.name)}</b><small>${x.pos ? `Pos ${esc(x.pos)} · ` : ""}Tot ${esc(x.tot)} · R${d.round} ${esc(x.rd)}</small></span><span class="gp-gt">${esc(x.thru || "")}</span></button>`).join("")}</div>`;
     }
-    const tabs = `<div class="gp-tabs" role="tablist"><button class="${pv.tab === "card" ? "on" : ""}" data-gp-tab="card" role="tab" aria-selected="${pv.tab === "card"}">Scorecard</button><button class="${pv.tab === "stats" ? "on" : ""}" data-gp-tab="stats" role="tab" aria-selected="${pv.tab === "stats"}">Stats</button></div>`;
+    const tabs = `<div class="gp-tabs" role="tablist">${[["card","Scorecard"],["stats","Stats"],["group","Group"]].map(([k,label])=>`<button class="${pv.tab===k ? "on" : ""}" data-gp-tab="${k}" role="tab" aria-selected="${pv.tab===k}">${label}</button>`).join("")}</div>`;
     let body;
-    if (!pv.sum) body = `<div class="gf-card gp-card"><div class="skel"></div><div class="skel"></div></div>`;
+    if (pv.tab === "group") body = group;
+    else if (!pv.sum) body = `<div class="gf-card gp-card"><div class="skel"></div><div class="skel"></div></div>`;
     else if (pv.tab === "card") {
       const chips = rounds.length > 1 ? `<div class="gp-rds">${rounds.map(r => `<button class="${r === rd ? "on" : ""}" data-gp-round="${r.period}">R${r.period}${r.period === d.round && d.state === "in" ? ' <i class="gp-live">Live</i>' : ""}</button>`).join("")}</div>` : "";
       body = `<div class="gf-card gp-card"><h3>Scorecard</h3>${chips}${rd ? golfCardHTML(d, rd) : `<p class="gf-empty">${p.thru && /M$/.test(p.thru) ? `Tees off at ${esc(p.thru)}.` : "No holes played yet."}</p>`}</div>`;
     } else body = `<div class="gf-card gp-card">${golfStatsHTML(pv)}</div>`;
-    return `<div class="gp"><div class="gc-wrap">${top}${hero}${group}${tabs}${body}${pv.bio ? golfInfoHTML(pv) : ""}</div></div>`;
+    return `<div class="gp"><div class="gc-wrap"><div class="gp-header">${top}${hero}</div>${actions}${tabs}${body}${pv.bio ? golfInfoHTML(pv) : ""}</div></div>`;
   }
   const isWeekly = lg => lg.sport === "Football";
   async function loadLeagueBoard(lv) {
@@ -6036,7 +6062,6 @@ button.brand, button.brand span { color: var(--accent); }
         const pv = gv.player;
         if (e.target.closest("[data-gp-back]")) { const y = pv.y || 0; gv.player = null; paintGolf(gv); document.getElementById("gsheet").scrollTop = y; return; }
         if (e.target.closest("[data-gp-fav]")) { const f = golfFavs(), i = f.indexOf(pv.id); if (i >= 0) f.splice(i, 1); else f.push(pv.id); store.set("golfFavs", f); paintGolf(gv); return; }
-        if (e.target.closest("[data-gp-group]")) { pv.group = !pv.group; paintGolf(gv); return; }
         const gt = e.target.closest("[data-gp-tab]"); if (gt) { pv.tab = gt.dataset.gpTab; paintGolf(gv); return; }
         const gr = e.target.closest("[data-gp-round]"); if (gr) { pv.round = +gr.dataset.gpRound; paintGolf(gv); return; }
       }
