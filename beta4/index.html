@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261021233123">
+<meta name="build" content="20261022090000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -4187,15 +4187,42 @@ button.brand, button.brand span { color: var(--accent); }
     ["sheet", "ssheet", "pksheet", "lsheet", "b4saved"].forEach(id => { const el = document.getElementById(id); el.hidden = true; el.classList.remove("as-tab"); delete el.dataset.b4Area; });
     if (!document.getElementById("gsheet").hidden) { navStack = []; closeGame(); }
   }
+  // Teams and Search share a sheet, but keep separate navigation state.
+  const bbPlaces = new Map();
+  function bbRemember(area) {
+    const id = BB_SHEETS[area];
+    if (!id) return;
+    const sheet = document.getElementById(id);
+    if (sheet.hidden || sheet.classList.contains("sub")) return;
+    bbPlaces.set(area, { scroll: sheet.querySelector(".sheet-body")?.scrollTop || 0,
+      page: area === "settings" ? b4SettingsPage : undefined,
+      query: area === "search" ? document.getElementById("q").value : undefined });
+  }
+  function bbRestore(area) {
+    const place = bbPlaces.get(area);
+    if (area === "settings" && place?.page) { b4SettingsPage = place.page; renderSettings(); }
+    if (area === "search") {
+      const input = document.getElementById("q"), query = place?.query || "";
+      if (input.value !== query) { input.value = query; search(); }
+      beta4SearchVisibility();
+    }
+    const body = document.getElementById(BB_SHEETS[area])?.querySelector(".sheet-body");
+    if (body) body.scrollTop = place?.scroll || 0;
+  }
   function bbGo(act) {
     if (act === "saved") act = "teams";
     const cur = bbCurrent(), gameOpen = !document.getElementById("gsheet").hidden;
+    bbRemember(cur);
     if (act === "home") {
       if (cur !== "home" || gameOpen || !document.getElementById("lsheet").hidden || !document.getElementById("sheet").hidden) { bbHideAll(); syncLock(); bbSync(); return; }
       if (window.scrollY > 10) window.scrollTo({ top: 0, behavior: "smooth" }); else goHome();
       return;
     }
-    if (act === cur && !gameOpen) return;
+    if (act === cur && !gameOpen) {
+      document.getElementById(BB_SHEETS[act])?.querySelector(".sheet-body")?.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    b4TeamEditorReturn = "";
     bbHideAll();
     if (act === "saved") { beta4SavedPaint(); document.getElementById("b4saved").hidden = false; beta4LoadSaved(); }
     if (act === "teams") { openSheet(); document.getElementById("sheet-h").textContent = "My Teams"; document.getElementById("sheet").classList.add("b4-team-schedule-mode"); beta4SearchVisibility(); document.getElementById("q").blur(); document.getElementById("b4-team-upcoming").hidden = false; document.getElementById("b4-add-heading").hidden = false; document.getElementById("b4-tracked-games").hidden = false; beta4TeamUpcomingPaint(); beta4LoadTeamUpcoming(); beta4SavedPaint(); beta4LoadSaved(); }
@@ -4205,7 +4232,7 @@ button.brand, button.brand span { color: var(--accent); }
     if (act === "settings") openSettings();
     document.getElementById(BB_SHEETS[act]).classList.add("as-tab");
     document.getElementById(BB_SHEETS[act]).dataset.b4Area = act;
-    if (act === "search") beta4SearchVisibility();
+    bbRestore(act);
     syncLock(); bbSync();
   }
   // Closing a tab screen any other way (Escape, a link inside it) puts the highlight back on Scores
@@ -6168,6 +6195,11 @@ button.brand, button.brand span { color: var(--accent); }
     openSheet();
     const el = document.getElementById("sheet");
     el.classList.add("b4-team-editor");
+    if (state.homeLayout === "bar") {
+      el.classList.add("as-tab", "sub");
+      el.dataset.b4Area = b4TeamEditorReturn === "teams" ? "teams" : "settings";
+      bbSync();
+    }
     document.getElementById("q").value = "";
     document.getElementById("sheet-h").textContent = b4TeamEditorReturn === "teams" ? "Manage Teams" : "My Teams";
     document.getElementById("q").blur();

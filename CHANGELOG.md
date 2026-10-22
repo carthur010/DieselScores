@@ -2,6 +2,13 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 22, 2026: Beta 4.0 — Keep Your Place
+- Search remembers its query when switching tabs, including visits to the shared team editor.
+- Settings resumes its previous subpage; Search, My Teams and Settings retain separate scroll positions during tab switches.
+- Tapping the selected non-Scores tab scrolls its content to the top.
+- Team management keeps the parent destination highlighted. Switching destinations clears stale editor return state.
+- Validation: 47 automated checks pass; inline scripts parse. Device/browser interaction review remains pending.
+
 ## Oct 21, 2026: Beta 4.0 - Centered League Row
 - Centered All, the top five league shortcuts and More as a group. On narrow screens, edge margins collapse so every shortcut remains reachable by swiping.
 

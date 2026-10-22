@@ -543,3 +543,54 @@ test('Search discovery omits the following list even with an empty query', () =>
   assert.equal(nodes.following.hidden, true);
   assert.equal(nodes['b4-following-heading'].hidden, true);
 });
+
+function navigationFixture() {
+  const {ctx} = fixture();
+  const nodes = {};
+  for (const id of ['sheet', 'ssheet', 'q']) nodes[id] = {
+    hidden: false, value: '', scrollTop: 0,
+    classList: { contains: () => false },
+    querySelector() { return this; }
+  };
+  ctx.document.getElementById = id => nodes[id];
+  ctx.BB_SHEETS = { search: 'sheet', teams: 'sheet', settings: 'ssheet' };
+  ctx.renderSettings = () => {};
+  ctx.beta4SearchVisibility = () => {};
+  ctx.search = () => {};
+  vm.runInContext(html.slice(html.indexOf('  const bbPlaces = new Map();'), html.indexOf('  function bbGo(act) {')), ctx);
+  return {ctx, nodes};
+}
+
+test('Search keeps its query and scroll position when the shared Teams sheet changes', () => {
+  const {ctx, nodes} = navigationFixture();
+  let searches = 0; ctx.search = () => { searches++; };
+  nodes.q.value = 'Knicks'; nodes.sheet.scrollTop = 240;
+  ctx.bbRemember('search');
+  nodes.q.value = ''; nodes.sheet.scrollTop = 80;
+  ctx.bbRemember('teams');
+  ctx.bbRestore('search');
+  assert.equal(nodes.q.value, 'Knicks');
+  assert.equal(nodes.sheet.scrollTop, 240);
+  assert.equal(searches, 1);
+  ctx.bbRestore('teams');
+  assert.equal(nodes.sheet.scrollTop, 80);
+});
+
+test('Settings restores its subpage and scroll position after changing tabs', () => {
+  const {ctx, nodes} = navigationFixture();
+  vm.runInContext('b4SettingsPage = "tv"', ctx);
+  nodes.ssheet.scrollTop = 150; ctx.bbRemember('settings');
+  vm.runInContext('b4SettingsPage = "root"', ctx);
+  nodes.ssheet.scrollTop = 0; ctx.bbRestore('settings');
+  assert.equal(vm.runInContext('b4SettingsPage', ctx), 'tv');
+  assert.equal(nodes.ssheet.scrollTop, 150);
+});
+
+test('Team editors do not overwrite the parent tab position', () => {
+  const {ctx, nodes} = navigationFixture();
+  nodes.sheet.scrollTop = 320; ctx.bbRemember('teams');
+  nodes.sheet.classList.contains = value => value === 'sub';
+  nodes.sheet.scrollTop = 0; ctx.bbRemember('teams');
+  ctx.bbRestore('teams');
+  assert.equal(nodes.sheet.scrollTop, 320);
+});
