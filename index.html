@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup</title>
-<meta name="build" content="20261022101648">
+<meta name="build" content="20261022102101">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="The Lineup">
@@ -2150,7 +2150,8 @@ button.brand, button.brand span { color: var(--accent); }
     const rows = (comp.competitors || []).map((c, i) => {
       const ls = (c.linescores || []).filter(l => l && (l.value != null || l.displayValue));
       const today = ls.length ? ls[ls.length - 1] : null;
-      const thruRaw = c.status?.thru ?? c.status?.hole;
+      const holes = today?.linescores?.length || 0;
+      const thruRaw = c.status?.thru ?? c.status?.hole ?? (holes ? holes : null);
       return {
         name: c.athlete?.displayName || c.athlete?.fullName || "",
         flag: c.athlete?.flag?.href || "",
@@ -2161,6 +2162,10 @@ button.brand, button.brand span { color: var(--accent); }
         thru: thruRaw != null && thruRaw !== "" ? (+thruRaw >= 18 ? "F" : String(thruRaw)) : (c.status?.displayValue || ""),
       };
     }).filter(r => r.name).sort((a, b) => a.order - b.order);
+    const par = v => v === "E" ? 0 : /^[+-]?\d+$/.test(v) ? +v : null;
+    rows.forEach(r => { if (r.pos) return; const v = par(r.total); if (v == null) return;
+      const ahead = rows.filter(x => { const y = par(x.total); return y != null && y < v; }).length, tied = rows.filter(x => par(x.total) === v).length;
+      r.pos = (tied > 1 ? "T" : "") + (ahead + 1); });
     return { kind: "golf", lg, id: ev.id, name: ev.shortName || ev.name || lg.name, date: ev.date, end: ev.endDate,
       state: type.state || "pre", detail: type.detail || type.shortDetail || "", link: ev.links?.[0]?.href || "", rows };
   }
@@ -3051,10 +3056,9 @@ button.brand, button.brand span { color: var(--accent); }
     const body = rows.length ? `<div class="lb-wrap"><table class="lb">
       <thead><tr><th>Pos</th><th>Player</th><th class="num">Total</th><th class="num">Today</th><th class="num">Thru</th></tr></thead>
       <tbody>${rows.map(r => {
-        const hot = /^-\d/.test(r.today) && parseInt(r.today) <= -5;
         return `<tr class="${r.total && r.total === leadTotal ? "lead" : ""}">
           <td class="pos">${esc(r.pos || "–")}</td>
-          <td><span class="pl">${r.flag ? `<img src="${esc(r.flag)}" alt="">` : ""}${esc(r.name)}${hot ? ' <span class="why hot">Hot</span>' : ""}</span></td>
+          <td><span class="pl">${r.flag ? `<img src="${esc(r.flag)}" alt="">` : ""}${esc(r.name)}</span></td>
           <td class="num ${toPar(r.total)}">${esc(r.total || "–")}</td>
           <td class="num ${toPar(r.today)}">${esc(r.today || "–")}</td>
           <td class="num">${esc(r.thru || "–")}</td></tr>`;
