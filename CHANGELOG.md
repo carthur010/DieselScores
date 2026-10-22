@@ -2,6 +2,9 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 22, 2026: Live, Beta 3.0 and Beta 4 (12:38 PM)
+- Golf tournament and player pages: the header now sits below the iPhone status bar, so the back and close buttons are no longer cut off in the app.
+
 ## Oct 22, 2026: Live, Beta 3.0 and Beta 4.0 — Official PGA Statistics
 - Added one shared PGA Tour stats cache for all versions, matched to ESPN event and player IDs. Includes round/tournament totals, official ranks, strokes gained, longest drive, scrambling and made-putt distance when supplied.
 - Added a scheduled cache publisher; requests are batched and the website displays the source update time. GitHub schedule timing and source coverage can vary. Existing ESPN data remains a fallback; missing ranks are not invented.
