@@ -2,6 +2,11 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 22, 2026: Live and Beta 3.0 (10:25 AM)
+- PGA Tour and LPGA tournament page: grass hero with the tournament name, round and status, Follow, and "Live on Golf Channel". Leaderboard with position, headshot and flag, TOT, current round and THRU (* for back-nine starts, tee times before they go). Top 50 with Show All, refreshes every minute while live. Course, purse and defending champion below.
+- Player page: tap any golfer for their headshot, Position and Total, Today, Thru, Round and Strokes. Favorite stars them (they also show in Your Players atop the leaderboard), Group shows their playing partners. Scorecard tab with Out and In, par, birdie circles, eagle double circles, bogey squares, a running to-par line and a round switcher; Stats tab with driving, greens, putting, sand saves and scoring; Player Information with FedExCup rank, earnings, birth date, birthplace, college and turned pro.
+- Home golf section: no more Hot tags, positions and thru filled in, and Full Leaderboard opens our leaderboard instead of ESPN. The PGA Tour and LPGA tiles on Leagues open the tournament page.
+
 ## Oct 22, 2026: Beta 4.0 — Keep Your Place
 - Search remembers its query when switching tabs, including visits to the shared team editor.
 - Settings resumes its previous subpage; Search, My Teams and Settings retain separate scroll positions during tab switches.
