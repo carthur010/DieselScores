@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup</title>
-<meta name="build" content="20261022151938">
+<meta name="build" content="20261022160542">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="The Lineup">
@@ -1498,6 +1498,15 @@ button.brand, button.brand span { color: var(--accent); }
 .gt-st { max-width:64px; white-space:normal; }
 .gf-follow:focus-visible, .gp button:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 
+
+.gp-official-stats { width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums; margin-bottom:20px; }
+.gp-official-stats th { text-align:left; font-weight:500; }
+.gp-official-stats thead th { color:var(--muted); font-size:10px; text-transform:uppercase; }
+.gp-official-stats td, .gp-official-stats tbody th { padding:13px 0; border-top:1px solid var(--line); }
+.gp-official-stats th:first-child { width:56%; }
+.gp-official-stats td, .gp-official-stats th:not(:first-child) { text-align:right; }
+.gp-official-stats td:last-child { color:var(--muted); }
+.gp-cache-note { color:var(--muted); font-size:12px; line-height:1.5; margin:0 0 14px; }
 </style>
 </head>
 <body>
@@ -1606,6 +1615,7 @@ button.brand, button.brand span { color: var(--accent); }
 </nav>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
+<script src="assets/pga-stats.js?v=1"></script>
 <script>
 (() => {
   // =====================================================================
@@ -3347,11 +3357,12 @@ button.brand, button.brand span { color: var(--accent); }
   }
   async function loadGolfPlayer(gv, pv) {
     const lgk = LG[gv.id].path.split("/")[1];
-    const [sum, bio] = await Promise.all([
+    const [sum, bio, pgaStats] = await Promise.all([
       getJ(`https://site.web.api.espn.com/apis/site/v2/sports/golf/${lgk}/leaderboard/${gv.data.id}/playersummary?player=${pv.id}`),
-      pv.bio ? Promise.resolve(pv.bio) : getJ(`https://site.web.api.espn.com/apis/common/v3/sports/golf/${lgk}/athletes/${pv.id}`)]);
+      pv.bio ? Promise.resolve(pv.bio) : getJ(`https://site.web.api.espn.com/apis/common/v3/sports/golf/${lgk}/athletes/${pv.id}`),
+      gv.id === "pga" ? globalThis.LineupGolfStats?.load(gv.data.id, pv.id) : null]);
     if (gv.player !== pv) return;
-    pv.sum = sum || {}; pv.bio = bio || {}; paintGolf(gv);
+    pv.sum = sum || {}; pv.bio = bio || {}; pv.pgaStats=pgaStats; paintGolf(gv);
   }
   // Eagle or better: double circle, birdie: circle, bogey: square, double bogey or worse: double square
   function golfMark(v, par) {
@@ -3380,7 +3391,21 @@ button.brand, button.brand span { color: var(--accent); }
     return (pv.sum?.rounds || []).filter(r => (r.linescores || []).length).map(r => ({ period: r.period, score: r.displayValue, strokes: r.value, group: r.groupNumber, tee: r.teeTime,
       holes: r.linescores.map(h => ({ n: h.period, v: h.value ?? h.displayValue, par: h.par })), stats: (r.statistics?.categories || []).flatMap(c => c.stats || []) }));
   }
-  function golfStatsHTML(pv) {
+  function golfStatsHTML(pv, course) {
+    if(pv.pgaStats && globalThis.LineupGolfStats) {
+      const scope=pv.statsScope || 'all';
+      const holes=(pv.sum?.rounds || []).filter(r=>scope==='all' || String(r.period)===scope).flatMap(r=>r.linescores || []);
+      const deltas=holes.filter(h=>Number(h.value)>0).map(h=>{
+        const text=h.scoreType?.displayValue;
+        if(text==='E')return 0;
+        if(/^[+-]?\d+$/.test(text || ''))return Number(text);
+        const par=h.par ?? course?.holes?.find(x=>Number(x.n)===Number(h.period))?.par;
+        return par!=null ? Number(h.value)-Number(par) : null;
+      }).filter(n=>n!==null);
+      const scoring={};
+      if(deltas.length) for(const [label,match] of [['Eagles',d=>d<=-2],['Birdies',d=>d===-1],['Pars',d=>d===0],['Bogeys',d=>d===1],['Double Bogeys',d=>d===2],['Other',d=>d>=3]]) scoring[label]=deltas.filter(match).length;
+      return globalThis.LineupGolfStats.render(pv.pgaStats,scope,esc,scoring);
+    }
     const st = Object.fromEntries((pv.sum?.stats || []).map(s => [s.name, s]));
     const v = k => st[k]?.displayValue, num = k => parseFloat(st[k]?.value ?? st[k]?.displayValue);
     const pct = (k, poss) => { const p = num(k); if (!isFinite(p) || (poss && !num(poss) && !p)) return ""; const n = poss ? num(poss) : null; return p.toFixed(1).replace(/\.0$/, "") + "%" + (n ? ` (${Math.round(p * n / 100)}/${n})` : ""); };
@@ -3431,7 +3456,11 @@ button.brand, button.brand span { color: var(--accent); }
     else if (pv.tab === "card") {
       const chips = rounds.length > 1 ? `<div class="gp-rds">${rounds.map(r => `<button class="${r === rd ? "on" : ""}" data-gp-round="${r.period}">R${r.period}${r.period === d.round && d.state === "in" ? ' <i class="gp-live">Live</i>' : ""}</button>`).join("")}</div>` : "";
       body = `<div class="gf-card gp-card"><h3>Scorecard</h3>${chips}${rd ? golfCardHTML(d, rd) : `<p class="gf-empty">${p.thru && /M$/.test(p.thru) ? `Tees off at ${esc(p.thru)}.` : "No holes played yet."}</p>`}</div>`;
-    } else body = `<div class="gf-card gp-card">${golfStatsHTML(pv)}</div>`;
+    } else {
+      const scopes=pv.pgaStats ? ['all',...Object.keys(pv.pgaStats.rounds).filter(k=>k!=='all')] : [];
+      const pills=scopes.length ? `<div class="gp-rds">${scopes.map(k=>`<button data-gp-stats-round="${esc(k)}" class="${(pv.statsScope || 'all')===k ? 'on' : ''}" aria-pressed="${(pv.statsScope || 'all')===k}">${k==='all'?'All':'R'+esc(k)}</button>`).join('')}</div>` : '';
+      body = `<div class="gf-card gp-card">${pills}${golfStatsHTML(pv,d)}</div>`;
+    }
     return `<div class="gp"><div class="gc-wrap"><div class="gp-header">${top}${hero}</div>${actions}${tabs}${body}${pv.bio ? golfInfoHTML(pv) : ""}</div></div>`;
   }
   const isWeekly = lg => lg.sport === "Football";
@@ -6063,6 +6092,7 @@ button.brand, button.brand span { color: var(--accent); }
         if (e.target.closest("[data-gp-back]")) { const y = pv.y || 0; gv.player = null; paintGolf(gv); document.getElementById("gsheet").scrollTop = y; return; }
         if (e.target.closest("[data-gp-fav]")) { const f = golfFavs(), i = f.indexOf(pv.id); if (i >= 0) f.splice(i, 1); else f.push(pv.id); store.set("golfFavs", f); paintGolf(gv); return; }
         const gt = e.target.closest("[data-gp-tab]"); if (gt) { pv.tab = gt.dataset.gpTab; paintGolf(gv); return; }
+        const sr = e.target.closest("[data-gp-stats-round]"); if(sr) {pv.statsScope=sr.dataset.gpStatsRound;paintGolf(gv);return;}
         const gr = e.target.closest("[data-gp-round]"); if (gr) { pv.round = +gr.dataset.gpRound; paintGolf(gv); return; }
       }
       const sl = e.target.closest("[data-share-lg]"); if (sl) { const lg = LG[gv.id]; shareLink(lg.name, `${gv.data?.name || lg.name} leaderboard on The Lineup`, "league=" + lg.id); return; }

@@ -2,6 +2,11 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 22, 2026: Live, Beta 3.0 and Beta 4.0 — Official PGA Statistics
+- Added one shared PGA Tour stats cache for all versions, matched to ESPN event and player IDs. Includes round/tournament totals, official ranks, strokes gained, longest drive, scrambling and made-putt distance when supplied.
+- Added a scheduled cache publisher; requests are batched and the website displays the source update time. GitHub schedule timing and source coverage can vary. Existing ESPN data remains a fallback; missing ranks are not invented.
+- Validation: 71 automated checks pass, all inline/shared scripts parse, and the cache generator fetched 120 players. Browser verified official totals and ranks, including Feet of Putts Made.
+
 ## Oct 22, 2026: Live, Beta 3.0 and Beta 4.0 — PGA Tour Layout
 - Moved Group into the player section navigation after Scorecard and Stats; Favorite remains an action above the tabs.
 - Tournament pages now use the matchup palette, soft header gradient, red status and active tabs, white bordered cards, and a separate Watch / Follow action row. Watch resolves through the existing TV-service preferences.

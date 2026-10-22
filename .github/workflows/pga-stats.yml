@@ -1,0 +1,34 @@
+name: Refresh PGA statistics
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - scripts/update-pga-stats.py
+      - .github/workflows/pga-stats.yml
+permissions:
+  contents: write
+concurrency:
+  group: pga-statistics-cache
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/update-pga-stats.py
+      - name: Publish cache
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/pga-stats.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Refresh PGA tournament statistics'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi

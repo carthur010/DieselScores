@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 4.0</title>
 <meta name="description" content="The Lineup Beta 4.0: an iPhone-first home for live scores, your teams and where to watch.">
-<meta name="build" content="20261022151938">
+<meta name="build" content="20261022160542">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 4.0">
@@ -1479,6 +1479,7 @@ button.brand, button.brand span { color: var(--accent); }
 </nav>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
+<script src="../assets/pga-stats.js?v=1"></script>
 <script>
 (() => {
   // =====================================================================
@@ -3133,6 +3134,7 @@ button.brand, button.brand span { color: var(--accent); }
   }
   function beta4GolfPlayerStats(v) {
     const stats = beta4GolfStatMap(v.stats), missing = '–';
+    const official=(category,label)=>globalThis.LineupGolfStats?.find(v.pgaStats,v.scope==='all'?'all':v.round,category,label);
     const definitions = [
       ['SG: Off The Tee',['strokesGainedOffTee','strokesGainedOffTheTee']],
       ['SG: Approach to Green',['strokesGainedApproach','strokesGainedApproachTheGreen']],
@@ -3145,14 +3147,15 @@ button.brand, button.brand span { color: var(--accent); }
     ];
     const rows = definitions.map(([label,keys,unit]) => {
       const stat = keys.map(k=>stats[k]).find(Boolean);
-      let value = stat?.displayValue ?? missing;
+      const pga=official('performance',label);
+      let value = pga?.total ?? stat?.displayValue ?? missing;
       if (unit && /^[-+]?\d+(\.\d+)?$/.test(value)) value += unit;
-      return `<tr><th scope="row">${esc(label)}</th><td>${esc(value)}</td><td>${esc(stat?.rankDisplayValue || stat?.rank || missing)}</td></tr>`;
+      return `<tr><th scope="row">${esc(label)}</th><td>${esc(value)}</td><td>${esc(pga?.rank || stat?.rankDisplayValue || stat?.rank || missing)}</td></tr>`;
     }).join('');
     const table = (title,body) => `<section class="b4-gp-panel"><h2>${title}</h2><table class="b4-gp-stats"><thead><tr><th scope="col">Stat</th><th scope="col">Total</th><th scope="col">Rank</th></tr></thead><tbody>${body}</tbody></table></section>`;
     const holes = (v.scope === 'all' ? (v.player.rounds || []).flatMap(r=>beta4GolfHoles(v.player,r.period,v.course)) : beta4GolfHoles(v.player,v.round,v.course)).filter(h=>h.value != null && h.delta != null);
-    const scoring = [['Eagles', d=>d<=-2],['Birdies',d=>d===-1],['Pars',d=>d===0],['Bogeys',d=>d===1],['Double Bogeys',d=>d===2],['Other',d=>d>=3]].map(([label,match]) => `<tr><th scope="row">${label}</th><td>${holes.length ? holes.filter(h=>match(h.delta)).length : missing}</td><td>${missing}</td></tr>`).join('');
-    return `<p class="b4-gp-note">${v.scope === 'all' ? 'Tournament totals' : 'Round '+v.round}. Unavailable statistics and ranks appear as a dash.</p>`+table('Performance',rows)+table('Scoring',scoring);
+    const scoring = [['Eagles', d=>d<=-2],['Birdies',d=>d===-1],['Pars',d=>d===0],['Bogeys',d=>d===1],['Double Bogeys',d=>d===2],['Other',d=>d>=3]].map(([label,match]) => `<tr><th scope="row">${label}</th><td>${esc(official('scoring',label)?.total ?? (holes.length ? holes.filter(h=>match(h.delta)).length : missing))}</td><td>${esc(official('scoring',label)?.rank ?? missing)}</td></tr>`).join('');
+    return `<p class="b4-gp-note">${v.scope === 'all' ? 'Tournament totals' : 'Round '+v.round}. ${esc(globalThis.LineupGolfStats?.note(v.pgaStats) || 'Unavailable statistics and ranks appear as a dash.')}</p>`+table('Performance',rows)+table('Scoring',scoring);
   }
   function beta4GolfPlayerInfo(v) {
     const bio = v.bio || {}, place = bio.birthPlace || {};
@@ -3213,7 +3216,7 @@ button.brand, button.brand span { color: var(--accent); }
     const v=b4Golfer;if(!v) return;
     const scope=v.scope==='all' ? 0 : v.round;
     v.loading=true;beta4GolfPlayerPaint();
-    try {const stats=await beta4GolfJSON(`${b4GolfCore}${v.event.lg.id}/events/${v.event.id}/competitions/${v.event.id}/competitors/${v.player.id}/statistics/${scope}`);if(b4Golfer===v && (v.scope==='all'?0:v.round)===scope)v.stats=stats;}
+    try {const [stats,pgaStats]=await Promise.all([beta4GolfJSON(`${b4GolfCore}${v.event.lg.id}/events/${v.event.id}/competitions/${v.event.id}/competitors/${v.player.id}/statistics/${scope}`).catch(()=>null),v.event.lg.id==='pga'?globalThis.LineupGolfStats?.load(v.event.id,v.player.id):null]);if(b4Golfer===v && (v.scope==='all'?0:v.round)===scope){v.stats=stats;v.pgaStats=pgaStats;if(!stats&&!pgaStats)v.error=true;}}
     catch {if(b4Golfer===v)v.error=true;}
     finally {if(b4Golfer===v && (v.scope==='all'?0:v.round)===scope){v.loading=false;beta4GolfPlayerPaint();}}
   }
