@@ -2,6 +2,10 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 22, 2026: Live, Beta 3.0 and Beta 4.0 — Compact Golf Leaderboards
+- Reduced Beta 4 leaderboard rows to about 51px while retaining 44px player tap targets. Live and Beta 3 retain their existing compact rows.
+- Matched numeric type sizes and centered score/progress columns under their headings across all three versions.
+
 ## Oct 22, 2026: Live, Beta 3.0 and Beta 4 (12:38 PM)
 - Golf tournament and player pages: the header now sits below the iPhone status bar, so the back and close buttons are no longer cut off in the app.
 

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Lineup Beta 3.0</title>
-<meta name="build" content="20261022123613">
+<meta name="build" content="20261023013219">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lineup 3.0">
@@ -1463,9 +1463,10 @@ button.brand, button.brand span { color: var(--accent); }
 .gf-face img:first-child { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: top; }
 .gf-face .gf-flag { position: absolute; right: -4px; bottom: -3px; width: 14px; height: 14px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--surface); background: var(--surface); }
 .gf-nm { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.gf-n { text-align: center; font-size: 16px; }
+.gf-n { text-align: center; font-family: var(--body); font-size: 15px; line-height: 20px; font-weight: 500; font-variant-numeric: lining-nums tabular-nums; }
+.gf-row:not(.gf-head) > .gf-n:not(.dim):not(.thru) { font-weight: 600; }
 .gf-n.dim { color: var(--muted); }
-.gf-n.thru { color: var(--muted); font-size: 14px; white-space: nowrap; }
+.gf-n.thru { color: var(--muted); font-size: 15px; white-space: nowrap; }
 .gf-n.thru.tee { font-size: 12px; }
 .gf-head .gf-n { font-size: 13px; color: var(--muted); }
 .gf-row.out { opacity: .55; }

@@ -409,11 +409,11 @@ body:has(#sheet:not([hidden]).b4-team-editor) #botbar, body:has(#sheet:not([hidd
 .b4-golf th:first-child { width: 30px; }
 .b4-golf th:nth-child(2) { width: auto; text-align: left; }
 .b4-golf thead th:nth-child(3), .b4-golf thead th:nth-child(4) { width: 39px; }
-.b4-golf thead th:last-child { width: 40px; text-align: right; }
-.b4-golf tbody td, .b4-golf tbody th { border-top: 1px solid var(--line); padding: 14px 0; font-weight: 400; color: var(--golf-muted); vertical-align: middle; }
-.b4-golf tbody td { text-align: center; }
-.b4-golf tbody td:last-child { text-align: right; }
-.b4-golf tbody .b4-golf-total { color: var(--golf-text); font-size: 18px; }
+.b4-golf thead th:last-child { width: 40px; text-align: center; }
+.b4-golf tbody td, .b4-golf tbody th { border-top: 1px solid var(--line); padding: 3px 0; font-weight: 400; color: var(--golf-muted); vertical-align: middle; }
+.b4-golf tbody td { text-align: center; font-family: var(--body); font-size: 15px; line-height: 20px; font-weight: 500; font-variant-numeric: lining-nums tabular-nums; }
+.b4-golf tbody td:last-child { text-align: center; }
+.b4-golf tbody .b4-golf-total { color: var(--golf-text); font-weight: 600; }
 .b4-golf .b4-golf-pos { font-size: 13px; text-align: left; }
 .b4-golf-player { display: flex; align-items: center; gap: 8px; min-width: 0; padding-right: 4px; color: var(--golf-text); }
 .b4-golf-player > span:last-child { overflow-wrap: anywhere; font-size: 15px; line-height: 1.2; }
