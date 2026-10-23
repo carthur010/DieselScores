@@ -796,3 +796,29 @@ test('Tournament action row uses configured streaming destinations and escapes t
   assert.ok(result.indexOf('b4-golf-actions')>result.indexOf('</header>'));
   assert.ok(result.indexOf('b4-golf-actions')<result.indexOf('<nav'));
 });
+
+
+test('Feed Top 25 rankings appear before names across sizes, game states and the featured match', () => {
+  const { ctx, games } = fixture();
+  const game = games[0];
+  game.teams[0].rank = 9;
+  game.teams[1].rank = 16;
+  for (const status of ['pre', 'in', 'post']) {
+    game.state = status;
+    for (const density of ['simple', 'compact', 'expanded']) {
+      ctx.state.density = density;
+      const result = ctx.beta4Rows([game]);
+      assert.match(result, /aria-label="Rank 9">9<\/small> Away live/);
+      assert.match(result, /aria-label="Rank 16">16<\/small> Home live/);
+      assert.match(result, /aria-label="Rank 9 Away live vs Rank 16 Home live/);
+    }
+  }
+  game.state = 'in';
+  assert.match(ctx.beta4Feature([game]).html, /aria-label="Rank 9">9<\/small> Away live/);
+  game.teams[0].rank = 25;
+  assert.match(ctx.beta4Row(game), /Rank 25/);
+  for (const rank of [null, undefined, 0, 99, -1, 1.5, '<script>']) {
+    game.teams.forEach(t => { t.rank = rank; });
+    assert.doesNotMatch(ctx.beta4Row(game) + ctx.beta4Card(game), /b4-team-rank|aria-label="Rank/);
+  }
+});

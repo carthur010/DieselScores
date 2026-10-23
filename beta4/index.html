@@ -1368,7 +1368,7 @@ button.brand, button.brand span { color: var(--accent); }
 /* Oct 21: no "Off today" or "Updated" lines at the bottom of the new layouts */
 :root:not([data-home="classic"]) #main > .updated { display: none; }
 </style>
-<link rel="stylesheet" href="beta4.css?v=28">
+<link rel="stylesheet" href="beta4.css?v=team-rankings-30">
 </head>
 <body>
 <header class="top">
@@ -6565,19 +6565,31 @@ button.brand, button.brand span { color: var(--accent); }
     const game = n.game?.teams?.length === 2 ? n.game : { id: n.id, teams: n.at === "@" ? [own, opponent] : [opponent, own], watch: [] };
     return { ...game, lg, id: n.id, date: n.date, state: "pre", status: nextWhen(n.date), fav: true, pin: !!state.favGames[lg.id + ":" + n.id] };
   }
+  function beta4TeamRank(t) {
+    const rank = Number(t.rank);
+    return Number.isInteger(rank) && rank >= 1 && rank <= 25 ? rank : null;
+  }
+  function beta4TeamName(g, t) {
+    const rank = beta4TeamRank(t);
+    return `${rank ? `<small class="b4-team-rank" aria-label="Rank ${rank}">${rank}</small> ` : ""}${esc(b4Name(g, t))}`;
+  }
+  function beta4TeamLabel(g, t) {
+    const rank = beta4TeamRank(t);
+    return (rank ? `Rank ${rank} ` : "") + b4Name(g, t);
+  }
   function beta4Row(g) {
     const key = gameKey(g), [a, h] = g.teams;
     if (!a || !h) return "";
-    const team = t => `<span class="b4-team">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ""}<span class="name">${esc(b4Name(g, t))}</span>${isFavTeam(g.lg, t.abbr) ? `<i aria-label="Followed team">★</i>` : ""}<b>${g.state === "pre" ? "" : esc(t.score)}</b></span>`;
+    const team = t => `<span class="b4-team">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ""}<span class="name">${beta4TeamName(g, t)}</span>${isFavTeam(g.lg, t.abbr) ? `<i aria-label="Followed team">★</i>` : ""}<b>${g.state === "pre" ? "" : esc(t.score)}</b></span>`;
     const tv = g.state === "post" ? "" : String(netLabel(g) || "").replace(/^(W?NBA) League Pass$/i, "League Pass");
-    return `<div class="b4-row${beta4HasStarredTeam(g) ? " b4-row-no-heart" : ""}"><button class="b4-game" data-game="${esc(key)}" aria-label="${esc(g.teams.map(t => b4Name(g, t)).join(" vs ") + ", " + g.status + ": game details")}"><span class="b4-time"><span class="${g.state === "in" ? "b4-status" : ""}">${esc(g.state === "pre" ? g.status || timeLabel(g.date) : g.status)}</span><small>${esc(b4Short(g.lg))}</small>${tv ? `<small class="b4-channel">${esc(tv)}</small>` : ""}</span><span>${team(a)}${team(h)}${g.b4Reason ? `<span class="b4-reason">${esc(g.b4Reason)}</span>` : ""}</span></button>${beta4Heart(g)}</div>`;
+    return `<div class="b4-row${beta4HasStarredTeam(g) ? " b4-row-no-heart" : ""}"><button class="b4-game" data-game="${esc(key)}" aria-label="${esc(g.teams.map(t => beta4TeamLabel(g, t)).join(" vs ") + ", " + g.status + ": game details")}"><span class="b4-time"><span class="${g.state === "in" ? "b4-status" : ""}">${esc(g.state === "pre" ? g.status || timeLabel(g.date) : g.status)}</span><small>${esc(b4Short(g.lg))}</small>${tv ? `<small class="b4-channel">${esc(tv)}</small>` : ""}</span><span>${team(a)}${team(h)}${g.b4Reason ? `<span class="b4-reason">${esc(g.b4Reason)}</span>` : ""}</span></button>${beta4Heart(g)}</div>`;
   }
   function beta4Card(g, density = state.density) {
     const [a, h] = g.teams;
     if (!a || !h) return "";
     const expanded = density === "expanded", pre = g.state === "pre", final = g.state === "post";
     const key = gameKey(g);
-    const team = t => `<div class="b4-card-team">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : '<span class="b4-card-logo"></span>'}<span class="b4-card-team-label"><b class="b4-card-name">${esc(b4Name(g, t))}</b>${expanded && pre && (t.seasonRecord || t.record) ? `<small class="b4-card-record">${esc(t.seasonRecord || t.record)}</small>` : ""}</span>${pre ? "" : `<strong class="b4-card-score">${esc(t.score)}</strong>`}</div>`;
+    const team = t => `<div class="b4-card-team">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : '<span class="b4-card-logo"></span>'}<span class="b4-card-team-label"><b class="b4-card-name">${beta4TeamName(g, t)}</b>${expanded && pre && (t.seasonRecord || t.record) ? `<small class="b4-card-record">${esc(t.seasonRecord || t.record)}</small>` : ""}</span>${pre ? "" : `<strong class="b4-card-score">${esc(t.score)}</strong>`}</div>`;
     const channel = String(netLabel(g) || "").replace(/^(W?NBA) League Pass$/i, "League Pass");
     const watch = expanded && !final ? g.watch?.find(w => w.url) : null;
     const save = beta4Heart(g);
@@ -6586,7 +6598,7 @@ button.brand, button.brand span { color: var(--accent); }
     const buttons = save + bellBtn(g);
     const actions = buttons ? `<span class="b4-card-actions">${buttons}</span>` : "";
     const footer = !expanded || watchLink || buttons ? `<div class="b4-card-foot">${expanded ? watchLink : clock}${actions}</div>` : "";
-    return `<article class="b4-scorecard b4-card-${expanded ? "expanded" : "compact"} tap" data-game="${esc(key)}" role="button" tabindex="0" aria-label="${esc(a.name + " vs " + h.name + ": game details")}"><div class="b4-card-top"><span class="b4-card-heading"><b>${esc(b4Short(g.lg))}</b>${expanded ? clock : ""}</span><span class="b4-card-tv">${esc(channel)}</span></div><div class="b4-card-teams">${team(a)}${team(h)}</div>${g.b4Reason ? `<span class="b4-reason">${esc(g.b4Reason)}</span>` : ""}${footer}</article>`;
+    return `<article class="b4-scorecard b4-card-${expanded ? "expanded" : "compact"} tap" data-game="${esc(key)}" role="button" tabindex="0" aria-label="${esc(beta4TeamLabel(g, a) + " vs " + beta4TeamLabel(g, h) + ": game details")}"><div class="b4-card-top"><span class="b4-card-heading"><b>${esc(b4Short(g.lg))}</b>${expanded ? clock : ""}</span><span class="b4-card-tv">${esc(channel)}</span></div><div class="b4-card-teams">${team(a)}${team(h)}</div>${g.b4Reason ? `<span class="b4-reason">${esc(g.b4Reason)}</span>` : ""}${footer}</article>`;
   }
   function beta4Rows(games, preserveOrder = false) {
     if (state.view === "league" && !preserveOrder) games = games.slice().sort((a, b) => leagueRank(a.lg.id) - leagueRank(b.lg.id) || byState(a, b));
@@ -6602,8 +6614,8 @@ button.brand, button.brand span { color: var(--accent); }
     if (!g || !isToday()) return { html: "", key: "" };
     const [a, h] = g.teams;
     const key = gameKey(g);
-    const label = esc(a.name + " " + a.score + ", " + h.name + " " + h.score + ", " + g.status + ": game details");
-    const club = (t, side) => `<div class="b4-feature-club b4-feature-${side}${isFavTeam(g.lg, t.abbr) ? " b4-followed" : ""}">${starBtn(g.lg, t)}<button data-game="${esc(key)}" aria-label="${label}">${t.logo ? `<img src="${esc(t.logo)}" alt="">` : `<span class="b4-feature-crest"></span>`}<b>${esc(b4Name(g, t))}</b></button></div>`;
+    const label = esc(beta4TeamLabel(g, a) + " " + a.score + ", " + beta4TeamLabel(g, h) + " " + h.score + ", " + g.status + ": game details");
+    const club = (t, side) => `<div class="b4-feature-club b4-feature-${side}${isFavTeam(g.lg, t.abbr) ? " b4-followed" : ""}">${starBtn(g.lg, t)}<button data-game="${esc(key)}" aria-label="${label}">${t.logo ? `<img src="${esc(t.logo)}" alt="">` : `<span class="b4-feature-crest"></span>`}<b>${beta4TeamName(g, t)}</b></button></div>`;
     const scoresKnown = a.score !== "" && h.score !== "" && a.score != null && h.score != null && Number.isFinite(+a.score) && Number.isFinite(+h.score);
     const leader = scoresKnown ? (+a.score === +h.score ? "Tied" : b4Name(g, +a.score > +h.score ? a : h) + " leads") : "Live";
     const w = g.watch?.find(x => x.url);

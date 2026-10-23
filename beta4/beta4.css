@@ -531,3 +531,6 @@ body:has(#sheet:not([hidden]).b4-team-editor) #botbar, body:has(#sheet:not([hidd
 .b4-golf .b4-tee-load { padding:8px 0; margin:0 0 12px; font-size:12px; }
 @media(min-width:540px) { .b4-golf .b4-tee-table th:first-child { width:86px; } .b4-golf .b4-tee-table th:nth-child(2) { width:40px; } .b4-golf .b4-tee-table th:last-child { width:84px; } .b4-tee-player { grid-template-columns:44px minmax(0,1fr) 84px; gap:8px; } .b4-golf .b4-tee-table th:nth-child(3) { padding-left:52px; } .b4-tee-favorite { width:44px; } .b4-tee-name { font-size:15px; } .b4-tee-status, .b4-golf .b4-tee-table .b4-tee-time { font-size:13px; } }
 .b4-golf-badge { color: #f3f6fa; }
+
+/* Feed rankings sit just before the name in every scoreboard size. */
+.b4-team-rank { color: var(--muted); font-size: .7em; font-weight: 400; font-style: normal; font-variant-numeric: tabular-nums; white-space: nowrap; }

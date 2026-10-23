@@ -2,6 +2,11 @@
 
 Newest first. Beta changes move to Live when shipped.
 
+## Oct 23, 2026: Beta 4.0 — Team Rankings
+- Show available Top 25 rankings as small muted numbers before team names in Simple, Compact, Expanded and featured match views, including league scores and saved games.
+- Use the score feed's rankings; unranked teams have no number. Game-detail button labels include each team's rank.
+- Validation: 72 automated checks pass, including all three sizes, upcoming/live/final games, featured matches and unranked teams. Inline scripts parse and phone layouts visually verified.
+
 ## Oct 22, 2026: Live, Beta 3.0 and Beta 4.0 — Compact Golf Leaderboards
 - Reduced Beta 4 leaderboard rows to about 51px while retaining 44px player tap targets. Live and Beta 3 retain their existing compact rows.
 - Matched numeric type sizes and centered score/progress columns under their headings across all three versions.
